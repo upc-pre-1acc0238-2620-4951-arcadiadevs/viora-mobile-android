@@ -1,9 +1,11 @@
 # Viora — mobile app
 
-Viora is the mobile client of an olive orchard crop-load and alternate-bearing
-management platform for producers and cooperatives. It lets producers track
-plots, telemetry, phenological stages and crop-load regulation, and lets
-cooperatives coordinate operations and settlements across their members.
+Viora is the native Android client of an olive orchard crop-load and
+alternate-bearing (vecería) management platform for olive producers and
+cooperative technical managers. Producers register plots, record field
+samples, follow agroclimatic alerts, phenology and thinning prescriptions,
+and close each harvest; cooperative managers oversee members, territorial
+risk and intake forecasts.
 
 ## Tech stack
 
@@ -24,7 +26,7 @@ under `features/`, with cross-cutting concerns under `core/`.
 app/src/main/java/pe/edu/upc/viora/
 ├── core/
 │   ├── theme/        # Material 3 color scheme, typography
-│   ├── navigation/    # AppNavHost, type-safe routes
+│   ├── navigation/   # AppNavHost, type-safe routes
 │   ├── network/di/   # Retrofit / OkHttp Hilt module
 │   └── database/     # Room database (added when the first entity lands)
 └── features/
@@ -50,23 +52,37 @@ app/src/main/java/pe/edu/upc/viora/
 
 ### Bounded contexts
 
-- `iam` — identity and access management (authentication, sessions).
-- `profiles` — producer and cooperative member profiles.
-- `subscription` — plans and billing for producers/cooperatives.
-- `plotmanagement` — orchard plots and their metadata.
-- `telemetry` — sensor and field telemetry ingestion.
-- `phenology` — phenological stage tracking for olive trees.
-- `croploadregulation` — crop-load estimation and regulation actions.
-- `harvestsettlement` — harvest volumes and settlement calculations.
-- `cooperativeoperations` — cross-member cooperative coordination.
+Package names map to the bounded contexts of the Viora context map
+(`ma-viora-report`, `docs/context-map/context-map.md`):
+
+- `iam` — Identity & Access Management: sign-up, sign-in, JWT access/refresh
+  tokens, roles, password recovery.
+- `profiles` — User Profiles: personal data and contact channels of
+  producers and technical managers.
+- `subscription` — Subscription & Cooperative Membership: Producer Plan
+  subscriptions, checkout, cooperative voucher codes and hectare quota.
+- `plotmanagement` — Olive Orchard & Plot Management: georeferenced plots,
+  olive variety and tree density.
+- `telemetry` — Agroclimatic Telemetry & Sensor Monitoring: virtual sensor
+  nodes, soil moisture series, weather forecast and stress/frost alerts.
+- `phenology` — Phenology & Historical Bearing Analytics: phenological
+  stages, winter chill accumulation, Biennial Bearing Index and yield history.
+- `croploadregulation` — Crop Load Regulation & Thinning Advisory (primary
+  core): field sampling, sustainable crop load, thinning prescriptions and
+  execution window.
+- `harvestsettlement` — Harvest Settlement & Performance Reporting: final
+  harvested weights, interannual stabilization and technical dossier.
+- `cooperativeoperations` — Cooperative Operations & Territorial
+  Intelligence: member registry, territorial risk matrix and intake forecast.
 
 ### Architecture rules
 
-- Dependencies point inward: `presentation` → `application` → `domain`;
-  `infrastructure` depends on `domain`/`application`, never the other way
-  around.
-- `domain` and `application` are pure Kotlin: no `android.*` imports.
-- Prefer value objects over primitive types at domain boundaries.
+- Dependencies point inward: `presentation` and `infrastructure` depend on
+  `application` and `domain`; `domain` depends on nothing else.
+- `domain` and `application` are pure Kotlin: no `android.*` imports and no
+  persistence/network libraries (Room, Retrofit, OkHttp, Gson).
+- Business validation lives in `domain` entities and value objects; prefer
+  value objects over primitive types (e.g. `value class Email(val value: String)`).
 - DTOs and Room entities never leave `infrastructure`; they are mapped to
   domain types before crossing into `application`/`presentation`.
 

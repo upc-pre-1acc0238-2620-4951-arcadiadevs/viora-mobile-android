@@ -22,6 +22,8 @@ object NetworkModule {
         if (BuildConfig.DEBUG) {
             val logging = HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
+                // Never log bearer tokens, even in debug builds.
+                redactHeader("Authorization")
             }
             builder.addInterceptor(logging)
         }
