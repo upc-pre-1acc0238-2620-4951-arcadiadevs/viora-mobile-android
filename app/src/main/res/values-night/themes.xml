@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Window theme only: colors come from VioraTheme in Compose. -->
+    <style name="Theme.Viora" parent="android:Theme.Material.NoActionBar" />
+</resources>
