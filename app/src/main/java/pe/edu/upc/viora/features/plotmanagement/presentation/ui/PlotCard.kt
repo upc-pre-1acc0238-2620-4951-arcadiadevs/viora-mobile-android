@@ -18,12 +18,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.text.NumberFormat
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 
 @Composable
 fun PlotCard(plot: Plot, modifier: Modifier = Modifier) {
@@ -60,21 +58,11 @@ fun PlotCard(plot: Plot, modifier: Modifier = Modifier) {
 @Composable
 private fun plotSummary(plot: Plot): String {
     val variety = stringResource(plot.variety.labelRes())
-    val area = NumberFormat.getNumberInstance().apply {
-        minimumFractionDigits = 1
-        maximumFractionDigits = 2
-    }.format(plot.areaHectares)
+    val area = formatHectares(plot.areaHectares)
     val trees = pluralStringResource(
         R.plurals.plots_trees_count,
         plot.estimatedTrees,
-        NumberFormat.getIntegerInstance().format(plot.estimatedTrees),
+        formatCount(plot.estimatedTrees),
     )
     return stringResource(R.string.plots_summary, variety, area, trees)
-}
-
-private fun OliveVariety.labelRes(): Int = when (this) {
-    OliveVariety.CRIOLLA -> R.string.variety_criolla
-    OliveVariety.SEVILLANA -> R.string.variety_sevillana
-    OliveVariety.MANZANILLA -> R.string.variety_manzanilla
-    OliveVariety.ARBEQUINA -> R.string.variety_arbequina
 }
