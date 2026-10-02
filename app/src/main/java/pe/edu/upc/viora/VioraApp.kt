@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -41,7 +43,9 @@ fun VioraApp(modifier: Modifier = Modifier) {
     val items = tabs.map { TabBarItem(icon = it.icon, label = stringResource(it.label)) }
     val actionLabel = stringResource(R.string.nav_action_add)
 
-    Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
+    // No insets here: each screen decides how to use the area under the system bars (maps go
+    // beneath them, lists pad themselves), so the status bar can stay transparent.
+    Scaffold(modifier = modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0, 0, 0, 0)) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             AppNavHost(navController = navController)
 
@@ -64,7 +68,7 @@ fun VioraApp(modifier: Modifier = Modifier) {
                     actionLabel = actionLabel,
                     // Opens the "what will you record?" menu once the logging features exist.
                     onActionClick = {},
-                    modifier = Modifier.padding(bottom = Spacing.sm),
+                    modifier = Modifier.navigationBarsPadding().padding(bottom = Spacing.sm),
                 )
             }
         }

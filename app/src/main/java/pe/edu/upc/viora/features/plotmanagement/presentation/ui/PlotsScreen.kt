@@ -5,16 +5,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
@@ -35,6 +43,8 @@ import java.time.Instant
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green900
+import pe.edu.upc.viora.core.designsystem.theme.Harvest300
+import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Spacing
@@ -51,14 +61,27 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotsUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.PlotsViewModel
 
 @Composable
-fun PlotsScreen(modifier: Modifier = Modifier, viewModel: PlotsViewModel = hiltViewModel()) {
+fun PlotsScreen(onRegisterPlot: () -> Unit, onOpenMap: () -> Unit, modifier: Modifier = Modifier, viewModel: PlotsViewModel = hiltViewModel()) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
-    PlotsScreenContent(state = state, onRefresh = viewModel::refresh, modifier = modifier)
+    PlotsScreenContent(
+        state = state,
+        onRefresh = viewModel::refresh,
+        onRegisterPlot = onRegisterPlot,
+        onOpenMap = onOpenMap,
+        modifier = modifier,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlotsScreenContent(state: PlotsUiState, onRefresh: () -> Unit, modifier: Modifier = Modifier) {
+fun PlotsScreenContent(
+    state: PlotsUiState,
+    onRefresh: () -> Unit,
+    onRegisterPlot: () -> Unit,
+    modifier: Modifier = Modifier,
+    onOpenMap: () -> Unit = {},
+) {
+    val systemBars = WindowInsets.systemBars.asPaddingValues()
     PullToRefreshBox(
         isRefreshing = (state as? PlotsUiState.Content)?.isRefreshing == true,
         onRefresh = onRefresh,
@@ -69,18 +92,19 @@ fun PlotsScreenContent(state: PlotsUiState, onRefresh: () -> Unit, modifier: Mod
             contentPadding = PaddingValues(
                 start = Spacing.lg,
                 end = Spacing.lg,
-                top = Spacing.lg,
-                bottom = VioraTabBarDefaults.ContentBottomPadding,
+                top = Spacing.lg + systemBars.calculateTopPadding(),
+                bottom = VioraTabBarDefaults.ContentBottomPadding + systemBars.calculateBottomPadding(),
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            item { PlotsTitle() }
+            item { PlotsTitle(onRegisterPlot) }
             when (state) {
                 PlotsUiState.Loading -> item { Centered { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) } }
                 PlotsUiState.Empty -> item { EmptyState() }
                 is PlotsUiState.Error -> item { ErrorState(error = state.error, onRetry = onRefresh) }
                 is PlotsUiState.Content -> {
                     item { FilterAndStatus(state) }
+                    item { PlotsOverview(plots = state.plots, onExpand = onOpenMap) }
                     items(state.plots, key = { it.id.value }) { plot -> PlotCard(plot) }
                 }
             }
@@ -89,11 +113,44 @@ fun PlotsScreenContent(state: PlotsUiState, onRefresh: () -> Unit, modifier: Mod
 }
 
 @Composable
-private fun PlotsTitle() {
+private fun PlotsTitle(onRegisterPlot: () -> Unit) {
     val style = MaterialTheme.typography.displayMedium.copy(fontSize = 44.sp, lineHeight = 46.sp, letterSpacing = (-1.1).sp)
-    Column(modifier = Modifier.padding(bottom = Spacing.sm)) {
-        Text(text = stringResource(R.string.plots_title_lead), style = style)
-        Text(text = stringResource(R.string.plots_title_emphasis), style = style, fontStyle = FontStyle.Italic)
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(bottom = Spacing.sm),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        Column {
+            Text(text = stringResource(R.string.plots_title_lead), style = style)
+            Text(text = stringResource(R.string.plots_title_emphasis), style = style, fontStyle = FontStyle.Italic)
+        }
+        RegisterPlotButton(onClick = onRegisterPlot)
+    }
+}
+
+/** Dark pill with a yellow "+" circle: the entry to the registration wizard (Figma "Registrar lote"). */
+@Composable
+private fun RegisterPlotButton(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(percent = 50))
+            .background(Green900)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(start = 20.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.plots_register),
+            style = MaterialTheme.typography.labelLarge,
+            color = Neutral50,
+        )
+        Box(
+            modifier = Modifier.size(36.dp).clip(CircleShape).background(Harvest300),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(painter = painterResource(R.drawable.ic_add), contentDescription = null, tint = Neutral900)
+        }
     }
 }
 
@@ -223,6 +280,7 @@ private fun PlotsContentPreview() {
         PlotsScreenContent(
             state = PlotsUiState.Content(previewPlots, isRefreshing = false, refreshError = null, lastRefresh = Instant.now()),
             onRefresh = {},
+            onRegisterPlot = {},
         )
     }
 }
@@ -234,6 +292,7 @@ private fun PlotsOfflinePreview() {
         PlotsScreenContent(
             state = PlotsUiState.Content(previewPlots, isRefreshing = false, refreshError = AppError.Offline, lastRefresh = Instant.now()),
             onRefresh = {},
+            onRegisterPlot = {},
         )
     }
 }
@@ -241,11 +300,11 @@ private fun PlotsOfflinePreview() {
 @Preview(showBackground = true, backgroundColor = 0xFFF9F6F1, heightDp = 480)
 @Composable
 private fun PlotsEmptyPreview() {
-    VioraTheme { PlotsScreenContent(state = PlotsUiState.Empty, onRefresh = {}) }
+    VioraTheme { PlotsScreenContent(state = PlotsUiState.Empty, onRefresh = {}, onRegisterPlot = {}) }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFF9F6F1, heightDp = 480)
 @Composable
 private fun PlotsErrorPreview() {
-    VioraTheme { PlotsScreenContent(state = PlotsUiState.Error(AppError.Offline), onRefresh = {}) }
+    VioraTheme { PlotsScreenContent(state = PlotsUiState.Error(AppError.Offline), onRefresh = {}, onRegisterPlot = {}) }
 }

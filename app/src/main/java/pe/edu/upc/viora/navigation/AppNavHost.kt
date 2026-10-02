@@ -35,7 +35,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         navigation<HomeGraph>(startDestination = HomeRoute) {
             composable<HomeRoute> { PlaceholderScreen(title = stringResource(R.string.nav_home)) }
         }
-        plotsNavGraph()
+        plotsNavGraph(navController)
         navigation<PlanGraph>(startDestination = PlanRoute) {
             composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
         }

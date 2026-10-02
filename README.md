@@ -130,6 +130,18 @@ Bounded contexts (package → report name): `iam` IAM · `profiles` User Profile
 7. Unit-test domain rules, mappers, use cases and ViewModels (`kotlinx-coroutines-test`;
    `MockWebServer` for remote code — see `ApiCallerTest`).
 
+### Maps (Mapbox)
+
+The plot maps use the Mapbox Maps SDK. Its **public** token (`pk.…`, created in your Mapbox
+account; no secret token is needed to build) is read from `local.properties`, never committed:
+
+```properties
+viora.mapboxPublicToken=pk.your_public_token
+```
+
+Without it the build works but the maps stay blank. The token ends up in the app as the
+`mapbox_access_token` string resource.
+
 ## Known gaps (before the first Firebase distribution)
 
 - Release builds still have R8 disabled (`optimization { enable = false }`); enable it, add the
