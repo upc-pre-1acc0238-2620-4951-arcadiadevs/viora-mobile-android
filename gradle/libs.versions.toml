@@ -13,6 +13,7 @@ retrofit = "3.0.0"
 okhttp = "4.12.0"
 room = "3.0.3"
 datastore = "1.2.1"
+mapbox = "11.31.1"
 coil = "3.6.3"
 kotlinxCoroutines = "1.11.0"
 kotlinxSerializationJson = "1.11.0"
@@ -57,6 +58,10 @@ okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver",
 room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+
+# Maps (Mapbox Maps SDK v11; the ndk27 builds are 16 KB page-size compatible)
+mapbox-maps = { group = "com.mapbox.maps", name = "android-ndk27", version.ref = "mapbox" }
+mapbox-maps-compose = { group = "com.mapbox.extension", name = "maps-compose-ndk27", version.ref = "mapbox" }
 
 # Images
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
