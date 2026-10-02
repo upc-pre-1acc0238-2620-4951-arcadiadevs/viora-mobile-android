@@ -10,6 +10,7 @@ val Tierra = Color(0xFFC15A2E)
 
 // Figma primitives (file "Viora202602_Mobile_App"). Use these for design-specific surfaces
 // that have no Material 3 role, e.g. the Home phase cards or the floating tab bar.
+val Green100 = Color(0xFFE9EEEB)
 val Green200 = Color(0xFFD4DBD7)
 val Green800 = Forest
 val Green900 = Shadow

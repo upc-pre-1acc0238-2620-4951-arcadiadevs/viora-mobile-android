@@ -22,4 +22,24 @@
     <string name="error_validation">Hay datos que no son válidos. Revísalos e inténtalo de nuevo.</string>
     <string name="error_server">El servidor tuvo un problema. Inténtalo en un momento.</string>
     <string name="error_unknown">Algo salió mal. Inténtalo de nuevo.</string>
+
+    <!-- Lotes -->
+    <string name="plots_title_lead">Tus</string>
+    <string name="plots_title_emphasis">lotes.</string>
+    <string name="plots_filter_active">Activos · %1$d</string>
+    <string name="plots_summary">%1$s · %2$s ha · %3$s</string>
+    <plurals name="plots_trees_count">
+        <item quantity="one">%1$s árbol</item>
+        <item quantity="other">%1$s árboles</item>
+    </plurals>
+    <string name="plots_updated">Actualizado %1$s</string>
+    <string name="plots_updated_just_now">Actualizado hace un momento</string>
+    <string name="plots_showing_saved_data">Mostrando datos guardados.</string>
+    <string name="plots_empty_title">Aún no tienes lotes</string>
+    <string name="plots_empty_body">Los lotes que registres aparecerán aquí.</string>
+    <string name="plots_retry">Reintentar</string>
+    <string name="variety_criolla">Criolla</string>
+    <string name="variety_sevillana">Sevillana</string>
+    <string name="variety_manzanilla">Manzanilla</string>
+    <string name="variety_arbequina">Arbequina</string>
 </resources>
