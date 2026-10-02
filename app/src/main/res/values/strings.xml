@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">Viora</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_plots">Plots</string>
+    <string name="nav_plan">Plan</string>
+    <string name="nav_logbook">Logbook</string>
+    <string name="nav_action_add">What will you record?</string>
+
+    <!-- Placeholders for tabs that are not built yet -->
+    <string name="placeholder_coming_soon">Coming soon</string>
+
+    <!-- Generic errors (AppError) -->
+    <string name="error_offline">No connection. Check your signal and try again.</string>
+    <string name="error_timeout">The server took too long to respond. Try again.</string>
+    <string name="error_unauthorized">Your session expired. Sign in again.</string>
+    <string name="error_forbidden">You do not have access to this resource.</string>
+    <string name="error_not_found">We could not find what you were looking for.</string>
+    <string name="error_conflict">This item conflicts with an existing one.</string>
+    <string name="error_precondition_failed">This item changed on the server. Reload it and try again.</string>
+    <string name="error_validation">Some data is not valid. Review it and try again.</string>
+    <string name="error_server">The server had a problem. Try again in a moment.</string>
+    <string name="error_unknown">Something went wrong. Try again.</string>
 </resources>
