@@ -26,6 +26,13 @@ import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.core.network.ApiErrorMapper
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotEntity
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
+import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
+import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
+import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
+import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
+import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.CreatePlotRequestDto
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.PlotDto
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.PlotService
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.repository.PlotRepositoryImpl
@@ -63,7 +70,14 @@ private class FakeCacheMetadataDao : CacheMetadataDao {
 }
 
 private class FakePlotService(var next: () -> Response<List<PlotDto>>) : PlotService {
+    val createRequests = mutableListOf<CreatePlotRequestDto>()
+    var created: () -> Response<PlotDto> = { throw IOException("not configured") }
+
     override suspend fun getPlots(): Response<List<PlotDto>> = next()
+    override suspend fun createPlot(request: CreatePlotRequestDto): Response<PlotDto> {
+        createRequests += request
+        return created()
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -167,5 +181,61 @@ class PlotRepositoryImplTest {
         repository.refresh()
 
         assertTrue(repository.observePlots().first().none { it.name == "Beta" })
+    }
+
+    // ---- register
+
+    private val newPlot = NewPlot(
+        name = PlotName.of("La Yarada 03"),
+        variety = OliveVariety.SEVILLANA,
+        outline = PlotOutline(
+            listOf(GeoPoint(-18.05, -70.25), GeoPoint(-18.05, -70.24), GeoPoint(-18.06, -70.24)),
+        ),
+        frame = PlantationFrame(7.0, 7.0),
+    )
+
+    private fun problem(status: Int, code: String, detail: String) = Response.error<PlotDto>(
+        status,
+        """{"status":$status,"detail":"$detail","code":"$code"}""".toResponseBody("application/problem+json".toMediaType()),
+    )
+
+    @Test
+    fun `register sends the plot, caches the answer and returns it`() = runTest {
+        service.created = { Response.success(201, dto("new-1", "La Yarada 03")) }
+
+        val result = repository.register(newPlot)
+
+        assertEquals("new-1", (result as AppResult.Success).value.id.value)
+        val sent = service.createRequests.single()
+        assertEquals("La Yarada 03", sent.name)
+        assertEquals("SEVILLANA", sent.variety)
+        assertEquals(7.0, sent.rowSpacingM, 0.0)
+        assertEquals(listOf("La Yarada 03"), repository.observePlots().first().map { it.name })
+    }
+
+    @Test
+    fun `register maps a duplicated name to Conflict and caches nothing`() = runTest {
+        service.created = { problem(409, "PLOT_CONFLICT", "Name already used") }
+
+        val result = repository.register(newPlot)
+
+        assertEquals(AppResult.Failure(AppError.Conflict("Name already used", "PLOT_CONFLICT")), result)
+        assertTrue(repository.observePlots().first().isEmpty())
+    }
+
+    @Test
+    fun `register maps a rejected polygon to Validation`() = runTest {
+        service.created = { problem(400, "VALIDATION_ERROR", "Polygon ring is not closed") }
+
+        val result = repository.register(newPlot)
+
+        assertEquals(AppResult.Failure(AppError.Validation("Polygon ring is not closed", "VALIDATION_ERROR")), result)
+    }
+
+    @Test
+    fun `register without connection maps to Offline`() = runTest {
+        service.created = { throw IOException("no route") }
+
+        assertEquals(AppResult.Failure(AppError.Offline), repository.register(newPlot))
     }
 }

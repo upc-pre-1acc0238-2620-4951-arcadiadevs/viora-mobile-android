@@ -21,6 +21,7 @@ import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsLastRefreshUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RefreshPlotsUseCase
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
@@ -36,6 +37,8 @@ private class FakePlotRepository : PlotRepository {
 
     override fun observePlots(): Flow<List<Plot>> = plots
     override fun observeLastRefresh(): Flow<Instant?> = lastRefresh
+    override suspend fun register(newPlot: NewPlot): AppResult<Plot> = AppResult.Failure(AppError.Offline)
+
     override suspend fun refresh(): AppResult<Unit> {
         refreshCalls++
         return pendingRefresh.await()
