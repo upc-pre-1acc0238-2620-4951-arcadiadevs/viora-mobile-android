@@ -1,0 +1,114 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "6329ac86022af5397d00cebd13031b8d",
+    "entities": [
+      {
+        "tableName": "cache_metadata",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`resource_key` TEXT NOT NULL, `fetched_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`resource_key`))",
+        "fields": [
+          {
+            "fieldPath": "resourceKey",
+            "columnName": "resource_key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fetchedAtEpochMs",
+            "columnName": "fetched_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "resource_key"
+          ]
+        }
+      },
+      {
+        "tableName": "plots",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `variety` TEXT NOT NULL, `area_ha` REAL NOT NULL, `tree_density` INTEGER NOT NULL, `row_spacing_m` REAL NOT NULL, `tree_spacing_m` REAL NOT NULL, `polygon_geojson` TEXT NOT NULL, `last_pruning_date` TEXT, `status` TEXT NOT NULL, `revision` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "variety",
+            "columnName": "variety",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "areaHa",
+            "columnName": "area_ha",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "treeDensity",
+            "columnName": "tree_density",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rowSpacingM",
+            "columnName": "row_spacing_m",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "treeSpacingM",
+            "columnName": "tree_spacing_m",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "polygonGeoJson",
+            "columnName": "polygon_geojson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastPruningDate",
+            "columnName": "last_pruning_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revision",
+            "columnName": "revision",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6329ac86022af5397d00cebd13031b8d')"
+    ]
+  }
+}
