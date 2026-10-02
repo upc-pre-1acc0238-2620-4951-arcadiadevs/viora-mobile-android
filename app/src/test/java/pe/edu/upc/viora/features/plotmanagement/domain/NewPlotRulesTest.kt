@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.plotmanagement.domain
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -91,5 +92,33 @@ class NewPlotRulesTest {
             GeoPoint(0.001, 0.001), GeoPoint(0.002, 0.001), GeoPoint(0.002, 0.000),
         )
         assertNull(PlotOutline.check(lShape))
+    }
+
+    @Test
+    fun `a corner to the right of a triangle is slipped into an edge so the outline stays simple`() {
+        val triangle = listOf(
+            GeoPoint(latitude = -18.0500, longitude = -70.2500),
+            GeoPoint(latitude = -18.0495, longitude = -70.2490),
+            GeoPoint(latitude = -18.0510, longitude = -70.2492),
+        )
+        // Appending it last would close across the first edge.
+        val extra = GeoPoint(latitude = -18.0500, longitude = -70.2480)
+
+        val index = PlotOutline.insertionIndex(triangle, extra)
+
+        assertNotNull(index)
+        val outline = triangle.toMutableList().apply { add(index!!, extra) }
+        assertEquals(null, PlotOutline.check(outline))
+    }
+
+    @Test
+    fun `a corner that keeps the outline simple goes last, in the order it was tapped`() {
+        val square = listOf(
+            GeoPoint(latitude = -18.050, longitude = -70.250),
+            GeoPoint(latitude = -18.050, longitude = -70.249),
+            GeoPoint(latitude = -18.051, longitude = -70.249),
+        )
+
+        assertEquals(3, PlotOutline.insertionIndex(square, GeoPoint(latitude = -18.051, longitude = -70.250)))
     }
 }

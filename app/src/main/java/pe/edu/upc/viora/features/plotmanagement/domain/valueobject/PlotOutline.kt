@@ -38,6 +38,36 @@ data class PlotOutline(val corners: List<GeoPoint>) {
             else -> null
         }
 
+        /**
+         * Where in [outline] (a simple outline, in drawing order) a new [corner] should go, or `null`
+         * when it fits nowhere without making edges cross.
+         *
+         * Producers tap where the plot border is, not always going round in order. The corner goes
+         * after the last one when that keeps the outline simple; otherwise it is slipped into the
+         * edge where it adds the least perimeter and still keeps the outline simple. This is what
+         * allows irregular plots (L shapes, a corner pushed in) without a "bow-tie".
+         */
+        fun insertionIndex(outline: List<GeoPoint>, corner: GeoPoint): Int? =
+            if (outline.size < MIN_CORNERS) outline.size else bestPosition(outline, corner)
+
+        /** Index where [corner] can be inserted keeping [outline] simple; the end if possible, else the cheapest. */
+        private fun bestPosition(outline: List<GeoPoint>, corner: GeoPoint): Int? {
+            fun keepsSimple(index: Int) = !hasCrossingEdges(outline.toMutableList().apply { add(index, corner) })
+            if (keepsSimple(outline.size)) return outline.size
+            return (1 until outline.size)
+                .filter(::keepsSimple)
+                .minByOrNull { index ->
+                    val before = outline[index - 1]
+                    val after = outline[index]
+                    distance(before, corner) + distance(corner, after) - distance(before, after)
+                }
+        }
+
+        private fun distance(a: GeoPoint, b: GeoPoint): Double {
+            val (p, q) = project(listOf(a, b))
+            return kotlin.math.hypot(p.first - q.first, p.second - q.second)
+        }
+
         /** Area of the polygon in hectares; 0 when there are fewer than 3 corners. */
         fun areaHectares(corners: List<GeoPoint>): Double {
             if (corners.size < MIN_CORNERS) return 0.0

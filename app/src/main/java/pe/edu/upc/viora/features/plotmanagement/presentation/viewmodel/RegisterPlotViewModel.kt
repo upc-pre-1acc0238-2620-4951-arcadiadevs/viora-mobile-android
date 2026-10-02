@@ -21,6 +21,7 @@ import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFra
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.TracedCorner
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
 
@@ -44,14 +45,53 @@ class RegisterPlotViewModel @Inject constructor(
 
     // ---- Step 1: trace
 
+    /**
+     * Adds a corner. It is slipped into the outline where it keeps the edges from crossing (see
+     * [PlotOutline.insertionIndex]); only when it fits nowhere it is refused, and the screen
+     * explains it through [RegisterPlotUiState.outlineError].
+     */
     fun addCorner(point: GeoPoint) {
         _uiState.update {
-            if (it.step != RegisterPlotStep.TRACE) it else it.copy(corners = it.corners + point, outlineError = null)
+            if (it.step != RegisterPlotStep.TRACE) return@update it
+            val index = PlotOutline.insertionIndex(it.corners, point)
+            if (index == null) {
+                it.copy(outlineError = PlotOutline.Error.SelfIntersecting)
+            } else {
+                val corner = TracedCorner(id = it.nextCornerId, point = point)
+                it.copy(
+                    outline = it.outline.toMutableList().apply { add(index, corner) },
+                    nextCornerId = it.nextCornerId + 1,
+                    outlineError = null,
+                    refusedMove = false,
+                )
+            }
         }
     }
 
+    /** Removes the corner the producer added last, wherever it sits in the outline. */
     fun undoCorner() {
-        _uiState.update { it.copy(corners = it.corners.dropLast(1), outlineError = null) }
+        _uiState.update {
+            val last = it.outline.maxByOrNull { corner -> corner.id } ?: return@update it
+            it.copy(outline = it.outline - last, outlineError = null, refusedMove = false)
+        }
+    }
+
+    /**
+     * Follows a corner being dragged on the map. A position that would make two edges cross is
+     * not applied (the corner stays where it was, so the handle on screen stays put) and
+     * [RegisterPlotUiState.refusedMove] says why.
+     */
+    fun moveCorner(id: Int, point: GeoPoint) {
+        _uiState.update {
+            val index = it.outline.indexOfFirst { corner -> corner.id == id }
+            if (index < 0) return@update it
+            val moved = it.outline.toMutableList().apply { this[index] = this[index].copy(point = point) }
+            if (PlotOutline.check(moved.map { corner -> corner.point }) == PlotOutline.Error.SelfIntersecting) {
+                it.copy(refusedMove = true)
+            } else {
+                it.copy(outline = moved, refusedMove = false, outlineError = null)
+            }
+        }
     }
 
     /** Validates the traced outline and moves on, or explains what is wrong with it. */

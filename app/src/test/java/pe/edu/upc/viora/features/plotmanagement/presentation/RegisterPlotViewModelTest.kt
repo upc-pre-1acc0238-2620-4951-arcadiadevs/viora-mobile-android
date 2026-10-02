@@ -135,15 +135,52 @@ class RegisterPlotViewModelTest {
     }
 
     @Test
-    fun `closing an outline whose edges cross is refused`() {
+    fun `corners tapped out of order are arranged so the outline does not cross`() {
         val vm = viewModel()
-        // a -> c -> b -> d draws a bow-tie.
+        // a -> c -> b -> d tapped in this order would be a bow-tie.
         listOf(a, c, b, d).forEach(vm::addCorner)
 
-        vm.closeOutline()
+        val state = vm.uiState.value
+        assertEquals(4, state.corners.size)
+        assertEquals(null, PlotOutline.check(state.corners))
+        assertEquals(null, state.outlineError)
+        // Same square as tracing it in order.
+        assertEquals(PlotOutline.areaHectares(listOf(a, b, c, d)), state.areaHectares, 1e-9)
+    }
 
-        assertEquals(PlotOutline.Error.SelfIntersecting, vm.uiState.value.outlineError)
-        assertEquals(RegisterPlotStep.TRACE, vm.uiState.value.step)
+    @Test
+    fun `undo removes the corner added last even if it was slipped between others`() {
+        val vm = viewModel()
+        listOf(a, c, b, d).forEach(vm::addCorner)
+
+        vm.undoCorner()
+
+        assertEquals(setOf(a, c, b), vm.uiState.value.corners.toSet())
+    }
+
+    @Test
+    fun `a corner can be dragged to a new place`() {
+        val vm = viewModel()
+        listOf(a, b, c, d).forEach(vm::addCorner)
+        val id = vm.uiState.value.outline.first { it.point == c }.id
+        val moved = GeoPoint(latitude = -18.0515, longitude = -70.2485)
+
+        vm.moveCorner(id, moved)
+
+        assertTrue(moved in vm.uiState.value.corners)
+        assertEquals(false, vm.uiState.value.refusedMove)
+    }
+
+    @Test
+    fun `dragging a corner across the opposite edge is refused and the corner stays`() {
+        val vm = viewModel()
+        listOf(a, b, c, d).forEach(vm::addCorner)
+        val id = vm.uiState.value.outline.first { it.point == c }.id
+        // Past the d-a edge: the b-c edge would cut across it.
+        vm.moveCorner(id, GeoPoint(latitude = -18.0505, longitude = -70.2510))
+
+        assertTrue(c in vm.uiState.value.corners)
+        assertEquals(true, vm.uiState.value.refusedMove)
     }
 
     @Test
