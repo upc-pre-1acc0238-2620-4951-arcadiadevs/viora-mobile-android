@@ -1,4 +1,4 @@
-package pe.edu.upc.viora.core.theme
+package pe.edu.upc.viora.core.designsystem.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -106,6 +106,7 @@ fun VioraTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = AppTypography,
+        shapes = AppShapes,
         content = content
     )
 }

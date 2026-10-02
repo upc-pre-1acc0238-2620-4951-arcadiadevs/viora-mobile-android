@@ -1,4 +1,4 @@
-package pe.edu.upc.viora.core.theme
+package pe.edu.upc.viora.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
@@ -7,6 +7,29 @@ val Forest = Color(0xFF2E4A3A)
 val Shadow = Color(0xFF1F2C26)
 val Harvest = Color(0xFFE8B923)
 val Tierra = Color(0xFFC15A2E)
+
+// Figma primitives (file "Viora202602_Mobile_App"). Use these for design-specific surfaces
+// that have no Material 3 role, e.g. the Home phase cards or the floating tab bar.
+val Green200 = Color(0xFFD4DBD7)
+val Green800 = Forest
+val Green900 = Shadow
+val Harvest100 = Color(0xFFFFF0B4)
+val Harvest300 = Harvest
+val Harvest400 = Color(0xFFCDA100)
+val Harvest800 = Color(0xFF5D3F00)
+val Terracotta100 = Color(0xFFFFE5D8)
+val Terracotta500 = Tierra
+val Terracotta700 = Color(0xFF8E3507)
+val Neutral0 = Color(0xFFFFFFFF)
+val Neutral50 = Color(0xFFF9F6F1)
+val Neutral200 = Color(0xFFD7D4CE)
+val Neutral300 = Color(0xFFC0BDB8)
+val Neutral600 = Color(0xFF5C5A57)
+val Neutral700 = Color(0xFF413F3C)
+val Neutral900 = Color(0xFF1B1916)
+
+// Warm brown tint used for floating-element shadows instead of pure black.
+val ShadowTint = Color(0xFF4B3425)
 
 val primaryLight = Forest
 val onPrimaryLight = Color(0xFFFFFFFF)
@@ -24,10 +47,10 @@ val errorLight = Color(0xFFBA1A1A)
 val onErrorLight = Color(0xFFFFFFFF)
 val errorContainerLight = Color(0xFFFFDAD6)
 val onErrorContainerLight = Color(0xFF93000A)
-val backgroundLight = Color(0xFFFBF8F1)
-val onBackgroundLight = Color(0xFF1B1C18)
-val surfaceLight = Color(0xFFFBF8F1)
-val onSurfaceLight = Color(0xFF1B1C18)
+val backgroundLight = Neutral50
+val onBackgroundLight = Neutral900
+val surfaceLight = Neutral50
+val onSurfaceLight = Neutral900
 val surfaceVariantLight = Color(0xFFE3E2D3)
 val onSurfaceVariantLight = Color(0xFF46483C)
 val outlineLight = Color(0xFF76786A)
@@ -37,9 +60,9 @@ val inverseSurfaceLight = Color(0xFF30312B)
 val inverseOnSurfaceLight = Color(0xFFF2F1E7)
 val inversePrimaryLight = Color(0xFF9BCFA9)
 val surfaceDimLight = Color(0xFFDBD9CF)
-val surfaceBrightLight = Color(0xFFFBF8F1)
-val surfaceContainerLowestLight = Color(0xFFFFFFFF)
-val surfaceContainerLowLight = Color(0xFFF5F2E8)
+val surfaceBrightLight = Neutral50
+val surfaceContainerLowestLight = Neutral0
+val surfaceContainerLowLight = Color(0xFFF3F0EA)
 val surfaceContainerLight = Color(0xFFEFEDE2)
 val surfaceContainerHighLight = Color(0xFFE9E7DC)
 val surfaceContainerHighestLight = Color(0xFFE3E1D7)
