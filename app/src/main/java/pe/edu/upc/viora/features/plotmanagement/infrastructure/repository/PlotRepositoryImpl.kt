@@ -11,11 +11,13 @@ import pe.edu.upc.viora.core.database.CacheMetadataEntity
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.network.ApiCaller
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.toDomainOrNull
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.toEntity
+import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.toRequestDto
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.PlotService
 
 class PlotRepositoryImpl @Inject constructor(
@@ -41,6 +43,22 @@ class PlotRepositoryImpl @Inject constructor(
             plotDao.deleteAllExcept(entities.map { it.id })
             cacheMetadataDao.upsert(CacheMetadataEntity(PLOTS_CACHE_KEY, clock.millis()))
             AppResult.Success(Unit)
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (throwable: Throwable) {
+            AppResult.Failure(AppError.Unknown(throwable))
+        }
+    }
+
+    override suspend fun register(newPlot: NewPlot): AppResult<Plot> {
+        val remote = apiCaller.call { service.createPlot(newPlot.toRequestDto()) }
+        if (remote is AppResult.Failure) return remote
+        val entity = (remote as AppResult.Success).value.toEntity()
+        val plot = entity.toDomainOrNull()
+            ?: return AppResult.Failure(AppError.Unknown(IllegalStateException("Server returned an unreadable plot")))
+        return try {
+            plotDao.upsertAll(listOf(entity))
+            AppResult.Success(plot)
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (throwable: Throwable) {

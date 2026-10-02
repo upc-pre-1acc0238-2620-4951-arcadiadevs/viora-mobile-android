@@ -16,6 +16,9 @@ val localProperties = Properties().apply {
     if (file.exists()) file.inputStream().use { load(it) }
 }
 
+// Public Mapbox token (pk.…). It is not a secret, but keep it out of git: set it in local.properties.
+val mapboxPublicToken: String = localProperties.getProperty("viora.mapboxPublicToken", "")
+
 // Android emulator alias for the host machine's localhost (backend running locally).
 val defaultDebugApiBaseUrl = "http://10.0.2.2:8080/api/v1/"
 val defaultReleaseApiBaseUrl = "https://viora-platform.onrender.com/api/v1/"
@@ -36,7 +39,10 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.2.0"
+
+        // The Maps SDK reads this string resource at startup.
+        resValue("string", "mapbox_access_token", mapboxPublicToken)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -61,6 +67,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        resValues = true
     }
     testOptions {
         unitTests.isReturnDefaultValues = true
@@ -100,6 +107,10 @@ dependencies {
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.androidx.datastore.preferences)
+
+    // Maps
+    implementation(libs.mapbox.maps)
+    implementation(libs.mapbox.maps.compose)
 
     // Images
     implementation(libs.coil.compose)

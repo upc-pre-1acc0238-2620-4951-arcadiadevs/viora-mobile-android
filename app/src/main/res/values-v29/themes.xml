@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Window theme only: colors come from VioraTheme in Compose. -->
+    <!-- Android 10+: stops OEM "force dark" (e.g. MIUI) from recolouring this light-only app. -->
     <style name="Theme.Viora" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/viora_background</item>
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 </resources>

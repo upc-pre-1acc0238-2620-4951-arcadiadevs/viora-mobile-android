@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Figma primitives/neutral/50. Same value as Neutral50 in Color.kt. -->
+    <color name="viora_background">#FFF9F6F1</color>
+</resources>
