@@ -22,4 +22,24 @@
     <string name="error_validation">Some data is not valid. Review it and try again.</string>
     <string name="error_server">The server had a problem. Try again in a moment.</string>
     <string name="error_unknown">Something went wrong. Try again.</string>
+
+    <!-- Plots -->
+    <string name="plots_title_lead">Your</string>
+    <string name="plots_title_emphasis">plots.</string>
+    <string name="plots_filter_active">Active · %1$d</string>
+    <string name="plots_summary">%1$s · %2$s ha · %3$s</string>
+    <plurals name="plots_trees_count">
+        <item quantity="one">%1$s tree</item>
+        <item quantity="other">%1$s trees</item>
+    </plurals>
+    <string name="plots_updated">Updated %1$s</string>
+    <string name="plots_updated_just_now">Updated just now</string>
+    <string name="plots_showing_saved_data">Showing saved data.</string>
+    <string name="plots_empty_title">No plots yet</string>
+    <string name="plots_empty_body">The plots you register will show up here.</string>
+    <string name="plots_retry">Retry</string>
+    <string name="variety_criolla">Criolla</string>
+    <string name="variety_sevillana">Sevillana</string>
+    <string name="variety_manzanilla">Manzanilla</string>
+    <string name="variety_arbequina">Arbequina</string>
 </resources>

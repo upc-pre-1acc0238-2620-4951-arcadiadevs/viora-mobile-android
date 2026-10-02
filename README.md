@@ -37,7 +37,7 @@ The API base URL comes from `BuildConfig.API_BASE_URL`:
 | Build | Default |
 |---|---|
 | debug | `http://10.0.2.2:8080/api/v1/` (emulator → backend on your machine) |
-| release | placeholder until the Render URL exists |
+| release | `https://viora-platform.onrender.com/api/v1/` (first request can take ~1 min: free-tier cold start) |
 
 Override it per developer in `local.properties` (never committed):
 
@@ -114,9 +114,11 @@ Bounded contexts (package → report name): `iam` IAM · `profiles` User Profile
    `infrastructure/di` (`retrofit.create(...)`). Check the real field names against the
    backend/Swagger — they differ from the report in places.
 3. **Local (if cached/offline):** a Room entity + DAO in `infrastructure/local`; register the
-   entity in `core/database/AppDatabase` (one line), bump `version`, add a `Migration`, and
-   commit the generated JSON in `app/schemas/`. Provide the DAO in your `infrastructure/di`.
-   Do **not** use destructive migration.
+   entity in `core/database/AppDatabase` (one line) and commit the regenerated JSON in
+   `app/schemas/`. Provide the DAO in your `infrastructure/di`. Before the first release the schema
+   stays at version 1 and is edited in place: after pulling a schema change, clear the app data
+   (or reinstall). From the first release on, bump `version` and add a `Migration` for every
+   change; never use destructive migration.
 4. **Repository:** interface in `domain/repository`, implementation in
    `infrastructure/repository` bound with `@Binds` in `SingletonComponent`. Use `ApiCaller` for
    network calls and map DTOs to domain types before returning.

@@ -15,8 +15,7 @@ import pe.edu.upc.viora.core.navigation.LogbookRoute
 import pe.edu.upc.viora.core.navigation.PlaceholderScreen
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
-import pe.edu.upc.viora.core.navigation.PlotsGraph
-import pe.edu.upc.viora.core.navigation.PlotsRoute
+import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNavGraph
 
 /**
  * Composition root of navigation. It lives outside `core/` on purpose: this is the one place
@@ -36,9 +35,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         navigation<HomeGraph>(startDestination = HomeRoute) {
             composable<HomeRoute> { PlaceholderScreen(title = stringResource(R.string.nav_home)) }
         }
-        navigation<PlotsGraph>(startDestination = PlotsRoute) {
-            composable<PlotsRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plots)) }
-        }
+        plotsNavGraph()
         navigation<PlanGraph>(startDestination = PlanRoute) {
             composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
         }
