@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Viora</string>
+
+    <!-- Navegación inferior -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_plots">Lotes</string>
+    <string name="nav_plan">Plan</string>
+    <string name="nav_logbook">Bitácora</string>
+    <string name="nav_action_add">¿Qué vas a registrar?</string>
+
+    <!-- Marcadores para pestañas aún no construidas -->
+    <string name="placeholder_coming_soon">Próximamente</string>
+
+    <!-- Errores genéricos (AppError) -->
+    <string name="error_offline">Sin conexión. Revisa tu señal e inténtalo de nuevo.</string>
+    <string name="error_timeout">El servidor tardó demasiado en responder. Inténtalo de nuevo.</string>
+    <string name="error_unauthorized">Tu sesión venció. Inicia sesión de nuevo.</string>
+    <string name="error_forbidden">No tienes acceso a este recurso.</string>
+    <string name="error_not_found">No encontramos lo que buscabas.</string>
+    <string name="error_conflict">Este elemento entra en conflicto con otro existente.</string>
+    <string name="error_precondition_failed">Este elemento cambió en el servidor. Vuelve a cargarlo e inténtalo de nuevo.</string>
+    <string name="error_validation">Hay datos que no son válidos. Revísalos e inténtalo de nuevo.</string>
+    <string name="error_server">El servidor tuvo un problema. Inténtalo en un momento.</string>
+    <string name="error_unknown">Algo salió mal. Inténtalo de nuevo.</string>
+</resources>
