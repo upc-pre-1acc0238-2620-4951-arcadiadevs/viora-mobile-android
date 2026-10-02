@@ -18,9 +18,7 @@ val localProperties = Properties().apply {
 
 // Android emulator alias for the host machine's localhost (backend running locally).
 val defaultDebugApiBaseUrl = "http://10.0.2.2:8080/api/v1/"
-// Placeholder until the backend is deployed (".invalid" is a reserved, never-resolving TLD).
-// Set viora.apiBaseUrl in local.properties or replace this default with the Render URL.
-val defaultReleaseApiBaseUrl = "https://viora-api.invalid/api/v1/"
+val defaultReleaseApiBaseUrl = "https://viora-platform.onrender.com/api/v1/"
 
 room3 {
     // Exported schemas are committed so migrations can be reviewed and tested.

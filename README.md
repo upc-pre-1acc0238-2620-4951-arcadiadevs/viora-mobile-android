@@ -37,7 +37,7 @@ The API base URL comes from `BuildConfig.API_BASE_URL`:
 | Build | Default |
 |---|---|
 | debug | `http://10.0.2.2:8080/api/v1/` (emulator → backend on your machine) |
-| release | placeholder until the Render URL exists |
+| release | `https://viora-platform.onrender.com/api/v1/` (first request can take ~1 min: free-tier cold start) |
 
 Override it per developer in `local.properties` (never committed):
 
