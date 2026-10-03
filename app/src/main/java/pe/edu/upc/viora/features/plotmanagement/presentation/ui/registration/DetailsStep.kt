@@ -57,6 +57,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
@@ -79,7 +80,7 @@ fun DetailsStep(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
-        StepHeader(step = 2, onBack = onBack, onClose = onClose, modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp))
+        StepHeader(step = RegisterPlotStep.DETAILS.number, onBack = onBack, onClose = onClose, modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp))
         Column(
             modifier = Modifier
                 .weight(1f)
