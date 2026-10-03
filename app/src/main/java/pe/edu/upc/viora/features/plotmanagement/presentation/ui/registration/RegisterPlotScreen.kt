@@ -18,16 +18,19 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.RegisterPlotViewModel
 
 /**
  * The plot registration wizard. It owns navigation inside the wizard (back and close) and the
- * "discard?" confirmation; [onFinished] is called when the producer leaves or the plot is saved.
+ * "discard?" confirmation; [onLeave] is called when the producer leaves without saving and
+ * [onSaved] with the new plot's id once it is saved.
  */
 @Composable
 fun RegisterPlotScreen(
-    onFinished: () -> Unit,
+    onLeave: () -> Unit,
+    onSaved: (PlotId) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RegisterPlotViewModel = hiltViewModel(),
 ) {
@@ -35,7 +38,7 @@ fun RegisterPlotScreen(
     var askDiscard by rememberSaveable { mutableStateOf(false) }
 
     fun leave() {
-        if (state.hasWorkInProgress) askDiscard = true else onFinished()
+        if (state.hasWorkInProgress) askDiscard = true else onLeave()
     }
 
     fun back() {
@@ -43,8 +46,8 @@ fun RegisterPlotScreen(
     }
 
     BackHandler(onBack = ::back)
-    LaunchedEffect(state.isSaved) {
-        if (state.isSaved) onFinished()
+    LaunchedEffect(state.savedPlotId) {
+        state.savedPlotId?.let(onSaved)
     }
 
     when (state.step) {
@@ -89,7 +92,7 @@ fun RegisterPlotScreen(
                 TextButton(onClick = { askDiscard = false }) { Text(stringResource(R.string.discard_keep)) }
             },
             dismissButton = {
-                TextButton(onClick = onFinished) {
+                TextButton(onClick = onLeave) {
                     Text(stringResource(R.string.discard_confirm), color = Terracotta700)
                 }
             },
