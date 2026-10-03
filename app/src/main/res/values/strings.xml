@@ -27,6 +27,10 @@
     <string name="plots_title_lead">Your</string>
     <string name="plots_title_emphasis">plots.</string>
     <string name="plots_filter_active">Active · %1$d</string>
+    <string name="plots_filter_archived">Archived · %1$d</string>
+    <string name="plots_archived_badge">Archived · history kept</string>
+    <string name="plots_restore">Restore plot</string>
+    <string name="plots_restore_failed">We could not restore the plot. %1$s</string>
     <string name="plots_summary">%1$s · %2$s ha · %3$s</string>
     <plurals name="plots_trees_count">
         <item quantity="one">%1$s tree</item>
