@@ -14,6 +14,7 @@ okhttp = "4.12.0"
 room = "3.0.3"
 datastore = "1.2.1"
 mapbox = "11.31.1"
+playServicesLocation = "21.3.0"
 coil = "3.6.3"
 kotlinxCoroutines = "1.11.0"
 kotlinxSerializationJson = "1.11.0"
@@ -62,6 +63,9 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 # Maps (Mapbox Maps SDK v11; the ndk27 builds are 16 KB page-size compatible)
 mapbox-maps = { group = "com.mapbox.maps", name = "android-ndk27", version.ref = "mapbox" }
 mapbox-maps-compose = { group = "com.mapbox.extension", name = "maps-compose-ndk27", version.ref = "mapbox" }
+
+# Location (the fused provider gives the best GPS fix with its accuracy)
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 # Images
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }

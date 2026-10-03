@@ -27,6 +27,7 @@ import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.MarkingMethod
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.RegisterPlotViewModel
@@ -66,10 +67,14 @@ class RegisterPlotViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = RegisterPlotViewModel(
+    /** A view model as the wizard opens it, on the first step. */
+    private fun freshViewModel() = RegisterPlotViewModel(
         observePlots = ObservePlotsUseCase(repository),
         registerPlot = RegisterPlotUseCase(repository),
     )
+
+    /** A view model that already chose to trace on the map, ready to mark corners. */
+    private fun viewModel() = freshViewModel().also { it.startMarking(MarkingMethod.MAP_TRACE) }
 
     private fun existingPlot() = Plot(
         id = PlotId("p"), name = "Existing", variety = OliveVariety.CRIOLLA, areaHectares = 1.0, treesPerHectare = 100,
@@ -91,12 +96,67 @@ class RegisterPlotViewModelTest {
     // ---- start
 
     @Test
-    fun `starts on the trace step with nothing drawn`() {
-        val state = viewModel().uiState.value
+    fun `starts on the method step with nothing chosen or drawn`() {
+        val state = freshViewModel().uiState.value
 
-        assertEquals(RegisterPlotStep.TRACE, state.step)
+        assertEquals(RegisterPlotStep.METHOD, state.step)
+        assertNull(state.method)
         assertTrue(state.corners.isEmpty())
         assertFalse(state.hasWorkInProgress)
+    }
+
+    @Test
+    fun `choosing a method starts marking the outline with it`() {
+        val vm = freshViewModel()
+
+        vm.startMarking(MarkingMethod.GPS_WALK)
+
+        assertEquals(RegisterPlotStep.TRACE, vm.uiState.value.step)
+        assertEquals(MarkingMethod.GPS_WALK, vm.uiState.value.method)
+    }
+
+    @Test
+    fun `switching to the map keeps the corners already marked`() {
+        val vm = freshViewModel()
+        vm.startMarking(MarkingMethod.GPS_WALK)
+        vm.addCorner(a)
+        vm.addCorner(b)
+
+        vm.switchToMapTrace()
+
+        assertEquals(MarkingMethod.MAP_TRACE, vm.uiState.value.method)
+        assertEquals(listOf(a, b), vm.uiState.value.corners)
+        assertEquals(RegisterPlotStep.TRACE, vm.uiState.value.step)
+    }
+
+    @Test
+    fun `the outline centre is the middle of the corners, and nothing without corners`() {
+        val vm = viewModel()
+        assertNull(vm.uiState.value.outlineCenter)
+
+        vm.addCorner(a)
+        vm.addCorner(c)
+
+        val center = vm.uiState.value.outlineCenter!!
+        assertEquals((a.latitude + c.latitude) / 2, center.latitude, 1e-9)
+        assertEquals((a.longitude + c.longitude) / 2, center.longitude, 1e-9)
+    }
+
+    @Test
+    fun `corners cannot be marked before choosing a method`() {
+        val vm = freshViewModel()
+
+        vm.addCorner(a)
+
+        assertTrue(vm.uiState.value.corners.isEmpty())
+    }
+
+    @Test
+    fun `the steps are numbered one to three, the details and the review sharing the last`() {
+        assertEquals(
+            listOf(1, 2, 3, 3),
+            RegisterPlotStep.entries.map { it.number },
+        )
     }
 
     @Test
@@ -329,6 +389,19 @@ class RegisterPlotViewModelTest {
         assertEquals(RegisterPlotStep.DETAILS, vm.uiState.value.step)
         assertTrue(vm.goBack())
         assertEquals(RegisterPlotStep.TRACE, vm.uiState.value.step)
+        assertTrue(vm.goBack())
+        assertEquals(RegisterPlotStep.METHOD, vm.uiState.value.step)
         assertFalse(vm.goBack())
+    }
+
+    @Test
+    fun `going back to the method keeps the corners marked`() {
+        val vm = readyToSave()
+        vm.goBack()
+        vm.goBack()
+        vm.goBack()
+
+        assertEquals(RegisterPlotStep.METHOD, vm.uiState.value.step)
+        assertEquals(listOf(a, b, c, d), vm.uiState.value.corners)
     }
 }

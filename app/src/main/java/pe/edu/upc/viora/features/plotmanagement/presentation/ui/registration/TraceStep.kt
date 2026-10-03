@@ -50,12 +50,14 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
+import pe.edu.upc.viora.core.designsystem.theme.Neutral200
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 
@@ -83,7 +85,8 @@ fun TraceStep(
     Box(modifier = modifier.fillMaxSize()) {
         PlotTraceMap(
             corners = state.corners,
-            initialCenter = state.mapCenter,
+            // With corners already marked (e.g. walked with the GPS), open where they are.
+            initialCenter = state.outlineCenter ?: state.mapCenter,
             viewportState = viewportState,
             onCornerTapped = onAddCorner,
             bottomInsetPx = sheetHeightPx,
@@ -105,7 +108,7 @@ fun TraceStep(
             modifier = Modifier.statusBarsPadding().padding(horizontal = 24.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            StepHeader(step = 1, onBack = onBack, onClose = onClose)
+            StepHeader(step = RegisterPlotStep.TRACE.number, onBack = onBack, onClose = onClose)
             MapHintChip()
         }
 
@@ -170,7 +173,7 @@ private const val DRAG_THRESHOLD_PX = 24f
 
 /** The handle: dragging it down folds the sheet, dragging it up (or tapping it) opens it. */
 @Composable
-private fun SheetHandle(expanded: Boolean, onExpandedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+internal fun SheetHandle(expanded: Boolean, onExpandedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
     var dragged by remember { mutableFloatStateOf(0f) }
     Box(
         modifier = modifier
@@ -240,23 +243,11 @@ private fun TraceSheet(
                 style = titleStyle,
                 fontStyle = FontStyle.Italic,
             )
-            Row(
-                modifier = Modifier.padding(top = 12.dp).height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                StatTile(
-                    value = cornerCount.toString(),
-                    caption = stringResource(R.string.trace_corners_label),
-                    background = Neutral0,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                )
-                StatTile(
-                    value = if (cornerCount >= PlotOutline.MIN_CORNERS) stringResource(R.string.trace_area_value, formatHectares(state.areaHectares)) else "—",
-                    caption = stringResource(R.string.trace_area_label),
-                    background = Harvest100,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                )
-            }
+            CornerStatTiles(
+                cornerCount = cornerCount,
+                areaHectares = state.areaHectares,
+                modifier = Modifier.padding(top = 12.dp),
+            )
         }
         Row(
             modifier = Modifier.padding(top = 12.dp),
@@ -312,23 +303,54 @@ private fun TraceSheet(
     }
 }
 
-/** The yellow pill of the action row: the main thing to do next (add a corner, or finish moving). */
+/** The two figures of the outline sheets: how many corners there are and the provisional area. */
 @Composable
-private fun ActionPill(@DrawableRes icon: Int, text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun CornerStatTiles(cornerCount: Int, areaHectares: Double, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        StatTile(
+            value = cornerCount.toString(),
+            caption = stringResource(R.string.trace_corners_label),
+            background = Neutral0,
+            modifier = Modifier.weight(1f).fillMaxHeight(),
+        )
+        StatTile(
+            value = if (cornerCount >= PlotOutline.MIN_CORNERS) stringResource(R.string.trace_area_value, formatHectares(areaHectares)) else "—",
+            caption = stringResource(R.string.trace_area_label),
+            background = Harvest100,
+            modifier = Modifier.weight(1f).fillMaxHeight(),
+        )
+    }
+}
+
+/**
+ * The yellow pill of the action row: the main thing to do next (add a corner, or finish moving).
+ * Disabled it turns grey: the action is not possible right now.
+ */
+@Composable
+internal fun ActionPill(
+    @DrawableRes icon: Int,
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
     Row(
         modifier = modifier
             .height(56.dp)
             .clip(CircleShape)
-            .background(Harvest300)
-            .clickable(role = Role.Button, onClick = onClick),
+            .background(if (enabled) Harvest300 else Neutral200)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(painter = painterResource(icon), contentDescription = null, tint = Neutral900)
+        Icon(painter = painterResource(icon), contentDescription = null, tint = if (enabled) Neutral900 else Neutral600)
         Text(
             text = text,
             style = MaterialTheme.typography.titleMedium,
-            color = Neutral900,
+            color = if (enabled) Neutral900 else Neutral600,
             modifier = Modifier.padding(start = 8.dp),
         )
     }

@@ -20,12 +20,13 @@ import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.MarkingMethod
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.TracedCorner
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
 
-/** Drives the three-step wizard: trace the outline, describe the plot, review and save. */
+/** Drives the wizard: choose how to mark the outline, mark it, describe the plot, review and save. */
 @HiltViewModel
 class RegisterPlotViewModel @Inject constructor(
     observePlots: ObservePlotsUseCase,
@@ -43,7 +44,22 @@ class RegisterPlotViewModel @Inject constructor(
         }
     }
 
-    // ---- Step 1: trace
+    // ---- Step 1: choose how to mark the outline
+
+    /** Starts marking the outline with [method]. */
+    fun startMarking(method: MarkingMethod) {
+        _uiState.update { it.copy(method = method, step = RegisterPlotStep.TRACE) }
+    }
+
+    /**
+     * Carries on with the map when the GPS is not enough (no signal, or the producer prefers it).
+     * The corners marked so far are kept.
+     */
+    fun switchToMapTrace() {
+        _uiState.update { it.copy(method = MarkingMethod.MAP_TRACE) }
+    }
+
+    // ---- Step 2: mark the outline
 
     /**
      * Adds a corner. It is slipped into the outline where it keeps the edges from crossing (see
@@ -102,7 +118,7 @@ class RegisterPlotViewModel @Inject constructor(
         }
     }
 
-    // ---- Step 2: details
+    // ---- Step 3: details
 
     fun setName(value: String) {
         _uiState.update { it.copy(name = value, saveFailure = null) }
@@ -154,7 +170,8 @@ class RegisterPlotViewModel @Inject constructor(
      */
     fun goBack(): Boolean {
         val previous = when (_uiState.value.step) {
-            RegisterPlotStep.TRACE -> return false
+            RegisterPlotStep.METHOD -> return false
+            RegisterPlotStep.TRACE -> RegisterPlotStep.METHOD
             RegisterPlotStep.DETAILS -> RegisterPlotStep.TRACE
             RegisterPlotStep.REVIEW -> RegisterPlotStep.DETAILS
         }

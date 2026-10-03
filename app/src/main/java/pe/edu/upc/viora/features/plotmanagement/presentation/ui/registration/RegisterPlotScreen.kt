@@ -19,7 +19,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.MarkingMethod
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
+import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.GpsTrackingViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.RegisterPlotViewModel
 
 /**
@@ -50,17 +52,41 @@ fun RegisterPlotScreen(
         state.savedPlotId?.let(onSaved)
     }
 
+    val locationPermission = rememberLocationPermission()
+
     when (state.step) {
-        RegisterPlotStep.TRACE -> TraceStep(
-            state = state,
-            onAddCorner = viewModel::addCorner,
-            onMoveCorner = viewModel::moveCorner,
-            onUndo = viewModel::undoCorner,
-            onCloseOutline = viewModel::closeOutline,
+        RegisterPlotStep.METHOD -> MethodStep(
+            permission = locationPermission,
+            onStart = viewModel::startMarking,
             onBack = ::back,
             onClose = ::leave,
             modifier = modifier,
         )
+        RegisterPlotStep.TRACE -> if (state.method == MarkingMethod.GPS_WALK) {
+            val gps: GpsTrackingViewModel = hiltViewModel()
+            GpsStep(
+                state = state,
+                reading = gps.reading.collectAsStateWithLifecycle().value,
+                onMarkCorner = viewModel::addCorner,
+                onUndo = viewModel::undoCorner,
+                onCloseOutline = viewModel::closeOutline,
+                onUseMap = viewModel::switchToMapTrace,
+                onBack = ::back,
+                onClose = ::leave,
+                modifier = modifier,
+            )
+        } else {
+            TraceStep(
+                state = state,
+                onAddCorner = viewModel::addCorner,
+                onMoveCorner = viewModel::moveCorner,
+                onUndo = viewModel::undoCorner,
+                onCloseOutline = viewModel::closeOutline,
+                onBack = ::back,
+                onClose = ::leave,
+                modifier = modifier,
+            )
+        }
         RegisterPlotStep.DETAILS -> DetailsStep(
             state = state,
             onNameChange = viewModel::setName,
