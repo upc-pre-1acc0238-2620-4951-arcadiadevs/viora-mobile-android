@@ -136,7 +136,7 @@ class RegisterPlotViewModel @Inject constructor(
         _uiState.update { it.copy(isSaving = true, saveFailure = null) }
         viewModelScope.launch {
             when (val result = registerPlot(newPlot)) {
-                is AppResult.Success -> _uiState.update { it.copy(isSaving = false, isSaved = true) }
+                is AppResult.Success -> _uiState.update { it.copy(isSaving = false, savedPlotId = result.value.id) }
                 is AppResult.Failure -> _uiState.update { it.afterSaveFailure(result.error) }
             }
         }

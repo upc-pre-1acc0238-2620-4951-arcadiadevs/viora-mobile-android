@@ -30,6 +30,7 @@ import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
+import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.CreatePlotRequestDto
@@ -43,6 +44,8 @@ private class FakePlotDao : PlotDao {
 
     override fun observeActive(): Flow<List<PlotEntity>> =
         rows.map { all -> all.filter { it.status == "ACTIVE" }.sortedBy { it.name.lowercase() } }
+
+    override fun observeById(id: String): Flow<PlotEntity?> = rows.map { all -> all.firstOrNull { it.id == id } }
 
     override suspend fun upsertAll(entities: List<PlotEntity>) {
         val byId = rows.value.associateBy { it.id }.toMutableMap()
@@ -181,6 +184,31 @@ class PlotRepositoryImplTest {
         repository.refresh()
 
         assertTrue(repository.observePlots().first().none { it.name == "Beta" })
+    }
+
+    // ---- one plot
+
+    @Test
+    fun `observePlot emits the cached plot`() = runTest {
+        service.next = { Response.success(listOf(dto("1", "Alfa"), dto("2", "Beta"))) }
+        repository.refresh()
+
+        assertEquals("Beta", repository.observePlot(PlotId("2")).first()?.name)
+    }
+
+    @Test
+    fun `observePlot emits null for a plot that is not cached`() = runTest {
+        assertNull(repository.observePlot(PlotId("missing")).first())
+    }
+
+    @Test
+    fun `observePlot still emits a plot that is no longer active`() = runTest {
+        service.next = { Response.success(listOf(dto("1", "Alfa", status = "INACTIVE"))) }
+        repository.refresh()
+
+        val plot = repository.observePlot(PlotId("1")).first()
+
+        assertEquals(false, plot?.isActive)
     }
 
     // ---- register

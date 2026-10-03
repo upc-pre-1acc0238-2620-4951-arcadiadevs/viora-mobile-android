@@ -61,13 +61,20 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotsUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.PlotsViewModel
 
 @Composable
-fun PlotsScreen(onRegisterPlot: () -> Unit, onOpenMap: () -> Unit, modifier: Modifier = Modifier, viewModel: PlotsViewModel = hiltViewModel()) {
+fun PlotsScreen(
+    onRegisterPlot: () -> Unit,
+    onOpenMap: () -> Unit,
+    onOpenPlot: (PlotId) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: PlotsViewModel = hiltViewModel(),
+) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     PlotsScreenContent(
         state = state,
         onRefresh = viewModel::refresh,
         onRegisterPlot = onRegisterPlot,
         onOpenMap = onOpenMap,
+        onOpenPlot = onOpenPlot,
         modifier = modifier,
     )
 }
@@ -80,6 +87,7 @@ fun PlotsScreenContent(
     onRegisterPlot: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenMap: () -> Unit = {},
+    onOpenPlot: (PlotId) -> Unit = {},
 ) {
     val systemBars = WindowInsets.systemBars.asPaddingValues()
     PullToRefreshBox(
@@ -105,7 +113,7 @@ fun PlotsScreenContent(
                 is PlotsUiState.Content -> {
                     item { FilterAndStatus(state) }
                     item { PlotsOverview(plots = state.plots, onExpand = onOpenMap) }
-                    items(state.plots, key = { it.id.value }) { plot -> PlotCard(plot) }
+                    items(state.plots, key = { it.id.value }) { plot -> PlotCard(plot, onClick = { onOpenPlot(plot.id) }) }
                 }
             }
         }

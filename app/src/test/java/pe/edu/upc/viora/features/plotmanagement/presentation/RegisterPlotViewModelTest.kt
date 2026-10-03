@@ -37,6 +37,7 @@ private class RegistrationRepository : PlotRepository {
     var registerResult: AppResult<Plot> = AppResult.Failure(AppError.Offline)
 
     override fun observePlots(): Flow<List<Plot>> = plots
+    override fun observePlot(id: PlotId): Flow<Plot?> = MutableStateFlow(null)
     override fun observeLastRefresh(): Flow<Instant?> = MutableStateFlow(null)
     override suspend fun refresh(): AppResult<Unit> = AppResult.Success(Unit)
     override suspend fun register(newPlot: NewPlot): AppResult<Plot> {
@@ -261,6 +262,7 @@ class RegisterPlotViewModelTest {
         assertEquals(204, sent.frame.treesPerHectare)
         assertEquals(4, sent.outline.corners.size)
         assertTrue(vm.uiState.value.isSaved)
+        assertEquals(PlotId("p"), vm.uiState.value.savedPlotId)
         assertFalse(vm.uiState.value.isSaving)
     }
 
