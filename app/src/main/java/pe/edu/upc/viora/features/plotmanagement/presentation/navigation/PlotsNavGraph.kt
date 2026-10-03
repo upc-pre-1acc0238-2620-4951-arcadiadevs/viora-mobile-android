@@ -10,6 +10,7 @@ import pe.edu.upc.viora.core.navigation.PlotsRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotDetailScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotsMapScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotsScreen
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.EditPlotScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.RegisterPlotScreen
 
 /** The plot registration wizard. It hides the tab bar because it is not a tab root. */
@@ -26,6 +27,10 @@ data object PlotsMapRoute
  */
 @Serializable
 data class PlotDetailRoute(val plotId: String, val justSaved: Boolean = false)
+
+/** The form that edits a plot's name, variety and planting frame. It hides the tab bar. */
+@Serializable
+data class EditPlotRoute(val plotId: String)
 
 /** The "Lotes" tab: the list, the registration wizard reached from it and each plot's detail. */
 fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
@@ -53,6 +58,9 @@ fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
         }
         composable<PlotDetailRoute> {
             PlotDetailScreen(onBack = { navController.popBackStack() })
+        }
+        composable<EditPlotRoute> {
+            EditPlotScreen(onBack = { navController.popBackStack() })
         }
     }
 }

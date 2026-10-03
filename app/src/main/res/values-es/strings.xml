@@ -85,6 +85,7 @@
     <string name="details_between_rows">Entre filas</string>
     <string name="details_between_trees">Entre árboles</string>
     <string name="details_meters_value">%1$s m</string>
+    <string name="details_meters_unit">m</string>
     <string name="details_decrease">Disminuir</string>
     <string name="details_increase">Aumentar</string>
     <string name="details_density_caption">árboles por ha · calculado</string>
@@ -165,4 +166,19 @@
     <string name="discard_body">Perderás las esquinas que marcaste y los datos que escribiste.</string>
     <string name="discard_keep">Seguir editando</string>
     <string name="discard_confirm">Descartar</string>
+
+    <!-- Editar y archivar lote (P27, P28, P29) -->
+    <string name="edit_header_title">Editar lote</string>
+    <string name="edit_title_lead">Datos del</string>
+    <string name="edit_title_emphasis">lote.</string>
+    <string name="edit_name_label">Nombre</string>
+    <string name="edit_variety_label">Variedad</string>
+    <string name="edit_frame_label">Marco de plantación</string>
+    <string name="edit_density_caption">árboles/ha · ≈ %1$s en el lote</string>
+    <string name="edit_density_not_viable">árboles/ha · no es viable</string>
+    <string name="edit_frame_error">En olivar tradicional usa 5 × 5 m o más (hasta %1$d/ha).</string>
+    <string name="edit_frame_required">Escribe las dos distancias en metros.</string>
+    <string name="edit_area_label">Superficie · desde el contorno</string>
+    <string name="edit_save">Guardar cambios</string>
+    <string name="edit_error_outdated">Este lote cambió en otro dispositivo. Cargamos sus datos más recientes: cierra este formulario y ábrelo de nuevo.</string>
 </resources>

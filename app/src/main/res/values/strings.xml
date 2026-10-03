@@ -83,6 +83,7 @@
     <string name="details_between_rows">Between rows</string>
     <string name="details_between_trees">Between trees</string>
     <string name="details_meters_value">%1$s m</string>
+    <string name="details_meters_unit">m</string>
     <string name="details_decrease">Decrease</string>
     <string name="details_increase">Increase</string>
     <string name="details_density_caption">trees per ha · calculated</string>
@@ -163,4 +164,19 @@
     <string name="discard_body">You will lose the corners you marked and the data you typed.</string>
     <string name="discard_keep">Keep editing</string>
     <string name="discard_confirm">Discard</string>
+
+    <!-- Plot edit and archive (P27, P28, P29) -->
+    <string name="edit_header_title">Edit plot</string>
+    <string name="edit_title_lead">Plot</string>
+    <string name="edit_title_emphasis">data.</string>
+    <string name="edit_name_label">Name</string>
+    <string name="edit_variety_label">Variety</string>
+    <string name="edit_frame_label">Planting frame</string>
+    <string name="edit_density_caption">trees/ha · ≈ %1$s in the plot</string>
+    <string name="edit_density_not_viable">trees/ha · not viable</string>
+    <string name="edit_frame_error">In traditional olive groves use 5 × 5 m or more (up to %1$d/ha).</string>
+    <string name="edit_frame_required">Enter both distances in meters.</string>
+    <string name="edit_area_label">Area · from the outline</string>
+    <string name="edit_save">Save changes</string>
+    <string name="edit_error_outdated">This plot changed on another device. We loaded its latest data: close this form and open it again.</string>
 </resources>
