@@ -133,7 +133,7 @@ fun TraceStep(
 }
 
 @Composable
-private fun MapHintChip() {
+internal fun MapHintChip(text: String = stringResource(R.string.trace_map_hint)) {
     Row(
         modifier = Modifier
             .clip(CircleShape)
@@ -143,13 +143,13 @@ private fun MapHintChip() {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Box(Modifier.size(7.dp).clip(CircleShape).background(Harvest300))
-        Text(text = stringResource(R.string.trace_map_hint), style = MaterialTheme.typography.labelMedium, color = Neutral900)
+        Text(text = text, style = MaterialTheme.typography.labelMedium, color = Neutral900)
     }
 }
 
 /** A fixed aiming mark in the middle of the visible map; drawn, since it is a map overlay, not an asset. */
 @Composable
-private fun Crosshair(modifier: Modifier = Modifier) {
+internal fun Crosshair(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier.size(52.dp)) {
         val center = Offset(size.width / 2, size.height / 2)
         val ring = 14.dp.toPx()

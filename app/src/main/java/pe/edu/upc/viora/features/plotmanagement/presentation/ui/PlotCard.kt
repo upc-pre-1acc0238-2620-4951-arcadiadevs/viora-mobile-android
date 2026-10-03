@@ -25,17 +25,21 @@ import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
+import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 
-/** A plot in the list: silhouette, name and summary. Tapping it opens the plot's detail. */
+/**
+ * A plot in the list: silhouette, name and summary, and optionally a [badge] under them. Tapping it
+ * opens the plot's detail; with a null [onClick] the card only shows the plot.
+ */
 @Composable
-fun PlotCard(plot: Plot, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun PlotCard(plot: Plot, onClick: (() -> Unit)?, modifier: Modifier = Modifier, badge: String? = null) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
             .background(Neutral0)
-            .clickable(role = Role.Button, onClick = onClick)
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
             .padding(start = 10.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -56,8 +60,24 @@ fun PlotCard(plot: Plot, onClick: () -> Unit, modifier: Modifier = Modifier) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            if (badge != null) {
+                Text(
+                    text = badge,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Neutral900,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .clip(RoundedCornerShape(percent = 50))
+                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                )
+            }
         }
-        Icon(painter = painterResource(R.drawable.ic_chevron_right), contentDescription = null, tint = Neutral600)
+        if (onClick != null) {
+            Icon(painter = painterResource(R.drawable.ic_chevron_right), contentDescription = null, tint = Neutral600)
+        }
     }
 }
 

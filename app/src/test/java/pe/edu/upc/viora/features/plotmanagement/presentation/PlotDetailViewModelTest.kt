@@ -20,12 +20,16 @@ import org.junit.Before
 import org.junit.Test
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.ArchivePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotChanges
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotDetailUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.PlotDetailViewModel
 
@@ -34,9 +38,20 @@ private class CachedPlotsRepository : PlotRepository {
 
     override fun observePlots(): Flow<List<Plot>> = plots
     override fun observePlot(id: PlotId): Flow<Plot?> = plots.map { all -> all.firstOrNull { it.id == id } }
+    override fun observeArchivedPlots(): Flow<List<Plot>> = MutableStateFlow(emptyList())
     override fun observeLastRefresh(): Flow<Instant?> = MutableStateFlow(null)
     override suspend fun refresh(): AppResult<Unit> = AppResult.Success(Unit)
+    override suspend fun refreshArchived(): AppResult<Unit> = AppResult.Success(Unit)
     override suspend fun register(newPlot: NewPlot): AppResult<Plot> = AppResult.Failure(AppError.Offline)
+    override suspend fun update(id: PlotId, changes: PlotChanges): AppResult<Plot> = AppResult.Failure(AppError.Offline)
+    var archiveResult: AppResult<Unit> = AppResult.Success(Unit)
+    val archived = mutableListOf<PlotId>()
+
+    override suspend fun archive(id: PlotId): AppResult<Unit> {
+        archived += id
+        return archiveResult
+    }
+    override suspend fun restore(id: PlotId): AppResult<Plot> = AppResult.Failure(AppError.Offline)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -71,6 +86,8 @@ class PlotDetailViewModelTest {
     private fun viewModel(plotId: String, justSaved: Boolean = false) = PlotDetailViewModel(
         savedStateHandle = SavedStateHandle(mapOf("plotId" to plotId, "justSaved" to justSaved)),
         observePlot = ObservePlotUseCase(repository),
+        observePlots = ObservePlotsUseCase(repository),
+        archivePlot = ArchivePlotUseCase(repository),
     )
 
     @Test
@@ -115,5 +132,43 @@ class PlotDetailViewModelTest {
         advanceTimeBy(3_001)
 
         assertEquals(false, (vm.uiState.value as PlotDetailUiState.Content).showSavedNotice)
+    }
+
+    @Test
+    fun `archiving asks the repository and finishes as Done`() = runTest {
+        repository.plots.value = listOf(plot("p1"))
+        val vm = viewModel("p1")
+
+        assertEquals(ArchiveState.Idle, vm.archiveState.value)
+        vm.archive()
+
+        assertEquals(listOf(PlotId("p1")), repository.archived)
+        assertEquals(ArchiveState.Done, vm.archiveState.value)
+    }
+
+    @Test
+    fun `a failed archive can be dismissed and tried again`() = runTest {
+        repository.plots.value = listOf(plot("p1"))
+        repository.archiveResult = AppResult.Failure(AppError.Offline)
+        val vm = viewModel("p1")
+
+        vm.archive()
+        assertEquals(ArchiveState.Failed, vm.archiveState.value)
+
+        vm.dismissArchiveFailure()
+        assertEquals(ArchiveState.Idle, vm.archiveState.value)
+
+        repository.archiveResult = AppResult.Success(Unit)
+        vm.archive()
+        assertEquals(ArchiveState.Done, vm.archiveState.value)
+    }
+
+    @Test
+    fun `reports the hectares of all the active plots to show what archiving frees`() = runTest {
+        repository.plots.value = listOf(plot("p1").copy(areaHectares = 1.5), plot("p2").copy(areaHectares = 2.5))
+        val vm = viewModel("p2")
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.uiState.collect {} }
+
+        assertEquals(4.0, (vm.uiState.value as PlotDetailUiState.Content).activeHectares, 0.0)
     }
 }
