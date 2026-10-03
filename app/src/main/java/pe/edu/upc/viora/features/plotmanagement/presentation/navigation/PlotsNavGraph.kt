@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.core.navigation.PlotsGraph
 import pe.edu.upc.viora.core.navigation.PlotsRoute
@@ -61,8 +62,12 @@ fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
                 },
             )
         }
-        composable<PlotDetailRoute> {
-            PlotDetailScreen(onBack = { navController.popBackStack() })
+        composable<PlotDetailRoute> { entry ->
+            PlotDetailScreen(
+                onBack = { navController.popBackStack() },
+                onEdit = { navController.navigate(EditPlotRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
+                onAdjustOutline = { navController.navigate(AdjustOutlineRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
+            )
         }
         composable<EditPlotRoute> {
             EditPlotScreen(onBack = { navController.popBackStack() })

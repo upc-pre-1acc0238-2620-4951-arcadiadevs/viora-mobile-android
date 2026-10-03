@@ -166,6 +166,16 @@
     <string name="discard_confirm">Discard</string>
 
     <!-- Plot edit and archive (P27, P28, P29) -->
+    <string name="plot_menu_more">More options</string>
+    <string name="plot_options_subtitle">%1$s · %2$s ha · %3$s trees</string>
+    <string name="plot_menu_edit">Edit plot data</string>
+    <string name="plot_menu_edit_hint">Name, variety and planting frame</string>
+    <string name="plot_menu_outline">Adjust the outline</string>
+    <string name="plot_menu_outline_hint">Move the corners and I recalculate the area</string>
+    <string name="plot_menu_sensors">Plot sensors</string>
+    <string name="plot_menu_sensors_hint">Virtual climate and soil nodes</string>
+    <string name="plot_menu_archive">Archive plot</string>
+    <string name="plot_menu_archive_hint">Keeps its history · frees %1$s ha</string>
     <string name="edit_header_title">Edit plot</string>
     <string name="edit_title_lead">Plot</string>
     <string name="edit_title_emphasis">data.</string>
@@ -179,6 +189,13 @@
     <string name="edit_area_label">Area · from the outline</string>
     <string name="edit_save">Save changes</string>
     <string name="edit_error_outdated">This plot changed on another device. We loaded its latest data: close this form and open it again.</string>
+    <string name="archive_title_lead">Archive</string>
+    <string name="archive_title_name">%1$s?</string>
+    <string name="archive_body">It leaves your active plots, but all its history is kept.</string>
+    <string name="archive_usage_caption">ha in your active plots</string>
+    <string name="archive_confirm">Archive plot</string>
+    <string name="archive_cancel">Cancel</string>
+    <string name="archive_failed">We could not archive the plot.</string>
     <string name="adjust_title">Adjust the outline</string>
     <string name="adjust_hint">Drag a corner to fix it</string>
     <string name="adjust_corners_label">corners</string>

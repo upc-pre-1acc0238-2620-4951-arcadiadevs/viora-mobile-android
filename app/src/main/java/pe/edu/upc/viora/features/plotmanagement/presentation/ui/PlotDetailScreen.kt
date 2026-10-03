@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +23,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -71,6 +70,7 @@ import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotDetailUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.PlotDetailViewModel
@@ -90,15 +90,38 @@ private val LoweredSheetContent = 112.dp
 @Composable
 fun PlotDetailScreen(
     onBack: () -> Unit,
+    onEdit: () -> Unit,
+    onAdjustOutline: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: PlotDetailViewModel = hiltViewModel(),
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
-    PlotDetailContent(state = state, onBack = onBack, modifier = modifier)
+    val archiveState = viewModel.archiveState.collectAsStateWithLifecycle().value
+    // Archived: the plot is gone from the active list, so leave its detail.
+    LaunchedEffect(archiveState) { if (archiveState == ArchiveState.Done) onBack() }
+    PlotDetailContent(
+        state = state,
+        onBack = onBack,
+        onEdit = onEdit,
+        onAdjustOutline = onAdjustOutline,
+        archiveState = archiveState,
+        onArchive = viewModel::archive,
+        onDismissArchiveFailure = viewModel::dismissArchiveFailure,
+        modifier = modifier,
+    )
 }
 
 @Composable
-fun PlotDetailContent(state: PlotDetailUiState, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun PlotDetailContent(
+    state: PlotDetailUiState,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    onEdit: () -> Unit = {},
+    onAdjustOutline: () -> Unit = {},
+    archiveState: ArchiveState = ArchiveState.Idle,
+    onArchive: () -> Unit = {},
+    onDismissArchiveFailure: () -> Unit = {},
+) {
     when (state) {
         PlotDetailUiState.Loading -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
@@ -108,13 +131,32 @@ fun PlotDetailContent(state: PlotDetailUiState, onBack: () -> Unit, modifier: Mo
             plot = state.plot,
             showSavedNotice = state.showSavedNotice,
             onBack = onBack,
+            onEdit = onEdit,
+            onAdjustOutline = onAdjustOutline,
+            activeHectares = state.activeHectares,
+            archiveState = archiveState,
+            onArchive = onArchive,
+            onDismissArchiveFailure = onDismissArchiveFailure,
             modifier = modifier,
         )
     }
 }
 
 @Composable
-private fun PlotDetailBody(plot: Plot, showSavedNotice: Boolean, onBack: () -> Unit, modifier: Modifier = Modifier) {
+private fun PlotDetailBody(
+    plot: Plot,
+    showSavedNotice: Boolean,
+    onBack: () -> Unit,
+    onEdit: () -> Unit,
+    onAdjustOutline: () -> Unit,
+    activeHectares: Double,
+    archiveState: ArchiveState,
+    onArchive: () -> Unit,
+    onDismissArchiveFailure: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var optionsOpen by rememberSaveable { mutableStateOf(false) }
+    var confirmingArchive by rememberSaveable { mutableStateOf(false) }
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val openSheetHeight = maxHeight - OpenSheetTop
         // The lowered sheet leaves its content above the floating tab bar, which stays on screen.
@@ -139,7 +181,7 @@ private fun PlotDetailBody(plot: Plot, showSavedNotice: Boolean, onBack: () -> U
                     .pointerInput(Unit) { detectTapGestures(onDoubleTap = { exploring = true }) },
             )
         }
-        TopBar(showSavedNotice = showSavedNotice, onBack = onBack)
+        TopBar(showSavedNotice = showSavedNotice, onBack = onBack, onMore = { optionsOpen = true })
         DetailSheet(
             plot = plot,
             exploring = exploring,
@@ -147,12 +189,45 @@ private fun PlotDetailBody(plot: Plot, showSavedNotice: Boolean, onBack: () -> U
             sheetHeight = if (exploring) loweredSheetHeight else openSheetHeight,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
+        if (optionsOpen) {
+            PlotOptionsSheet(
+                plot = plot,
+                onEdit = {
+                    optionsOpen = false
+                    onEdit()
+                },
+                onAdjustOutline = {
+                    optionsOpen = false
+                    onAdjustOutline()
+                },
+                // Sensors are a later feature: the row is in the design, so it only closes the sheet for now.
+                onSensors = { optionsOpen = false },
+                onArchive = {
+                    optionsOpen = false
+                    confirmingArchive = true
+                },
+                onDismiss = { optionsOpen = false },
+            )
+        }
+        if (confirmingArchive) {
+            ArchivePlotDialog(
+                plotName = plot.name,
+                activeHectaresBefore = activeHectares,
+                activeHectaresAfter = (activeHectares - plot.areaHectares).coerceAtLeast(0.0),
+                state = archiveState,
+                onConfirm = onArchive,
+                onDismiss = {
+                    confirmingArchive = false
+                    onDismissArchiveFailure()
+                },
+            )
+        }
     }
 }
 
 /** Back button on the left and, for a moment after registering, the "plot saved" notice centred. */
 @Composable
-private fun TopBar(showSavedNotice: Boolean, onBack: () -> Unit) {
+private fun TopBar(showSavedNotice: Boolean, onBack: () -> Unit, onMore: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 24.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -163,8 +238,11 @@ private fun TopBar(showSavedNotice: Boolean, onBack: () -> Unit) {
             onClick = onBack,
         )
         SavedNoticeSlot(visible = showSavedNotice, modifier = Modifier.weight(1f))
-        // Mirrors the back button so the notice stays centred.
-        Spacer(Modifier.width(48.dp))
+        CircleIconButton(
+            icon = R.drawable.ic_more_vert,
+            contentDescription = stringResource(R.string.plot_menu_more),
+            onClick = onMore,
+        )
     }
 }
 

@@ -168,6 +168,16 @@
     <string name="discard_confirm">Descartar</string>
 
     <!-- Editar y archivar lote (P27, P28, P29) -->
+    <string name="plot_menu_more">Más opciones</string>
+    <string name="plot_options_subtitle">%1$s · %2$s ha · %3$s árboles</string>
+    <string name="plot_menu_edit">Editar datos del lote</string>
+    <string name="plot_menu_edit_hint">Nombre, variedad y marco de plantación</string>
+    <string name="plot_menu_outline">Ajustar el contorno</string>
+    <string name="plot_menu_outline_hint">Mueve las esquinas y recalculo el área</string>
+    <string name="plot_menu_sensors">Sensores del lote</string>
+    <string name="plot_menu_sensors_hint">Nodos virtuales de clima y suelo</string>
+    <string name="plot_menu_archive">Archivar lote</string>
+    <string name="plot_menu_archive_hint">Conserva su historial · libera %1$s ha</string>
     <string name="edit_header_title">Editar lote</string>
     <string name="edit_title_lead">Datos del</string>
     <string name="edit_title_emphasis">lote.</string>
@@ -181,6 +191,13 @@
     <string name="edit_area_label">Superficie · desde el contorno</string>
     <string name="edit_save">Guardar cambios</string>
     <string name="edit_error_outdated">Este lote cambió en otro dispositivo. Cargamos sus datos más recientes: cierra este formulario y ábrelo de nuevo.</string>
+    <string name="archive_title_lead">¿Archivar</string>
+    <string name="archive_title_name">%1$s?</string>
+    <string name="archive_body">Sale de tus lotes activos, pero todo su historial se conserva.</string>
+    <string name="archive_usage_caption">ha en tus lotes activos</string>
+    <string name="archive_confirm">Archivar lote</string>
+    <string name="archive_cancel">Cancelar</string>
+    <string name="archive_failed">No pudimos archivar el lote.</string>
     <string name="adjust_title">Ajusta el contorno</string>
     <string name="adjust_hint">Arrastra una esquina para corregirla</string>
     <string name="adjust_corners_label">esquinas</string>

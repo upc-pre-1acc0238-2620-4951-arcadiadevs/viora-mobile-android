@@ -6,19 +6,27 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.ArchivePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotDetailUiState
 
 @HiltViewModel
 class PlotDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     observePlot: ObservePlotUseCase,
+    observePlots: ObservePlotsUseCase,
+    private val archivePlot: ArchivePlotUseCase,
 ) : ViewModel() {
 
     // Navigation stores each property of PlotDetailRoute in the saved state under its own name.
@@ -31,10 +39,34 @@ class PlotDetailViewModel @Inject constructor(
 
     val uiState: StateFlow<PlotDetailUiState> = combine(
         observePlot(plotId),
+        observePlots(),
         savedNoticeVisible,
-    ) { plot, noticeVisible ->
-        if (plot == null) PlotDetailUiState.NotFound else PlotDetailUiState.Content(plot, noticeVisible)
+    ) { plot, activePlots, noticeVisible ->
+        if (plot == null) {
+            PlotDetailUiState.NotFound
+        } else {
+            PlotDetailUiState.Content(plot, noticeVisible, activeHectares = activePlots.sumOf { it.areaHectares })
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), PlotDetailUiState.Loading)
+
+    private val _archiveState = MutableStateFlow(ArchiveState.Idle)
+    val archiveState: StateFlow<ArchiveState> = _archiveState.asStateFlow()
+
+    /** Archives this plot. When it works [archiveState] becomes [ArchiveState.Done] and the screen leaves. */
+    fun archive() {
+        if (_archiveState.value == ArchiveState.Working) return
+        _archiveState.value = ArchiveState.Working
+        viewModelScope.launch {
+            _archiveState.value = when (archivePlot(plotId)) {
+                is AppResult.Success -> ArchiveState.Done
+                is AppResult.Failure -> ArchiveState.Failed
+            }
+        }
+    }
+
+    fun dismissArchiveFailure() {
+        if (_archiveState.value == ArchiveState.Failed) _archiveState.value = ArchiveState.Idle
+    }
 
     init {
         if (savedNoticeVisible.value) {
