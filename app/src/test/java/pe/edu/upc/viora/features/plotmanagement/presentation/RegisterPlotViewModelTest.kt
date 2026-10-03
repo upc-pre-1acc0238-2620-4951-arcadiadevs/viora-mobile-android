@@ -262,6 +262,7 @@ class RegisterPlotViewModelTest {
         assertEquals(204, sent.frame.treesPerHectare)
         assertEquals(4, sent.outline.corners.size)
         assertTrue(vm.uiState.value.isSaved)
+        assertEquals(PlotId("p"), vm.uiState.value.savedPlotId)
         assertFalse(vm.uiState.value.isSaving)
     }
 

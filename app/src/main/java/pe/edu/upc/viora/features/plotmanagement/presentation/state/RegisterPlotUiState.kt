@@ -4,6 +4,7 @@ import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
+import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
 
@@ -44,8 +45,11 @@ data class RegisterPlotUiState(
     val showDetailErrors: Boolean = false,
     val isSaving: Boolean = false,
     val saveFailure: SaveFailure? = null,
-    val isSaved: Boolean = false,
+    /** The id of the plot once it has been saved, so the screen can open its detail. */
+    val savedPlotId: PlotId? = null,
 ) {
+    val isSaved: Boolean get() = savedPlotId != null
+
     val corners: List<GeoPoint> get() = outline.map { it.point }
 
     val areaHectares: Double get() = PlotOutline.areaHectares(corners)
