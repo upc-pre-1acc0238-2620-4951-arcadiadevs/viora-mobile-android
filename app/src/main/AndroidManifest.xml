@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Walking the outline of a plot needs the precise location; Android 12+ asks for both together. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Not required: without a GPS the producer can still trace the plot on the map. -->
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 
     <application
         android:name=".VioraApplication"

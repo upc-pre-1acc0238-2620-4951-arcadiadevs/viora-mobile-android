@@ -111,6 +111,7 @@ dependencies {
     // Maps
     implementation(libs.mapbox.maps)
     implementation(libs.mapbox.maps.compose)
+    implementation(libs.play.services.location)
 
     // Images
     implementation(libs.coil.compose)
