@@ -27,6 +27,10 @@
     <string name="plots_title_lead">Your</string>
     <string name="plots_title_emphasis">plots.</string>
     <string name="plots_filter_active">Active · %1$d</string>
+    <string name="plots_filter_archived">Archived · %1$d</string>
+    <string name="plots_archived_badge">Archived · history kept</string>
+    <string name="plots_restore">Restore plot</string>
+    <string name="plots_restore_failed">We could not restore the plot. %1$s</string>
     <string name="plots_summary">%1$s · %2$s ha · %3$s</string>
     <plurals name="plots_trees_count">
         <item quantity="one">%1$s tree</item>
@@ -83,6 +87,7 @@
     <string name="details_between_rows">Between rows</string>
     <string name="details_between_trees">Between trees</string>
     <string name="details_meters_value">%1$s m</string>
+    <string name="details_meters_unit">m</string>
     <string name="details_decrease">Decrease</string>
     <string name="details_increase">Increase</string>
     <string name="details_density_caption">trees per ha · calculated</string>
@@ -163,4 +168,47 @@
     <string name="discard_body">You will lose the corners you marked and the data you typed.</string>
     <string name="discard_keep">Keep editing</string>
     <string name="discard_confirm">Discard</string>
+
+    <!-- Plot edit and archive (P27, P28, P29) -->
+    <string name="plot_menu_more">More options</string>
+    <string name="plot_options_subtitle">%1$s · %2$s ha · %3$s trees</string>
+    <string name="plot_menu_edit">Edit plot data</string>
+    <string name="plot_menu_edit_hint">Name, variety and planting frame</string>
+    <string name="plot_menu_outline">Adjust the outline</string>
+    <string name="plot_menu_outline_hint">Move the corners and I recalculate the area</string>
+    <string name="plot_menu_sensors">Plot sensors</string>
+    <string name="plot_menu_sensors_hint">Virtual climate and soil nodes</string>
+    <string name="plot_menu_archive">Archive plot</string>
+    <string name="plot_menu_archive_hint">Keeps its history · frees %1$s ha</string>
+    <string name="edit_header_title">Edit plot</string>
+    <string name="edit_title_lead">Plot</string>
+    <string name="edit_title_emphasis">data.</string>
+    <string name="edit_name_label">Name</string>
+    <string name="edit_variety_label">Variety</string>
+    <string name="edit_frame_label">Planting frame</string>
+    <string name="edit_density_caption">trees/ha · ≈ %1$s in the plot</string>
+    <string name="edit_density_not_viable">trees/ha · not viable</string>
+    <string name="edit_frame_error">In traditional olive groves use 5 × 5 m or more (up to %1$d/ha).</string>
+    <string name="edit_frame_required">Enter both distances in meters.</string>
+    <string name="edit_area_label">Area · from the outline</string>
+    <string name="edit_save">Save changes</string>
+    <string name="edit_error_outdated">This plot changed on another device. We loaded its latest data: close this form and open it again.</string>
+    <string name="archive_title_lead">Archive</string>
+    <string name="archive_title_name">%1$s?</string>
+    <string name="archive_body">It leaves your active plots, but all its history is kept.</string>
+    <string name="archive_usage_caption">ha in your active plots</string>
+    <string name="archive_confirm">Archive plot</string>
+    <string name="archive_cancel">Cancel</string>
+    <string name="archive_failed">We could not archive the plot.</string>
+    <string name="adjust_title">Adjust the outline</string>
+    <string name="adjust_hint">Drag a corner to fix it</string>
+    <string name="adjust_corners_label">corners</string>
+    <plurals name="adjust_corners_moved">
+        <item quantity="one">corners · %1$d moved</item>
+        <item quantity="other">corners · %1$d moved</item>
+    </plurals>
+    <string name="adjust_area_before">before %1$s ha</string>
+    <string name="adjust_add_corner">Add corner</string>
+    <string name="adjust_save">Save outline</string>
+    <string name="adjust_error_outdated">This plot changed on another device. Close this screen and open it again.</string>
 </resources>

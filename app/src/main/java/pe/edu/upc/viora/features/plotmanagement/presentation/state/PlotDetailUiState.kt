@@ -15,5 +15,13 @@ sealed interface PlotDetailUiState {
      * The plot to show. [showSavedNotice] is true for a few seconds right after the plot was
      * registered, to confirm that it was saved.
      */
-    data class Content(val plot: Plot, val showSavedNotice: Boolean) : PlotDetailUiState
+    data class Content(
+        val plot: Plot,
+        val showSavedNotice: Boolean,
+        /** Hectares of all the producer's active plots, used to show what archiving this one frees. */
+        val activeHectares: Double = plot.areaHectares,
+    ) : PlotDetailUiState
 }
+
+/** Progress of archiving the plot being shown. */
+enum class ArchiveState { Idle, Working, Failed, Done }

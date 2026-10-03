@@ -44,6 +44,8 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
+import pe.edu.upc.viora.core.designsystem.theme.Neutral0
+import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
@@ -57,6 +59,7 @@ import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotsFilter
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotsUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.PlotsViewModel
 
@@ -75,6 +78,8 @@ fun PlotsScreen(
         onRegisterPlot = onRegisterPlot,
         onOpenMap = onOpenMap,
         onOpenPlot = onOpenPlot,
+        onSelectFilter = viewModel::selectFilter,
+        onRestore = viewModel::restore,
         modifier = modifier,
     )
 }
@@ -88,6 +93,8 @@ fun PlotsScreenContent(
     modifier: Modifier = Modifier,
     onOpenMap: () -> Unit = {},
     onOpenPlot: (PlotId) -> Unit = {},
+    onSelectFilter: (PlotsFilter) -> Unit = {},
+    onRestore: (PlotId) -> Unit = {},
 ) {
     val systemBars = WindowInsets.systemBars.asPaddingValues()
     PullToRefreshBox(
@@ -111,9 +118,25 @@ fun PlotsScreenContent(
                 PlotsUiState.Empty -> item { EmptyState() }
                 is PlotsUiState.Error -> item { ErrorState(error = state.error, onRetry = onRefresh) }
                 is PlotsUiState.Content -> {
-                    item { FilterAndStatus(state) }
-                    item { PlotsOverview(plots = state.plots, onExpand = onOpenMap) }
-                    items(state.plots, key = { it.id.value }) { plot -> PlotCard(plot, onClick = { onOpenPlot(plot.id) }) }
+                    item { FilterAndStatus(state, onSelectFilter) }
+                    when {
+                        state.filter == PlotsFilter.ARCHIVED -> {
+                            state.restoreError?.let { error -> item { RestoreError(error) } }
+                            items(state.archivedPlots, key = { it.id.value }) { plot ->
+                                ArchivedPlot(
+                                    plot = plot,
+                                    isRestoring = state.restoringId == plot.id,
+                                    canRestore = state.restoringId == null,
+                                    onRestore = { onRestore(plot.id) },
+                                )
+                            }
+                        }
+                        state.plots.isEmpty() -> item { EmptyState() }
+                        else -> {
+                            item { PlotsOverview(plots = state.plots, onExpand = onOpenMap) }
+                            items(state.plots, key = { it.id.value }) { plot -> PlotCard(plot, onClick = { onOpenPlot(plot.id) }) }
+                        }
+                    }
                 }
             }
         }
@@ -163,24 +186,74 @@ private fun RegisterPlotButton(onClick: () -> Unit) {
 }
 
 @Composable
-private fun FilterAndStatus(state: PlotsUiState.Content) {
+private fun FilterAndStatus(state: PlotsUiState.Content, onSelectFilter: (PlotsFilter) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs), modifier = Modifier.padding(bottom = Spacing.xs)) {
-        ActiveFilterChip(count = state.plots.size)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(
+                text = stringResource(R.string.plots_filter_active, state.plots.size),
+                selected = state.filter == PlotsFilter.ACTIVE,
+                onClick = { onSelectFilter(PlotsFilter.ACTIVE) },
+            )
+            FilterChip(
+                text = stringResource(R.string.plots_filter_archived, state.archivedPlots.size),
+                selected = state.filter == PlotsFilter.ARCHIVED,
+                // With nothing archived there is nothing to show, as in the design (Archivados · 0).
+                onClick = { if (state.archivedPlots.isNotEmpty()) onSelectFilter(PlotsFilter.ARCHIVED) },
+            )
+        }
         state.refreshError?.let { OfflineBanner(it) }
         state.lastRefresh?.let { LastRefreshLabel(it) }
     }
 }
 
+/** One of the two filters of the list: dark when selected, white when not (Figma P20). */
 @Composable
-private fun ActiveFilterChip(count: Int) {
+private fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit) {
     Text(
-        text = stringResource(R.string.plots_filter_active, count),
+        text = text,
         style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, lineHeight = 18.sp),
-        color = Neutral50,
+        color = if (selected) Neutral50 else Neutral900,
         modifier = Modifier
             .clip(RoundedCornerShape(percent = 50))
-            .background(Green900)
+            .background(if (selected) Green900 else Neutral0)
+            .clickable(role = Role.Tab, onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 8.dp),
+    )
+}
+
+/** An archived plot (Figma P20 "Archivados"): the card with its badge and the button that restores it. */
+@Composable
+private fun ArchivedPlot(plot: Plot, isRestoring: Boolean, canRestore: Boolean, onRestore: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        PlotCard(plot = plot, onClick = null, badge = stringResource(R.string.plots_archived_badge))
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(percent = 50))
+                .background(if (canRestore) Green900 else Neutral300)
+                .clickable(enabled = canRestore, role = Role.Button, onClick = onRestore)
+                .padding(horizontal = 20.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (isRestoring) {
+                CircularProgressIndicator(color = Neutral50, strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
+            }
+            Text(text = stringResource(R.string.plots_restore), style = MaterialTheme.typography.labelLarge, color = Neutral50)
+        }
+    }
+}
+
+@Composable
+private fun RestoreError(error: AppError) {
+    Text(
+        text = stringResource(R.string.plots_restore_failed, stringResource(error.messageRes())),
+        style = MaterialTheme.typography.bodyMedium,
+        color = Terracotta700,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Terracotta100)
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
     )
 }
 
