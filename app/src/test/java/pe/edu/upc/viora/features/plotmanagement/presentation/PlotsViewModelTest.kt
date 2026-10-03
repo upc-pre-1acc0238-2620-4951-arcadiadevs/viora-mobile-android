@@ -23,6 +23,7 @@ import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlots
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RefreshPlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotChanges
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
@@ -39,6 +40,11 @@ private class FakePlotRepository : PlotRepository {
     override fun observePlot(id: PlotId): Flow<Plot?> = MutableStateFlow(null)
     override fun observeLastRefresh(): Flow<Instant?> = lastRefresh
     override suspend fun register(newPlot: NewPlot): AppResult<Plot> = AppResult.Failure(AppError.Offline)
+    override fun observeArchivedPlots(): Flow<List<Plot>> = MutableStateFlow(emptyList())
+    override suspend fun refreshArchived(): AppResult<Unit> = AppResult.Success(Unit)
+    override suspend fun update(id: PlotId, changes: PlotChanges): AppResult<Plot> = AppResult.Failure(AppError.Offline)
+    override suspend fun archive(id: PlotId): AppResult<Unit> = AppResult.Failure(AppError.Offline)
+    override suspend fun restore(id: PlotId): AppResult<Plot> = AppResult.Failure(AppError.Offline)
 
     override suspend fun refresh(): AppResult<Unit> {
         refreshCalls++
