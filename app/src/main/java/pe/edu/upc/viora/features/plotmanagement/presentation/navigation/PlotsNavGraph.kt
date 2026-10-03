@@ -7,6 +7,7 @@ import androidx.navigation.compose.navigation
 import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.core.navigation.PlotsGraph
 import pe.edu.upc.viora.core.navigation.PlotsRoute
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotDetailScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotsMapScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotsScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.RegisterPlotScreen
@@ -19,20 +20,39 @@ data object RegisterPlotRoute
 @Serializable
 data object PlotsMapRoute
 
-/** The "Lotes" tab: the list, and the registration wizard reached from it. */
+/**
+ * One plot's detail. [justSaved] is true when it is reached right after registering the plot,
+ * which shows the "plot saved" notice. [plotId] is the plot's UUID.
+ */
+@Serializable
+data class PlotDetailRoute(val plotId: String, val justSaved: Boolean = false)
+
+/** The "Lotes" tab: the list, the registration wizard reached from it and each plot's detail. */
 fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
     navigation<PlotsGraph>(startDestination = PlotsRoute) {
         composable<PlotsRoute> {
             PlotsScreen(
                 onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
                 onOpenMap = { navController.navigate(PlotsMapRoute) },
+                onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
             )
         }
         composable<PlotsMapRoute> {
             PlotsMapScreen(onBack = { navController.popBackStack() })
         }
         composable<RegisterPlotRoute> {
-            RegisterPlotScreen(onFinished = { navController.popBackStack() })
+            RegisterPlotScreen(
+                onLeave = { navController.popBackStack() },
+                // The wizard is replaced by the detail, so "back" from there returns to the list.
+                onSaved = { id ->
+                    navController.navigate(PlotDetailRoute(plotId = id.value, justSaved = true)) {
+                        popUpTo<RegisterPlotRoute> { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable<PlotDetailRoute> {
+            PlotDetailScreen(onBack = { navController.popBackStack() })
         }
     }
 }
