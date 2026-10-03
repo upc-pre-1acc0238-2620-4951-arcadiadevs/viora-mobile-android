@@ -57,6 +57,7 @@ fun PlotTraceMap(
     outline: List<TracedCorner>,
     onCornerMoved: (id: Int, point: GeoPoint) -> Unit,
     modifier: Modifier = Modifier,
+    panWhileMoving: Boolean = false,
 ) {
     var mapboxMap by remember { mutableStateOf<MapboxMap?>(null) }
     var cameraTick by remember { mutableIntStateOf(0) }
@@ -95,15 +96,16 @@ fun PlotTraceMap(
             attribution = { Attribution(contentPadding = PaddingValues(start = 92.dp, top = 4.dp, end = 4.dp, bottom = bottomInset + 4.dp)) },
         ) {
             // The map is completely still while corners are moved, so their screen positions stay valid.
-            MapEffect(moving) { mapView ->
+            MapEffect(moving, panWhileMoving) { mapView ->
+                val still = moving && !panWhileMoving
                 mapView.gestures.updateSettings {
-                    scrollEnabled = !moving
-                    pinchToZoomEnabled = !moving
-                    rotateEnabled = !moving
-                    pitchEnabled = !moving
-                    doubleTapToZoomInEnabled = !moving
-                    doubleTouchToZoomOutEnabled = !moving
-                    quickZoomEnabled = !moving
+                    scrollEnabled = !still
+                    pinchToZoomEnabled = !still
+                    rotateEnabled = !still
+                    pitchEnabled = !still
+                    doubleTapToZoomInEnabled = !still
+                    doubleTouchToZoomOutEnabled = !still
+                    quickZoomEnabled = !still
                 }
             }
             MapEffect(Unit) { mapView ->

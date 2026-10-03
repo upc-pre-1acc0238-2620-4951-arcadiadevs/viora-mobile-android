@@ -181,4 +181,15 @@
     <string name="edit_area_label">Superficie · desde el contorno</string>
     <string name="edit_save">Guardar cambios</string>
     <string name="edit_error_outdated">Este lote cambió en otro dispositivo. Cargamos sus datos más recientes: cierra este formulario y ábrelo de nuevo.</string>
+    <string name="adjust_title">Ajusta el contorno</string>
+    <string name="adjust_hint">Arrastra una esquina para corregirla</string>
+    <string name="adjust_corners_label">esquinas</string>
+    <plurals name="adjust_corners_moved">
+        <item quantity="one">esquinas · %1$d movida</item>
+        <item quantity="other">esquinas · %1$d movidas</item>
+    </plurals>
+    <string name="adjust_area_before">antes %1$s ha</string>
+    <string name="adjust_add_corner">Agregar esquina</string>
+    <string name="adjust_save">Guardar contorno</string>
+    <string name="adjust_error_outdated">Este lote cambió en otro dispositivo. Cierra esta pantalla y ábrela de nuevo.</string>
 </resources>

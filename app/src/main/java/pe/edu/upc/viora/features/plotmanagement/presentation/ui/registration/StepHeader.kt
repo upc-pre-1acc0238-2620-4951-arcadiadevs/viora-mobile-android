@@ -28,7 +28,13 @@ private const val TOTAL_STEPS = 3
  * Finished steps are dark, the current one is yellow and wider, the rest are faint.
  */
 @Composable
-fun StepHeader(step: Int, onBack: () -> Unit, onClose: () -> Unit, modifier: Modifier = Modifier) {
+fun StepHeader(
+    step: Int,
+    onBack: () -> Unit,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+    title: String = stringResource(R.string.register_step_counter, step),
+) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -41,7 +47,7 @@ fun StepHeader(step: Int, onBack: () -> Unit, onClose: () -> Unit, modifier: Mod
         )
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                text = stringResource(R.string.register_step_counter, step),
+                text = title,
                 style = MaterialTheme.typography.labelLarge.copy(color = Neutral900),
             )
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {

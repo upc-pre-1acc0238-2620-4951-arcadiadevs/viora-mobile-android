@@ -179,4 +179,15 @@
     <string name="edit_area_label">Area · from the outline</string>
     <string name="edit_save">Save changes</string>
     <string name="edit_error_outdated">This plot changed on another device. We loaded its latest data: close this form and open it again.</string>
+    <string name="adjust_title">Adjust the outline</string>
+    <string name="adjust_hint">Drag a corner to fix it</string>
+    <string name="adjust_corners_label">corners</string>
+    <plurals name="adjust_corners_moved">
+        <item quantity="one">corners · %1$d moved</item>
+        <item quantity="other">corners · %1$d moved</item>
+    </plurals>
+    <string name="adjust_area_before">before %1$s ha</string>
+    <string name="adjust_add_corner">Add corner</string>
+    <string name="adjust_save">Save outline</string>
+    <string name="adjust_error_outdated">This plot changed on another device. Close this screen and open it again.</string>
 </resources>
