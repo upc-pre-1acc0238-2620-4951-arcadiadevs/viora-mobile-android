@@ -36,6 +36,7 @@ private class FakePlotRepository : PlotRepository {
     var pendingRefresh: CompletableDeferred<AppResult<Unit>> = CompletableDeferred(AppResult.Success(Unit))
 
     override fun observePlots(): Flow<List<Plot>> = plots
+    override fun observePlot(id: PlotId): Flow<Plot?> = MutableStateFlow(null)
     override fun observeLastRefresh(): Flow<Instant?> = lastRefresh
     override suspend fun register(newPlot: NewPlot): AppResult<Plot> = AppResult.Failure(AppError.Offline)
 

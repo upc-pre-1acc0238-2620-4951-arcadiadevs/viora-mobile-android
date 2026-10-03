@@ -14,6 +14,7 @@ import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
+import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.toDomainOrNull
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.toEntity
@@ -30,6 +31,9 @@ class PlotRepositoryImpl @Inject constructor(
 
     override fun observePlots(): Flow<List<Plot>> =
         plotDao.observeActive().map { rows -> rows.mapNotNull { it.toDomainOrNull() } }
+
+    override fun observePlot(id: PlotId): Flow<Plot?> =
+        plotDao.observeById(id.value).map { row -> row?.toDomainOrNull() }
 
     override fun observeLastRefresh(): Flow<Instant?> =
         cacheMetadataDao.observeFetchedAt(PLOTS_CACHE_KEY).map { epochMs -> epochMs?.let(Instant::ofEpochMilli) }

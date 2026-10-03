@@ -37,6 +37,7 @@ private class RegistrationRepository : PlotRepository {
     var registerResult: AppResult<Plot> = AppResult.Failure(AppError.Offline)
 
     override fun observePlots(): Flow<List<Plot>> = plots
+    override fun observePlot(id: PlotId): Flow<Plot?> = MutableStateFlow(null)
     override fun observeLastRefresh(): Flow<Instant?> = MutableStateFlow(null)
     override suspend fun refresh(): AppResult<Unit> = AppResult.Success(Unit)
     override suspend fun register(newPlot: NewPlot): AppResult<Plot> {

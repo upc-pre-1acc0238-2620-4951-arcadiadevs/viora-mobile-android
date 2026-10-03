@@ -11,6 +11,10 @@ interface PlotDao {
     @Query("SELECT * FROM plots WHERE status = 'ACTIVE' ORDER BY name COLLATE NOCASE ASC")
     fun observeActive(): Flow<List<PlotEntity>>
 
+    /** One plot whatever its status, or `null` when it is not cached. Emits again when it changes. */
+    @Query("SELECT * FROM plots WHERE id = :id")
+    fun observeById(id: String): Flow<PlotEntity?>
+
     @Upsert
     suspend fun upsertAll(entities: List<PlotEntity>)
 
