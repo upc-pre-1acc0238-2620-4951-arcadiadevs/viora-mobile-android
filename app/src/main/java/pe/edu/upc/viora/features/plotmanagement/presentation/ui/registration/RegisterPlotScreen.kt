@@ -50,7 +50,16 @@ fun RegisterPlotScreen(
         state.savedPlotId?.let(onSaved)
     }
 
+    val locationPermission = rememberLocationPermission()
+
     when (state.step) {
+        RegisterPlotStep.METHOD -> MethodStep(
+            permission = locationPermission,
+            onStart = viewModel::startMarking,
+            onBack = ::back,
+            onClose = ::leave,
+            modifier = modifier,
+        )
         RegisterPlotStep.TRACE -> TraceStep(
             state = state,
             onAddCorner = viewModel::addCorner,

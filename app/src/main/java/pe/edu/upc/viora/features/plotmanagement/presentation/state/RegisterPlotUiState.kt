@@ -11,8 +11,15 @@ import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
 /** A corner of the outline being traced; the [id] follows it even when the outline is reordered. */
 data class TracedCorner(val id: Int, val point: GeoPoint)
 
-/** The three steps of the registration wizard, in order. */
-enum class RegisterPlotStep { TRACE, DETAILS, REVIEW }
+/** How the producer marks the corners of the plot. */
+enum class MarkingMethod { GPS_WALK, MAP_TRACE }
+
+/**
+ * The steps of the registration wizard, in order. [number] is the "Paso N de 3" the producer
+ * sees: choosing the method is step 1, marking the outline step 2, and the details and the
+ * review are both step 3.
+ */
+enum class RegisterPlotStep(val number: Int) { METHOD(1), TRACE(2), DETAILS(3), REVIEW(3) }
 
 /** Why saving did not work, in terms the screen can explain. */
 sealed interface SaveFailure {
@@ -27,7 +34,9 @@ sealed interface SaveFailure {
 }
 
 data class RegisterPlotUiState(
-    val step: RegisterPlotStep = RegisterPlotStep.TRACE,
+    val step: RegisterPlotStep = RegisterPlotStep.METHOD,
+    /** The method chosen in the first step; the outline is marked with it. */
+    val method: MarkingMethod? = null,
     /** The traced corners in drawing order (the outline never crosses itself). */
     val outline: List<TracedCorner> = emptyList(),
     /** Next id to hand out: ids grow in the order corners are added, so the highest is the last one. */
@@ -51,6 +60,10 @@ data class RegisterPlotUiState(
     val isSaved: Boolean get() = savedPlotId != null
 
     val corners: List<GeoPoint> get() = outline.map { it.point }
+
+    /** The middle of the corners marked so far, or `null` when there are none. */
+    val outlineCenter: GeoPoint?
+        get() = if (outline.isEmpty()) null else GeoPoint(corners.map { it.latitude }.average(), corners.map { it.longitude }.average())
 
     val areaHectares: Double get() = PlotOutline.areaHectares(corners)
     val treesPerHectare: Int get() = PlantationFrame.density(rowSpacingMeters, treeSpacingMeters)
