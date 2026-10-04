@@ -83,7 +83,7 @@ fun PlotCard(plot: Plot, onClick: (() -> Unit)?, modifier: Modifier = Modifier, 
 
 /** "Sevillana · 2,5 ha · 180 árboles", localised. */
 @Composable
-private fun plotSummary(plot: Plot): String {
+fun plotSummary(plot: Plot): String {
     val variety = stringResource(plot.variety.labelRes())
     val area = formatHectares(plot.areaHectares)
     val trees = pluralStringResource(
