@@ -45,6 +45,7 @@ class HomeViewModel @Inject constructor(
         val offline = refresh.error == AppError.Offline
         when {
             plots.isNotEmpty() -> HomeUiState.Content(plots, offline, lastRefresh, refresh.isRefreshing)
+            refresh.isRefreshing || !refresh.hasFinishedOnce -> HomeUiState.Loading
             refresh.error != null -> HomeUiState.Error(refresh.error)
             else -> HomeUiState.NoPlots(offline, lastRefresh)
         }

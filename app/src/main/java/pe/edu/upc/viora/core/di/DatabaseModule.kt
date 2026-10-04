@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import pe.edu.upc.viora.core.database.AppDatabase
+import pe.edu.upc.viora.core.database.AppMigrations
 import pe.edu.upc.viora.core.database.CacheMetadataDao
 
 @Module
@@ -18,7 +19,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder<AppDatabase>(context, "viora.db").build()
+        Room.databaseBuilder<AppDatabase>(context, "viora.db")
+            .addMigrations(*AppMigrations.ALL)
+            .build()
 
     @Provides
     fun provideCacheMetadataDao(database: AppDatabase): CacheMetadataDao =
