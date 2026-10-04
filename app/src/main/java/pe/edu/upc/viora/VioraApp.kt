@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +35,16 @@ import pe.edu.upc.viora.core.designsystem.component.TabBarMode
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBar
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarActionColors
 import pe.edu.upc.viora.core.designsystem.theme.Spacing
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import pe.edu.upc.viora.core.navigation.HomeRoute
 import pe.edu.upc.viora.core.navigation.TopLevelDestination
+import pe.edu.upc.viora.features.home.presentation.tour.HomeTourOverlay
+import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
+import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTargets
+import pe.edu.upc.viora.features.home.presentation.tour.LocalHomeTourTargets
+import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
+import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeTourViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
 import pe.edu.upc.viora.navigation.AppNavHost
 
@@ -45,6 +55,10 @@ fun VioraApp(modifier: Modifier = Modifier) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
 
     val tabs = TopLevelDestination.entries
+    val tourTargets = remember { HomeTourTargets() }
+    val tourViewModel: HomeTourViewModel = hiltViewModel()
+    val tourPending by tourViewModel.isPending.collectAsStateWithLifecycle()
+    var tourRunning by remember { mutableStateOf(false) }
     val selectedIndex = tabs.indexOfFirst { tab ->
         currentDestination?.hierarchy?.any { it.hasRoute(tab.graph::class) } == true
     }
@@ -61,8 +75,17 @@ fun VioraApp(modifier: Modifier = Modifier) {
     LaunchedEffect(selectedIndex, showTabBar) { barMode = TabBarMode.Rest }
     BackHandler(enabled = barMode == TabBarMode.Actions) { barMode = TabBarMode.Rest }
 
+    // The tour opens the first time the Home has data on screen (a plots section and the tab bar).
+    val onHome = currentDestination?.hasRoute(HomeRoute::class) == true
+    val tourReady = HomeTourTarget.Today in tourTargets.rects && HomeTourTarget.Plots in tourTargets.rects &&
+        HomeTourTarget.Register in tourTargets.rects
+    LaunchedEffect(tourPending, onHome, tourReady, barMode) {
+        if (tourPending == true && onHome && tourReady && barMode == TabBarMode.Rest) tourRunning = true
+    }
+
     // No insets here: each screen decides how to use the area under the system bars (maps go
     // beneath them, lists pad themselves), so the status bar can stay transparent.
+    CompositionLocalProvider(LocalHomeTourTargets provides tourTargets) {
     Scaffold(modifier = modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0, 0, 0, 0)) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             AppNavHost(navController = navController)
@@ -105,10 +128,22 @@ fun VioraApp(modifier: Modifier = Modifier) {
                     // The logging screens do not exist yet: picking an option only closes the menu.
                     onActionSelected = { barMode = TabBarMode.Rest },
                     onCollapsedBarClick = { barMode = TabBarMode.Rest },
+                    barRowModifier = Modifier.homeTourTarget(HomeTourTarget.Register),
                     modifier = Modifier.navigationBarsPadding().padding(bottom = Spacing.sm),
                 )
             }
+
+            if (tourRunning && onHome) {
+                HomeTourOverlay(
+                    targets = tourTargets,
+                    onFinish = {
+                        tourRunning = false
+                        tourViewModel.complete()
+                    },
+                )
+            }
         }
+    }
     }
 }
 

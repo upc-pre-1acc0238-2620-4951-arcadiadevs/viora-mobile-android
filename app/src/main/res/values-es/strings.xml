@@ -250,4 +250,32 @@
     <string name="adjust_save">Guardar contorno</string>
     <string name="adjust_error_outdated">Este lote cambió en otro dispositivo. Cierra esta pantalla y ábrela de nuevo.</string>
 
+    <!-- Recorrido del Inicio -->
+    <string name="tour_signature_welcome">VIORA · TU INICIO</string>
+    <string name="tour_signature_done">VIORA · LISTO</string>
+    <string name="tour_signature_step">VIORA · %1$d DE %2$d</string>
+    <string name="tour_skip">Saltar</string>
+    <string name="tour_not_now">Ahora no</string>
+    <string name="tour_start">Empezar</string>
+    <string name="tour_next">Siguiente</string>
+    <string name="tour_finish">Empezar a usar Viora</string>
+    <string name="tour_welcome_title">Hola.\nTe muestro *tu Inicio*.</string>
+    <plurals name="tour_welcome_body">
+        <item quantity="one">Es una sola parada, menos de un minuto. Cada tarjeta responde una pregunta de tu campo.</item>
+        <item quantity="other">Son %1$d paradas, menos de un minuto. Cada tarjeta responde una pregunta de tu campo.</item>
+    </plurals>
+    <string name="tour_today_title">Cada mañana te digo *qué toca hoy*.</string>
+    <string name="tour_today_body">Leo tu fase, tu clima y tu plan, y lo resumo en una frase. Debajo está tu semana: el punto marca un día con tarea.</string>
+    <string name="tour_phase_title">Tu fase, *en cuenta regresiva*.</string>
+    <string name="tour_phase_body">Cuántos días te quedan para actuar y qué viene después. Desliza la tarjeta para ver la siguiente fase del olivo.</string>
+    <string name="tour_field_title">Tu campo, *de un vistazo*.</string>
+    <string name="tour_field_body">El clima de hoy, tus alertas activas y la humedad del suelo que miden tus sensores. Toca cualquiera para ver el detalle.</string>
+    <string name="tour_alternation_title">Tu alternancia, *campaña por campaña*.</string>
+    <string name="tour_alternation_body">Verde es año ON y amarillo, año OFF. La barra punteada es mi proyección: si aclareas a tiempo, suavizo la caída del próximo año.</string>
+    <string name="tour_plots_title">Cada lote, *con su estado*.</string>
+    <string name="tour_plots_body">La etiqueta te avisa si un lote necesita atención, como una carga crítica. Toca un lote para ver su vecería, su plan o editarlo.</string>
+    <string name="tour_register_title">Todo empieza *aquí abajo*.</string>
+    <string name="tour_register_body">Inicio, Lotes, Plan y Bitácora. Con el botón + registras en campo un muestreo, un aclareo o una cosecha, aunque no tengas señal.</string>
+    <string name="tour_done_title">Listo. Lo demás\n*te lo aviso yo*.</string>
+    <string name="tour_done_body">Si quieres repasarlo, está en Mi cuenta › Recorrido del Inicio.</string>
 </resources>
