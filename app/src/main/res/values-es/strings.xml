@@ -312,8 +312,6 @@
     <string name="sensors_link_submit">Vincular nodo</string>
 
     <!-- Historial de cosechas e índice de vecería (US20) -->
-    <string name="plot_menu_harvest">Alternancia</string>
-    <string name="plot_menu_harvest_hint">Cosechas pasadas e índice de vecería</string>
     <string name="harvest_subtitle">Alternancia · %1$s · %2$s ha</string>
     <string name="harvest_subtitle_plain">Alternancia</string>
     <string name="harvest_retry">Reintentar</string>
@@ -352,6 +350,15 @@
     <string name="harvest_next_steady">Cosecha estable esperada</string>
     <string name="harvest_history_eyebrow">HISTORIAL DE COSECHAS</string>
     <string name="harvest_progress_of">de %1$d campañas necesarias</string>
+    <string name="harvest_chart_title_ha">Cosecha por campaña · t/ha</string>
+    <string name="harvest_average_ha">Promedio %1$s t/ha</string>
+    <string name="harvest_chart_item_ha">%1$d, %2$s toneladas por hectárea</string>
+    <string name="harvest_chart_description_ha">Cosecha por campaña, %1$s. %2$s. Promedio %3$s toneladas por hectárea.</string>
+    <string name="harvest_row_per_ha">%1$s t/ha · boleta de almazara</string>
+    <string name="harvest_missing_tag">falta</string>
+    <string name="harvest_missing_title">Falta esta campaña</string>
+    <string name="harvest_missing_body">Agrégala para calcular tu índice</string>
+    <string name="harvest_missing_add">Agregar la campaña %1$d</string>
     <string name="harvest_chart_title">Cosecha por campaña · kg</string>
     <string name="harvest_year_on">Año ON</string>
     <string name="harvest_year_off">Año OFF</string>
@@ -444,4 +451,31 @@
         <item quantity="one">Se borra del historial de %1$s y el índice se recalcula con la %2$d campaña que queda.</item>
         <item quantity="other">Se borra del historial de %1$s y el índice se recalcula con las %2$d campañas que quedan.</item>
     </plurals>
+    <string name="lot_section_harvest">Vecería del lote</string>
+    <string name="lot_section_harvest_hint">Índice, campañas y proyección</string>
+    <string name="lot_section_thinning">Plan de aclareo</string>
+    <string name="lot_section_thinning_hint">Ventana y carga del lote</string>
+    <string name="lot_section_climate">Clima del lote</string>
+    <string name="lot_section_climate_hint">Pronóstico y lecturas del nodo</string>
+    <string name="lot_section_sensors">Sensores del lote</string>
+    <string name="lot_section_sensors_hint">Nodos virtuales vinculados</string>
+    <string name="lot_section_dossier">Expediente del lote</string>
+    <string name="lot_section_dossier_hint">PDF sellado de la campaña</string>
+    <string name="lot_section_soon">Próximamente</string>
+    <string name="plot_detail_your_lot">Tu lote</string>
+    <string name="plot_detail_harvest_index">Índice %1$s · %2$s</string>
+    <plurals name="plot_detail_harvest_missing">
+        <item quantity="one">Te falta %1$d campaña para tu índice</item>
+        <item quantity="other">Te faltan %1$d campañas para tu índice</item>
+    </plurals>
+    <string name="home_alternation_title">Tu alternancia</string>
+    <string name="home_alternation_subtitle">%1$s · cosecha en t/ha</string>
+    <plurals name="home_alternation_missing">
+        <item quantity="one">Te falta %1$d campaña para calcular tu índice de vecería.</item>
+        <item quantity="other">Te faltan %1$d campañas para calcular tu índice de vecería.</item>
+    </plurals>
+    <string name="home_alternation_add">Agregar campañas</string>
+    <string name="home_focus_title">Lote en foco</string>
+    <string name="home_focus_hint">Las tarjetas del Inicio hablan de este lote.</string>
+    <string name="home_focus_change">Cambiar el lote en foco</string>
 </resources>
