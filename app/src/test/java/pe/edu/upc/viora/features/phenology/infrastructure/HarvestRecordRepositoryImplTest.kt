@@ -274,6 +274,27 @@ class HarvestRecordRepositoryImplTest {
         assertEquals(1, repository.observeRecords("p-1").first().size)
     }
 
+    @Test
+    fun removeAcceptsA200WithAMessageBody() = runTest {
+        recordDao.upsertAll(listOf(dto("r-1", 2024, 1.0).toEntityForTest()))
+        service.records = { Response.success(emptyList()) }
+        service.removed = { Response.success(200, Unit) }
+
+        assertTrue(repository.remove("p-1", "r-1") is AppResult.Success)
+        assertTrue(repository.observeRecords("p-1").first().isEmpty())
+    }
+
+    @Test
+    fun removePreconditionFailedIsReturnedAndTheCacheKept() = runTest {
+        recordDao.upsertAll(listOf(dto("r-1", 2024, 1.0).toEntityForTest()))
+        service.removed = { Response.error(412, "{}".toResponseBody("application/json".toMediaType())) }
+
+        val result = repository.remove("p-1", "r-1")
+
+        assertTrue((result as AppResult.Failure).error is AppError.PreconditionFailed)
+        assertEquals(1, repository.observeRecords("p-1").first().size)
+    }
+
     private fun HarvestRecordDto.toEntityForTest() =
         toEntity()
 }

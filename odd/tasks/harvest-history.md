@@ -33,11 +33,20 @@ Viora's thinning plan depends on whether the plot alternates (ON/OFF years). Wit
 
 ## Tasks
 - [x] T1 — Domain + data: `HarvestRecord`, `BbiClass`, `HoblynBbi` (index, intervals, classification), DTOs, `PhenologyService`, Room entity/DAO, mapper, repository (observe/refresh/add/rectify/remove), use cases, Hilt modules; tests. Route: delegated writer.
-- [ ] T2 — P40 screen: `HarvestHistoryRoute`, view model, UI state, gauge, chart, interval chips, campaign list, insufficient/offline/empty states, BBI info sheet, entry from plot detail, strings; tests. Route: delegated writer.
+- [x] T2 — P40 screen: `HarvestHistoryRoute`, view model, UI state, gauge, chart, interval chips, campaign list, insufficient/offline/empty states, BBI info sheet, entry from plot detail, strings; tests. Route: delegated writer.
 - [ ] T3 — P41 sheet: add/correct with validation and live preview, delete dialog, "campaign added" toast; tests. Route: delegated writer.
+
+## Decisions (T2)
+- Insight cards are data-driven: the "after an ON year" card shows the real ratio (e.g. 28 %) of the latest ON to OFF pair instead of Figma's fixed 1/3; hidden when there is no such pair or the class is low. The "next campaign" card has no thinning-plan arrow (no target screen yet).
+- Row subtitle shows "recorded on {date}" (server `recordedAt`) instead of Figma's static "mill receipt" text; chart bar labels are compact ("7,8k") so they fit the 44 dp bars, full kg stay in the list and in the accessibility description.
+- Missing-year placeholders of the insufficient variant (dashed "?" bar, "Falta esta campaña" row) are left out; the progress card and the add button cover it.
+- Only Offline/Timeout refresh errors switch to the offline variant; other errors keep the editable cache.
+- `VioraSectionHeader` got an optional `count` badge (Figma "Contador"). Hand-authored Material paths for `ic_bar_chart` and `ic_warning` (no Figma asset URLs in code).
 
 ## Progress
 - Branch `feature/harvest-history` created from `develop`.
+- T1 done in `e399ec2` (1116 authored lines, 22 new tests). `./gradlew testDebugUnitTest assembleDebug` green; parent spot check of `features.phenology.*` tests green. Index cached in its own `bearing_indexes` table; metrics 404 → no index; `observeLastRefresh` added for the offline state (cache key `harvest:{plotId}`).
+- T2 done in `__T2__` (2393 authored lines, 22 new tests). `./gradlew testDebugUnitTest assembleDebug` green (226 tests); `lintDebug` reports 6 pre-existing NonObservableLocale errors in Home*/SensorsScreen, none in phenology. Delete (200 + body, 412) verified in `remove()` with two new repository tests; no code fix needed because `callUnit` ignores the body.
 
 ## Next step
-T2.
+T3.

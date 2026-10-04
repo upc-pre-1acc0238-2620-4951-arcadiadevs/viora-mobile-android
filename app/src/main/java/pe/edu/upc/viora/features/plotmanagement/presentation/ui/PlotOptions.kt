@@ -46,7 +46,7 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.Pri
 
 /**
  * The options of a plot (Figma P27): a sheet with the plot's name, its summary and a white card of
- * rows: edit its data, adjust its outline, its sensors and archive it.
+ * rows: edit its data, adjust its outline, its sensors, its alternation and archive it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +55,7 @@ fun PlotOptionsSheet(
     onEdit: () -> Unit,
     onAdjustOutline: () -> Unit,
     onSensors: () -> Unit,
+    onHarvestHistory: () -> Unit,
     onArchive: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -112,6 +113,13 @@ fun PlotOptionsSheet(
                     title = stringResource(R.string.plot_menu_sensors),
                     hint = stringResource(R.string.plot_menu_sensors_hint),
                     onClick = onSensors,
+                )
+                OptionDivider()
+                OptionRow(
+                    icon = R.drawable.ic_bar_chart,
+                    title = stringResource(R.string.plot_menu_harvest),
+                    hint = stringResource(R.string.plot_menu_harvest_hint),
+                    onClick = onHarvestHistory,
                 )
                 OptionDivider()
                 OptionRow(

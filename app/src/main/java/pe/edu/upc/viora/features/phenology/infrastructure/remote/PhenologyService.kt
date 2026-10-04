@@ -29,7 +29,7 @@ interface PhenologyService {
         @Body request: RectifyHarvestYieldRequestDto,
     ): Response<HarvestRecordDto>
 
-    /** 204 without body on success. */
+    /** 200 with a message body (ignored) on success; 404 unknown record; 412 stale version. */
     @DELETE("plots/{plotId}/harvest-records/{recordId}")
     suspend fun removeRecord(
         @Path("plotId") plotId: String,
