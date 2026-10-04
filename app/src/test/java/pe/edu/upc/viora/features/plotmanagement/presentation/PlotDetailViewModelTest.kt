@@ -15,11 +15,19 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.phenology.application.usecase.ObserveBearingIndexUseCase
+import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestHistoryUseCase
+import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestLastRefreshUseCase
+import pe.edu.upc.viora.features.phenology.application.usecase.RefreshHarvestHistoryUseCase
+import pe.edu.upc.viora.features.phenology.domain.entity.BearingIndex
+import pe.edu.upc.viora.features.phenology.presentation.FakeHarvestRepository
+import pe.edu.upc.viora.features.phenology.presentation.figmaRecords
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ArchivePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
@@ -30,6 +38,7 @@ import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.LotHarvest
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotDetailUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.PlotDetailViewModel
 
@@ -58,6 +67,7 @@ private class CachedPlotsRepository : PlotRepository {
 class PlotDetailViewModelTest {
 
     private val repository = CachedPlotsRepository()
+    private val harvests = FakeHarvestRepository()
 
     @Before
     fun setUp() {
@@ -88,7 +98,46 @@ class PlotDetailViewModelTest {
         observePlot = ObservePlotUseCase(repository),
         observePlots = ObservePlotsUseCase(repository),
         archivePlot = ArchivePlotUseCase(repository),
+        observeHarvests = ObserveHarvestHistoryUseCase(harvests),
+        observeBearingIndex = ObserveBearingIndexUseCase(harvests),
+        observeHarvestRefresh = ObserveHarvestLastRefreshUseCase(harvests),
+        refreshHarvests = RefreshHarvestHistoryUseCase(harvests),
     )
+
+    private fun contentOf(vm: PlotDetailViewModel, scope: kotlinx.coroutines.test.TestScope): PlotDetailUiState.Content {
+        scope.backgroundScope.launch(UnconfinedTestDispatcher(scope.testScheduler)) { vm.uiState.collect {} }
+        return vm.uiState.value as PlotDetailUiState.Content
+    }
+
+    @Test
+    fun `the alternation card has no line until the history is known`() = runTest {
+        repository.plots.value = listOf(plot("p1"))
+
+        assertNull(contentOf(viewModel("p1"), this).harvest)
+    }
+
+    @Test
+    fun `with fewer than three campaigns the card says how many are missing`() = runTest {
+        repository.plots.value = listOf(plot("p1"))
+        harvests.records.value = figmaRecords().takeLast(2)
+        harvests.lastRefresh.value = Instant.parse("2026-10-01T00:00:00Z")
+
+        val harvest = contentOf(viewModel("p1"), this).harvest
+
+        assertEquals(LotHarvest(index = null, missingCampaigns = 1), harvest)
+    }
+
+    @Test
+    fun `with enough campaigns the card shows the server index`() = runTest {
+        repository.plots.value = listOf(plot("p1"))
+        harvests.records.value = figmaRecords()
+        harvests.index.value = BearingIndex(0.51, 4, null)
+        harvests.lastRefresh.value = Instant.parse("2026-10-01T00:00:00Z")
+
+        val harvest = contentOf(viewModel("p1"), this).harvest
+
+        assertEquals(LotHarvest(index = 0.51, missingCampaigns = 0), harvest)
+    }
 
     @Test
     fun `shows the cached plot`() = runTest {

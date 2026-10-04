@@ -67,11 +67,14 @@ class CampaignEditorViewModel @Inject constructor(
     ) { draft, records, index -> draft?.let { build(it, records, index) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
 
-    /** Opens the sheet to register a campaign, starting one year before the oldest registered. */
-    fun openAdd() {
+    /**
+     * Opens the sheet to register a campaign: on [startYear] when a missing campaign was tapped,
+     * else one year before the oldest registered.
+     */
+    fun openAdd(startYear: Int? = null) {
         viewModelScope.launch {
             val records = observeRecords(plotId).first()
-            val year = HarvestPresenter.suggestedYear(records, currentYear())
+            val year = startYear ?: HarvestPresenter.suggestedYear(records, currentYear())
             draft.value = Draft(CampaignMode.Add, year, kilosText = "")
         }
     }

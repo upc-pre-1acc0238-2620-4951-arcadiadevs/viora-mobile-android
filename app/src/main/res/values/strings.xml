@@ -310,8 +310,6 @@
     <string name="sensors_link_submit">Link node</string>
 
     <!-- Harvest history and bearing index (US20) -->
-    <string name="plot_menu_harvest">Alternation</string>
-    <string name="plot_menu_harvest_hint">Past harvests and bearing index</string>
     <string name="harvest_subtitle">Alternation · %1$s · %2$s ha</string>
     <string name="harvest_subtitle_plain">Alternation</string>
     <string name="harvest_retry">Try again</string>
@@ -350,6 +348,15 @@
     <string name="harvest_next_steady">Steady harvest expected</string>
     <string name="harvest_history_eyebrow">HARVEST HISTORY</string>
     <string name="harvest_progress_of">of %1$d campaigns needed</string>
+    <string name="harvest_chart_title_ha">Harvest per campaign · t/ha</string>
+    <string name="harvest_average_ha">Average %1$s t/ha</string>
+    <string name="harvest_chart_item_ha">%1$d, %2$s tonnes per hectare</string>
+    <string name="harvest_chart_description_ha">Harvest per campaign, %1$s. %2$s. Average %3$s tonnes per hectare.</string>
+    <string name="harvest_row_per_ha">%1$s t/ha · mill receipt</string>
+    <string name="harvest_missing_tag">missing</string>
+    <string name="harvest_missing_title">This campaign is missing</string>
+    <string name="harvest_missing_body">Add it to calculate your index</string>
+    <string name="harvest_missing_add">Add the %1$d campaign</string>
     <string name="harvest_chart_title">Harvest per campaign · kg</string>
     <string name="harvest_year_on">ON year</string>
     <string name="harvest_year_off">OFF year</string>
@@ -442,4 +449,31 @@
         <item quantity="one">It is removed from the history of %1$s and the index is recalculated with the %2$d campaign that remains.</item>
         <item quantity="other">It is removed from the history of %1$s and the index is recalculated with the %2$d campaigns that remain.</item>
     </plurals>
+    <string name="lot_section_harvest">Plot alternation</string>
+    <string name="lot_section_harvest_hint">Index, campaigns and projection</string>
+    <string name="lot_section_thinning">Thinning plan</string>
+    <string name="lot_section_thinning_hint">Window and load of the plot</string>
+    <string name="lot_section_climate">Plot climate</string>
+    <string name="lot_section_climate_hint">Forecast and node readings</string>
+    <string name="lot_section_sensors">Plot sensors</string>
+    <string name="lot_section_sensors_hint">Linked virtual nodes</string>
+    <string name="lot_section_dossier">Plot dossier</string>
+    <string name="lot_section_dossier_hint">Sealed PDF of the campaign</string>
+    <string name="lot_section_soon">Coming soon</string>
+    <string name="plot_detail_your_lot">Your plot</string>
+    <string name="plot_detail_harvest_index">Index %1$s · %2$s</string>
+    <plurals name="plot_detail_harvest_missing">
+        <item quantity="one">%1$d more campaign for your index</item>
+        <item quantity="other">%1$d more campaigns for your index</item>
+    </plurals>
+    <string name="home_alternation_title">Your alternation</string>
+    <string name="home_alternation_subtitle">%1$s · harvest in t/ha</string>
+    <plurals name="home_alternation_missing">
+        <item quantity="one">You are %1$d campaign short of your bearing index.</item>
+        <item quantity="other">You are %1$d campaigns short of your bearing index.</item>
+    </plurals>
+    <string name="home_alternation_add">Add campaigns</string>
+    <string name="home_focus_title">Plot in focus</string>
+    <string name="home_focus_hint">The cards of the Home talk about this plot.</string>
+    <string name="home_focus_change">Change the plot in focus</string>
 </resources>

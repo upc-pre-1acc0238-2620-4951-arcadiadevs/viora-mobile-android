@@ -1,21 +1,21 @@
 package pe.edu.upc.viora.features.home.presentation.ui
 
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +24,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Instant
 import java.time.LocalDate
+import java.time.Year
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
@@ -49,7 +54,6 @@ import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
-import java.time.Year
 
 private val ScreenPadding = 24.dp
 
@@ -65,6 +69,7 @@ fun HomeScreen(
     onOpenPlot: (PlotId) -> Unit,
     onOpenPlots: () -> Unit,
     onOpenAlerts: () -> Unit,
+    onOpenAlternation: (plotId: PlotId, plotName: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -76,6 +81,8 @@ fun HomeScreen(
         onOpenPlot = onOpenPlot,
         onOpenPlots = onOpenPlots,
         onOpenAlerts = onOpenAlerts,
+        onOpenAlternation = onOpenAlternation,
+        onFocusPlot = viewModel::focusPlot,
         modifier = modifier,
     )
 }
@@ -90,6 +97,8 @@ fun HomeScreenContent(
     onOpenPlot: (PlotId) -> Unit = {},
     onOpenPlots: () -> Unit = {},
     onOpenAlerts: () -> Unit = {},
+    onOpenAlternation: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
+    onFocusPlot: (PlotId) -> Unit = {},
     today: LocalDate = LocalDate.now(),
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
@@ -97,6 +106,7 @@ fun HomeScreenContent(
     val plots = (state as? HomeUiState.Content)?.plots.orEmpty()
     val hasNoPlots = state is HomeUiState.NoPlots
     val scrollState = rememberScrollState()
+    var pickingFocus by rememberSaveable { mutableStateOf(false) }
 
     // The tour scrolls the Home from outside to bring each section into view.
     val tourTargets = LocalHomeTourTargets.current
@@ -138,10 +148,15 @@ fun HomeScreenContent(
                     plotCount = plots.size,
                     totalHectares = plots.sumOf { it.areaHectares },
                     modifier = Modifier.padding(top = 12.dp),
+                    focusedName = (state as? HomeUiState.Content)?.focusedPlot?.name,
+                    onChangeFocus = { pickingFocus = true },
                 )
                 if (state.isOffline) HomeOfflineNotice(modifier = Modifier.padding(top = 16.dp))
                 // Without plots the design drops the week and goes straight to the invitation.
                 if (!hasNoPlots) HomeWeekStrip(today = today, modifier = Modifier.padding(top = 22.dp))
+            }
+            if (pickingFocus && state is HomeUiState.Content) {
+                FocusPicker(state = state, onSelect = onFocusPlot, onDismiss = { pickingFocus = false })
             }
             when (state) {
                 HomeUiState.Loading -> Centered { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) }
@@ -152,6 +167,18 @@ fun HomeScreenContent(
                 )
                 is HomeUiState.Content -> {
                     sections()
+                    val focused = state.focusedPlot
+                    val alternation = state.alternation
+                    if (focused != null && alternation != null) {
+                        HomeAlternationCard(
+                            plotName = focused.name,
+                            alternation = alternation,
+                            onOpen = { onOpenAlternation(focused.id, focused.name) },
+                            modifier = Modifier
+                                .padding(start = ScreenPadding, end = ScreenPadding, top = 32.dp)
+                                .homeTourTarget(HomeTourTarget.Alternation),
+                        )
+                    }
                     Column(modifier = Modifier.padding(top = 32.dp).homeTourTarget(HomeTourTarget.Plots)) {
                         VioraSectionHeader(
                             title = stringResource(R.string.home_my_plots),
@@ -165,6 +192,19 @@ fun HomeScreenContent(
             }
         }
     }
+}
+
+@Composable
+private fun FocusPicker(state: HomeUiState.Content, onSelect: (PlotId) -> Unit, onDismiss: () -> Unit) {
+    HomeFocusSheet(
+        plots = state.plots,
+        focusedId = state.focusedPlot?.id,
+        onSelect = {
+            onSelect(it)
+            onDismiss()
+        },
+        onDismiss = onDismiss,
+    )
 }
 
 @Composable

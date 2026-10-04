@@ -53,10 +53,11 @@ class SensorsViewModel @Inject constructor(
                 nodes = nodes,
                 isRefreshing = refresh.isRefreshing,
                 refreshError = refresh.error,
+                plot = plot,
             )
             refresh.isRefreshing || !refresh.hasFinishedOnce -> SensorsUiState.Loading
             refresh.error != null -> SensorsUiState.Error(refresh.error)
-            else -> SensorsUiState.Empty(plotName = resolvedName)
+            else -> SensorsUiState.Empty(plotName = resolvedName, plot = plot)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), SensorsUiState.Loading)
 

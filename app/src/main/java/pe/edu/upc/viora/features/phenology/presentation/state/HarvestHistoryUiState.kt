@@ -8,7 +8,7 @@ import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 
 /** The plot facts the header shows next to "Alternancia". */
-data class PlotSubtitle(val variety: OliveVariety, val areaHectares: Double)
+data class PlotSubtitle(val variety: OliveVariety, val areaHectares: Double, val estimatedTrees: Int)
 
 /** What happened to a campaign, to confirm it to the producer. */
 enum class CampaignChangeKind { ADDED, CORRECTED, DELETED }
@@ -28,7 +28,9 @@ sealed interface HarvestHistoryUiState {
     /**
      * The cached history. [records] are newest first. [index] and [bbiClass] are null while there
      * are fewer than three campaigns. [offline] is true when the last refresh could not reach the
-     * server: the cache is shown and nothing can be changed.
+     * server: the cache is shown and nothing can be changed. [areaHectares] lets the screen show
+     * yields per hectare (null while the plot is not cached). [missingYears] are the campaigns
+     * still needed for an index, oldest first.
      */
     data class Content(
         val plotName: String,
@@ -38,6 +40,8 @@ sealed interface HarvestHistoryUiState {
         val bbiClass: BbiClass?,
         val intervals: List<BbiInterval>,
         val averageKg: Double,
+        val areaHectares: Double?,
+        val missingYears: List<Int>,
         val summary: HarvestSummary,
         val suggestedYear: Int,
         val offline: Boolean,

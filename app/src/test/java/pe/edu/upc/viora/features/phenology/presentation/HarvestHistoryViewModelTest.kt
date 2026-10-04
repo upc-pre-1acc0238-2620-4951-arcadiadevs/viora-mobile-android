@@ -119,6 +119,7 @@ class HarvestHistoryViewModelTest {
         assertTrue(content.intervals.isEmpty())
         assertEquals(1, content.summary.missing)
         assertEquals(2023, content.suggestedYear)
+        assertEquals(listOf(2023), content.missingYears)
     }
 
     @Test
@@ -130,6 +131,8 @@ class HarvestHistoryViewModelTest {
         assertTrue(content.records.isEmpty())
         assertEquals(3, content.summary.missing)
         assertEquals(2025, content.suggestedYear)
+        assertEquals(listOf(2023, 2024, 2025), content.missingYears)
+        assertEquals(samplePlot().areaHectares, content.areaHectares)
     }
 
     @Test

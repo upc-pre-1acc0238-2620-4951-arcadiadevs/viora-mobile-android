@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,9 +34,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
@@ -72,14 +73,17 @@ import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
 import pe.edu.upc.viora.features.phenology.domain.entity.HoblynBbi
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignChangeKind
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignResult
-import pe.edu.upc.viora.features.phenology.presentation.state.Headline
 import pe.edu.upc.viora.features.phenology.presentation.state.HarvestHistoryUiState
 import pe.edu.upc.viora.features.phenology.presentation.state.HarvestNotice
 import pe.edu.upc.viora.features.phenology.presentation.state.HarvestPresenter
+import pe.edu.upc.viora.features.phenology.presentation.state.Headline
 import pe.edu.upc.viora.features.phenology.presentation.state.Outlook
 import pe.edu.upc.viora.features.phenology.presentation.state.Voice
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.CampaignEditorViewModel
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.HarvestHistoryViewModel
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
@@ -92,12 +96,14 @@ private const val NOTICE_MILLIS = 3_500L
 fun HarvestHistoryScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    onSensors: () -> Unit = {},
     viewModel: HarvestHistoryViewModel = hiltViewModel(),
     editor: CampaignEditorViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val editorState by editor.uiState.collectAsStateWithLifecycle()
     var showInfo by rememberSaveable { mutableStateOf(false) }
+    var showMore by rememberSaveable { mutableStateOf(false) }
 
     HarvestHistoryContent(
         state = state,
@@ -105,7 +111,9 @@ fun HarvestHistoryScreen(
         onRetry = viewModel::refresh,
         onWhatIs = { showInfo = true },
         onDismissNotice = viewModel::dismissNotice,
-        onAddCampaign = editor::openAdd,
+        onMore = { showMore = true },
+        onAddCampaign = { editor.openAdd() },
+        onAddYear = { editor.openAdd(it) },
         onEditCampaign = editor::openCorrect,
         modifier = modifier,
     )
@@ -138,6 +146,25 @@ fun HarvestHistoryScreen(
             )
         }
     }
+    if (showMore && content != null) {
+        LotSectionsSheet(
+            plotName = content.plotName,
+            summary = content.plotSubtitle?.let {
+                stringResource(
+                    R.string.plot_options_subtitle,
+                    stringResource(it.variety.labelRes()),
+                    formatHectares(it.areaHectares),
+                    formatCount(it.estimatedTrees),
+                )
+            }.orEmpty(),
+            current = LotSection.HARVEST,
+            onSelect = { section ->
+                showMore = false
+                if (section == LotSection.SENSORS) onSensors()
+            },
+            onDismiss = { showMore = false },
+        )
+    }
     if (showInfo && content != null) {
         BbiInfoSheet(
             index = content.index,
@@ -156,7 +183,9 @@ fun HarvestHistoryContent(
     onWhatIs: () -> Unit,
     onDismissNotice: () -> Unit,
     modifier: Modifier = Modifier,
+    onMore: () -> Unit = {},
     onAddCampaign: () -> Unit = {},
+    onAddYear: (Int) -> Unit = {},
     onEditCampaign: (HarvestRecord) -> Unit = {},
 ) {
     Column(
@@ -166,7 +195,7 @@ fun HarvestHistoryContent(
             .statusBarsPadding(),
     ) {
         val content = state as? HarvestHistoryUiState.Content
-        TopBar(content = content, onBack = onBack, onDismissNotice = onDismissNotice)
+        TopBar(content = content, onBack = onBack, onDismissNotice = onDismissNotice, onMore = onMore)
         when (state) {
             HarvestHistoryUiState.Loading -> Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Green900)
@@ -177,6 +206,7 @@ fun HarvestHistoryContent(
                 onRetry = onRetry,
                 onWhatIs = onWhatIs,
                 onAddCampaign = onAddCampaign,
+                onAddYear = onAddYear,
                 onEditCampaign = onEditCampaign,
                 modifier = Modifier.weight(1f),
             )
@@ -185,7 +215,7 @@ fun HarvestHistoryContent(
 }
 
 @Composable
-private fun TopBar(content: HarvestHistoryUiState.Content?, onBack: () -> Unit, onDismissNotice: () -> Unit) {
+private fun TopBar(content: HarvestHistoryUiState.Content?, onBack: () -> Unit, onDismissNotice: () -> Unit, onMore: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -228,8 +258,11 @@ private fun TopBar(content: HarvestHistoryUiState.Content?, onBack: () -> Unit, 
                 )
             }
         }
-        // Keeps the title centred: the design's "more" button has nothing to offer here yet.
-        Spacer(Modifier.size(48.dp))
+        CircleIconButton(
+            icon = R.drawable.ic_more_vert,
+            contentDescription = stringResource(R.string.plot_menu_more),
+            onClick = onMore,
+        )
     }
 }
 
@@ -279,6 +312,7 @@ private fun ContentBody(
     onRetry: () -> Unit,
     onWhatIs: () -> Unit,
     onAddCampaign: () -> Unit,
+    onAddYear: (Int) -> Unit,
     onEditCampaign: (HarvestRecord) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -301,21 +335,34 @@ private fun ContentBody(
         VoiceLine(text = voiceText(summary.voice))
         if (index != null && bbiClass != null) InsightCards(state)
 
-        VioraSectionHeader(title = stringResource(R.string.harvest_chart_title))
-        HarvestChartCard(records = state.records, averageKg = state.averageKg, intervals = state.intervals)
+        VioraSectionHeader(
+            title = stringResource(if (state.areaHectares != null) R.string.harvest_chart_title_ha else R.string.harvest_chart_title),
+        )
+        HarvestChartCard(
+            records = state.records,
+            averageKg = state.averageKg,
+            intervals = state.intervals,
+            areaHectares = state.areaHectares,
+            missingYears = state.missingYears,
+            enabled = state.canEdit,
+            onAddYear = onAddYear,
+        )
 
         VioraSectionHeader(
             title = stringResource(R.string.harvest_registered_title),
-            count = state.records.size,
+            count = state.records.size.takeIf { it > 0 },
             actionLabel = if (state.canEdit) stringResource(R.string.harvest_add_link) else null,
             onAction = if (state.canEdit) onAddCampaign else null,
         )
-        if (state.records.isNotEmpty()) {
+        if (state.records.isNotEmpty() || state.missingYears.isNotEmpty()) {
             CampaignList(
                 records = state.records,
+                missingYears = state.missingYears.asReversed(),
+                areaHectares = state.areaHectares,
                 newRecordId = state.newRecordId,
                 enabled = state.canEdit,
                 onClick = onEditCampaign,
+                onAddYear = onAddYear,
             )
         }
 
@@ -362,7 +409,7 @@ private fun Heading(headline: Headline, missing: Int) {
 }
 
 @Composable
-private fun voiceText(voice: Voice): String = when (voice) {
+fun voiceText(voice: Voice): String = when (voice) {
     is Voice.BreakCycle -> stringResource(R.string.harvest_voice_break_cycle, voice.year)
     is Voice.Recover -> stringResource(R.string.harvest_voice_recover, voice.year)
     Voice.Steady -> stringResource(R.string.harvest_voice_steady)
@@ -546,22 +593,36 @@ private fun NextCampaignCard(year: Int?, outlook: Outlook?, modifier: Modifier =
 }
 
 @Composable
-private fun CampaignList(records: List<HarvestRecord>, newRecordId: String?, enabled: Boolean, onClick: (HarvestRecord) -> Unit) {
+private fun CampaignList(
+    records: List<HarvestRecord>,
+    missingYears: List<Int>,
+    areaHectares: Double?,
+    newRecordId: String?,
+    enabled: Boolean,
+    onClick: (HarvestRecord) -> Unit,
+    onAddYear: (Int) -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(Neutral0).padding(horizontal = 18.dp, vertical = 4.dp),
     ) {
         records.forEachIndexed { position, record ->
             val isNew = record.id == newRecordId
-            CampaignRow(record, isNew = isNew, enabled = enabled, onClick = { onClick(record) })
+            CampaignRow(record, areaHectares = areaHectares, isNew = isNew, enabled = enabled, onClick = { onClick(record) })
             if (position < records.lastIndex && !isNew) {
                 HorizontalDivider(color = Neutral200)
             }
         }
+        if (records.isNotEmpty() && missingYears.isNotEmpty()) Spacer(Modifier.height(4.dp))
+        missingYears.forEachIndexed { position, year ->
+            MissingCampaignRow(year, enabled = enabled, onClick = { onAddYear(year) })
+            if (position < missingYears.lastIndex) Spacer(Modifier.height(4.dp))
+        }
+        if (missingYears.isNotEmpty()) Spacer(Modifier.height(4.dp))
     }
 }
 
 @Composable
-private fun CampaignRow(record: HarvestRecord, isNew: Boolean, enabled: Boolean, onClick: () -> Unit) {
+private fun CampaignRow(record: HarvestRecord, areaHectares: Double?, isNew: Boolean, enabled: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -583,12 +644,50 @@ private fun CampaignRow(record: HarvestRecord, isNew: Boolean, enabled: Boolean,
                 color = Neutral900,
             )
             Text(
-                text = if (isNew) stringResource(R.string.harvest_row_new) else stringResource(R.string.harvest_row_recorded, formatRecordDate(record.recordedAt)),
+                text = when {
+                    isNew -> stringResource(R.string.harvest_row_new)
+                    areaHectares != null -> stringResource(
+                        R.string.harvest_row_per_ha,
+                        formatTonnesPerHectare(tonnesPerHectare(record.totalYieldKg, areaHectares)),
+                    )
+                    else -> stringResource(R.string.harvest_row_recorded, formatRecordDate(record.recordedAt))
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = Neutral600,
             )
         }
         BearingTag(record.bearing, large = true, onHighlight = isNew)
+        Icon(
+            painter = painterResource(R.drawable.ic_chevron_right),
+            contentDescription = null,
+            tint = if (enabled) Neutral600 else Neutral300,
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
+/** A campaign still to register (Figma P40 "Historial insuficiente"): dashed row that opens the add sheet. */
+@Composable
+private fun MissingCampaignRow(year: Int, enabled: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .dashedOutline(Neutral300, CornerRadius(60f, 60f), strokeWidth = 1.5.dp, dash = 5.dp, gap = 4.dp)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .padding(vertical = 14.dp, horizontal = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = year.toString(),
+            style = MaterialTheme.typography.headlineLarge.copy(fontSize = 26.sp, lineHeight = 30.sp),
+            color = Neutral600,
+        )
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(stringResource(R.string.harvest_missing_title), style = MaterialTheme.typography.titleSmall, color = Neutral900)
+            Text(stringResource(R.string.harvest_missing_body), style = MaterialTheme.typography.bodySmall, color = Neutral600)
+        }
         Icon(
             painter = painterResource(R.drawable.ic_chevron_right),
             contentDescription = null,
