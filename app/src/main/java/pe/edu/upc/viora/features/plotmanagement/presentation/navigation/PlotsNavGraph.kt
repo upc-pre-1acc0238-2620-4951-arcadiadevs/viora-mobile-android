@@ -14,6 +14,8 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotsScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.AdjustOutlineScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.EditPlotScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.RegisterPlotScreen
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.sensorsComposable
 
 /** The plot registration wizard. It hides the tab bar because it is not a tab root. */
 @Serializable
@@ -67,6 +69,7 @@ fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
                 onBack = { navController.popBackStack() },
                 onEdit = { navController.navigate(EditPlotRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
                 onAdjustOutline = { navController.navigate(AdjustOutlineRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
+                onSensors = { navController.navigate(SensorsRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
             )
         }
         composable<EditPlotRoute> {
@@ -75,5 +78,6 @@ fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
         composable<AdjustOutlineRoute> {
             AdjustOutlineScreen(onBack = { navController.popBackStack() })
         }
+        sensorsComposable(navController)
     }
 }

@@ -278,4 +278,36 @@
     <string name="tour_register_body">Inicio, Lotes, Plan y Bitácora. Con el botón + registras en campo un muestreo, un aclareo o una cosecha, aunque no tengas señal.</string>
     <string name="tour_done_title">Listo. Lo demás\n*te lo aviso yo*.</string>
     <string name="tour_done_body">Si quieres repasarlo, está en Mi cuenta › Recorrido del Inicio.</string>
+    <!-- Sensores (US13, US14) -->
+    <string name="sensors_subtitle_top">Sensores · nodos virtuales</string>
+    <string name="sensors_title_lead">Tus</string>
+    <string name="sensors_title_emphasis">sensores.</string>
+    <string name="sensors_virtual_notice">Son nodos virtuales: simulo sus lecturas con el clima de tus coordenadas, sin instalar equipos.</string>
+    <string name="sensors_chip_active">%1$d activos</string>
+    <string name="sensors_chip_paused">%1$d en pausa</string>
+    <string name="sensors_empty">Esta parcela aún no tiene nodos sensores. Vincula el primero.</string>
+    <string name="sensors_link_action">Vincular un nodo</string>
+    <string name="sensors_pause_footnote">En pausa no genera lecturas nuevas; lo que ya midió se conserva.</string>
+    <string name="sensors_type_microclima_subtitle">Microclima · aire y temperatura</string>
+    <string name="sensors_type_sonda_subtitle">Suelo · %1$d cm</string>
+    <string name="sensors_active_since">Activo · hace %1$s</string>
+    <string name="sensors_active_simple">Activo</string>
+    <string name="sensors_paused_since">En pausa desde el %1$s</string>
+    <string name="sensors_paused_simple">En pausa</string>
+    <string name="sensors_reading_temp_hum">%1$s° · %2$s %%</string>
+    <string name="sensors_reading_hum">%1$s %%</string>
+
+    <!-- Sheet de vinculación -->
+    <string name="sensors_link_title_lead">Vincular</string>
+    <string name="sensors_link_title_emphasis">un nodo</string>
+    <string name="sensors_link_sheet_subtitle">%1$s · nodo virtual, sin equipos</string>
+    <string name="sensors_link_name_label">Nombre del nodo</string>
+    <string name="sensors_link_type_label">TIPO</string>
+    <string name="sensors_type_microclima">Microclima</string>
+    <string name="sensors_type_sonda">Sonda de suelo</string>
+    <string name="sensors_link_depth_label">PROFUNDIDAD DE LA SONDA</string>
+    <string name="sensors_depth_30">30 cm</string>
+    <string name="sensors_depth_60">60 cm</string>
+    <string name="sensors_depth_hint">30 cm sigue las raíces que absorben agua; 60 cm, la reserva más profunda.</string>
+    <string name="sensors_link_submit">Vincular nodo</string>
 </resources>

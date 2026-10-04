@@ -92,6 +92,7 @@ fun PlotDetailScreen(
     onBack: () -> Unit,
     onEdit: () -> Unit,
     onAdjustOutline: () -> Unit,
+    onSensors: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: PlotDetailViewModel = hiltViewModel(),
 ) {
@@ -104,6 +105,7 @@ fun PlotDetailScreen(
         onBack = onBack,
         onEdit = onEdit,
         onAdjustOutline = onAdjustOutline,
+        onSensors = onSensors,
         archiveState = archiveState,
         onArchive = viewModel::archive,
         onDismissArchiveFailure = viewModel::dismissArchiveFailure,
@@ -118,6 +120,7 @@ fun PlotDetailContent(
     modifier: Modifier = Modifier,
     onEdit: () -> Unit = {},
     onAdjustOutline: () -> Unit = {},
+    onSensors: () -> Unit = {},
     archiveState: ArchiveState = ArchiveState.Idle,
     onArchive: () -> Unit = {},
     onDismissArchiveFailure: () -> Unit = {},
@@ -133,6 +136,7 @@ fun PlotDetailContent(
             onBack = onBack,
             onEdit = onEdit,
             onAdjustOutline = onAdjustOutline,
+            onSensors = onSensors,
             activeHectares = state.activeHectares,
             archiveState = archiveState,
             onArchive = onArchive,
@@ -149,6 +153,7 @@ private fun PlotDetailBody(
     onBack: () -> Unit,
     onEdit: () -> Unit,
     onAdjustOutline: () -> Unit,
+    onSensors: () -> Unit,
     activeHectares: Double,
     archiveState: ArchiveState,
     onArchive: () -> Unit,
@@ -200,8 +205,10 @@ private fun PlotDetailBody(
                     optionsOpen = false
                     onAdjustOutline()
                 },
-                // Sensors are a later feature: the row is in the design, so it only closes the sheet for now.
-                onSensors = { optionsOpen = false },
+                onSensors = {
+                    optionsOpen = false
+                    onSensors()
+                },
                 onArchive = {
                     optionsOpen = false
                     confirmingArchive = true

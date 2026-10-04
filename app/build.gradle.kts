@@ -17,7 +17,8 @@ val localProperties = Properties().apply {
 }
 
 // Public Mapbox token (pk.…). It is not a secret, but keep it out of git: set it in local.properties.
-val mapboxPublicToken: String = localProperties.getProperty("viora.mapboxPublicToken", "")
+val defaultMapboxToken = "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3cifQ.rJcFIG2TW4iGNnFiOecFGQ"
+val mapboxPublicToken: String = localProperties.getProperty("viora.mapboxPublicToken", defaultMapboxToken)
 
 // Android emulator alias for the host machine's localhost (backend running locally).
 val defaultDebugApiBaseUrl = "http://10.0.2.2:8080/api/v1/"
@@ -83,6 +84,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

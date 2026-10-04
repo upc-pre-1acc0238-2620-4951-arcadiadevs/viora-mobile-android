@@ -46,6 +46,7 @@ import pe.edu.upc.viora.features.home.presentation.tour.LocalHomeTourTargets
 import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeTourViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.navigation.AppNavHost
 
 /** App shell: navigation host plus the producer's floating tab bar on top-level screens. */
@@ -63,9 +64,10 @@ fun VioraApp(modifier: Modifier = Modifier) {
         currentDestination?.hierarchy?.any { it.hasRoute(tab.graph::class) } == true
     }
     // Tab roots show the bar, and so do the detail screens the design keeps it on (the plot
-    // detail); the rest (wizards, full-screen maps) take the whole screen.
+    // detail, sensors); the rest (wizards, full-screen maps) take the whole screen.
     val showTabBar = tabs.any { currentDestination?.hasRoute(it.startRoute) == true } ||
-        currentDestination?.hasRoute<PlotDetailRoute>() == true
+        currentDestination?.hasRoute<PlotDetailRoute>() == true ||
+        currentDestination?.hasRoute<SensorsRoute>() == true
 
     val items = tabs.map { TabBarItem(icon = it.icon, label = stringResource(it.label)) }
     val actionLabel = stringResource(R.string.nav_action_add)

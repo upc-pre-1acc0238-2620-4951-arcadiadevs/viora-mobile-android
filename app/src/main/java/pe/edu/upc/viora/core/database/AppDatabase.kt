@@ -4,6 +4,8 @@ import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotEntity
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeDao
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeEntity
 
 /**
  * The single Room database of the app. Every bounded context contributes its entities and DAOs
@@ -21,6 +23,7 @@ import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotEntity
     entities = [
         CacheMetadataEntity::class,
         PlotEntity::class,
+        SensorNodeEntity::class,
     ],
     version = 1,
     exportSchema = true,
@@ -28,4 +31,5 @@ import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotEntity
 abstract class AppDatabase : RoomDatabase() {
     abstract fun cacheMetadataDao(): CacheMetadataDao
     abstract fun plotDao(): PlotDao
+    abstract fun sensorNodeDao(): SensorNodeDao
 }
