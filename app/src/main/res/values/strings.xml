@@ -276,4 +276,36 @@
     <string name="tour_register_body">Home, Plots, Plan and Logbook. With the + button you record a sampling, a thinning or a harvest in the field, even without signal.</string>
     <string name="tour_done_title">Ready. I\'ll let you know\n*about the rest*.</string>
     <string name="tour_done_body">If you want to go over it again, it is in My account › Home tour.</string>
+    <!-- Sensors (US13, US14) -->
+    <string name="sensors_subtitle_top">Sensors · virtual nodes</string>
+    <string name="sensors_title_lead">Your</string>
+    <string name="sensors_title_emphasis">sensors.</string>
+    <string name="sensors_virtual_notice">Son nodos virtuales: simulo sus lecturas con el clima de tus coordenadas, sin instalar equipos.</string>
+    <string name="sensors_chip_active">%1$d active</string>
+    <string name="sensors_chip_paused">%1$d paused</string>
+    <string name="sensors_empty">No sensors linked to this plot yet. Link your first virtual node.</string>
+    <string name="sensors_link_action">Link a node</string>
+    <string name="sensors_pause_footnote">En pausa no genera lecturas nuevas; lo que ya midió se conserva.</string>
+    <string name="sensors_type_microclima_subtitle">Microclimate · air and temperature</string>
+    <string name="sensors_type_sonda_subtitle">Soil · %1$d cm</string>
+    <string name="sensors_active_since">Active · %1$s ago</string>
+    <string name="sensors_active_simple">Active</string>
+    <string name="sensors_paused_since">Paused since %1$s</string>
+    <string name="sensors_paused_simple">Paused</string>
+    <string name="sensors_reading_temp_hum">%1$s° · %2$s %%</string>
+    <string name="sensors_reading_hum">%1$s %%</string>
+
+    <!-- Link sensor sheet -->
+    <string name="sensors_link_title_lead">Link</string>
+    <string name="sensors_link_title_emphasis">a node</string>
+    <string name="sensors_link_sheet_subtitle">%1$s · virtual node, without equipment</string>
+    <string name="sensors_link_name_label">Node name</string>
+    <string name="sensors_link_type_label">TYPE</string>
+    <string name="sensors_type_microclima">Microclimate</string>
+    <string name="sensors_type_sonda">Soil probe</string>
+    <string name="sensors_link_depth_label">PROBE DEPTH</string>
+    <string name="sensors_depth_30">30 cm</string>
+    <string name="sensors_depth_60">60 cm</string>
+    <string name="sensors_depth_hint">30 cm follows the water-absorbing roots; 60 cm, the deeper reserve.</string>
+    <string name="sensors_link_submit">Link node</string>
 </resources>
