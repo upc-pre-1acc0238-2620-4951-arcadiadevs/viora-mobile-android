@@ -51,6 +51,10 @@ private class FakeHarvestRecordDao : HarvestRecordDao {
         rows.value = byId.values.toList()
     }
 
+    override suspend fun deleteById(recordId: String) {
+        rows.value = rows.value.filter { it.id != recordId }
+    }
+
     override suspend fun deleteByPlot(plotId: String) {
         rows.value = rows.value.filter { it.plotId != plotId }
     }
@@ -263,6 +267,30 @@ class HarvestRecordRepositoryImplTest {
         assertTrue(result is AppResult.Success)
         assertEquals(listOf("r-1"), service.removedIds)
         assertTrue(repository.observeRecords("p-1").first().isEmpty())
+    }
+
+    @Test
+    fun rectifyDropsTheStaleIndexWhenTheFollowUpRefreshFails() = runTest {
+        indexDao.upsert(BearingIndexEntity("p-1", 0.51, 4, null))
+        service.rectified = { Response.success(dto("r-1", 2024, 500.0)) }
+        service.records = { throw IOException("offline") }
+
+        assertTrue(repository.rectify("p-1", "r-1", 500.0) is AppResult.Success)
+
+        assertEquals(500.0, repository.observeRecords("p-1").first().single().totalYieldKg, 0.0)
+        assertNull(repository.observeBearingIndex("p-1").first())
+    }
+
+    @Test
+    fun removeDropsTheRecordAndTheStaleIndexWhenTheFollowUpRefreshFails() = runTest {
+        recordDao.upsertAll(listOf(dto("r-1", 2023, 1.0).toEntityForTest(), dto("r-2", 2024, 2.0).toEntityForTest()))
+        indexDao.upsert(BearingIndexEntity("p-1", 0.51, 4, null))
+        service.records = { throw IOException("offline") }
+
+        assertTrue(repository.remove("p-1", "r-1") is AppResult.Success)
+
+        assertEquals(listOf("r-2"), repository.observeRecords("p-1").first().map { it.id })
+        assertNull(repository.observeBearingIndex("p-1").first())
     }
 
     @Test

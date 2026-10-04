@@ -15,6 +15,9 @@ interface HarvestRecordDao {
     @Upsert
     suspend fun upsertAll(entities: List<HarvestRecordEntity>)
 
+    @Query("DELETE FROM harvest_records WHERE id = :recordId")
+    suspend fun deleteById(recordId: String)
+
     @Query("DELETE FROM harvest_records WHERE plot_id = :plotId")
     suspend fun deleteByPlot(plotId: String)
 
