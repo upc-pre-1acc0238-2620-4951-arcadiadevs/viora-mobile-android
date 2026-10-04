@@ -7,9 +7,19 @@
     <string name="nav_plan">Plan</string>
     <string name="nav_logbook">Logbook</string>
     <string name="nav_action_add">What will you record?</string>
+    <string name="nav_action_close">Close menu</string>
+    <string name="record_sampling_title">Fruit-set sampling</string>
+    <string name="record_sampling_subtitle">At the tree · works offline</string>
+    <string name="record_thinning_title">Thinning done</string>
+    <string name="record_thinning_subtitle">Confirm what was done in the plot</string>
+    <string name="record_harvest_title">Harvest</string>
+    <string name="record_harvest_subtitle">Kilos per plot</string>
+    <string name="record_note_title">Logbook note</string>
+    <string name="record_note_subtitle">Free observation or photo</string>
 
     <!-- Placeholders for tabs that are not built yet -->
     <string name="placeholder_coming_soon">Coming soon</string>
+
 
     <!-- Generic errors (AppError) -->
     <string name="error_offline">No connection. Check your signal and try again.</string>
@@ -211,4 +221,5 @@
     <string name="adjust_add_corner">Add corner</string>
     <string name="adjust_save">Save outline</string>
     <string name="adjust_error_outdated">This plot changed on another device. Close this screen and open it again.</string>
+
 </resources>

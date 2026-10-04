@@ -7,9 +7,19 @@
     <string name="nav_plan">Plan</string>
     <string name="nav_logbook">Bitácora</string>
     <string name="nav_action_add">¿Qué vas a registrar?</string>
+    <string name="nav_action_close">Cerrar menú</string>
+    <string name="record_sampling_title">Muestreo de cuajado</string>
+    <string name="record_sampling_subtitle">A pie de árbol · funciona sin señal</string>
+    <string name="record_thinning_title">Aclareo realizado</string>
+    <string name="record_thinning_subtitle">Confirma lo ejecutado en el lote</string>
+    <string name="record_harvest_title">Cosecha</string>
+    <string name="record_harvest_subtitle">Kilos por lote</string>
+    <string name="record_note_title">Nota de bitácora</string>
+    <string name="record_note_subtitle">Observación libre o foto</string>
 
     <!-- Marcadores para pestañas aún no construidas -->
     <string name="placeholder_coming_soon">Próximamente</string>
+
 
     <!-- Errores genéricos (AppError) -->
     <string name="error_offline">Sin conexión. Revisa tu señal e inténtalo de nuevo.</string>
@@ -213,4 +223,5 @@
     <string name="adjust_add_corner">Agregar esquina</string>
     <string name="adjust_save">Guardar contorno</string>
     <string name="adjust_error_outdated">Este lote cambió en otro dispositivo. Cierra esta pantalla y ábrela de nuevo.</string>
+
 </resources>
