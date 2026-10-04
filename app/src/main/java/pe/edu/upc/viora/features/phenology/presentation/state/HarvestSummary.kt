@@ -50,6 +50,10 @@ object HarvestPresenter {
     fun suggestedYear(records: List<HarvestRecord>, currentYear: Int): Int =
         records.minOfOrNull { it.campaignYear }?.minus(1) ?: (currentYear - 1)
 
+    /** The [missing] campaigns still needed, oldest first, counting back from [suggestedYear]. */
+    fun missingYears(missing: Int, suggestedYear: Int): List<Int> =
+        (missing - 1 downTo 0).map { suggestedYear - it }
+
     /** [bbiClass] is null when there is no index (fewer than [HoblynBbi.MIN_CAMPAIGNS] campaigns). */
     fun summarize(records: List<HarvestRecord>, bbiClass: BbiClass?, currentYear: Int): HarvestSummary {
         if (bbiClass == null) {

@@ -17,6 +17,16 @@ fun formatKg(kg: Double): String =
         maximumFractionDigits = 1
     }.format(kg)
 
+/** Tonnes per hectare of a harvest of [kg] kilograms on [areaHectares] hectares. */
+fun tonnesPerHectare(kg: Double, areaHectares: Double): Double = kg / 1_000 / areaHectares
+
+/** "8,5": one decimal, in the device's language. */
+fun formatTonnesPerHectare(value: Double): String =
+    NumberFormat.getNumberInstance().apply {
+        minimumFractionDigits = 1
+        maximumFractionDigits = 1
+    }.format(value)
+
 /** "7,8k" for bars that are too narrow for the whole number; below a tonne the plain kilos. */
 fun formatKgCompact(kg: Double): String =
     if (kg < 1_000) {
