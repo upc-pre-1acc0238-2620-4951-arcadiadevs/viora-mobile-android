@@ -17,7 +17,7 @@ val localProperties = Properties().apply {
 }
 
 // Public Mapbox token (pk.…). It is not a secret, but keep it out of git: set it in local.properties.
-val defaultMapboxToken = " "
+val defaultMapboxToken = "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3cifQ.rJcFIG2TW4iGNnFiOecFGQ"
 val mapboxPublicToken: String = localProperties.getProperty("viora.mapboxPublicToken", defaultMapboxToken)
 
 // Android emulator alias for the host machine's localhost (backend running locally).
