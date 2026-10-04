@@ -3,6 +3,7 @@ package pe.edu.upc.viora.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,6 +16,10 @@ import pe.edu.upc.viora.core.navigation.LogbookRoute
 import pe.edu.upc.viora.core.navigation.PlaceholderScreen
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
+import pe.edu.upc.viora.core.navigation.PlotsGraph
+import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
+import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
+import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNavGraph
 
 /**
@@ -33,7 +38,21 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         modifier = modifier,
     ) {
         navigation<HomeGraph>(startDestination = HomeRoute) {
-            composable<HomeRoute> { PlaceholderScreen(title = stringResource(R.string.nav_home)) }
+            composable<HomeRoute> {
+                HomeScreen(
+                    onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
+                    onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
+                    onOpenPlots = {
+                        navController.navigate(PlotsGraph) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    // The alerts center (T14) belongs to the alerts feature.
+                    onOpenAlerts = {},
+                )
+            }
         }
         plotsNavGraph(navController)
         navigation<PlanGraph>(startDestination = PlanRoute) {
