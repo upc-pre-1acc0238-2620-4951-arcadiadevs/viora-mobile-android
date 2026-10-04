@@ -124,6 +124,7 @@ fun HomeScreenContent(
                 isOffline = state.isOffline,
                 lastRefresh = state.lastRefresh,
                 onOpenAlerts = onOpenAlerts,
+                hasUnreadAlerts = state.activeAlertsCount > 0,
                 modifier = Modifier.padding(horizontal = ScreenPadding),
             )
             Spacer(Modifier.height(28.dp))
@@ -152,6 +153,13 @@ fun HomeScreenContent(
                 )
                 is HomeUiState.Content -> {
                     sections()
+                    if (state.activeAlertsCount > 0) {
+                        pe.edu.upc.viora.features.telemetry.presentation.ui.components.HomeAlertsCard(
+                            activeCount = state.activeAlertsCount,
+                            onClick = onOpenAlerts,
+                            modifier = Modifier.padding(start = ScreenPadding, end = ScreenPadding, top = 24.dp),
+                        )
+                    }
                     Column(modifier = Modifier.padding(top = 32.dp).homeTourTarget(HomeTourTarget.Plots)) {
                         VioraSectionHeader(
                             title = stringResource(R.string.home_my_plots),

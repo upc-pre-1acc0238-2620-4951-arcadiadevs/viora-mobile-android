@@ -17,6 +17,8 @@ import pe.edu.upc.viora.core.navigation.PlaceholderScreen
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.alertsNavGraph
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
@@ -49,12 +51,15 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                             restoreState = true
                         }
                     },
-                    // The alerts center (T14) belongs to the alerts feature.
-                    onOpenAlerts = {},
+                    onOpenAlerts = { navController.navigate(AlertsCenterRoute) },
                 )
             }
         }
         plotsNavGraph(navController)
+        alertsNavGraph(
+            navController = navController,
+            onOpenPlot = { plotId -> navController.navigate(PlotDetailRoute(plotId = plotId)) },
+        )
         navigation<PlanGraph>(startDestination = PlanRoute) {
             composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
         }
