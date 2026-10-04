@@ -2,6 +2,10 @@ package pe.edu.upc.viora.core.database
 
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
+import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexDao
+import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexEntity
+import pe.edu.upc.viora.features.phenology.infrastructure.local.HarvestRecordDao
+import pe.edu.upc.viora.features.phenology.infrastructure.local.HarvestRecordEntity
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeDao
@@ -24,6 +28,8 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeEntity
         CacheMetadataEntity::class,
         PlotEntity::class,
         SensorNodeEntity::class,
+        HarvestRecordEntity::class,
+        BearingIndexEntity::class,
     ],
     version = 1,
     exportSchema = true,
@@ -32,4 +38,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun cacheMetadataDao(): CacheMetadataDao
     abstract fun plotDao(): PlotDao
     abstract fun sensorNodeDao(): SensorNodeDao
+    abstract fun harvestRecordDao(): HarvestRecordDao
+    abstract fun bearingIndexDao(): BearingIndexDao
 }

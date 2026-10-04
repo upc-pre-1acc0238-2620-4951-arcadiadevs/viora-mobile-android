@@ -14,6 +14,8 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotsScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.AdjustOutlineScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.EditPlotScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.RegisterPlotScreen
+import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
+import pe.edu.upc.viora.features.phenology.presentation.navigation.harvestHistoryComposable
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.sensorsComposable
 
@@ -70,6 +72,9 @@ fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
                 onEdit = { navController.navigate(EditPlotRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
                 onAdjustOutline = { navController.navigate(AdjustOutlineRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
                 onSensors = { navController.navigate(SensorsRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
+                onHarvestHistory = { plotName ->
+                    navController.navigate(HarvestHistoryRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
+                },
             )
         }
         composable<EditPlotRoute> {
@@ -79,5 +84,6 @@ fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
             AdjustOutlineScreen(onBack = { navController.popBackStack() })
         }
         sensorsComposable(navController)
+        harvestHistoryComposable(navController)
     }
 }
