@@ -72,18 +72,28 @@ class HarvestRecordRepositoryImpl @Inject constructor(
     override suspend fun remove(plotId: String, recordId: String): AppResult<Unit> {
         val result = apiCaller.callUnit { service.removeRecord(plotId, recordId) }
         if (result is AppResult.Failure) return result
+        val dropped = guarded {
+            recordDao.deleteById(recordId)
+            indexDao.deleteByPlot(plotId)
+        }
+        if (dropped is AppResult.Failure) return dropped
         refresh(plotId)
         return result
     }
 
     /**
      * Stores the mutated record, then refreshes so the list and the index are current. The
-     * mutation already succeeded on the server, so a failed refresh does not fail it.
+     * mutation already succeeded on the server, so a failed refresh does not fail it. The cached
+     * index is dropped first: it no longer matches the records, and without it the screen falls
+     * back to the local formula until a refresh brings the server's value.
      */
     private suspend fun AppResult<HarvestRecordDto>.cachedAndRefreshed(plotId: String): AppResult<HarvestRecord> {
         if (this is AppResult.Failure) return this
         val entity = (this as AppResult.Success).value.toEntity()
-        val stored = guarded { recordDao.upsertAll(listOf(entity)) }
+        val stored = guarded {
+            recordDao.upsertAll(listOf(entity))
+            indexDao.deleteByPlot(plotId)
+        }
         if (stored is AppResult.Failure) return stored
         refresh(plotId)
         return AppResult.Success(entity.toDomain())

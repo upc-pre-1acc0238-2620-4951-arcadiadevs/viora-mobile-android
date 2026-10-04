@@ -21,3 +21,6 @@ google-services.json
 # JVM crash logs
 hs_err_pid*.log
 replay_pid*.log
+
+# CodeGraph local index
+.codegraph/
