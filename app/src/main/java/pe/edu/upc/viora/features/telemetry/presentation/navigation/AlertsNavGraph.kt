@@ -7,12 +7,18 @@ import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.features.telemetry.presentation.ui.AlertDetailScreen
 import pe.edu.upc.viora.features.telemetry.presentation.ui.AlertsCenterScreen
 
+/** Route to the central alerts inbox screen. */
 @Serializable
 data object AlertsCenterRoute
 
+/**
+ * Route to the deep detail of an alert.
+ * [incidentId] identifies the target agroclimatic incident.
+ */
 @Serializable
 data class AlertDetailRoute(val incidentId: String)
 
+/** Alerts navigation subgraph: Alerts Center and Alert Detail. */
 fun NavGraphBuilder.alertsNavGraph(
     navController: NavController,
     onOpenPlot: (plotId: String) -> Unit = {},

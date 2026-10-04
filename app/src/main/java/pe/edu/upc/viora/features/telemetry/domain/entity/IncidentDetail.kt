@@ -4,6 +4,11 @@ import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentSeverity
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
 
+/**
+ * Detailed view of an agroclimatic incident.
+ * Contains the threshold breach metrics, the 7-day progression curve ([weeklyTrend]),
+ * and the actionable task checklist ([mitigationSteps]).
+ */
 data class IncidentDetail(
     val id: String,
     val plotId: String,

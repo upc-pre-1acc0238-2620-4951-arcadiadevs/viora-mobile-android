@@ -16,6 +16,10 @@ import pe.edu.upc.viora.features.telemetry.application.usecase.PostponeIncidentU
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertDetailUiState
 
+/**
+ * ViewModel for the Alert Detail screen.
+ * Coordinates incident detail retrieval, task completion, and postponement (snooze).
+ */
 @HiltViewModel
 class AlertDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,

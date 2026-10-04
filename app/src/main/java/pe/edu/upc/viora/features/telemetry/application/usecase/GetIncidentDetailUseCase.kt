@@ -5,6 +5,7 @@ import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.telemetry.domain.entity.IncidentDetail
 import pe.edu.upc.viora.features.telemetry.domain.repository.IncidentRepository
 
+/** Retrieves detailed metrics, weekly trends, and mitigation steps for a single incident. */
 class GetIncidentDetailUseCase @Inject constructor(
     private val repository: IncidentRepository,
 ) {

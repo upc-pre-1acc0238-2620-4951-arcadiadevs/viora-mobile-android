@@ -21,6 +21,10 @@ import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsFilter
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsUiState
 
+/**
+ * ViewModel for the Alerts Center.
+ * Combines cached incidents with interactive filter capsules (Critical, Warning, Normalized).
+ */
 @HiltViewModel
 class AlertsViewModel @Inject constructor(
     observeIncidents: ObserveIncidentsUseCase,

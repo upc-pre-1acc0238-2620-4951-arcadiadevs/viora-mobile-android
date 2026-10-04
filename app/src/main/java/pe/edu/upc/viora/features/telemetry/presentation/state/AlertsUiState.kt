@@ -4,6 +4,7 @@ import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.features.telemetry.domain.entity.AgroclimaticIncident
 import pe.edu.upc.viora.features.telemetry.domain.entity.AlertsSummary
 
+/** Filter criteria for the capsules in the Alerts Center. */
 enum class AlertsFilter {
     ALL,
     CRITICAL,
@@ -11,6 +12,7 @@ enum class AlertsFilter {
     NORMALIZED,
 }
 
+/** UI state for the central alerts inboxs. */
 sealed interface AlertsUiState {
     data object Loading : AlertsUiState
 

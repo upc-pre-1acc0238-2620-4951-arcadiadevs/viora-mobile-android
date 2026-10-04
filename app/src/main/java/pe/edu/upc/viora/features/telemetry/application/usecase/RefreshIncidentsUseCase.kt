@@ -5,6 +5,7 @@ import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.telemetry.domain.entity.AlertsSummary
 import pe.edu.upc.viora.features.telemetry.domain.repository.IncidentRepository
 
+/** Synchronizes incidents from the backend into the local cache and returns updated counts. */
 class RefreshIncidentsUseCase @Inject constructor(
     private val repository: IncidentRepository,
 ) {

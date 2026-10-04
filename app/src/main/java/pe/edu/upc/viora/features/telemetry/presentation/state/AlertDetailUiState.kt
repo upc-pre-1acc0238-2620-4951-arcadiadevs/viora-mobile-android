@@ -3,6 +3,7 @@ package pe.edu.upc.viora.features.telemetry.presentation.state
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.features.telemetry.domain.entity.IncidentDetail
 
+/** UI state for the deep alert detail screen with weekly trend and mitigation tasks. */
 sealed interface AlertDetailUiState {
     data object Loading : AlertDetailUiState
 

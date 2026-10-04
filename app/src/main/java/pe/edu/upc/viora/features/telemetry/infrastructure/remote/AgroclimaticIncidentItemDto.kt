@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.telemetry.infrastructure.remote
 
 import kotlinx.serialization.Serializable
 
+/** `AgroclimaticIncidentResource` list item representation of the backend (`/api/v1/agroclimatic-incidents`). */
 @Serializable
 data class AgroclimaticIncidentItemDto(
     val id: String,

@@ -4,6 +4,7 @@ import javax.inject.Inject
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.telemetry.domain.repository.IncidentRepository
 
+/** Marks a mitigation action step as completed for an incident in the backend. */
 class CompleteMitigationStepUseCase @Inject constructor(
     private val repository: IncidentRepository,
 ) {

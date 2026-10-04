@@ -1,5 +1,9 @@
 package pe.edu.upc.viora.features.telemetry.domain.valueobject
 
+/**
+ * Types of agroclimatic incidents originating within the Telemetry bounded context.
+ * Scoped to microclimatic and soil anomalies: heat waves, hydric stress, and frost risk.
+ */
 enum class IncidentType {
     HEAT_WAVE,
     HYDRIC_STRESS,
