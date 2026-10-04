@@ -18,7 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -40,8 +42,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
-import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 
 /**
@@ -141,8 +143,10 @@ private fun headerSubtitle(date: LocalDate, isOffline: Boolean, lastRefresh: Ins
         if (updated != null) return stringResource(R.string.home_subtitle_offline, updated)
     }
     val pattern = stringResource(R.string.home_date_pattern)
-    val text = DateTimeFormatter.ofPattern(pattern, Locale.getDefault()).format(date)
-        .replaceFirstChar { it.titlecase(Locale.getDefault()) }
+    // Read from the configuration so the date follows the language when it changes.
+    val locale = LocalConfiguration.current.locales[0]
+    val text = DateTimeFormatter.ofPattern(pattern, locale).format(date)
+        .replaceFirstChar { it.titlecase(locale) }
     return stringResource(R.string.home_subtitle_synced, text)
 }
 
@@ -159,13 +163,19 @@ fun HomeHeadline(lead: String, emphasis: String, modifier: Modifier = Modifier) 
     }
 }
 
-/** Campaign chip (dark) plus, when there are plots, the plots-and-hectares chip (Figma "Contexto"). */
+/**
+ * Campaign chip (dark) plus, when there are plots, the plots-and-hectares chip (Figma "Contexto").
+ * With several plots and an [onChangeFocus] the second chip names the plot in focus ([focusedName])
+ * and opens the picker, so the producer sees which plot the cards of the Home talk about.
+ */
 @Composable
 fun HomeContextChips(
     campaignYear: Int,
     plotCount: Int,
     totalHectares: Double,
     modifier: Modifier = Modifier,
+    focusedName: String? = null,
+    onChangeFocus: (() -> Unit)? = null,
 ) {
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         ContextChip(
@@ -173,7 +183,18 @@ fun HomeContextChips(
             background = Green900,
             textColor = Neutral50,
         )
-        if (plotCount > 0) {
+        if (plotCount > 1 && focusedName != null && onChangeFocus != null) {
+            ContextChip(
+                text = focusedName,
+                background = Neutral0,
+                textColor = Neutral900,
+                dot = Green800,
+                onClick = onChangeFocus,
+                clickLabel = stringResource(R.string.home_focus_change),
+                dropdown = true,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+        } else if (plotCount > 0) {
             ContextChip(
                 text = pluralStringResource(R.plurals.home_plots_chip, plotCount, plotCount, formatHectares(totalHectares)),
                 background = Neutral0,
@@ -185,12 +206,22 @@ fun HomeContextChips(
 }
 
 @Composable
-private fun ContextChip(text: String, background: Color, textColor: Color, modifier: Modifier = Modifier, dot: Color? = null) {
+private fun ContextChip(
+    text: String,
+    background: Color,
+    textColor: Color,
+    modifier: Modifier = Modifier,
+    dot: Color? = null,
+    onClick: (() -> Unit)? = null,
+    clickLabel: String? = null,
+    dropdown: Boolean = false,
+) {
     Row(
         modifier = modifier
             .clip(CircleShape)
             .background(background)
-            .padding(start = 12.dp, end = 14.dp, top = 8.dp, bottom = 8.dp),
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClickLabel = clickLabel, onClick = onClick) else Modifier)
+            .padding(start = 12.dp, end = if (dropdown) 8.dp else 14.dp, top = 8.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -200,7 +231,17 @@ private fun ContextChip(text: String, background: Color, textColor: Color, modif
             style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, lineHeight = 18.sp, letterSpacing = 0.sp),
             color = textColor,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false),
         )
+        if (dropdown) {
+            Icon(
+                painter = painterResource(R.drawable.ic_chevron_right),
+                contentDescription = null,
+                tint = textColor,
+                modifier = Modifier.size(16.dp).rotate(90f),
+            )
+        }
     }
 }
 

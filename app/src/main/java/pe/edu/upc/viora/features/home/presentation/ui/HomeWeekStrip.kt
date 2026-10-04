@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.DayOfWeek
@@ -44,9 +45,10 @@ fun HomeWeekStrip(today: LocalDate, modifier: Modifier = Modifier) {
 
 @Composable
 private fun WeekDay(day: LocalDate, isToday: Boolean, isPast: Boolean) {
-    val label = day.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+    val locale = LocalConfiguration.current.locales[0]
+    val label = day.dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
         .trimEnd('.')
-        .replaceFirstChar { it.titlecase(Locale.getDefault()) }
+        .replaceFirstChar { it.titlecase(locale) }
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = label,

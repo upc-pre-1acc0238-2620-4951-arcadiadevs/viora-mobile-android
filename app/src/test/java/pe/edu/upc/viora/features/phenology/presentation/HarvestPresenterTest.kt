@@ -106,4 +106,10 @@ class HarvestPresenterTest {
         assertEquals(0.51, example.value, 0.0)
         assertNull(HarvestPresenter.example(figmaRecords().take(1)))
     }
+    @Test
+    fun `missing campaigns count back from the suggested year, oldest first`() {
+        assertEquals(listOf(2023, 2024, 2025), HarvestPresenter.missingYears(missing = 3, suggestedYear = 2025))
+        assertEquals(listOf(2023), HarvestPresenter.missingYears(missing = 1, suggestedYear = 2023))
+        assertEquals(emptyList<Int>(), HarvestPresenter.missingYears(missing = 0, suggestedYear = 2023))
+    }
 }

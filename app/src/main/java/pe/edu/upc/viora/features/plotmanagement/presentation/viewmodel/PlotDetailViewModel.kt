@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,11 +15,17 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.phenology.application.usecase.ObserveBearingIndexUseCase
+import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestHistoryUseCase
+import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestLastRefreshUseCase
+import pe.edu.upc.viora.features.phenology.application.usecase.RefreshHarvestHistoryUseCase
+import pe.edu.upc.viora.features.phenology.domain.entity.HoblynBbi
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ArchivePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.LotHarvest
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotDetailUiState
 
 @HiltViewModel
@@ -27,6 +34,10 @@ class PlotDetailViewModel @Inject constructor(
     observePlot: ObservePlotUseCase,
     observePlots: ObservePlotsUseCase,
     private val archivePlot: ArchivePlotUseCase,
+    observeHarvests: ObserveHarvestHistoryUseCase,
+    observeBearingIndex: ObserveBearingIndexUseCase,
+    observeHarvestRefresh: ObserveHarvestLastRefreshUseCase,
+    private val refreshHarvests: RefreshHarvestHistoryUseCase,
 ) : ViewModel() {
 
     // Navigation stores each property of PlotDetailRoute in the saved state under its own name.
@@ -37,15 +48,33 @@ class PlotDetailViewModel @Inject constructor(
     private val savedNoticeVisible: StateFlow<Boolean> =
         savedStateHandle.getStateFlow(KEY_NOTICE_VISIBLE, savedStateHandle.get<Boolean>(KEY_JUST_SAVED) ?: false)
 
+    private val harvest: Flow<LotHarvest?> = combine(
+        observeHarvests(plotId.value),
+        observeBearingIndex(plotId.value),
+        observeHarvestRefresh(plotId.value),
+    ) { records, index, lastRefresh ->
+        when {
+            records.isEmpty() && lastRefresh == null -> null
+            records.size >= HoblynBbi.MIN_CAMPAIGNS -> LotHarvest(index?.value ?: HoblynBbi.index(records), missingCampaigns = 0)
+            else -> LotHarvest(index = null, missingCampaigns = HoblynBbi.MIN_CAMPAIGNS - records.size)
+        }
+    }
+
     val uiState: StateFlow<PlotDetailUiState> = combine(
         observePlot(plotId),
         observePlots(),
         savedNoticeVisible,
-    ) { plot, activePlots, noticeVisible ->
+        harvest,
+    ) { plot, activePlots, noticeVisible, lotHarvest ->
         if (plot == null) {
             PlotDetailUiState.NotFound
         } else {
-            PlotDetailUiState.Content(plot, noticeVisible, activeHectares = activePlots.sumOf { it.areaHectares })
+            PlotDetailUiState.Content(
+                plot,
+                noticeVisible,
+                activeHectares = activePlots.sumOf { it.areaHectares },
+                harvest = lotHarvest,
+            )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), PlotDetailUiState.Loading)
 
@@ -69,6 +98,8 @@ class PlotDetailViewModel @Inject constructor(
     }
 
     init {
+        // Best effort: the alternation card falls back to a generic line if this cannot be downloaded.
+        viewModelScope.launch { refreshHarvests(plotId.value) }
         if (savedNoticeVisible.value) {
             viewModelScope.launch {
                 delay(SAVED_NOTICE_MILLIS)

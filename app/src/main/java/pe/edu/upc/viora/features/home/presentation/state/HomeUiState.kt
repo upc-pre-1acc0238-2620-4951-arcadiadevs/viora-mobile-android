@@ -36,11 +36,16 @@ sealed interface HomeUiState {
         override val lastRefresh: Instant?,
     ) : HomeUiState
 
-    /** Cached plots, possibly stale. */
+    /**
+     * Cached plots, possibly stale. [focusedPlot] is the one the cards of the Home talk about and
+     * [alternation] what is known about its harvests (null until they are downloaded).
+     */
     data class Content(
         val plots: List<Plot>,
         override val isOffline: Boolean,
         override val lastRefresh: Instant?,
         val isRefreshing: Boolean,
+        val focusedPlot: Plot? = plots.firstOrNull(),
+        val alternation: HomeAlternation? = null,
     ) : HomeUiState
 }

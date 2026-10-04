@@ -23,6 +23,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,7 +47,8 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.Pri
 
 /**
  * The options of a plot (Figma P27): a sheet with the plot's name, its summary and a white card of
- * rows: edit its data, adjust its outline, its sensors, its alternation and archive it.
+ * rows: edit its data, adjust its outline, its sensors and archive it. Its sections (alternation,
+ * plan, climate...) are reached from the detail and from [LotSectionsSheet], not from here.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,7 +57,6 @@ fun PlotOptionsSheet(
     onEdit: () -> Unit,
     onAdjustOutline: () -> Unit,
     onSensors: () -> Unit,
-    onHarvestHistory: () -> Unit,
     onArchive: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -116,13 +117,6 @@ fun PlotOptionsSheet(
                 )
                 OptionDivider()
                 OptionRow(
-                    icon = R.drawable.ic_bar_chart,
-                    title = stringResource(R.string.plot_menu_harvest),
-                    hint = stringResource(R.string.plot_menu_harvest_hint),
-                    onClick = onHarvestHistory,
-                )
-                OptionDivider()
-                OptionRow(
                     icon = R.drawable.ic_history,
                     title = stringResource(R.string.plot_menu_archive),
                     hint = stringResource(R.string.plot_menu_archive_hint, formatHectares(plot.areaHectares)),
@@ -135,20 +129,25 @@ fun PlotOptionsSheet(
 }
 
 @Composable
-private fun OptionDivider() {
+internal fun OptionDivider() {
     HorizontalDivider(color = Neutral200)
 }
 
 @Composable
-private fun OptionRow(
+internal fun OptionRow(
     @DrawableRes icon: Int,
     title: String,
     hint: String,
     onClick: () -> Unit,
     isDestructive: Boolean = false,
+    enabled: Boolean = true,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick).padding(vertical = 12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(if (enabled) 1f else 0.5f)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .padding(vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -171,7 +170,7 @@ private fun OptionRow(
             )
             Text(text = hint, style = MaterialTheme.typography.bodySmall, color = Neutral600)
         }
-        if (!isDestructive) {
+        if (!isDestructive && enabled) {
             Icon(
                 painter = painterResource(R.drawable.ic_chevron_right),
                 contentDescription = null,

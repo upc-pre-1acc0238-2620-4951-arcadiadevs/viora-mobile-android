@@ -18,8 +18,10 @@ import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
+import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
+import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotScreens
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNavGraph
 
 /**
@@ -42,6 +44,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 HomeScreen(
                     onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
                     onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
+                    onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id.value, plotName = name)) },
                     onOpenPlots = {
                         navController.navigate(PlotsGraph) {
                             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -55,6 +58,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             }
         }
         plotsNavGraph(navController)
+        plotScreens(navController)
         navigation<PlanGraph>(startDestination = PlanRoute) {
             composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
         }

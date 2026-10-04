@@ -37,11 +37,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -75,6 +77,11 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.core.presentation.messageRes
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorNode
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorStatus
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorType
@@ -88,6 +95,7 @@ import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.SensorsViewMod
 fun SensorsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    onHarvestHistory: () -> Unit = {},
     viewModel: SensorsViewModel = hiltViewModel(),
     linkViewModel: LinkNodeViewModel = hiltViewModel(),
 ) {
@@ -96,6 +104,7 @@ fun SensorsScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
+    var showMore by rememberSaveable { mutableStateOf(false) }
 
     val plotName = when (val s = state) {
         is SensorsUiState.Content -> s.plotName
@@ -110,8 +119,34 @@ fun SensorsScreen(
             linkViewModel.reset()
             showSheet = true
         },
+        onMore = { showMore = true },
         modifier = modifier,
     )
+
+    val plot = when (val s = state) {
+        is SensorsUiState.Content -> s.plot
+        is SensorsUiState.Empty -> s.plot
+        else -> null
+    }
+    if (showMore) {
+        LotSectionsSheet(
+            plotName = plotName,
+            summary = plot?.let {
+                stringResource(
+                    R.string.plot_options_subtitle,
+                    stringResource(it.variety.labelRes()),
+                    formatHectares(it.areaHectares),
+                    formatCount(it.estimatedTrees),
+                )
+            }.orEmpty(),
+            current = LotSection.SENSORS,
+            onSelect = { section ->
+                showMore = false
+                if (section == LotSection.HARVEST) onHarvestHistory()
+            },
+            onDismiss = { showMore = false },
+        )
+    }
 
     if (showSheet) {
         ModalBottomSheet(
@@ -148,6 +183,7 @@ fun SensorsScreenContent(
     onBack: () -> Unit,
     onLinkNode: () -> Unit,
     modifier: Modifier = Modifier,
+    onMore: () -> Unit = {},
 ) {
     val plotName = when (state) {
         is SensorsUiState.Content -> state.plotName
@@ -191,7 +227,7 @@ fun SensorsScreenContent(
             CircleIconButton(
                 icon = R.drawable.ic_more_vert,
                 contentDescription = stringResource(R.string.plot_menu_more),
-                onClick = { /* More options */ },
+                onClick = onMore,
             )
         }
 
@@ -462,12 +498,13 @@ private fun SensorCard(node: SensorNode, modifier: Modifier = Modifier) {
             if (node.status == SensorStatus.ACTIVE) {
                 val temp = node.lastTemperatureCelsius
                 val hum = node.lastHumidityPercent
+                val locale = LocalConfiguration.current.locales[0]
                 val readingText = when {
                     temp != null && hum != null -> {
-                        String.format(Locale.getDefault(), "%.1f° · %.0f %%", temp, hum)
+                        String.format(locale, "%.1f° · %.0f %%", temp, hum)
                     }
                     hum != null -> {
-                        String.format(Locale.getDefault(), "%.0f %%", hum)
+                        String.format(locale, "%.0f %%", hum)
                     }
                     else -> null
                 }

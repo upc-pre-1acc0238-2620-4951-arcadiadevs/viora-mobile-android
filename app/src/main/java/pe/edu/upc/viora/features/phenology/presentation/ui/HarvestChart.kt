@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.phenology.presentation.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -34,8 +37,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.TextStyle
@@ -107,10 +112,18 @@ private val TrackHeight = 180.dp
 private val ChartHeight = 212.dp
 private val TrackTop = 24.dp
 
+/** Shows a harvest per hectare when the plot area is known, else in kilograms. */
+private class YieldScale(private val areaHectares: Double?) {
+    fun value(kg: Double): Double = if (areaHectares != null) tonnesPerHectare(kg, areaHectares) else kg
+    fun label(kg: Double): String = if (areaHectares != null) formatTonnesPerHectare(value(kg)) else formatKgCompact(kg)
+}
+
 /**
  * The yield per campaign (Figma P40 "Serie ON / OFF"): a pill bar per campaign over a light track,
  * green for an ON year and yellow for an OFF year, the alternation line through the bar tops and
- * the dashed average. Years and tags sit under the bars; the interval chips below.
+ * the dashed average. Years and tags sit under the bars; the interval chips below. The campaigns
+ * still needed for an index ([missingYears], oldest first) are dashed columns with a "+" that
+ * calls [onAddYear]. Values are tonnes per hectare when [areaHectares] is known.
  * [records] come in any order; the chart shows them oldest to newest.
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -120,9 +133,14 @@ fun HarvestChartCard(
     averageKg: Double,
     intervals: List<BbiInterval>,
     modifier: Modifier = Modifier,
+    areaHectares: Double? = null,
+    missingYears: List<Int> = emptyList(),
+    enabled: Boolean = true,
+    onAddYear: (Int) -> Unit = {},
 ) {
     val ordered = remember(records) { records.sortedBy { it.campaignYear } }
-    val description = chartDescription(ordered, averageKg)
+    val scale = remember(areaHectares) { YieldScale(areaHectares) }
+    val description = chartDescription(ordered, averageKg, areaHectares)
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -134,34 +152,42 @@ fun HarvestChartCard(
         FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             LegendDot(Green800, stringResource(R.string.harvest_year_on))
             LegendDot(Harvest300, stringResource(R.string.harvest_year_off))
-            if (ordered.size > 1) LegendDash(stringResource(R.string.harvest_average, formatKg(averageKg)))
+            if (ordered.size > 1) {
+                LegendDash(
+                    if (areaHectares != null) {
+                        stringResource(R.string.harvest_average_ha, formatTonnesPerHectare(scale.value(averageKg)))
+                    } else {
+                        stringResource(R.string.harvest_average, formatKg(averageKg))
+                    },
+                )
+            }
         }
 
-        if (ordered.isNotEmpty()) {
+        val columns = missingYears.size + ordered.size
+        if (columns > 0) {
             BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val slot = max(maxWidth.value / ordered.size, MinSlot.value).dp
+                val slot = max(maxWidth.value / columns, MinSlot.value).dp
                 val scroll = rememberScrollState()
                 LaunchedEffect(scroll.maxValue) { scroll.scrollTo(scroll.maxValue) }
-                Column(
-                    modifier = Modifier
-                        .horizontalScroll(scroll)
-                        .clearAndSetSemantics { contentDescription = description },
-                ) {
-                    BarsCanvas(ordered, averageKg, slot)
-                    Row {
-                        ordered.forEach { record ->
-                            Column(
-                                modifier = Modifier.width(slot).padding(top = 8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                Text(
-                                    text = record.campaignYear.toString(),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Neutral700,
-                                )
-                                BearingTag(record.bearing)
+                Column(modifier = Modifier.horizontalScroll(scroll)) {
+                    Box {
+                        Box(Modifier.clearAndSetSemantics { if (ordered.isNotEmpty()) contentDescription = description }) {
+                            BarsCanvas(ordered, missingYears.size, averageKg, slot, scale)
+                        }
+                        Row {
+                            missingYears.forEach { year ->
+                                Box(Modifier.width(slot).height(ChartHeight), contentAlignment = Alignment.BottomCenter) {
+                                    AddYearButton(year = year, enabled = enabled, onClick = { onAddYear(year) })
+                                }
                             }
+                        }
+                    }
+                    Row(Modifier.clearAndSetSemantics { }) {
+                        missingYears.forEach { year ->
+                            YearLabel(year = year, modifier = Modifier.width(slot)) { MissingTag() }
+                        }
+                        ordered.forEach { record ->
+                            YearLabel(year = record.campaignYear, modifier = Modifier.width(slot)) { BearingTag(record.bearing) }
                         }
                     }
                 }
@@ -181,19 +207,85 @@ fun HarvestChartCard(
 }
 
 @Composable
-private fun chartDescription(ordered: List<HarvestRecord>, averageKg: Double): String {
-    val items = ordered.map { record ->
-        stringResource(R.string.harvest_chart_item, record.campaignYear, formatKg(record.totalYieldKg))
-    }.joinToString(separator = "; ")
-    return stringResource(R.string.harvest_chart_description, pluralStringResource(R.plurals.harvest_campaigns, ordered.size, ordered.size), items, formatKg(averageKg))
+private fun YearLabel(year: Int, modifier: Modifier = Modifier, tag: @Composable () -> Unit) {
+    Column(
+        modifier = modifier.padding(top = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(text = year.toString(), style = MaterialTheme.typography.bodySmall, color = Neutral700)
+        tag()
+    }
+}
+
+/** Dashed "falta" pill of a campaign that is still to be registered. */
+@Composable
+fun MissingTag(modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(R.string.harvest_missing_tag),
+        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 12.sp),
+        color = Neutral700,
+        modifier = modifier
+            .dashedOutline(Neutral300, CornerRadius(100f, 100f), strokeWidth = 1.dp, dash = 2.dp)
+            .padding(horizontal = 7.dp, vertical = 3.dp),
+    )
+}
+
+/** Dashed rounded outline, for what is missing and can be added. */
+fun Modifier.dashedOutline(color: Color, corner: CornerRadius, strokeWidth: Dp, dash: Dp, gap: Dp = dash): Modifier =
+    drawBehind {
+        val stroke = strokeWidth.toPx()
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(stroke / 2, stroke / 2),
+            size = Size(size.width - stroke, size.height - stroke),
+            cornerRadius = CornerRadius(minOf(corner.x, size.height / 2), minOf(corner.y, size.height / 2)),
+            style = Stroke(width = stroke, pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash.toPx(), gap.toPx()))),
+        )
+    }
+
+@Composable
+private fun AddYearButton(year: Int, enabled: Boolean, onClick: () -> Unit) {
+    val label = stringResource(R.string.harvest_missing_add, year)
+    Box(
+        modifier = Modifier
+            .padding(bottom = (ChartHeight - TrackTop - TrackHeight) + 12.dp)
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(if (enabled) Green800 else Neutral300)
+            .clickable(enabled = enabled, role = Role.Button, onClickLabel = label, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(painterResource(R.drawable.ic_add), contentDescription = label, tint = Neutral0, modifier = Modifier.size(20.dp))
+    }
 }
 
 @Composable
-private fun BarsCanvas(ordered: List<HarvestRecord>, averageKg: Double, slot: Dp) {
+private fun chartDescription(ordered: List<HarvestRecord>, averageKg: Double, areaHectares: Double?): String {
+    if (ordered.isEmpty()) return ""
+    val scale = YieldScale(areaHectares)
+    val items = ordered.map { record ->
+        if (areaHectares != null) {
+            stringResource(R.string.harvest_chart_item_ha, record.campaignYear, formatTonnesPerHectare(scale.value(record.totalYieldKg)))
+        } else {
+            stringResource(R.string.harvest_chart_item, record.campaignYear, formatKg(record.totalYieldKg))
+        }
+    }.joinToString(separator = "; ")
+    val count = pluralStringResource(R.plurals.harvest_campaigns, ordered.size, ordered.size)
+    return if (areaHectares != null) {
+        stringResource(R.string.harvest_chart_description_ha, count, items, formatTonnesPerHectare(scale.value(averageKg)))
+    } else {
+        stringResource(R.string.harvest_chart_description, count, items, formatKg(averageKg))
+    }
+}
+
+@Composable
+private fun BarsCanvas(ordered: List<HarvestRecord>, missingCount: Int, averageKg: Double, slot: Dp, scale: YieldScale) {
     val measurer = rememberTextMeasurer()
     val valueStyle = TextStyle(fontFamily = RobotoFamily, fontSize = 13.sp, textAlign = TextAlign.Center)
-    val scaleMax = (ordered.maxOf { it.totalYieldKg } * 1.04).coerceAtLeast(1.0)
-    Canvas(Modifier.width(slot * ordered.size).height(ChartHeight)) {
+    val ghostStyle = TextStyle(fontFamily = RobotoFamily, fontSize = 28.sp, color = Neutral600, textAlign = TextAlign.Center)
+    val scaleMax = ((ordered.maxOfOrNull { scale.value(it.totalYieldKg) } ?: 1.0) * 1.04).coerceAtLeast(0.001)
+    Canvas(Modifier.width(slot * (missingCount + ordered.size)).height(ChartHeight)) {
         val slotPx = slot.toPx()
         val barPx = BarWidth.toPx()
         val trackH = TrackHeight.toPx()
@@ -201,28 +293,44 @@ private fun BarsCanvas(ordered: List<HarvestRecord>, averageKg: Double, slot: Dp
         val trackBottom = trackTop + trackH
         val radius = CornerRadius(barPx / 2, barPx / 2)
 
-        val tops = ordered.mapIndexed { i, record ->
+        repeat(missingCount) { i ->
             val centerX = slotPx * i + slotPx / 2
-            val barH = (record.totalYieldKg / scaleMax * trackH).toFloat().coerceAtLeast(barPx)
+            val left = centerX - barPx / 2
+            drawRoundRect(
+                color = Neutral300,
+                topLeft = Offset(left + 1.dp.toPx(), trackTop + 1.dp.toPx()),
+                size = Size(barPx - 2.dp.toPx(), trackH - 2.dp.toPx()),
+                cornerRadius = radius,
+                style = Stroke(width = 2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 5.dp.toPx()))),
+            )
+            val mark = measurer.measure("?", ghostStyle)
+            drawText(mark, topLeft = Offset(centerX - mark.size.width / 2f, trackTop + trackH * 0.42f - mark.size.height / 2f))
+        }
+
+        val tops = ordered.mapIndexed { i, record ->
+            val centerX = slotPx * (missingCount + i) + slotPx / 2
+            val barH = (scale.value(record.totalYieldKg) / scaleMax * trackH).toFloat().coerceAtLeast(barPx)
             val left = centerX - barPx / 2
             drawRoundRect(Neutral100, Offset(left, trackTop), Size(barPx, trackH), radius)
             drawRoundRect(record.bearing.barColor(), Offset(left, trackBottom - barH), Size(barPx, barH), radius)
             val label = measurer.measure(
-                formatKgCompact(record.totalYieldKg),
+                scale.label(record.totalYieldKg),
                 valueStyle.copy(color = if (record.bearing == BearingYear.ON) Neutral0 else Neutral900),
             )
             drawText(label, topLeft = Offset(centerX - label.size.width / 2f, trackBottom - 12.dp.toPx() - label.size.height))
             Offset(centerX, trackBottom - barH)
         }
 
-        val averageY = trackBottom - (averageKg / scaleMax * trackH).toFloat()
-        drawLine(
-            color = Neutral600,
-            start = Offset(0f, averageY),
-            end = Offset(size.width, averageY),
-            strokeWidth = 1.dp.toPx(),
-            pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 4.dp.toPx())),
-        )
+        if (ordered.isNotEmpty()) {
+            val averageY = trackBottom - (scale.value(averageKg) / scaleMax * trackH).toFloat()
+            drawLine(
+                color = Neutral600,
+                start = Offset(0f, averageY),
+                end = Offset(size.width, averageY),
+                strokeWidth = 1.dp.toPx(),
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 4.dp.toPx())),
+            )
+        }
 
         if (tops.size > 1) {
             val line = Path().apply {

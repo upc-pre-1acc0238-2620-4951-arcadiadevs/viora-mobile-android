@@ -126,16 +126,20 @@ class HarvestHistoryViewModel @Inject constructor(
         }
         val bbiClass = index?.let(BbiClass::of)
         val currentYear = LocalDate.now(clock).year
+        val summary = HarvestPresenter.summarize(records, bbiClass, currentYear)
+        val suggestedYear = HarvestPresenter.suggestedYear(records, currentYear)
         return HarvestHistoryUiState.Content(
             plotName = plotName.ifBlank { cache.plot?.name.orEmpty() },
-            plotSubtitle = cache.plot?.let { PlotSubtitle(it.variety, it.areaHectares) },
+            plotSubtitle = cache.plot?.let { PlotSubtitle(it.variety, it.areaHectares, it.estimatedTrees) },
             records = records,
             index = index,
             bbiClass = bbiClass,
             intervals = if (index != null) HoblynBbi.intervals(records) else emptyList(),
             averageKg = if (records.isEmpty()) 0.0 else records.sumOf { it.totalYieldKg } / records.size,
-            summary = HarvestPresenter.summarize(records, bbiClass, currentYear),
-            suggestedYear = HarvestPresenter.suggestedYear(records, currentYear),
+            areaHectares = cache.plot?.areaHectares?.takeIf { it > 0 },
+            missingYears = HarvestPresenter.missingYears(summary.missing, suggestedYear),
+            summary = summary,
+            suggestedYear = suggestedYear,
             offline = refresh.error is AppError.Offline || refresh.error is AppError.Timeout,
             lastRefresh = cache.lastRefresh,
             isRefreshing = refresh.isRefreshing,
