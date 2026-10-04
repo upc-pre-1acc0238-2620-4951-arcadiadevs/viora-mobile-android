@@ -398,4 +398,50 @@
         <item quantity="one">Con una campaña más calculo tu índice de vecería. Mientras tanto, el plan, el muestreo y el clima siguen disponibles.</item>
         <item quantity="other">Con %1$d campañas más calculo tu índice de vecería. Mientras tanto, el plan, el muestreo y el clima siguen disponibles.</item>
     </plurals>
+
+    <!-- Hoja de campaña (agregar, corregir, eliminar) -->
+    <string name="harvest_sheet_add_lead">Agrega una</string>
+    <string name="harvest_sheet_add_emphasis">campaña</string>
+    <string name="harvest_sheet_correct_lead">Corrige la</string>
+    <string name="harvest_sheet_correct_emphasis">campaña %1$d</string>
+    <string name="harvest_sheet_subtitle">%1$s · %2$s ha</string>
+    <string name="harvest_campaign_label">CAMPAÑA</string>
+    <string name="harvest_kilos_label">KILOS COSECHADOS</string>
+    <string name="harvest_kilos_unit">kg</string>
+    <string name="harvest_year_previous">Año anterior</string>
+    <string name="harvest_year_next">Año siguiente</string>
+    <string name="harvest_caption_first">tu primera campaña</string>
+    <string name="harvest_caption_before_oldest">antes de %1$d · la más antigua</string>
+    <string name="harvest_caption_after_latest">después de %1$d · la más reciente</string>
+    <string name="harvest_caption_between">entre campañas registradas</string>
+    <string name="harvest_caption_future">campaña futura</string>
+    <string name="harvest_caption_too_old">anterior al registro</string>
+    <string name="harvest_caption_duplicate">ya registrada</string>
+    <string name="harvest_error_future">La campaña %1$d aún no ocurre. Elige un año entre %2$d y %3$d.</string>
+    <string name="harvest_error_too_old">La campaña %1$d es anterior al registro. Elige un año entre %2$d y %3$d.</string>
+    <string name="harvest_error_duplicate">La campaña %1$d ya está registrada. Elige otro año o corrígela desde la lista.</string>
+    <string name="harvest_error_kilos">Ingresa los kilos cosechados: un número mayor a 0.</string>
+    <string name="harvest_kilos_hint">Usa el total de tu boleta de almazara</string>
+    <string name="harvest_kilos_before">Antes %1$s kg</string>
+    <string name="harvest_preview_add_same">Así quedaría tu índice con %1$d. Sigue siendo %2$s.</string>
+    <string name="harvest_preview_add_change">Así quedaría tu índice con %1$d. Pasaría a %2$s.</string>
+    <string name="harvest_preview_add_first">Este sería tu primer índice, con %1$d campañas: %2$s.</string>
+    <string name="harvest_preview_add_progress">Con esta tendrías %1$d de %2$d campañas necesarias para el índice.</string>
+    <string name="harvest_preview_correct_same">Se recalculan los intervalos %1$s. Sigue siendo %2$s.</string>
+    <string name="harvest_preview_correct_change">Se recalculan los intervalos %1$s. Pasaría a %2$s.</string>
+    <string name="harvest_preview_correct_plain">El índice se recalcula con la nueva cifra.</string>
+    <string name="harvest_and">" y "</string>
+    <string name="harvest_save_campaign">Guardar campaña</string>
+    <string name="harvest_save_changes">Guardar cambios</string>
+    <string name="harvest_delete_campaign_link">Eliminar esta campaña</string>
+    <string name="harvest_delete_lead">¿Eliminar la</string>
+    <string name="harvest_delete_emphasis">campaña %1$d?</string>
+    <string name="harvest_delete_confirm">Eliminar campaña</string>
+    <string name="harvest_cancel">Cancelar</string>
+    <string name="harvest_delete_index_caption">índice sin %1$d</string>
+    <string name="harvest_delete_no_index">Con menos de 3 campañas no se puede calcular el índice hasta que agregues más.</string>
+    <plurals name="harvest_delete_body">
+        <item quantity="one">Se borra del historial de %1$s y el índice se recalcula con la %2$d campaña que queda.</item>
+        <item quantity="other">Se borra del historial de %1$s y el índice se recalcula con las %2$d campañas que quedan.</item>
+    </plurals>
 </resources>

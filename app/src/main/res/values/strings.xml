@@ -396,4 +396,50 @@
         <item quantity="one">With one more campaign I can calculate your bearing index. Meanwhile, the plan, sampling and weather stay available.</item>
         <item quantity="other">With %1$d more campaigns I can calculate your bearing index. Meanwhile, the plan, sampling and weather stay available.</item>
     </plurals>
+
+    <!-- Campaign sheet (add, correct, delete) -->
+    <string name="harvest_sheet_add_lead">Add a</string>
+    <string name="harvest_sheet_add_emphasis">campaign</string>
+    <string name="harvest_sheet_correct_lead">Correct</string>
+    <string name="harvest_sheet_correct_emphasis">campaign %1$d</string>
+    <string name="harvest_sheet_subtitle">%1$s · %2$s ha</string>
+    <string name="harvest_campaign_label">CAMPAIGN</string>
+    <string name="harvest_kilos_label">KILOS HARVESTED</string>
+    <string name="harvest_kilos_unit">kg</string>
+    <string name="harvest_year_previous">Previous year</string>
+    <string name="harvest_year_next">Next year</string>
+    <string name="harvest_caption_first">your first campaign</string>
+    <string name="harvest_caption_before_oldest">before %1$d · the oldest</string>
+    <string name="harvest_caption_after_latest">after %1$d · the latest</string>
+    <string name="harvest_caption_between">between registered campaigns</string>
+    <string name="harvest_caption_future">future campaign</string>
+    <string name="harvest_caption_too_old">before the record</string>
+    <string name="harvest_caption_duplicate">already registered</string>
+    <string name="harvest_error_future">Campaign %1$d has not happened yet. Choose a year between %2$d and %3$d.</string>
+    <string name="harvest_error_too_old">Campaign %1$d is before the record. Choose a year between %2$d and %3$d.</string>
+    <string name="harvest_error_duplicate">Campaign %1$d is already registered. Choose another year or correct it from the list.</string>
+    <string name="harvest_error_kilos">Enter the kilos harvested: a number greater than 0.</string>
+    <string name="harvest_kilos_hint">Use the total from your mill receipt</string>
+    <string name="harvest_kilos_before">Before %1$s kg</string>
+    <string name="harvest_preview_add_same">This is how your index would look with %1$d. It is still %2$s.</string>
+    <string name="harvest_preview_add_change">This is how your index would look with %1$d. It would become %2$s.</string>
+    <string name="harvest_preview_add_first">This would be your first index, with %1$d campaigns: %2$s.</string>
+    <string name="harvest_preview_add_progress">With this one you would have %1$d of %2$d campaigns needed for the index.</string>
+    <string name="harvest_preview_correct_same">The intervals %1$s are recalculated. It is still %2$s.</string>
+    <string name="harvest_preview_correct_change">The intervals %1$s are recalculated. It would become %2$s.</string>
+    <string name="harvest_preview_correct_plain">The index is recalculated with the new figure.</string>
+    <string name="harvest_and">" and "</string>
+    <string name="harvest_save_campaign">Save campaign</string>
+    <string name="harvest_save_changes">Save changes</string>
+    <string name="harvest_delete_campaign_link">Delete this campaign</string>
+    <string name="harvest_delete_lead">Delete the</string>
+    <string name="harvest_delete_emphasis">campaign %1$d?</string>
+    <string name="harvest_delete_confirm">Delete campaign</string>
+    <string name="harvest_cancel">Cancel</string>
+    <string name="harvest_delete_index_caption">index without %1$d</string>
+    <string name="harvest_delete_no_index">With fewer than 3 campaigns the index cannot be calculated until you add more.</string>
+    <plurals name="harvest_delete_body">
+        <item quantity="one">It is removed from the history of %1$s and the index is recalculated with the %2$d campaign that remains.</item>
+        <item quantity="other">It is removed from the history of %1$s and the index is recalculated with the %2$d campaigns that remain.</item>
+    </plurals>
 </resources>

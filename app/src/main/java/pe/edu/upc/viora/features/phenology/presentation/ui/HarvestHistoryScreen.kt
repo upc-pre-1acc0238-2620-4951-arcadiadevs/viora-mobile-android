@@ -71,12 +71,14 @@ import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
 import pe.edu.upc.viora.features.phenology.domain.entity.HoblynBbi
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignChangeKind
+import pe.edu.upc.viora.features.phenology.presentation.state.CampaignResult
 import pe.edu.upc.viora.features.phenology.presentation.state.Headline
 import pe.edu.upc.viora.features.phenology.presentation.state.HarvestHistoryUiState
 import pe.edu.upc.viora.features.phenology.presentation.state.HarvestNotice
 import pe.edu.upc.viora.features.phenology.presentation.state.HarvestPresenter
 import pe.edu.upc.viora.features.phenology.presentation.state.Outlook
 import pe.edu.upc.viora.features.phenology.presentation.state.Voice
+import pe.edu.upc.viora.features.phenology.presentation.viewmodel.CampaignEditorViewModel
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.HarvestHistoryViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
@@ -91,8 +93,10 @@ fun HarvestHistoryScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HarvestHistoryViewModel = hiltViewModel(),
+    editor: CampaignEditorViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val editorState by editor.uiState.collectAsStateWithLifecycle()
     var showInfo by rememberSaveable { mutableStateOf(false) }
 
     HarvestHistoryContent(
@@ -101,10 +105,39 @@ fun HarvestHistoryScreen(
         onRetry = viewModel::refresh,
         onWhatIs = { showInfo = true },
         onDismissNotice = viewModel::dismissNotice,
+        onAddCampaign = editor::openAdd,
+        onEditCampaign = editor::openCorrect,
         modifier = modifier,
     )
 
     val content = state as? HarvestHistoryUiState.Content
+    val onChanged: (CampaignResult) -> Unit = { viewModel.onCampaignChanged(it.kind, it.year, it.recordId) }
+    editorState?.let { sheet ->
+        val subtitle = content?.let { c ->
+            c.plotSubtitle?.let { stringResource(R.string.harvest_sheet_subtitle, c.plotName, formatHectares(it.areaHectares)) } ?: c.plotName
+        }.orEmpty()
+        CampaignSheet(
+            state = sheet,
+            subtitle = subtitle,
+            onYearStep = editor::onYearStep,
+            onKilosChange = editor::onKilosChange,
+            onSave = { editor.save(onChanged) },
+            onDelete = editor::requestDelete,
+            onDismiss = editor::dismiss,
+        )
+        val deletePreview = sheet.deletePreview
+        if (sheet.confirmingDelete && deletePreview != null) {
+            DeleteCampaignDialog(
+                year = sheet.year,
+                plotName = content?.plotName.orEmpty(),
+                preview = deletePreview,
+                isWorking = sheet.isSaving,
+                error = sheet.error,
+                onConfirm = { editor.confirmDelete(onChanged) },
+                onDismiss = editor::cancelDelete,
+            )
+        }
+    }
     if (showInfo && content != null) {
         BbiInfoSheet(
             index = content.index,
