@@ -31,7 +31,7 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeEntity
         HarvestRecordEntity::class,
         BearingIndexEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
