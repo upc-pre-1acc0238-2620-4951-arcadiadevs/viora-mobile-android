@@ -20,6 +20,32 @@
     <!-- Marcadores para pestañas aún no construidas -->
     <string name="placeholder_coming_soon">Próximamente</string>
 
+    <!-- Inicio -->
+    <string name="home_greeting">Hola, %1$s</string>
+    <string name="home_greeting_anonymous">Hola</string>
+    <string name="home_date_pattern">EEEE d \'de\' MMMM</string>
+    <string name="home_subtitle_synced">%1$s · sincronizado</string>
+    <string name="home_subtitle_offline">Sin conexión · actualizado %1$s</string>
+    <string name="home_alerts">Alertas</string>
+    <string name="home_headline_lead">Tu campo,</string>
+    <string name="home_headline_emphasis">hoy.</string>
+    <string name="home_headline_empty_lead">Empecemos por</string>
+    <string name="home_headline_empty_emphasis">tu olivar.</string>
+    <string name="home_campaign">Campaña %1$d</string>
+    <plurals name="home_plots_chip">
+        <item quantity="one">%1$d lote · %2$s ha</item>
+        <item quantity="other">%1$d lotes · %2$s ha</item>
+    </plurals>
+    <string name="home_offline_notice">Sin señal. Lo que registres se guarda aquí y se envía al volver.</string>
+    <string name="home_my_plots">Mis lotes</string>
+    <string name="home_see_all">Ver todos</string>
+    <string name="home_plot_status_no_data">Sin datos suficientes</string>
+    <string name="home_loading_error">No pudimos cargar tu campo.</string>
+    <string name="home_first_step">PRIMER PASO</string>
+    <string name="home_first_plot_title_lead">Dibuja tu lote</string>
+    <string name="home_first_plot_title_emphasis">en el mapa</string>
+    <string name="home_first_plot_body">Con el contorno y la variedad calculo frío, clima y carga para cada parcela. Toma unos 3 minutos.</string>
+    <string name="home_first_plot_action">Registrar mi primer lote</string>
 
     <!-- Errores genéricos (AppError) -->
     <string name="error_offline">Sin conexión. Revisa tu señal e inténtalo de nuevo.</string>

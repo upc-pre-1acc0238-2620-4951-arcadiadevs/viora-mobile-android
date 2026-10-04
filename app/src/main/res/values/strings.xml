@@ -20,6 +20,32 @@
     <!-- Placeholders for tabs that are not built yet -->
     <string name="placeholder_coming_soon">Coming soon</string>
 
+    <!-- Home -->
+    <string name="home_greeting">Hello, %1$s</string>
+    <string name="home_greeting_anonymous">Hello</string>
+    <string name="home_date_pattern">EEEE, MMMM d</string>
+    <string name="home_subtitle_synced">%1$s · synced</string>
+    <string name="home_subtitle_offline">No connection · updated %1$s</string>
+    <string name="home_alerts">Alerts</string>
+    <string name="home_headline_lead">Your field,</string>
+    <string name="home_headline_emphasis">today.</string>
+    <string name="home_headline_empty_lead">Let\'s start with</string>
+    <string name="home_headline_empty_emphasis">your grove.</string>
+    <string name="home_campaign">Season %1$d</string>
+    <plurals name="home_plots_chip">
+        <item quantity="one">%1$d plot · %2$s ha</item>
+        <item quantity="other">%1$d plots · %2$s ha</item>
+    </plurals>
+    <string name="home_offline_notice">No signal. What you record is saved here and sent when you are back online.</string>
+    <string name="home_my_plots">My plots</string>
+    <string name="home_see_all">See all</string>
+    <string name="home_plot_status_no_data">Not enough data</string>
+    <string name="home_loading_error">We could not load your field.</string>
+    <string name="home_first_step">FIRST STEP</string>
+    <string name="home_first_plot_title_lead">Draw your plot</string>
+    <string name="home_first_plot_title_emphasis">on the map</string>
+    <string name="home_first_plot_body">With the outline and the variety I work out chill, weather and fruit load for each plot. It takes about 3 minutes.</string>
+    <string name="home_first_plot_action">Register my first plot</string>
 
     <!-- Generic errors (AppError) -->
     <string name="error_offline">No connection. Check your signal and try again.</string>
