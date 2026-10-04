@@ -93,6 +93,7 @@ fun PlotDetailScreen(
     onEdit: () -> Unit,
     onAdjustOutline: () -> Unit,
     onSensors: () -> Unit = {},
+    onHarvestHistory: (plotName: String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: PlotDetailViewModel = hiltViewModel(),
 ) {
@@ -106,6 +107,7 @@ fun PlotDetailScreen(
         onEdit = onEdit,
         onAdjustOutline = onAdjustOutline,
         onSensors = onSensors,
+        onHarvestHistory = onHarvestHistory,
         archiveState = archiveState,
         onArchive = viewModel::archive,
         onDismissArchiveFailure = viewModel::dismissArchiveFailure,
@@ -121,6 +123,7 @@ fun PlotDetailContent(
     onEdit: () -> Unit = {},
     onAdjustOutline: () -> Unit = {},
     onSensors: () -> Unit = {},
+    onHarvestHistory: (plotName: String) -> Unit = {},
     archiveState: ArchiveState = ArchiveState.Idle,
     onArchive: () -> Unit = {},
     onDismissArchiveFailure: () -> Unit = {},
@@ -137,6 +140,7 @@ fun PlotDetailContent(
             onEdit = onEdit,
             onAdjustOutline = onAdjustOutline,
             onSensors = onSensors,
+            onHarvestHistory = onHarvestHistory,
             activeHectares = state.activeHectares,
             archiveState = archiveState,
             onArchive = onArchive,
@@ -154,6 +158,7 @@ private fun PlotDetailBody(
     onEdit: () -> Unit,
     onAdjustOutline: () -> Unit,
     onSensors: () -> Unit,
+    onHarvestHistory: (plotName: String) -> Unit,
     activeHectares: Double,
     archiveState: ArchiveState,
     onArchive: () -> Unit,
@@ -208,6 +213,10 @@ private fun PlotDetailBody(
                 onSensors = {
                     optionsOpen = false
                     onSensors()
+                },
+                onHarvestHistory = {
+                    optionsOpen = false
+                    onHarvestHistory(plot.name)
                 },
                 onArchive = {
                     optionsOpen = false
