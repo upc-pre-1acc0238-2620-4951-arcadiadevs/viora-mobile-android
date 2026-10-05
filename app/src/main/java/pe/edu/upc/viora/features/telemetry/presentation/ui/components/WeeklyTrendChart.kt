@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.core.os.ConfigurationCompat
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,8 +71,7 @@ fun WeeklyTrendChart(
     val thresholdLineColor = if (isCritical) Terracotta600 else Harvest800
     val peakValueColor = if (isCritical) Terracotta700 else Harvest800
 
-    val configuration = LocalConfiguration.current
-    val locale = ConfigurationCompat.getLocales(configuration)[0] ?: Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0]
 
     val peakPoint = weeklyTrend.maxByOrNull { it.value }
     val peakDisplay = peakPoint?.let {

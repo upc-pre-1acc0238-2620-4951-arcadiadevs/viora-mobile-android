@@ -23,7 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.os.ConfigurationCompat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -126,8 +125,7 @@ private fun formatResolutionDate(incident: AgroclimaticIncident): String {
 
     val today = LocalDate.now(zone)
     val yesterday = today.minusDays(1)
-    val configuration = LocalConfiguration.current
-    val locale = ConfigurationCompat.getLocales(configuration)[0] ?: Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0]
 
     return when (eventDate) {
         today -> stringResource(R.string.alert_date_today)
