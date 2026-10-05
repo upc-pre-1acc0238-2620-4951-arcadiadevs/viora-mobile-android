@@ -44,6 +44,9 @@ private class FakeSensorRepository : SensorRepository {
         refreshCalls++
         return refreshResult
     }
+    override suspend fun updateNode(node: SensorNode): AppResult<SensorNode> = AppResult.Success(node)
+    override suspend fun unlinkNode(plotId: String, nodeId: String): AppResult<Unit> = AppResult.Success(Unit)
+
     override suspend fun linkNode(newNode: NewSensorNode): AppResult<SensorNode> =
         AppResult.Failure(AppError.Offline)
 }
