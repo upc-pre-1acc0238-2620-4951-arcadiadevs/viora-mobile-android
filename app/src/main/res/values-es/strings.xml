@@ -580,4 +580,25 @@
     <string name="logbook_empty_samplings_body">Tus muestreos se listarán aquí cuando los registres.</string>
     <string name="logbook_empty_thinnings_title">Aún no hay aclareos</string>
     <string name="logbook_empty_thinnings_body">Tus aclareos se listarán aquí cuando los registres.</string>
+
+    <!-- US15 / US16: configure and unlink a sensor node -->
+    <string name="sensors_cancel">Cancelar</string>
+    <string name="sensors_config_depth_hint">Cambiar la profundidad inicia una serie nueva; la anterior se conserva.</string>
+    <string name="sensors_config_depth_label">PROFUNDIDAD DE LA SONDA</string>
+    <string name="sensors_config_last_reading">ÚLTIMA LECTURA</string>
+    <string name="sensors_config_name_label">Nombre del nodo</string>
+    <string name="sensors_config_soil_reading">humedad del suelo a %1$d cm</string>
+    <string name="sensors_config_subtitle">%1$s · sensores</string>
+    <string name="sensors_config_title_emphasis">sonda.</string>
+    <string name="sensors_config_title_lead">Tu</string>
+    <string name="sensors_save_changes">Guardar cambios</string>
+    <string name="sensors_status_active">Activo</string>
+    <string name="sensors_transmit_subtitle">Si lo pausas, lo ya medido se conserva.</string>
+    <string name="sensors_transmit_title">Transmitir lecturas</string>
+    <string name="sensors_unlink_action">Desvincular nodo</string>
+    <string name="sensors_unlink_body">Sale de tus sensores activos, pero sus 182 días de lecturas se quedan en el historial del lote.</string>
+    <string name="sensors_unlink_confirm">Desvincular nodo</string>
+    <string name="sensors_unlink_count_label">nodos en el lote</string>
+    <string name="sensors_unlink_title_emphasis">%1$s?</string>
+    <string name="sensors_unlink_title_lead">¿Desvincular</string>
 </resources>

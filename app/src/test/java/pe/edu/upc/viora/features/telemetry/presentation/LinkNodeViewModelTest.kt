@@ -30,6 +30,9 @@ private class LinkFakeSensorRepo : SensorRepository {
 
     override fun observeNodes(plotId: String): Flow<List<SensorNode>> = MutableStateFlow(emptyList())
     override suspend fun refresh(plotId: String): AppResult<Unit> = AppResult.Success(Unit)
+    override suspend fun updateNode(node: SensorNode): AppResult<SensorNode> = AppResult.Success(node)
+    override suspend fun unlinkNode(plotId: String, nodeId: String): AppResult<Unit> = AppResult.Success(Unit)
+
     override suspend fun linkNode(newNode: NewSensorNode): AppResult<SensorNode> {
         linkedNode = newNode
         return if (shouldSucceed) {
