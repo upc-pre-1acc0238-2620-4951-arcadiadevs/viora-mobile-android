@@ -41,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -164,13 +165,13 @@ fun SamplingRoundScreen(
                         .fillMaxWidth()
                         .clip(CircleShape)
                         .background(Terracotta100)
-                        .padding(horizontal = 14.dp, vertical = 6.dp),
+                        .padding(start = 6.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(26.dp)
+                            .size(36.dp)
                             .clip(CircleShape)
                             .background(Neutral0),
                         contentAlignment = Alignment.Center,
@@ -179,14 +180,15 @@ fun SamplingRoundScreen(
                             painter = painterResource(R.drawable.ic_cloud_sync),
                             contentDescription = null,
                             tint = Terracotta700,
-                            modifier = Modifier.size(14.dp),
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                     Text(
                         text = stringResource(R.string.sampling_offline_banner),
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 12.sp,
-                            lineHeight = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp,
                         ),
                         color = Terracotta700,
                     )
@@ -194,37 +196,43 @@ fun SamplingRoundScreen(
                 Spacer(Modifier.height(16.dp))
             } else if (state.hasRecoveredConnection) {
                 Spacer(Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(CircleShape)
-                        .background(Green900)
-                        .padding(horizontal = 14.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
+                    Row(
                         modifier = Modifier
-                            .size(26.dp)
                             .clip(CircleShape)
-                            .background(Harvest300),
-                        contentAlignment = Alignment.Center,
+                            .background(Green900)
+                            .padding(start = 6.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_task_alt),
-                            contentDescription = null,
-                            tint = Green900,
-                            modifier = Modifier.size(14.dp),
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .background(Harvest300),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_task_alt),
+                                contentDescription = null,
+                                tint = Green900,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                        val syncCount = if (state.syncedOnResumeCount > 0) state.syncedOnResumeCount else state.evaluatedTreesCount
+                        Text(
+                            text = stringResource(R.string.sampling_synced_banner, syncCount),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 13.sp,
+                                lineHeight = 18.sp,
+                            ),
+                            color = Neutral50,
                         )
                     }
-                    Text(
-                        text = stringResource(R.string.sampling_synced_banner, state.evaluatedTreesCount),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 12.sp,
-                            lineHeight = 16.sp,
-                        ),
-                        color = Neutral50,
-                    )
                 }
                 Spacer(Modifier.height(16.dp))
             } else {
@@ -422,7 +430,11 @@ fun SamplingRoundScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     visibleSamples.forEach { sample ->
-                        EvaluatedTreeItem(sample = sample)
+                        EvaluatedTreeItem(
+                            sample = sample,
+                            isOffline = state.isOffline,
+                            hasRecoveredConnection = state.hasRecoveredConnection,
+                        )
                     }
                 }
 
@@ -574,6 +586,8 @@ fun SamplingRoundScreen(
 @Composable
 private fun EvaluatedTreeItem(
     sample: TreeSample,
+    isOffline: Boolean,
+    hasRecoveredConnection: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -630,8 +644,38 @@ private fun EvaluatedTreeItem(
             )
         }
 
-        // Sync pill badge ONLY when the sample exists in local (not synced with API)
-        if (!sample.isSynced) {
+        // Sync state badge
+        if (hasRecoveredConnection && sample.isSynced) {
+            Row(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Green200)
+                    .padding(start = 8.dp, end = 10.dp, top = 4.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_task_alt),
+                    contentDescription = null,
+                    tint = Green800,
+                    modifier = Modifier.size(14.dp),
+                )
+                Text(
+                    text = stringResource(R.string.sampling_badge_synced),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                    ),
+                    color = Green800,
+                )
+            }
+        } else if (!sample.isSynced) {
+            val badgeText = if (isOffline) {
+                stringResource(R.string.sampling_badge_pending_sync)
+            } else {
+                stringResource(R.string.sampling_saved_on_phone_badge)
+            }
             Row(
                 modifier = Modifier
                     .clip(CircleShape)
@@ -647,8 +691,9 @@ private fun EvaluatedTreeItem(
                     modifier = Modifier.size(14.dp),
                 )
                 Text(
-                    text = stringResource(R.string.sampling_saved_on_phone_badge),
+                    text = badgeText,
                     style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Medium,
                         fontSize = 11.sp,
                         lineHeight = 14.sp,
                     ),
@@ -663,9 +708,9 @@ private fun EvaluatedTreeItem(
 @Composable
 private fun SamplingRoundScreenPreview_Normal() {
     val sampleList = listOf(
-        TreeSample("A-01", 40, 24, 92.0, observedOn = java.time.LocalDate.now()),
-        TreeSample("A-02", 38, 20, null, observedOn = java.time.LocalDate.now()),
-        TreeSample("A-03", 42, 28, null, observedOn = java.time.LocalDate.now()),
+        TreeSample("A-01", 40, 24, 92.0, observedOn = java.time.LocalDate.now(), isSynced = true),
+        TreeSample("A-02", 38, 20, null, observedOn = java.time.LocalDate.now(), isSynced = true),
+        TreeSample("A-03", 42, 28, null, observedOn = java.time.LocalDate.now(), isSynced = true),
     )
     VioraTheme {
         SamplingRoundScreen(
@@ -690,9 +735,9 @@ private fun SamplingRoundScreenPreview_Normal() {
 @Composable
 private fun SamplingRoundScreenPreview_Offline() {
     val sampleList = listOf(
-        TreeSample("A-01", 40, 24, 92.0, observedOn = java.time.LocalDate.now()),
-        TreeSample("A-02", 38, 20, null, observedOn = java.time.LocalDate.now()),
-        TreeSample("A-03", 42, 28, null, observedOn = java.time.LocalDate.now()),
+        TreeSample("A-01", 40, 24, 92.0, observedOn = java.time.LocalDate.now(), isSynced = false),
+        TreeSample("A-02", 38, 20, null, observedOn = java.time.LocalDate.now(), isSynced = false),
+        TreeSample("A-03", 42, 28, null, observedOn = java.time.LocalDate.now(), isSynced = false),
     )
     VioraTheme {
         SamplingRoundScreen(
@@ -717,11 +762,11 @@ private fun SamplingRoundScreenPreview_Offline() {
 @Composable
 private fun SamplingRoundScreenPreview_RecoveredConnection() {
     val sampleList = listOf(
-        TreeSample("A-01", 40, 24, 92.0, observedOn = java.time.LocalDate.now()),
-        TreeSample("A-02", 38, 20, null, observedOn = java.time.LocalDate.now()),
-        TreeSample("A-03", 42, 28, null, observedOn = java.time.LocalDate.now()),
-        TreeSample("A-04", 40, 22, null, observedOn = java.time.LocalDate.now()),
-        TreeSample("A-05", 40, 26, null, observedOn = java.time.LocalDate.now()),
+        TreeSample("A-01", 40, 24, 92.0, observedOn = java.time.LocalDate.now(), isSynced = true),
+        TreeSample("A-02", 38, 20, null, observedOn = java.time.LocalDate.now(), isSynced = true),
+        TreeSample("A-03", 42, 28, null, observedOn = java.time.LocalDate.now(), isSynced = true),
+        TreeSample("A-04", 40, 22, null, observedOn = java.time.LocalDate.now(), isSynced = true),
+        TreeSample("A-05", 40, 26, null, observedOn = java.time.LocalDate.now(), isSynced = true),
     )
     VioraTheme {
         SamplingRoundScreen(
@@ -733,6 +778,7 @@ private fun SamplingRoundScreenPreview_RecoveredConnection() {
                 targetTreesCount = 5,
                 isOffline = false,
                 hasRecoveredConnection = true,
+                syncedOnResumeCount = 5,
             ),
             onNavigateBack = {},
             onAddTree = { _, _ -> },

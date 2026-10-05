@@ -15,6 +15,7 @@ data class SamplingSessionUiState(
     val submissionSummary: SamplingSummary? = null,
     val isOffline: Boolean = false,
     val hasRecoveredConnection: Boolean = false,
+    val syncedOnResumeCount: Int = 0,
     val error: AppError? = null,
 ) {
     val evaluatedTreesCount: Int

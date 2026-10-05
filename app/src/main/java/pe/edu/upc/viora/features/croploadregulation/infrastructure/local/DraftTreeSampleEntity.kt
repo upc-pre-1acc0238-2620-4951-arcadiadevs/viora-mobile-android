@@ -21,11 +21,11 @@ data class DraftTreeSampleEntity(
     @ColumnInfo(name = "fruit_set_count")
     val fruitSetCount: Int,
     @ColumnInfo(name = "trunk_circumference_cm")
-    val trunkCircumferenceCm: Double?,
+    val trunkCircumferenceCm: Double? = null,
     @ColumnInfo(name = "trunk_diameter_mm")
-    val trunkDiameterMm: Double?,
+    val trunkDiameterMm: Double? = null,
     @ColumnInfo(name = "observed_on")
-    val observedOn: String,
+    val observedOn: String = java.time.LocalDate.now().toString(),
     @ColumnInfo(name = "is_synced", defaultValue = "0")
     val isSynced: Boolean = false,
     @ColumnInfo(name = "created_at")
