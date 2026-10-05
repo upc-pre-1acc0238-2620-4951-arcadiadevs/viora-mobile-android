@@ -5,6 +5,7 @@ import pe.edu.upc.viora.features.telemetry.domain.entity.SensorNode
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorStatus
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorType
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeEntity
+import pe.edu.upc.viora.features.telemetry.infrastructure.remote.CalibrateSensorNodeRequestDto
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.LinkSensorNodeRequestDto
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.SensorNodeDto
 
@@ -40,4 +41,9 @@ fun NewSensorNode.toRequestDto(): LinkSensorNodeRequestDto = LinkSensorNodeReque
     name = name,
     type = type.name,
     depthCm = depthCm,
+)
+
+fun SensorNode.toCalibrationRequestDto(): CalibrateSensorNodeRequestDto = CalibrateSensorNodeRequestDto(
+    name = name,
+    depthCm = depthCm ?: 30,
 )
