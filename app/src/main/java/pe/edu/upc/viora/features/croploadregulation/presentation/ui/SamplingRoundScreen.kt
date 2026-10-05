@@ -593,9 +593,9 @@ private fun EvaluatedTreeItem(
 @Composable
 private fun SamplingRoundScreenPreview_Normal() {
     val sampleList = listOf(
-        TreeSample("A-01", 40, 24, 92.0, java.time.LocalDate.now()),
-        TreeSample("A-02", 38, 20, null, java.time.LocalDate.now()),
-        TreeSample("A-03", 42, 28, null, java.time.LocalDate.now()),
+        TreeSample("A-01", 40, 24, 92.0, observedOn = java.time.LocalDate.now()),
+        TreeSample("A-02", 38, 20, null, observedOn = java.time.LocalDate.now()),
+        TreeSample("A-03", 42, 28, null, observedOn = java.time.LocalDate.now()),
     )
     pe.edu.upc.viora.core.designsystem.theme.VioraTheme {
         SamplingRoundScreen(
@@ -620,9 +620,9 @@ private fun SamplingRoundScreenPreview_Normal() {
 @Composable
 private fun SamplingRoundScreenPreview_Offline() {
     val sampleList = listOf(
-        TreeSample("A-01", 40, 24, 92.0, java.time.LocalDate.now()),
-        TreeSample("A-02", 38, 20, null, java.time.LocalDate.now()),
-        TreeSample("A-03", 42, 28, null, java.time.LocalDate.now()),
+        TreeSample("A-01", 40, 24, 92.0, observedOn = java.time.LocalDate.now()),
+        TreeSample("A-02", 38, 20, null, observedOn = java.time.LocalDate.now()),
+        TreeSample("A-03", 42, 28, null, observedOn = java.time.LocalDate.now()),
     )
     pe.edu.upc.viora.core.designsystem.theme.VioraTheme {
         SamplingRoundScreen(
@@ -647,11 +647,11 @@ private fun SamplingRoundScreenPreview_Offline() {
 @Composable
 private fun SamplingRoundScreenPreview_RecoveredConnection() {
     val sampleList = listOf(
-        TreeSample("A-01", 40, 24, 92.0, java.time.LocalDate.now()),
-        TreeSample("A-02", 38, 20, null, java.time.LocalDate.now()),
-        TreeSample("A-03", 42, 28, null, java.time.LocalDate.now()),
-        TreeSample("A-04", 40, 22, null, java.time.LocalDate.now()),
-        TreeSample("A-05", 40, 26, null, java.time.LocalDate.now()),
+        TreeSample("A-01", 40, 24, 92.0, observedOn = java.time.LocalDate.now()),
+        TreeSample("A-02", 38, 20, null, observedOn = java.time.LocalDate.now()),
+        TreeSample("A-03", 42, 28, null, observedOn = java.time.LocalDate.now()),
+        TreeSample("A-04", 40, 22, null, observedOn = java.time.LocalDate.now()),
+        TreeSample("A-05", 40, 26, null, observedOn = java.time.LocalDate.now()),
     )
     pe.edu.upc.viora.core.designsystem.theme.VioraTheme {
         SamplingRoundScreen(
