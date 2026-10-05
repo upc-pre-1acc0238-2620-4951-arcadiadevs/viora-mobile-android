@@ -312,8 +312,12 @@
     <!-- Alerts Center & Detail (US18) -->
     <string name="alerts_title">Alerts</string>
     <string name="alerts_hero_active_label">active alerts</string>
+    <string name="alerts_hero_affected_plots_with_time">In %1$s · updated %2$s</string>
     <string name="alerts_hero_affected_plots">In %1$s</string>
     <string name="alerts_hero_no_affected_plots">Your fields are in optimal condition</string>
+    <string name="alerts_plots_conjunction"> and </string>
+    <string name="alerts_updated_at">updated %1$s</string>
+    <string name="alert_detail_date_pattern">EEEE, MMMM d</string>
     <string name="alerts_filter_critical">Critical</string>
     <string name="alerts_filter_warning">Warning</string>
     <string name="alerts_filter_normalized">Normalized</string>

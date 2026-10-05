@@ -25,6 +25,8 @@ sealed interface AlertsUiState {
         val isRefreshing: Boolean = false,
         val refreshError: AppError? = null,
         val affectedPlotsSummary: String = "",
+        val affectedPlotNames: List<String> = emptyList(),
+        val latestTriggeredAt: String? = null,
     ) : AlertsUiState
 
     data class Empty(

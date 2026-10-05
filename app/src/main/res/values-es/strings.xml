@@ -314,8 +314,12 @@
     <!-- Centro y Detalle de Alertas (US18) -->
     <string name="alerts_title">Alertas</string>
     <string name="alerts_hero_active_label">alertas activas</string>
+    <string name="alerts_hero_affected_plots_with_time">En %1$s · actualizado %2$s</string>
     <string name="alerts_hero_affected_plots">En %1$s</string>
     <string name="alerts_hero_no_affected_plots">Tus parcelas están en condiciones óptimas</string>
+    <string name="alerts_plots_conjunction"> y </string>
+    <string name="alerts_updated_at">actualizado %1$s</string>
+    <string name="alert_detail_date_pattern">EEEE d \'de\' MMMM</string>
     <string name="alerts_filter_critical">Críticas</string>
     <string name="alerts_filter_warning">Atención</string>
     <string name="alerts_filter_normalized">Normalizadas</string>

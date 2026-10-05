@@ -129,7 +129,7 @@ private fun formatResolutionDate(incident: AgroclimaticIncident): String {
         today -> stringResource(R.string.alert_date_today)
         yesterday -> stringResource(R.string.alert_date_yesterday)
         else -> {
-            val formatter = DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("es"))
+            val formatter = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
             eventDate.format(formatter).lowercase()
         }
     }

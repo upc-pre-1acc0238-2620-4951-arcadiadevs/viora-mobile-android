@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -78,7 +79,9 @@ fun HomeAlertsCard(
                         painter = painterResource(R.drawable.ic_arrow_forward),
                         contentDescription = stringResource(R.string.home_alerts),
                         tint = Terracotta700,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier
+                            .size(20.dp)
+                            .rotate(-45f),
                     )
                 }
             }

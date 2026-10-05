@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,12 +20,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Instant
@@ -130,7 +132,8 @@ fun WeeklyTrendChart(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .drawBehind {
+                        .drawWithContent {
+                            drawContent()
                             val thresholdHeightPx = with(density) { thresholdHeightFromBottom.toPx() }
                             // Line Y is relative to the tube height (tubes occupy the upper 176.dp of the day column)
                             val lineY = with(density) { tubeHeight.toPx() } - thresholdHeightPx
@@ -143,21 +146,6 @@ fun WeeklyTrendChart(
                             )
                         },
                 ) {
-                    // "umbral 32°" label placed just above the dashed line on the left
-                    Text(
-                        text = stringResource(R.string.alert_chart_threshold_label, thresholdValue.toInt(), unit),
-                        fontFamily = RobotoFamily,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 10.sp,
-                        color = thresholdTextColor,
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .offset(
-                                x = 0.dp,
-                                y = tubeHeight - thresholdHeightFromBottom - 16.dp,
-                            ),
-                    )
-
                     // 7 days columns
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -215,7 +203,10 @@ fun WeeklyTrendChart(
                                             fontWeight = FontWeight.Medium,
                                             fontSize = 11.sp,
                                             color = if (exceedsThreshold) Neutral50 else Neutral900,
-                                            modifier = Modifier.padding(top = 10.dp),
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier
+                                                .padding(top = 10.dp)
+                                                .wrapContentSize(Alignment.Center),
                                         )
                                     }
                                 }
@@ -229,10 +220,27 @@ fun WeeklyTrendChart(
                                     fontWeight = if (exceedsThreshold) FontWeight.Medium else FontWeight.Normal,
                                     fontSize = 11.sp,
                                     color = if (exceedsThreshold) peakValueColor else Neutral700,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.wrapContentSize(Alignment.Center),
                                 )
                             }
                         }
                     }
+
+                    // "umbral 32°" label placed just above the dashed line on the left, rendered in front of test-tubes
+                    Text(
+                        text = stringResource(R.string.alert_chart_threshold_label, thresholdValue.toInt(), unit),
+                        fontFamily = RobotoFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 10.sp,
+                        color = thresholdTextColor,
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .offset(
+                                x = 0.dp,
+                                y = tubeHeight - thresholdHeightFromBottom - 16.dp,
+                            ),
+                    )
                 }
             }
         }

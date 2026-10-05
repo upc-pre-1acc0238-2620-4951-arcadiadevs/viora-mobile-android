@@ -16,12 +16,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -226,27 +235,33 @@ fun AlertDetailScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    val timeWindowText = if (detail.timeWindow.isNotBlank()) {
-                        "${detail.dateFormatted} · ${detail.timeWindow}"
-                    } else {
-                        detail.dateFormatted.ifBlank { detail.triggeredAt }
-                    }
+                    val datePattern = stringResource(R.string.alert_detail_date_pattern)
+                    val timeWindowText = formatAlertDetailDateTime(
+                        dateFormatted = detail.dateFormatted,
+                        triggeredAt = detail.triggeredAt,
+                        timeWindow = detail.timeWindow,
+                        weeklyTrend = detail.weeklyTrend,
+                        datePattern = datePattern,
+                        locale = Locale.getDefault(),
+                    )
 
                     // Header centered (Figma T15)
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Text(
-                            text = timeWindowText,
-                            fontFamily = RobotoFamily,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 13.sp,
-                            color = timeRangeColor,
-                            textAlign = TextAlign.Center,
-                        )
+                        if (timeWindowText.isNotBlank()) {
+                            Text(
+                                text = timeWindowText,
+                                fontFamily = RobotoFamily,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 13.sp,
+                                color = timeRangeColor,
+                                textAlign = TextAlign.Center,
+                            )
 
-                        Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
+                        }
 
                         Text(
                             text = titleText,
@@ -261,6 +276,7 @@ fun AlertDetailScreen(
                         Spacer(modifier = Modifier.height(14.dp))
 
                         Row(
+                            modifier = Modifier.wrapContentWidth(Alignment.CenterHorizontally),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
@@ -269,6 +285,7 @@ fun AlertDetailScreen(
                                     .clip(PillShape)
                                     .background(if (isCritical) Terracotta500 else Harvest300)
                                     .padding(horizontal = 14.dp, vertical = 7.dp),
+                                contentAlignment = Alignment.Center,
                             ) {
                                 Text(
                                     text = if (isCritical) stringResource(R.string.alert_severity_critical) else stringResource(R.string.alert_severity_warning),
@@ -276,6 +293,8 @@ fun AlertDetailScreen(
                                     fontWeight = FontWeight.Medium,
                                     fontSize = 12.sp,
                                     color = if (isCritical) Neutral50 else Neutral900,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.wrapContentSize(Alignment.Center),
                                 )
                             }
 
@@ -285,6 +304,7 @@ fun AlertDetailScreen(
                                         .clip(PillShape)
                                         .background(Neutral0)
                                         .padding(horizontal = 14.dp, vertical = 7.dp),
+                                    contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
                                         text = detail.plotName,
@@ -292,6 +312,8 @@ fun AlertDetailScreen(
                                         fontWeight = FontWeight.Medium,
                                         fontSize = 12.sp,
                                         color = Neutral900,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.wrapContentSize(Alignment.Center),
                                     )
                                 }
                             }
@@ -301,6 +323,7 @@ fun AlertDetailScreen(
                                     .clip(PillShape)
                                     .background(Neutral0)
                                     .padding(horizontal = 14.dp, vertical = 7.dp),
+                                contentAlignment = Alignment.Center,
                             ) {
                                 Text(
                                     text = stringResource(R.string.alert_detail_rule_chip),
@@ -308,6 +331,8 @@ fun AlertDetailScreen(
                                     fontWeight = FontWeight.Medium,
                                     fontSize = 12.sp,
                                     color = Neutral900,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.wrapContentSize(Alignment.Center),
                                 )
                             }
                         }
@@ -421,3 +446,94 @@ fun AlertDetailScreen(
         }
     }
 }
+
+private fun formatAlertDetailDateTime(
+    dateFormatted: String,
+    triggeredAt: String,
+    timeWindow: String,
+    weeklyTrend: List<pe.edu.upc.viora.features.telemetry.domain.entity.WeeklyTrendPoint>,
+    datePattern: String,
+    locale: Locale = Locale.getDefault(),
+): String {
+    val rawDateCandidate = dateFormatted.ifBlank { triggeredAt }.ifBlank {
+        weeklyTrend.lastOrNull()?.timestamp.orEmpty()
+    }
+
+    val parsedDate = if (rawDateCandidate.isNotBlank()) {
+        runCatching {
+            LocalDate.parse(rawDateCandidate)
+        }.recoverCatching {
+            Instant.parse(rawDateCandidate).atZone(ZoneId.systemDefault()).toLocalDate()
+        }.recoverCatching {
+            LocalDateTime.parse(rawDateCandidate).toLocalDate()
+        }.getOrNull()
+    } else null
+
+    val resolvedDate = parsedDate ?: LocalDate.now(ZoneId.systemDefault())
+
+    val formattedDateText = DateTimeFormatter.ofPattern(datePattern, locale)
+        .format(resolvedDate)
+        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
+
+    val formattedTimeWindow = formatDetailTimeWindow(timeWindow, triggeredAt, locale)
+
+    return if (formattedTimeWindow.isNotBlank()) {
+        "$formattedDateText · $formattedTimeWindow"
+    } else {
+        formattedDateText
+    }
+}
+
+private fun formatDetailTimeWindow(
+    rawTimeWindow: String,
+    triggeredAt: String,
+    locale: Locale,
+): String {
+    val trimmed = rawTimeWindow.trim()
+    if (trimmed.isNotBlank()) {
+        val rangeRegex = Regex("""(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})""")
+        val match = rangeRegex.find(trimmed)
+        if (match != null) {
+            val (h1Str, m1Str, h2Str, m2Str) = match.destructured
+            val startHour = h1Str.toIntOrNull() ?: 0
+            val startMin = m1Str.toIntOrNull() ?: 0
+            val endHour = h2Str.toIntOrNull() ?: 0
+            val endMin = m2Str.toIntOrNull() ?: 0
+
+            val startTime = LocalTime.of(startHour, startMin)
+            val endTime = LocalTime.of(endHour, endMin)
+
+            val isSpanish = locale.language.equals("es", ignoreCase = true)
+            val timeFormatter = DateTimeFormatter.ofPattern("h a", locale)
+
+            val startFormatted = formatAmPm(startTime.format(timeFormatter), isSpanish)
+            val endFormatted = formatAmPm(endTime.format(timeFormatter), isSpanish)
+
+            val connector = if (isSpanish) " a " else " to "
+            return "$startFormatted$connector$endFormatted"
+        }
+        return trimmed
+    }
+
+    if (triggeredAt.isNotBlank()) {
+        val instant = runCatching { Instant.parse(triggeredAt) }.getOrNull()
+        if (instant != null) {
+            val localTime = instant.atZone(ZoneId.systemDefault()).toLocalTime()
+            val isSpanish = locale.language.equals("es", ignoreCase = true)
+            val timeFormatter = DateTimeFormatter.ofPattern("h:mm a", locale)
+            return formatAmPm(localTime.format(timeFormatter), isSpanish)
+        }
+    }
+
+    return ""
+}
+
+private fun formatAmPm(formattedTime: String, isSpanish: Boolean): String {
+    if (!isSpanish) return formattedTime
+    return formattedTime
+        .replace("AM", "a. m.")
+        .replace("PM", "p. m.")
+        .replace("am", "a. m.")
+        .replace("pm", "p. m.")
+}
+

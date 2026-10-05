@@ -50,6 +50,10 @@ import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsUiState
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.AlertCard
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.AlertFilterCapsules
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.NormalizedAlertRow
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.AlertsViewModel
 
 @Composable
@@ -126,6 +130,8 @@ fun AlertsCenterScreen(
                     activeFilter = state.activeFilter,
                     incidents = emptyList(),
                     affectedPlotsSummary = "",
+                    affectedPlotNames = emptyList(),
+                    latestTriggeredAt = null,
                     onBack = onBack,
                     onOpenDetail = onOpenDetail,
                     onFilterSelected = { viewModel.setFilter(it) },
@@ -138,6 +144,8 @@ fun AlertsCenterScreen(
                     activeFilter = state.activeFilter,
                     incidents = state.incidents,
                     affectedPlotsSummary = state.affectedPlotsSummary,
+                    affectedPlotNames = state.affectedPlotNames,
+                    latestTriggeredAt = state.latestTriggeredAt,
                     onBack = onBack,
                     onOpenDetail = onOpenDetail,
                     onFilterSelected = { viewModel.setFilter(it) },
@@ -153,6 +161,8 @@ private fun AlertsCenterContent(
     activeFilter: AlertsFilter,
     incidents: List<pe.edu.upc.viora.features.telemetry.domain.entity.AgroclimaticIncident>,
     affectedPlotsSummary: String,
+    affectedPlotNames: List<String> = emptyList(),
+    latestTriggeredAt: String? = null,
     onBack: () -> Unit,
     onOpenDetail: (String) -> Unit,
     onFilterSelected: (AlertsFilter) -> Unit,
@@ -252,10 +262,26 @@ private fun AlertsCenterContent(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            val contextualSubtitle = if (affectedPlotsSummary.isNotBlank()) {
-                stringResource(R.string.alerts_hero_affected_plots, affectedPlotsSummary)
-            } else {
-                stringResource(R.string.alerts_hero_no_affected_plots)
+            val conjunction = stringResource(R.string.alerts_plots_conjunction)
+            val affectedPlotsText = when {
+                affectedPlotNames.size > 1 -> affectedPlotNames.dropLast(1).joinToString(", ") + conjunction + affectedPlotNames.last()
+                affectedPlotNames.size == 1 -> affectedPlotNames.first()
+                affectedPlotsSummary.isNotBlank() -> affectedPlotsSummary
+                else -> ""
+            }
+
+            val formattedTime = latestTriggeredAt?.let { formatAlertTriggerTime(it, Locale.getDefault()) }
+
+            val contextualSubtitle = when {
+                affectedPlotsText.isNotBlank() && !formattedTime.isNullOrBlank() -> {
+                    stringResource(R.string.alerts_hero_affected_plots_with_time, affectedPlotsText, formattedTime)
+                }
+                affectedPlotsText.isNotBlank() -> {
+                    stringResource(R.string.alerts_hero_affected_plots, affectedPlotsText)
+                }
+                else -> {
+                    stringResource(R.string.alerts_hero_no_affected_plots)
+                }
             }
 
             Text(
@@ -358,3 +384,21 @@ private fun AlertsCenterContent(
         Spacer(modifier = Modifier.height(32.dp))
     }
 }
+
+private fun formatAlertTriggerTime(triggerIso: String, locale: Locale): String? {
+    return runCatching {
+        val instant = Instant.parse(triggerIso)
+        val isSpanish = locale.language.equals("es", ignoreCase = true)
+        val formatter = DateTimeFormatter.ofPattern("h:mm a", locale)
+        var formatted = instant.atZone(ZoneId.systemDefault()).format(formatter)
+        if (isSpanish) {
+            formatted = formatted
+                .replace("AM", "a. m.")
+                .replace("PM", "p. m.")
+                .replace("am", "a. m.")
+                .replace("pm", "p. m.")
+        }
+        formatted
+    }.getOrNull()
+}
+

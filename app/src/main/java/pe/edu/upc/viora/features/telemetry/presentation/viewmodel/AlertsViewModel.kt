@@ -74,31 +74,9 @@ class AlertsViewModel @Inject constructor(
             .filter { it.isNotBlank() }
             .distinct()
 
-        val affectedPlotsText = when {
-            affectedPlotNames.size > 1 -> affectedPlotNames.dropLast(1).joinToString(", ") + " y " + affectedPlotNames.last()
-            affectedPlotNames.size == 1 -> affectedPlotNames.first()
-            else -> ""
-        }
+        val latestTrigger = activeIncidents.map { it.triggeredAt }.filter { it.isNotBlank() }.maxOrNull()
 
-        val latestTrigger = activeIncidents.maxOfOrNull { it.triggeredAt }
-        val updatedTimeText = latestTrigger?.let { triggerStr ->
-            runCatching {
-                val instant = java.time.Instant.parse(triggerStr)
-                val formatter = java.time.format.DateTimeFormatter.ofPattern("h:mm a", java.util.Locale.forLanguageTag("es"))
-                val formattedTime = instant.atZone(java.time.ZoneId.systemDefault()).format(formatter)
-                    .replace("AM", "a. m.")
-                    .replace("PM", "p. m.")
-                    .replace("am", "a. m.")
-                    .replace("pm", "p. m.")
-                " · actualizado $formattedTime"
-            }.getOrNull()
-        }.orEmpty()
-
-        val affectedPlots = if (affectedPlotsText.isNotBlank()) {
-            "$affectedPlotsText$updatedTimeText"
-        } else {
-            ""
-        }
+        val fallbackSummary = affectedPlotNames.joinToString(", ")
 
         when {
             allIncidents.isNotEmpty() || filter != AlertsFilter.ALL -> AlertsUiState.Content(
@@ -107,7 +85,9 @@ class AlertsViewModel @Inject constructor(
                 activeFilter = filter,
                 isRefreshing = refresh.isRefreshing,
                 refreshError = refresh.error,
-                affectedPlotsSummary = affectedPlots,
+                affectedPlotsSummary = fallbackSummary,
+                affectedPlotNames = affectedPlotNames,
+                latestTriggeredAt = latestTrigger,
             )
             refresh.isRefreshing || !refresh.hasFinishedOnce -> AlertsUiState.Loading
             refresh.error != null -> AlertsUiState.Error(refresh.error)
