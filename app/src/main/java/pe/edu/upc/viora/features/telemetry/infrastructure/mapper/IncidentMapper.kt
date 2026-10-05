@@ -110,4 +110,5 @@ fun AgroclimaticIncidentDetailDto.toDomain(): IncidentDetail = IncidentDetail(
     snoozedUntil = snoozedUntil,
     mitigationSteps = mitigationSteps.map { it.toDomain() },
     weeklyTrend = weeklyTrend.map { it.toDomain() },
+    dataSource = dataSource,
 )

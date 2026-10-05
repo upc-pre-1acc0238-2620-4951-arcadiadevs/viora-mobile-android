@@ -53,8 +53,9 @@ fun AlertCard(
     val cardBg = if (isCritical) Terracotta100 else Harvest100
     val metricColor = if (isCritical) Terracotta700 else Harvest800
     val iconRes = when (incident.type) {
-        IncidentType.HEAT_WAVE -> R.drawable.ic_thermostat
-        IncidentType.HYDRIC_STRESS -> R.drawable.ic_water_drop
+        IncidentType.HEAT_WAVE -> R.drawable.ic_thermometer_gain
+        IncidentType.HYDRIC_STRESS -> R.drawable.ic_potencial_hidrico
+        IncidentType.FROST_WARNING -> R.drawable.ic_thermostat
         else -> R.drawable.ic_sensors
     }
 
@@ -95,7 +96,7 @@ fun AlertCard(
                     Icon(
                         painter = painterResource(iconRes),
                         contentDescription = null,
-                        tint = if (isCritical) Terracotta500 else Harvest800,
+                        tint = if (isCritical) Terracotta700 else Harvest800,
                         modifier = Modifier.size(24.dp),
                     )
                 }
@@ -175,43 +176,36 @@ fun AlertCard(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            Box(
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
                     .clip(PillShape)
                     .background(Green900)
                     .clickable { onOpenDetail(incident.id) }
-                    .padding(horizontal = 18.dp),
-                contentAlignment = Alignment.Center,
+                    .padding(start = 18.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text(
-                        text = stringResource(R.string.alert_action_see_what_to_do),
-                        fontFamily = RobotoFamily,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp,
-                        color = Neutral0,
-                    )
+                Text(
+                    text = stringResource(R.string.alert_action_see_what_to_do),
+                    fontFamily = RobotoFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    color = Neutral0,
+                )
 
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(Neutral0),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_forward),
-                            contentDescription = null,
-                            tint = Green900,
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(Neutral0),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_arrow_forward),
+                        contentDescription = null,
+                        tint = Green900,
+                        modifier = Modifier.size(16.dp),
+                    )
                 }
             }
         }

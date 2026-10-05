@@ -225,14 +225,18 @@ private fun AlertsCenterContent(
         Spacer(modifier = Modifier.height(28.dp))
 
         // Hero Section
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Text(
                 text = summary.activeCount.toString(),
                 fontFamily = NewsreaderFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 96.sp,
+                fontWeight = FontWeight.Normal,
+                fontSize = 112.sp,
                 color = Neutral900,
-                lineHeight = 96.sp,
+                lineHeight = 104.sp,
+                textAlign = TextAlign.Center,
             )
 
             Text(
@@ -242,6 +246,8 @@ private fun AlertsCenterContent(
                 fontWeight = FontWeight.Normal,
                 fontSize = 26.sp,
                 color = Neutral900,
+                lineHeight = 30.sp,
+                textAlign = TextAlign.Center,
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -258,6 +264,7 @@ private fun AlertsCenterContent(
                 fontWeight = FontWeight.Normal,
                 fontSize = 13.sp,
                 color = Neutral600,
+                textAlign = TextAlign.Center,
             )
         }
 
@@ -320,7 +327,6 @@ private fun AlertsCenterContent(
                 normalizedIncidents.forEach { incident ->
                     NormalizedAlertRow(
                         incident = incident,
-                        onClick = { onOpenDetail(incident.id) },
                     )
                 }
             }

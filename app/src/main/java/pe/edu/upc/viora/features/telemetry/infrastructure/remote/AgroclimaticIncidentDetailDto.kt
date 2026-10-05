@@ -24,4 +24,5 @@ data class AgroclimaticIncidentDetailDto(
     val snoozedUntil: String? = null,
     val mitigationSteps: List<MitigationStepDto> = emptyList(),
     val weeklyTrend: List<WeeklyTrendPointDto> = emptyList(),
+    val dataSource: String? = null,
 )

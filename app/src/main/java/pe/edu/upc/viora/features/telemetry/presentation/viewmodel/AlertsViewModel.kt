@@ -68,12 +68,34 @@ class AlertsViewModel @Inject constructor(
             AlertsFilter.NORMALIZED -> allIncidents.filter { it.status == IncidentStatus.NORMALIZED }
         }
 
-        val affectedPlots = allIncidents
-            .filter { it.status != IncidentStatus.NORMALIZED }
+        val activeIncidents = allIncidents.filter { it.status != IncidentStatus.NORMALIZED }
+        val affectedPlotNames = activeIncidents
             .map { it.plotName }
             .filter { it.isNotBlank() }
             .distinct()
-            .joinToString(separator = ", ")
+
+        val affectedPlotsText = when {
+            affectedPlotNames.size > 1 -> affectedPlotNames.dropLast(1).joinToString(", ") + " y " + affectedPlotNames.last()
+            affectedPlotNames.size == 1 -> affectedPlotNames.first()
+            else -> ""
+        }
+
+        val latestTrigger = activeIncidents.maxOfOrNull { it.triggeredAt }
+        val updatedTimeText = latestTrigger?.let { instant ->
+            val formatter = java.time.format.DateTimeFormatter.ofPattern("h:mm a", java.util.Locale.forLanguageTag("es"))
+            val formattedTime = instant.atZone(java.time.ZoneId.systemDefault()).format(formatter)
+                .replace("AM", "a. m.")
+                .replace("PM", "p. m.")
+                .replace("am", "a. m.")
+                .replace("pm", "p. m.")
+            " · actualizado $formattedTime"
+        }.orEmpty()
+
+        val affectedPlots = if (affectedPlotsText.isNotBlank()) {
+            "$affectedPlotsText$updatedTimeText"
+        } else {
+            ""
+        }
 
         when {
             allIncidents.isNotEmpty() || filter != AlertsFilter.ALL -> AlertsUiState.Content(

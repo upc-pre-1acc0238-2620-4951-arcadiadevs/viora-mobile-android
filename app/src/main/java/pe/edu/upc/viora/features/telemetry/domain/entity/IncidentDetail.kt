@@ -29,4 +29,5 @@ data class IncidentDetail(
     val snoozedUntil: String? = null,
     val mitigationSteps: List<MitigationStep> = emptyList(),
     val weeklyTrend: List<WeeklyTrendPoint> = emptyList(),
+    val dataSource: String? = null,
 )

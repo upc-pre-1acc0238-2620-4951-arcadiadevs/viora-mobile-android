@@ -51,16 +51,32 @@ fun MitigationChecklistCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
             .background(Neutral0)
-            .padding(20.dp),
+            .padding(22.dp),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = stringResource(R.string.alert_checklist_header, completedCount, totalCount),
-                fontFamily = NewsreaderFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 20.sp,
-                color = Neutral900,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.alert_checklist_title),
+                    fontFamily = NewsreaderFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 24.sp,
+                    lineHeight = 30.sp,
+                    color = Neutral900,
+                )
+
+                Text(
+                    text = stringResource(R.string.alert_checklist_progress, completedCount, totalCount),
+                    fontFamily = RobotoFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    color = Neutral600,
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -88,14 +104,13 @@ private fun MitigationStepRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
             .clickable(enabled = !step.completed, onClick = onClick)
-            .padding(vertical = 4.dp),
+            .padding(vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(28.dp)
+                .size(26.dp)
                 .clip(CircleShape)
                 .then(
                     if (step.completed) {
@@ -118,13 +133,13 @@ private fun MitigationStepRow(
             }
         }
 
-        Spacer(modifier = Modifier.width(14.dp))
+        Spacer(modifier = Modifier.width(12.dp))
 
         Text(
             text = step.instruction,
             fontFamily = RobotoFamily,
-            fontWeight = if (step.completed) FontWeight.Normal else FontWeight.Medium,
-            fontSize = 14.sp,
+            fontWeight = FontWeight.Normal,
+            fontSize = 15.sp,
             color = if (step.completed) Neutral600 else Neutral900,
             textDecoration = if (step.completed) TextDecoration.LineThrough else TextDecoration.None,
             lineHeight = 20.sp,

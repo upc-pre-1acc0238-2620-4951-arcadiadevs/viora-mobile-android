@@ -232,77 +232,84 @@ fun AlertDetailScreen(
                         detail.dateFormatted.ifBlank { detail.triggeredAt }
                     }
 
-                    Text(
-                        text = timeWindowText,
-                        fontFamily = RobotoFamily,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 13.sp,
-                        color = timeRangeColor,
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Text(
-                        text = titleText,
-                        fontFamily = NewsreaderFamily,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 38.sp,
-                        color = Neutral900,
-                        lineHeight = 42.sp,
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Row(
+                    // Header centered (Figma T15)
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .clip(PillShape)
-                                .background(if (isCritical) Terracotta500 else Harvest300)
-                                .padding(horizontal = 12.dp, vertical = 6.dp),
-                        ) {
-                            Text(
-                                text = if (isCritical) stringResource(R.string.alert_severity_critical) else stringResource(R.string.alert_severity_warning),
-                                fontFamily = RobotoFamily,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 12.sp,
-                                color = if (isCritical) Neutral0 else Neutral900,
-                            )
-                        }
+                        Text(
+                            text = timeWindowText,
+                            fontFamily = RobotoFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 13.sp,
+                            color = timeRangeColor,
+                            textAlign = TextAlign.Center,
+                        )
 
-                        if (detail.plotName.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(
+                            text = titleText,
+                            fontFamily = NewsreaderFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 40.sp,
+                            lineHeight = 44.sp,
+                            color = Neutral900,
+                            textAlign = TextAlign.Center,
+                        )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(PillShape)
+                                    .background(if (isCritical) Terracotta500 else Harvest300)
+                                    .padding(horizontal = 14.dp, vertical = 7.dp),
+                            ) {
+                                Text(
+                                    text = if (isCritical) stringResource(R.string.alert_severity_critical) else stringResource(R.string.alert_severity_warning),
+                                    fontFamily = RobotoFamily,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 12.sp,
+                                    color = if (isCritical) Neutral50 else Neutral900,
+                                )
+                            }
+
+                            if (detail.plotName.isNotBlank()) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(PillShape)
+                                        .background(Neutral0)
+                                        .padding(horizontal = 14.dp, vertical = 7.dp),
+                                ) {
+                                    Text(
+                                        text = detail.plotName,
+                                        fontFamily = RobotoFamily,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 12.sp,
+                                        color = Neutral900,
+                                    )
+                                }
+                            }
+
                             Box(
                                 modifier = Modifier
                                     .clip(PillShape)
                                     .background(Neutral0)
-                                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                                    .padding(horizontal = 14.dp, vertical = 7.dp),
                             ) {
                                 Text(
-                                    text = detail.plotName,
+                                    text = stringResource(R.string.alert_detail_rule_chip),
                                     fontFamily = RobotoFamily,
                                     fontWeight = FontWeight.Medium,
                                     fontSize = 12.sp,
                                     color = Neutral900,
                                 )
                             }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .clip(PillShape)
-                                .background(Neutral0)
-                                .padding(horizontal = 12.dp, vertical = 6.dp),
-                        ) {
-                            Text(
-                                text = stringResource(R.string.alert_detail_rule_chip),
-                                fontFamily = RobotoFamily,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 12.sp,
-                                color = Neutral600,
-                            )
                         }
                     }
 
@@ -326,14 +333,23 @@ fun AlertDetailScreen(
                         Spacer(modifier = Modifier.height(20.dp))
                     }
 
+                    val traceabilityNote = detail.dataSource?.takeIf { it.isNotBlank() }
+                        ?: if (detail.plotName.isNotBlank()) {
+                            stringResource(R.string.alert_detail_traceability_note_plot, detail.plotName)
+                        } else {
+                            stringResource(R.string.alert_detail_traceability_note)
+                        }
+
                     Text(
-                        text = stringResource(R.string.alert_detail_traceability_note),
+                        text = traceabilityNote,
                         fontFamily = RobotoFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 12.sp,
                         color = Neutral600,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
                     )
 
                     Spacer(modifier = Modifier.height(28.dp))
