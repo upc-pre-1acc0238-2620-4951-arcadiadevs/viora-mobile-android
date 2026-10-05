@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.croploadregulation.presentation.ui
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.tooling.preview.Preview
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,6 +29,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,6 +84,7 @@ fun SamplingRoundScreen(
     modifier: Modifier = Modifier,
 ) {
     val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     Box(
         modifier = modifier
@@ -90,7 +97,7 @@ fun SamplingRoundScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(
                     top = topInset + 8.dp,
-                    bottom = 120.dp,
+                    bottom = bottomInset + 24.dp,
                     start = ScreenPadding,
                     end = ScreenPadding,
                 ),
@@ -384,6 +391,14 @@ fun SamplingRoundScreen(
 
             Spacer(Modifier.height(12.dp))
 
+            var isTreesExpanded by rememberSaveable { mutableStateOf(false) }
+            val totalTrees = state.samples.size
+            val visibleSamples = if (!isTreesExpanded && totalTrees > 3) {
+                state.samples.take(3)
+            } else {
+                state.samples
+            }
+
             if (state.samples.isEmpty()) {
                 Box(
                     modifier = Modifier
@@ -402,24 +417,45 @@ fun SamplingRoundScreen(
                     )
                 }
             } else {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    state.samples.forEach { sample ->
+                Column(
+                    modifier = Modifier.animateContentSize(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    visibleSamples.forEach { sample ->
                         EvaluatedTreeItem(sample = sample)
                     }
                 }
-            }
-        }
 
-        // Bottom Actions Container
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = ScreenPadding, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+                if (totalTrees > 3) {
+                    Spacer(Modifier.height(14.dp))
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = if (isTreesExpanded) {
+                                stringResource(R.string.sampling_action_view_less_trees)
+                            } else {
+                                stringResource(R.string.sampling_action_view_all_trees, totalTrees)
+                            },
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                            ),
+                            color = Green800,
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .clickable(role = Role.Button) {
+                                    isTreesExpanded = !isTreesExpanded
+                                }
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(28.dp))
+
             // "Continuar después" link
             Text(
                 text = stringResource(R.string.sampling_action_continue_later),
@@ -429,10 +465,13 @@ fun SamplingRoundScreen(
                 ),
                 color = Green800,
                 modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
                     .clip(CircleShape)
                     .clickable(role = Role.Button, onClick = onContinueLater)
                     .padding(horizontal = 12.dp, vertical = 4.dp),
             )
+
+            Spacer(Modifier.height(12.dp))
 
             // Row with "Agregar árbol N" / "Otro árbol" and "Finalizar" / "Finalizar ronda"
             Row(

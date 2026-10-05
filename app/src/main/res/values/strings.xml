@@ -632,6 +632,8 @@
     <string name="sampling_action_another_tree">Another tree</string>
     <string name="sampling_action_finish">Finish</string>
     <string name="sampling_action_finalize_round">Finalize round</string>
+    <string name="sampling_action_view_all_trees">View all %1$d trees</string>
+    <string name="sampling_action_view_less_trees">View less</string>
 
     <string name="sampling_register_tree_title">Tree %1$d of %2$d</string>
     <string name="sampling_register_tree_subtitle">%1$s · saved on phone</string>

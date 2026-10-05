@@ -634,6 +634,8 @@
     <string name="sampling_action_another_tree">Otro árbol</string>
     <string name="sampling_action_finish">Finalizar</string>
     <string name="sampling_action_finalize_round">Finalizar ronda</string>
+    <string name="sampling_action_view_all_trees">Ver los %1$d árboles</string>
+    <string name="sampling_action_view_less_trees">Ver menos</string>
 
     <string name="sampling_register_tree_title">Árbol %1$d de %2$d</string>
     <string name="sampling_register_tree_subtitle">%1$s · se guarda en el teléfono</string>
