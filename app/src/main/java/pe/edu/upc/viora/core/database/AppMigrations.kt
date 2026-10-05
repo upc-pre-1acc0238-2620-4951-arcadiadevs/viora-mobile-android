@@ -44,5 +44,23 @@ object AppMigrations {
         )
     }
 
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+    /** Adds the draft tree samples cache for in-progress sampling rounds. */
+    val MIGRATION_3_4 = Migration(3, 4) { connection ->
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS `draft_tree_samples` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, " +
+                "`plot_name` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, `tree_identifier` TEXT NOT NULL, " +
+                "`shoots_count` INTEGER NOT NULL, `fruit_set_count` INTEGER NOT NULL, " +
+                "`trunk_circumference_cm` REAL, `trunk_diameter_mm` REAL, `observed_on` TEXT NOT NULL, " +
+                "`created_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        )
+    }
+
+    /** Adds the is_synced column to draft_tree_samples. */
+    val MIGRATION_4_5 = Migration(4, 5) { connection ->
+        connection.execSQL(
+            "ALTER TABLE `draft_tree_samples` ADD COLUMN `is_synced` INTEGER NOT NULL DEFAULT 0",
+        )
+    }
+
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
 }

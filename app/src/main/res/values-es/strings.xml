@@ -562,6 +562,7 @@
 
     <string name="logbook_headline_lead">Tu</string>
     <string name="logbook_headline_emphasis">bitácora.</string>
+    <string name="logbook_saved_on_phone_badge">%1$d en el teléfono</string>
     <string name="logbook_filter_all">Todo</string>
     <string name="logbook_filter_samplings">Muestreos</string>
     <string name="logbook_filter_thinnings">Aclareos</string>
@@ -619,16 +620,20 @@
     <string name="sampling_representativeness_title">REPRESENTATIVIDAD</string>
     <string name="sampling_trees_count_suffix">de %1$d árboles</string>
     <string name="sampling_trees_missing_notice">Faltan %1$d árboles para una muestra suficiente.</string>
-    <string name="sampling_trees_sufficient_notice">Muestra suficiente para generar prescripción.</string>
+    <string name="sampling_trees_sufficient_notice">Muestra suficiente: ya puedo calcular tu carga.</string>
     <string name="sampling_stat_mean_fruits">frutos por brote · media</string>
     <string name="sampling_stat_saved_locally">guardados en el teléfono</string>
     <string name="sampling_evaluated_trees_title">Árboles evaluados</string>
+    <string name="sampling_evaluated_trees_title_with_count">Árboles evaluados · %1$d</string>
+    <string name="sampling_evaluated_trees_empty">Aún no se ha evaluado ningún árbol</string>
     <string name="sampling_tree_details">%1$d brotes · %2$d frutos</string>
     <string name="sampling_tree_ratio">%1$s frutos por brote</string>
     <string name="sampling_saved_on_phone_badge">En el teléfono</string>
     <string name="sampling_action_continue_later">Continuar después</string>
     <string name="sampling_action_add_tree">Agregar árbol %1$d</string>
+    <string name="sampling_action_another_tree">Otro árbol</string>
     <string name="sampling_action_finish">Finalizar</string>
+    <string name="sampling_action_finalize_round">Finalizar ronda</string>
 
     <string name="sampling_register_tree_title">Árbol %1$d de %2$d</string>
     <string name="sampling_register_tree_subtitle">%1$s · se guarda en el teléfono</string>
@@ -636,6 +641,7 @@
     <string name="sampling_tree_tag_label">Etiqueta del árbol</string>
     <string name="sampling_trunk_circumference_label">Contorno del tronco · opcional</string>
     <string name="sampling_trunk_circumference_hint">p. ej. 92 cm · a un palmo del suelo</string>
+    <string name="sampling_trunk_circumference_suffix"> cm · a un palmo del suelo</string>
     <string name="sampling_shoots_observed_title">Brotes observados</string>
     <string name="sampling_shoots_observed_subtitle">En la rama marcada del árbol</string>
     <string name="sampling_fruit_set_title">Frutos cuajados</string>
