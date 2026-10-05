@@ -228,7 +228,7 @@ fun AlertDetailScreen(
                                 painter = painterResource(R.drawable.ic_share),
                                 contentDescription = stringResource(R.string.alert_detail_share),
                                 tint = Neutral900,
-                                modifier = Modifier.size(22.dp),
+                                modifier = Modifier.size(24.dp),
                             )
                         }
                     }

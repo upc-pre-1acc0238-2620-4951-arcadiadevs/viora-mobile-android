@@ -227,7 +227,7 @@ private fun AlertsCenterContent(
                     painter = painterResource(R.drawable.ic_settings),
                     contentDescription = stringResource(R.string.alerts_nav_settings),
                     tint = Neutral900,
-                    modifier = Modifier.size(22.dp),
+                    modifier = Modifier.size(24.dp),
                 )
             }
         }
