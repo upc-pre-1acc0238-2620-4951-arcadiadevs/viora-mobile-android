@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class SamplingBatchRequestDto(
+    val clientBatchId: String,
     val campaignYear: Int,
-    val samplingBatchId: String,
     val samples: List<TreeSampleRequestDto>,
 )

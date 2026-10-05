@@ -599,4 +599,77 @@
     <string name="sensors_unlink_count_label">nodes in the plot</string>
     <string name="sensors_unlink_title_emphasis">%1$s?</string>
     <string name="sensors_unlink_title_lead">Unlink</string>
+
+    <!-- US24 / US25: Thinning Sampling and Bitacora Timeline -->
+    <string name="sampling_select_plot_title">New sampling</string>
+    <string name="sampling_select_plot_subtitle">Season %1$d · fruit set</string>
+    <string name="sampling_select_plot_headline_lead">Where will you</string>
+    <string name="sampling_select_plot_headline_emphasis">sample?</string>
+    <string name="sampling_select_plot_voice">Choose 5 trees spread across the plot, not just the edge.</string>
+    <string name="sampling_status_in_progress">Round in progress · %1$d of %2$d</string>
+    <string name="sampling_status_completed">Round complete · %1$d of %2$d</string>
+    <string name="sampling_status_not_started">No sampling this season</string>
+    <string name="sampling_action_start">Start round</string>
+    <string name="sampling_action_continue">Continue round</string>
+    <string name="sampling_action_view_summary">View summary</string>
+
+    <string name="sampling_round_subtitle">Fruit set round · %1$d</string>
+    <string name="sampling_representativeness_title">REPRESENTATIVENESS</string>
+    <string name="sampling_trees_count_suffix">of %1$d trees</string>
+    <string name="sampling_trees_missing_notice">%1$d trees left for a representative sample.</string>
+    <string name="sampling_trees_sufficient_notice">Sufficient sample to generate prescription.</string>
+    <string name="sampling_stat_mean_fruits">fruits per shoot · mean</string>
+    <string name="sampling_stat_saved_locally">saved on phone</string>
+    <string name="sampling_evaluated_trees_title">Evaluated trees</string>
+    <string name="sampling_tree_details">%1$d shoots · %2$d fruits</string>
+    <string name="sampling_tree_ratio">%1$s fruits per shoot</string>
+    <string name="sampling_saved_on_phone_badge">On phone</string>
+    <string name="sampling_action_continue_later">Continue later</string>
+    <string name="sampling_action_add_tree">Add tree %1$d</string>
+    <string name="sampling_action_finish">Finish</string>
+
+    <string name="sampling_register_tree_title">Tree %1$d of %2$d</string>
+    <string name="sampling_register_tree_subtitle">%1$s · saved on phone</string>
+    <string name="sampling_register_tree_headline_lead">Tree</string>
+    <string name="sampling_tree_tag_label">Tree tag</string>
+    <string name="sampling_trunk_circumference_label">Trunk circumference · optional</string>
+    <string name="sampling_trunk_circumference_hint">e.g. 92 cm · a handspan above ground</string>
+    <string name="sampling_shoots_observed_title">Observed shoots</string>
+    <string name="sampling_shoots_observed_subtitle">On the marked branch</string>
+    <string name="sampling_fruit_set_title">Set fruits</string>
+    <string name="sampling_fruit_set_subtitle">Small fruits formed on those shoots</string>
+    <string name="sampling_live_calculated_suffix">fruits per shoot on this tree</string>
+    <string name="sampling_action_save_tree">Save tree</string>
+
+    <string name="sampling_complete_synced">Synced · %1$s</string>
+    <string name="sampling_complete_headline_lead">Round</string>
+    <string name="sampling_complete_headline_emphasis">complete.</string>
+    <string name="sampling_complete_voice">With this sample I can work out the crop load for %1$s.</string>
+    <string name="sampling_complete_trees_label">evaluated trees</string>
+    <string name="sampling_complete_shoots_label">observed shoots</string>
+    <string name="sampling_complete_fruits_label">set fruits</string>
+    <string name="sampling_complete_mean_label">fruits per shoot · mean</string>
+    <string name="sampling_complete_action_view_plan">View plot plan</string>
+    <string name="sampling_complete_action_back_logbook">Back to Logbook</string>
+
+    <string name="sampling_offline_banner">No connection: your records are saved on phone.</string>
+    <string name="sampling_synced_banner">Signal restored · %1$d trees synced</string>
+    <string name="sampling_badge_pending_sync">Pending sync</string>
+    <string name="sampling_badge_synced">Synced</string>
+    <string name="sampling_stat_synced">synced</string>
+    <string name="sampling_error_fruits_out_of_range">With %1$d shoots, the maximum allowed is %2$d fruits (4 per shoot).</string>
+    <string name="sampling_live_calculated_invalid">review fruits to calculate</string>
+    <string name="sampling_saved_offline_badge">On phone</string>
+    <string name="sampling_saved_offline_headline_emphasis">saved.</string>
+    <string name="sampling_saved_offline_voice">When signal returns, I\'ll complete the round and work out your crop load.</string>
+    <string name="sampling_saved_offline_plan_notice">The plan unlocks once the round is synced.</string>
+
+    <string name="logbook_sampling_completed_title">Sampling completed</string>
+    <string name="logbook_sampling_completed_desc">%1$s · %2$d trees · %3$s fruits/shoot</string>
+    <string name="logbook_thinning_executed_title">Thinning recorded</string>
+    <string name="logbook_thinning_executed_desc">%1$s · %2$s %% · %3$s</string>
+    <string name="logbook_in_progress_badge">IN PROGRESS · %1$s</string>
+    <string name="logbook_in_progress_title">Fruit-set sampling</string>
+    <string name="logbook_in_progress_counter">%1$d of %2$d trees · %3$d left for a sufficient sample</string>
+    <string name="logbook_in_progress_continue">Continue round</string>
 </resources>
