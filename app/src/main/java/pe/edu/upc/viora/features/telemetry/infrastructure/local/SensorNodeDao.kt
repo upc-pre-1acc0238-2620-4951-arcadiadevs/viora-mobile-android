@@ -16,4 +16,7 @@ interface SensorNodeDao {
 
     @Query("DELETE FROM sensor_nodes WHERE plot_id = :plotId AND id NOT IN (:keepIds)")
     suspend fun deleteExcept(plotId: String, keepIds: List<String>)
+
+    @Query("DELETE FROM sensor_nodes WHERE plot_id = :plotId AND id = :nodeId")
+    suspend fun delete(plotId: String, nodeId: String)
 }
