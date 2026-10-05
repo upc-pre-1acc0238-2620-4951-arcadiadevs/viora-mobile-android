@@ -40,16 +40,20 @@ import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlots
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RefreshPlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
+import pe.edu.upc.viora.features.telemetry.application.usecase.RefreshIncidentsUseCase
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 
 /**
- * Home (P10). It reads the same cached plots as the Lotes tab, so both always agree; the
- * sections owned by other features (phase, weather, alerts, alternation) are not read here.
+ * Home (P10). Observes plots and agroclimatic incidents for unified status and alerts badge.
  */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     observePlots: ObservePlotsUseCase,
     observeLastRefresh: ObservePlotsLastRefreshUseCase,
+    observeIncidents: ObserveIncidentsUseCase,
     private val refreshPlots: RefreshPlotsUseCase,
+    private val refreshIncidents: RefreshIncidentsUseCase,
     observeChosenPlot: ObserveChosenPlotUseCase,
     private val choosePlot: ChoosePlotUseCase,
     private val observeHarvests: ObserveHarvestHistoryUseCase,
@@ -85,19 +89,39 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private val activeAlertsCount: Flow<Long> = observeIncidents(null).map { incidents ->
+        incidents.count { it.status != IncidentStatus.NORMALIZED }.toLong()
+    }
+
+    private val focusAndAlternation: Flow<Pair<Plot?, HomeAlternation?>> =
+        combine(focusedPlot, alternation) { focused, alternation -> focused to alternation }
+
     val uiState: StateFlow<HomeUiState> = combine(
         observePlots(),
         observeLastRefresh(),
+        activeAlertsCount,
         refreshState,
-        focusedPlot,
-        alternation,
-    ) { plots, lastRefresh, refresh, focused, alternation ->
+        focusAndAlternation,
+    ) { plots, lastRefresh, activeCount, refresh, (focused, alternation) ->
         val offline = refresh.error == AppError.Offline
+
         when {
-            plots.isNotEmpty() -> HomeUiState.Content(plots, offline, lastRefresh, refresh.isRefreshing, focused, alternation)
+            plots.isNotEmpty() -> HomeUiState.Content(
+                plots = plots,
+                isOffline = offline,
+                lastRefresh = lastRefresh,
+                isRefreshing = refresh.isRefreshing,
+                activeAlertsCount = activeCount,
+                focusedPlot = focused,
+                alternation = alternation,
+            )
             refresh.isRefreshing || !refresh.hasFinishedOnce -> HomeUiState.Loading
             refresh.error != null -> HomeUiState.Error(refresh.error)
-            else -> HomeUiState.NoPlots(offline, lastRefresh)
+            else -> HomeUiState.NoPlots(
+                isOffline = offline,
+                lastRefresh = lastRefresh,
+                activeAlertsCount = activeCount,
+            )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState.Loading)
 
@@ -115,12 +139,13 @@ class HomeViewModel @Inject constructor(
         if (refreshState.value.isRefreshing) return
         refreshState.update { it.copy(isRefreshing = true) }
         viewModelScope.launch {
-            val result = refreshPlots()
+            val plotsResult = refreshPlots()
+            refreshIncidents()
             refreshState.update {
                 RefreshState(
                     isRefreshing = false,
                     hasFinishedOnce = true,
-                    error = (result as? AppResult.Failure)?.error,
+                    error = (plotsResult as? AppResult.Failure)?.error,
                 )
             }
         }

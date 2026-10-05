@@ -18,6 +18,9 @@ sealed interface HomeUiState {
     /** When the data shown was last synchronised with the server, if ever. */
     val lastRefresh: Instant?
 
+    /** Number of active agroclimatic alerts. */
+    val activeAlertsCount: Long get() = 0
+
     /** Nothing cached yet and the first download is in progress. */
     data object Loading : HomeUiState {
         override val isOffline = false
@@ -34,6 +37,7 @@ sealed interface HomeUiState {
     data class NoPlots(
         override val isOffline: Boolean,
         override val lastRefresh: Instant?,
+        override val activeAlertsCount: Long = 0,
     ) : HomeUiState
 
     /**
@@ -45,6 +49,7 @@ sealed interface HomeUiState {
         override val isOffline: Boolean,
         override val lastRefresh: Instant?,
         val isRefreshing: Boolean,
+        override val activeAlertsCount: Long = 0,
         val focusedPlot: Plot? = plots.firstOrNull(),
         val alternation: HomeAlternation? = null,
     ) : HomeUiState

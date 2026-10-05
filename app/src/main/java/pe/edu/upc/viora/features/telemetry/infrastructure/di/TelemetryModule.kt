@@ -6,7 +6,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import pe.edu.upc.viora.core.database.AppDatabase
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.IncidentDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeDao
+import pe.edu.upc.viora.features.telemetry.infrastructure.remote.IncidentService
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.SensorService
 import retrofit2.Retrofit
 
@@ -21,4 +23,12 @@ object TelemetryModule {
 
     @Provides
     fun provideSensorNodeDao(database: AppDatabase): SensorNodeDao = database.sensorNodeDao()
+
+    @Provides
+    @Singleton
+    fun provideIncidentService(retrofit: Retrofit): IncidentService =
+        retrofit.create(IncidentService::class.java)
+
+    @Provides
+    fun provideIncidentDao(database: AppDatabase): IncidentDao = database.incidentDao()
 }

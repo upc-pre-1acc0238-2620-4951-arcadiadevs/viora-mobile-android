@@ -43,6 +43,12 @@ import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotChanges
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
+import pe.edu.upc.viora.features.telemetry.application.usecase.RefreshIncidentsUseCase
+import pe.edu.upc.viora.features.telemetry.domain.entity.AgroclimaticIncident
+import pe.edu.upc.viora.features.telemetry.domain.entity.AlertsSummary
+import pe.edu.upc.viora.features.telemetry.domain.entity.IncidentDetail
+import pe.edu.upc.viora.features.telemetry.domain.repository.IncidentRepository
 
 private class CachedPlots : PlotRepository {
     val plots = MutableStateFlow<List<Plot>>(emptyList())
@@ -67,12 +73,28 @@ private class FakeFocus : FocusedPlotRepository {
     }
 }
 
+private class FakeIncidentRepository : IncidentRepository {
+    val incidents = MutableStateFlow<List<AgroclimaticIncident>>(emptyList())
+    var refreshCalls = 0
+
+    override fun observeIncidents(plotId: String?): Flow<List<AgroclimaticIncident>> = incidents
+    override suspend fun refresh(plotId: String?, status: String?, severity: String?): AppResult<AlertsSummary> {
+        refreshCalls++
+        return AppResult.Success(AlertsSummary(0, 0, 0, 0))
+    }
+    override suspend fun getIncidentDetail(incidentId: String): AppResult<IncidentDetail> = AppResult.Failure(AppError.Offline)
+    override suspend fun postponeIncident(incidentId: String, durationHours: Int): AppResult<Unit> = AppResult.Success(Unit)
+    override suspend fun completeMitigationStep(incidentId: String, stepId: String): AppResult<Unit> = AppResult.Success(Unit)
+    override suspend fun getSummary(): AppResult<AlertsSummary> = AppResult.Success(AlertsSummary(0, 0, 0, 0))
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
 
     private val plots = CachedPlots()
     private val focus = FakeFocus()
     private val harvests = FakeHarvestRepository()
+    private val incidentsRepo = FakeIncidentRepository()
     private val clock = Clock.fixed(Instant.parse("2026-10-04T12:00:00Z"), ZoneOffset.UTC)
 
     @Before
@@ -102,7 +124,9 @@ class HomeViewModelTest {
     private fun viewModel() = HomeViewModel(
         observePlots = ObservePlotsUseCase(plots),
         observeLastRefresh = ObservePlotsLastRefreshUseCase(plots),
+        observeIncidents = ObserveIncidentsUseCase(incidentsRepo),
         refreshPlots = RefreshPlotsUseCase(plots),
+        refreshIncidents = RefreshIncidentsUseCase(incidentsRepo),
         observeChosenPlot = ObserveChosenPlotUseCase(focus),
         choosePlot = ChoosePlotUseCase(focus),
         observeHarvests = ObserveHarvestHistoryUseCase(harvests),
