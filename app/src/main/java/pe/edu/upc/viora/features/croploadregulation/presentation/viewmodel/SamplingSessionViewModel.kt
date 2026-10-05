@@ -25,7 +25,7 @@ class SamplingSessionViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SamplingSessionUiState())
     val uiState: StateFlow<SamplingSessionUiState> = _uiState.asStateFlow()
 
-    fun initSession(plotId: String, plotName: String, campaignYear: Int = 2026) {
+    fun initSession(plotId: String, plotName: String, campaignYear: Int = java.time.Year.now().value) {
         if (_uiState.value.plotId != plotId) {
             _uiState.value = SamplingSessionUiState(
                 plotId = plotId,

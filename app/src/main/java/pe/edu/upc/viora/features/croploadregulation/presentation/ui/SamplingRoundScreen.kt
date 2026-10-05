@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.croploadregulation.presentation.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,6 +55,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.SamplingSessionUiState
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.component.SamplingSegmentedBar
@@ -146,7 +148,7 @@ fun SamplingRoundScreen(
                 }
             }
 
-            // Connectivity Banner (Figma P52: Sin conexión vs Conexión recuperada)
+            // Connectivity Banner
             if (state.isOffline) {
                 Spacer(Modifier.height(16.dp))
                 Row(
@@ -589,7 +591,7 @@ private fun EvaluatedTreeItem(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true, backgroundColor = 0xFFF3F0EA)
+@Preview(showBackground = true, backgroundColor = 0xFFF3F0EA)
 @Composable
 private fun SamplingRoundScreenPreview_Normal() {
     val sampleList = listOf(
@@ -597,7 +599,7 @@ private fun SamplingRoundScreenPreview_Normal() {
         TreeSample("A-02", 38, 20, null, observedOn = java.time.LocalDate.now()),
         TreeSample("A-03", 42, 28, null, observedOn = java.time.LocalDate.now()),
     )
-    pe.edu.upc.viora.core.designsystem.theme.VioraTheme {
+    VioraTheme {
         SamplingRoundScreen(
             state = SamplingSessionUiState(
                 plotId = "1",
@@ -616,7 +618,7 @@ private fun SamplingRoundScreenPreview_Normal() {
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true, backgroundColor = 0xFFF3F0EA)
+@Preview(showBackground = true, backgroundColor = 0xFFF3F0EA)
 @Composable
 private fun SamplingRoundScreenPreview_Offline() {
     val sampleList = listOf(
@@ -624,7 +626,7 @@ private fun SamplingRoundScreenPreview_Offline() {
         TreeSample("A-02", 38, 20, null, observedOn = java.time.LocalDate.now()),
         TreeSample("A-03", 42, 28, null, observedOn = java.time.LocalDate.now()),
     )
-    pe.edu.upc.viora.core.designsystem.theme.VioraTheme {
+    VioraTheme {
         SamplingRoundScreen(
             state = SamplingSessionUiState(
                 plotId = "1",
@@ -643,7 +645,7 @@ private fun SamplingRoundScreenPreview_Offline() {
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true, backgroundColor = 0xFFF3F0EA)
+@Preview(showBackground = true, backgroundColor = 0xFFF3F0EA)
 @Composable
 private fun SamplingRoundScreenPreview_RecoveredConnection() {
     val sampleList = listOf(
@@ -653,7 +655,7 @@ private fun SamplingRoundScreenPreview_RecoveredConnection() {
         TreeSample("A-04", 40, 22, null, observedOn = java.time.LocalDate.now()),
         TreeSample("A-05", 40, 26, null, observedOn = java.time.LocalDate.now()),
     )
-    pe.edu.upc.viora.core.designsystem.theme.VioraTheme {
+    VioraTheme {
         SamplingRoundScreen(
             state = SamplingSessionUiState(
                 plotId = "1",

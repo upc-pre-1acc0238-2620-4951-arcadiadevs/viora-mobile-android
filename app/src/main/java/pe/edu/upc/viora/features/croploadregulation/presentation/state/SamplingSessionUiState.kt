@@ -8,7 +8,7 @@ import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
 data class SamplingSessionUiState(
     val plotId: String = "",
     val plotName: String = "",
-    val campaignYear: Int = 2026,
+    val campaignYear: Int = java.time.Year.now().value,
     val samples: List<TreeSample> = emptyList(),
     val targetTreesCount: Int = 5,
     val isSubmitting: Boolean = false,

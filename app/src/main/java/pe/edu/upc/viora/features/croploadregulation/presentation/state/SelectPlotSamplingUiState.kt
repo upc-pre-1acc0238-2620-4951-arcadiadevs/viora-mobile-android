@@ -9,7 +9,7 @@ sealed interface SelectPlotSamplingUiState {
     data class Content(
         val plots: List<PlotSamplingOverview>,
         val selectedPlotId: String?,
-        val campaignYear: Int = 2026,
+        val campaignYear: Int = java.time.Year.now().value,
         val isRefreshing: Boolean = false,
         val error: AppError? = null,
     ) : SelectPlotSamplingUiState {

@@ -46,19 +46,23 @@ class SelectPlotSamplingViewModel @Inject constructor(
         loadPlots()
     }
 
+    private val currentYear = java.time.Year.now().value
+
     private fun loadPlots() {
         viewModelScope.launch {
-            getPlotSamplingOverview(campaignYear = 2026).fold(
+            getPlotSamplingOverview(campaignYear = currentYear).fold(
                 onSuccess = { plots ->
                     val defaultSelected = (_uiState.value as? SelectPlotSamplingUiState.Content)?.selectedPlotId
                         ?: plots.firstOrNull { it.samplingStatus == SamplingStatus.IN_PROGRESS }?.plotId
                         ?: plots.firstOrNull { it.samplingStatus == SamplingStatus.NOT_STARTED }?.plotId
                         ?: plots.firstOrNull()?.plotId
 
+                    val campaign = plots.firstOrNull()?.campaignYear ?: currentYear
+
                     _uiState.value = SelectPlotSamplingUiState.Content(
                         plots = plots,
                         selectedPlotId = defaultSelected,
-                        campaignYear = 2026,
+                        campaignYear = campaign,
                         isRefreshing = false,
                         error = null,
                     )
@@ -71,7 +75,7 @@ class SelectPlotSamplingViewModel @Inject constructor(
                         SelectPlotSamplingUiState.Content(
                             plots = emptyList(),
                             selectedPlotId = null,
-                            campaignYear = 2026,
+                            campaignYear = currentYear,
                             isRefreshing = false,
                             error = error,
                         )

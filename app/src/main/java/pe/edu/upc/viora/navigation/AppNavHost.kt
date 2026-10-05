@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRoundRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.component.ActiveSamplingCard
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
 
 /**
@@ -84,20 +83,12 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         navigation<LogbookGraph>(startDestination = LogbookRoute) {
             composable<LogbookRoute> {
                 LogbookScreen(
-                    activeSamplingCard = {
-                        ActiveSamplingCard(
-                            plotName = "Lote Norte",
-                            completedTrees = 3,
-                            targetTrees = 5,
-                            onContinueRound = {
-                                navController.navigate(
-                                    SamplingRoundRoute(
-                                        plotId = "550e8400-e29b-41d4-a716-446655440001",
-                                        plotName = "Lote Norte",
-                                    ),
-                                )
-                            },
-                            modifier = Modifier.padding(horizontal = 24.dp),
+                    onContinueSampling = { plotId, plotName ->
+                        navController.navigate(
+                            SamplingRoundRoute(
+                                plotId = plotId,
+                                plotName = plotName,
+                            ),
                         )
                     },
                 )

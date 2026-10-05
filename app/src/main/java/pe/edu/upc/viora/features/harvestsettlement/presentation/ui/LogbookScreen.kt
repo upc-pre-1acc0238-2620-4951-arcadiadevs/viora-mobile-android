@@ -41,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Instant
 import java.time.LocalDate
+import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
@@ -48,6 +49,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
+import pe.edu.upc.viora.core.designsystem.theme.Harvest300
 import pe.edu.upc.viora.core.designsystem.theme.Harvest800
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral100
@@ -59,10 +61,12 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.presentation.messageRes
+import pe.edu.upc.viora.features.croploadregulation.presentation.ui.component.ActiveSamplingCard
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementStatus
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.LogbookFilter
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.LogbookGroup
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.LogbookPeriod
+import pe.edu.upc.viora.features.harvestsettlement.presentation.state.LogbookRowType
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.LogbookUiState
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettledHarvestEntry
 import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.LogbookViewModel
@@ -73,22 +77,21 @@ import pe.edu.upc.viora.features.phenology.presentation.ui.formatKg
 private val ScreenPadding = 24.dp
 
 /**
- * Logbook / "Bitácora" (Figma P50), US29 slice: greeting, headline, filters and the settled
- * campaigns grouped by period. The in-progress card, the sync pill and the sampling, thinning
- * and note rows of the design wait for their features; the rows are not clickable yet.
+ * Logbook / "Bitácora" (Figma P50): greeting, headline, filters, active in-progress sampling
+ * and settled campaigns, field samplings and thinnings grouped by period.
  */
 @Composable
 fun LogbookScreen(
     modifier: Modifier = Modifier,
     viewModel: LogbookViewModel = hiltViewModel(),
-    activeSamplingCard: @Composable (() -> Unit)? = null,
+    onContinueSampling: (plotId: String, plotName: String) -> Unit = { _, _ -> },
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     LogbookContent(
         state = state,
         onSelectFilter = viewModel::selectFilter,
         onRefresh = viewModel::refresh,
-        activeSamplingCard = activeSamplingCard,
+        onContinueSampling = onContinueSampling,
         modifier = modifier,
     )
 }
@@ -101,7 +104,7 @@ fun LogbookContent(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
     today: LocalDate = LocalDate.now(),
-    activeSamplingCard: @Composable (() -> Unit)? = null,
+    onContinueSampling: (plotId: String, plotName: String) -> Unit = { _, _ -> },
 ) {
     val systemBars = WindowInsets.systemBars.asPaddingValues()
     val content = state as? LogbookUiState.Content
@@ -139,14 +142,24 @@ fun LogbookContent(
             } else {
                 FilterRow(selected = content.filter, onSelect = onSelectFilter, modifier = Modifier.padding(top = 20.dp))
                 content.refreshError?.let { RefreshNotice(it, onRetry = onRefresh) }
-                if (content.filter == LogbookFilter.ALL || content.filter == LogbookFilter.SAMPLINGS) {
-                    activeSamplingCard?.let {
-                        Box(modifier = Modifier.padding(top = 16.dp)) {
-                            it()
-                        }
+
+                val showActiveCard = (content.filter == LogbookFilter.ALL || content.filter == LogbookFilter.SAMPLINGS) &&
+                    content.activeSampling != null
+
+                if (showActiveCard) {
+                    val active = content.activeSampling!!
+                    Box(modifier = Modifier.padding(top = 16.dp)) {
+                        ActiveSamplingCard(
+                            plotName = active.plotName,
+                            completedTrees = active.completedTrees,
+                            targetTrees = active.targetTrees,
+                            onContinueRound = { onContinueSampling(active.plotId, active.plotName) },
+                            modifier = Modifier.padding(horizontal = ScreenPadding),
+                        )
                     }
                 }
-                if (content.isEmpty && (activeSamplingCard == null || (content.filter != LogbookFilter.ALL && content.filter != LogbookFilter.SAMPLINGS))) {
+
+                if (content.isEmpty) {
                     EmptyState(content.filter)
                 } else {
                     content.groups.forEach { Group(it) }
@@ -227,7 +240,13 @@ private fun Group(group: LogbookGroup) {
             title = stringResource(group.period.titleRes()),
             modifier = Modifier.padding(horizontal = ScreenPadding),
         )
-        group.entries.forEach { SettledHarvestRow(it, modifier = Modifier.padding(horizontal = ScreenPadding)) }
+        group.entries.forEach { entry ->
+            when (entry.type) {
+                LogbookRowType.HARVEST -> SettledHarvestRow(entry, modifier = Modifier.padding(horizontal = ScreenPadding))
+                LogbookRowType.SAMPLING -> SamplingEventRow(entry, modifier = Modifier.padding(horizontal = ScreenPadding))
+                LogbookRowType.THINNING -> ThinningEventRow(entry, modifier = Modifier.padding(horizontal = ScreenPadding))
+            }
+        }
     }
 }
 
@@ -271,6 +290,112 @@ private fun SettledHarvestRow(entry: SettledHarvestEntry, modifier: Modifier = M
             )
             Text(
                 text = subtitle,
+                style = MaterialTheme.typography.bodySmall.copy(letterSpacing = 0.sp),
+                color = Neutral600,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Icon(
+            painter = painterResource(R.drawable.ic_task_alt),
+            contentDescription = null,
+            tint = Green800,
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
+/** "Muestreo completado" row: icon, title, "plot · trees · fruits/shoot", check. */
+@Composable
+private fun SamplingEventRow(entry: SettledHarvestEntry, modifier: Modifier = Modifier) {
+    val plot = entry.plotName ?: stringResource(R.string.logbook_unknown_plot)
+    val trees = entry.evaluatedTreesCount ?: 0
+    val mean = String.format(Locale.ROOT, "%.2f", entry.meanFruitsPerShoot ?: 0.0).replace('.', ',')
+    val details = stringResource(R.string.logbook_sampling_completed_desc, plot, trees, mean)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(28.dp))
+            .background(Neutral0)
+            .padding(start = 10.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.size(48.dp).clip(CircleShape).background(Harvest300),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_nutrition),
+                contentDescription = null,
+                tint = Green900,
+                modifier = Modifier.size(24.dp),
+            )
+        }
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = stringResource(R.string.logbook_sampling_completed_title),
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp, lineHeight = 20.sp, letterSpacing = 0.sp),
+                color = Neutral900,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = details,
+                style = MaterialTheme.typography.bodySmall.copy(letterSpacing = 0.sp),
+                color = Neutral600,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Icon(
+            painter = painterResource(R.drawable.ic_task_alt),
+            contentDescription = null,
+            tint = Green800,
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
+/** "Raleo registrado" row: icon, title, "plot · removal% · timeliness", check. */
+@Composable
+private fun ThinningEventRow(entry: SettledHarvestEntry, modifier: Modifier = Modifier) {
+    val plot = entry.plotName ?: stringResource(R.string.logbook_unknown_plot)
+    val percent = String.format(Locale.ROOT, "%.0f", entry.removalPercentage ?: 0.0)
+    val timeliness = entry.timeliness ?: ""
+    val details = stringResource(R.string.logbook_thinning_executed_desc, plot, percent, timeliness)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(28.dp))
+            .background(Neutral0)
+            .padding(start = 10.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.size(48.dp).clip(CircleShape).background(Green200),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_content_cut),
+                contentDescription = null,
+                tint = Green900,
+                modifier = Modifier.size(24.dp),
+            )
+        }
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = stringResource(R.string.logbook_thinning_executed_title),
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp, lineHeight = 20.sp, letterSpacing = 0.sp),
+                color = Neutral900,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = details,
                 style = MaterialTheme.typography.bodySmall.copy(letterSpacing = 0.sp),
                 color = Neutral600,
                 maxLines = 1,

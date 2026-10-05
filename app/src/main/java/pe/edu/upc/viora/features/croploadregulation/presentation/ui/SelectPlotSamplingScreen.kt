@@ -141,8 +141,9 @@ fun SelectPlotSamplingContent(
                         ),
                         color = Neutral900,
                     )
+                    val campaignYear = (state as? SelectPlotSamplingUiState.Content)?.campaignYear ?: java.time.Year.now().value
                     Text(
-                        text = stringResource(R.string.sampling_select_plot_subtitle, 2026),
+                        text = stringResource(R.string.sampling_select_plot_subtitle, campaignYear),
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontSize = 12.sp,
                             lineHeight = 16.sp,
@@ -344,16 +345,17 @@ private fun PlotSamplingCard(
                 overflow = TextOverflow.Ellipsis,
             )
 
+            val targetTrees = (plot.sampledTreesCount + plot.treesNeeded).coerceAtLeast(plot.sampledTreesCount)
             val statusText = when (plot.samplingStatus) {
                 SamplingStatus.IN_PROGRESS -> stringResource(
                     R.string.sampling_status_in_progress,
                     plot.sampledTreesCount,
-                    5,
+                    targetTrees,
                 )
                 SamplingStatus.COMPLETED -> stringResource(
                     R.string.sampling_status_completed,
                     plot.sampledTreesCount,
-                    5,
+                    targetTrees,
                 )
                 SamplingStatus.NOT_STARTED -> stringResource(R.string.sampling_status_not_started)
             }

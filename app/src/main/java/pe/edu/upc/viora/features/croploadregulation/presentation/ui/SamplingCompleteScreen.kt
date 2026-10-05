@@ -67,10 +67,10 @@ private val ScreenPadding = 24.dp
 fun SamplingCompleteScreen(
     plotName: String,
     summary: SamplingSummary?,
-    evaluatedTreesCount: Int = 5,
-    totalShootsCount: Int = 200,
-    totalFruitsCount: Int = 120,
-    meanFruitsPerShoot: Double = 0.60,
+    evaluatedTreesCount: Int = 0,
+    totalShootsCount: Int = 0,
+    totalFruitsCount: Int = 0,
+    meanFruitsPerShoot: Double = 0.0,
     isOffline: Boolean = false,
     onClose: () -> Unit,
     onViewPlotPlan: () -> Unit,
@@ -82,7 +82,7 @@ fun SamplingCompleteScreen(
     val treesCount = summary?.evaluatedTreesCount ?: evaluatedTreesCount
     val mean = summary?.meanFruitsPerShoot ?: meanFruitsPerShoot
     val fruitsCount = summary?.sampledFruitSetCount ?: totalFruitsCount
-    val shootsCount = totalShootsCount
+    val shootsCount = summary?.sampledShootsCount ?: totalShootsCount
 
     val formattedMean = String.format(Locale.ROOT, "%.2f", mean).replace('.', ',')
     val timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ROOT)
