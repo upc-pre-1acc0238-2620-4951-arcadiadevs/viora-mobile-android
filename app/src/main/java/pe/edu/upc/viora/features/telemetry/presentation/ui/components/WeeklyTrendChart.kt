@@ -23,8 +23,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.core.os.ConfigurationCompat
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -69,6 +71,9 @@ fun WeeklyTrendChart(
     val thresholdTextColor = if (isCritical) Terracotta700 else Harvest800
     val thresholdLineColor = if (isCritical) Terracotta600 else Harvest800
     val peakValueColor = if (isCritical) Terracotta700 else Harvest800
+
+    val configuration = LocalConfiguration.current
+    val locale = ConfigurationCompat.getLocales(configuration)[0] ?: Locale.getDefault()
 
     val peakPoint = weeklyTrend.maxByOrNull { it.value }
     val peakDisplay = peakPoint?.let {
@@ -165,8 +170,8 @@ fun WeeklyTrendChart(
                                 val instant = Instant.parse(point.timestamp)
                                 instant.atZone(ZoneId.systemDefault())
                                     .dayOfWeek
-                                    .getDisplayName(TextStyle.SHORT, Locale.getDefault())
-                                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                                    .getDisplayName(TextStyle.SHORT, locale)
+                                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
                             }.getOrDefault("")
 
                             val valueFormatted = if (point.value % 1.0 == 0.0) {

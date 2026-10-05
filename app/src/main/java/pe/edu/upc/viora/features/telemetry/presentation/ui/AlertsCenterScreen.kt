@@ -25,8 +25,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.core.os.ConfigurationCompat
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -270,7 +272,9 @@ private fun AlertsCenterContent(
                 else -> ""
             }
 
-            val formattedTime = latestTriggeredAt?.let { formatAlertTriggerTime(it, Locale.getDefault()) }
+            val configuration = LocalConfiguration.current
+            val locale = ConfigurationCompat.getLocales(configuration)[0] ?: Locale.getDefault()
+            val formattedTime = latestTriggeredAt?.let { formatAlertTriggerTime(it, locale) }
 
             val contextualSubtitle = when {
                 affectedPlotsText.isNotBlank() && !formattedTime.isNullOrBlank() -> {

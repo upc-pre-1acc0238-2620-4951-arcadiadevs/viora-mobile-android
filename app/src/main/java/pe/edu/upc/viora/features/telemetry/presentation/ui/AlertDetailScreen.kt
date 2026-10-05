@@ -43,9 +43,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.core.os.ConfigurationCompat
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -235,6 +237,8 @@ fun AlertDetailScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
+                    val configuration = LocalConfiguration.current
+                    val locale = ConfigurationCompat.getLocales(configuration)[0] ?: Locale.getDefault()
                     val datePattern = stringResource(R.string.alert_detail_date_pattern)
                     val timeWindowText = formatAlertDetailDateTime(
                         dateFormatted = detail.dateFormatted,
@@ -242,7 +246,7 @@ fun AlertDetailScreen(
                         timeWindow = detail.timeWindow,
                         weeklyTrend = detail.weeklyTrend,
                         datePattern = datePattern,
-                        locale = Locale.getDefault(),
+                        locale = locale,
                     )
 
                     // Header centered (Figma T15)
