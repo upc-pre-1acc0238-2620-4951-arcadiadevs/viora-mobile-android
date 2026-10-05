@@ -46,7 +46,7 @@ fun SamplingSummaryResponseDto.toDomain(): SamplingSummary = SamplingSummary(
 fun PlotSamplingStateResponseDto.toDomain(): PlotSamplingOverview = PlotSamplingOverview(
     plotId = plotId,
     plotName = plotName,
-    variety = variety,
+    variety = variety.lowercase().replaceFirstChar { it.uppercase() },
     areaHectares = areaHectares,
     campaignYear = campaignYear,
     samplingStatus = when (samplingStatus) {
@@ -58,6 +58,7 @@ fun PlotSamplingStateResponseDto.toDomain(): PlotSamplingOverview = PlotSampling
     treesNeeded = treesNeeded,
     isRepresentative = isRepresentative,
 )
+
 
 fun ThinningEventItemDto.toDomain(): ThinningEvent = ThinningEvent(
     id = id,

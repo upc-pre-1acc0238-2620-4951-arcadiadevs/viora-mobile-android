@@ -14,6 +14,7 @@ data class TreeSample(
     val trunkCircumferenceCm: Double? = null,
     val trunkDiameterMm: Double? = null,
     val observedOn: LocalDate = LocalDate.now(),
+    val isSynced: Boolean = false,
 ) {
     val fruitsPerShoot: Double
         get() = if (shootsCount > 0) fruitSetCount.toDouble() / shootsCount else 0.0

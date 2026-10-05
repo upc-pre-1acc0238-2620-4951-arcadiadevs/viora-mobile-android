@@ -35,4 +35,14 @@ interface ThinningRepository {
         campaignYear: Int? = null,
         plotId: String? = null,
     ): AppResult<List<ThinningEvent>>
+
+    /**
+     * Observes the current in-progress sampling overview if one exists.
+     */
+    fun observeActiveSampling(): kotlinx.coroutines.flow.Flow<PlotSamplingOverview?>
+
+    /**
+     * Observes the total count of draft samples saved locally on the phone.
+     */
+    fun observePendingDraftSamplesCount(): kotlinx.coroutines.flow.Flow<Int>
 }
