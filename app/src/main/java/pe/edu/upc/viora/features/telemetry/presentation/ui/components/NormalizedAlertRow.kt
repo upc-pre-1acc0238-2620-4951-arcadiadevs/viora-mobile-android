@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -111,9 +112,16 @@ fun NormalizedAlertRow(
 
 @Composable
 private fun formatResolutionDate(incident: AgroclimaticIncident): String {
-    val instant = incident.resolvedAt ?: incident.triggeredAt
+    val dateString = incident.triggeredAt
+    if (dateString.isBlank()) return ""
+
     val zone = ZoneId.systemDefault()
-    val eventDate = instant.atZone(zone).toLocalDate()
+    val eventDate = runCatching {
+        Instant.parse(dateString).atZone(zone).toLocalDate()
+    }.recoverCatching {
+        LocalDate.parse(dateString)
+    }.getOrNull() ?: return dateString
+
     val today = LocalDate.now(zone)
     val yesterday = today.minusDays(1)
 

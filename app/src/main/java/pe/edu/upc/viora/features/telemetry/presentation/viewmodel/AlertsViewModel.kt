@@ -81,14 +81,17 @@ class AlertsViewModel @Inject constructor(
         }
 
         val latestTrigger = activeIncidents.maxOfOrNull { it.triggeredAt }
-        val updatedTimeText = latestTrigger?.let { instant ->
-            val formatter = java.time.format.DateTimeFormatter.ofPattern("h:mm a", java.util.Locale.forLanguageTag("es"))
-            val formattedTime = instant.atZone(java.time.ZoneId.systemDefault()).format(formatter)
-                .replace("AM", "a. m.")
-                .replace("PM", "p. m.")
-                .replace("am", "a. m.")
-                .replace("pm", "p. m.")
-            " · actualizado $formattedTime"
+        val updatedTimeText = latestTrigger?.let { triggerStr ->
+            runCatching {
+                val instant = java.time.Instant.parse(triggerStr)
+                val formatter = java.time.format.DateTimeFormatter.ofPattern("h:mm a", java.util.Locale.forLanguageTag("es"))
+                val formattedTime = instant.atZone(java.time.ZoneId.systemDefault()).format(formatter)
+                    .replace("AM", "a. m.")
+                    .replace("PM", "p. m.")
+                    .replace("am", "a. m.")
+                    .replace("pm", "p. m.")
+                " · actualizado $formattedTime"
+            }.getOrNull()
         }.orEmpty()
 
         val affectedPlots = if (affectedPlotsText.isNotBlank()) {
