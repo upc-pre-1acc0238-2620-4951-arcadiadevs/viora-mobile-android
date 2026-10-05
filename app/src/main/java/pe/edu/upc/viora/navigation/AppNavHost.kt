@@ -27,6 +27,13 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNav
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.alertsNavGraph
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRoundRoute
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
+import pe.edu.upc.viora.features.croploadregulation.presentation.ui.component.ActiveSamplingCard
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
+
 /**
  * Composition root of navigation. It lives outside `core/` on purpose: this is the one place
  * allowed to know every feature, so `core/` never depends on `features/`.
@@ -65,11 +72,36 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             navController = navController,
             onOpenPlot = { plotId -> navController.navigate(PlotDetailRoute(plotId = plotId)) },
         )
+        samplingNavGraph(
+            navController = navController,
+            plotSilhouetteSlot = { plotId, slotModifier ->
+                PlotSilhouetteById(plotId = plotId, modifier = slotModifier)
+            },
+        )
         navigation<PlanGraph>(startDestination = PlanRoute) {
             composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
         }
         navigation<LogbookGraph>(startDestination = LogbookRoute) {
-            composable<LogbookRoute> { LogbookScreen() }
+            composable<LogbookRoute> {
+                LogbookScreen(
+                    activeSamplingCard = {
+                        ActiveSamplingCard(
+                            plotName = "Lote Norte",
+                            completedTrees = 3,
+                            targetTrees = 5,
+                            onContinueRound = {
+                                navController.navigate(
+                                    SamplingRoundRoute(
+                                        plotId = "550e8400-e29b-41d4-a716-446655440001",
+                                        plotName = "Lote Norte",
+                                    ),
+                                )
+                            },
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                        )
+                    },
+                )
+            }
         }
     }
 }

@@ -81,12 +81,14 @@ private val ScreenPadding = 24.dp
 fun LogbookScreen(
     modifier: Modifier = Modifier,
     viewModel: LogbookViewModel = hiltViewModel(),
+    activeSamplingCard: @Composable (() -> Unit)? = null,
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     LogbookContent(
         state = state,
         onSelectFilter = viewModel::selectFilter,
         onRefresh = viewModel::refresh,
+        activeSamplingCard = activeSamplingCard,
         modifier = modifier,
     )
 }
@@ -99,6 +101,7 @@ fun LogbookContent(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
     today: LocalDate = LocalDate.now(),
+    activeSamplingCard: @Composable (() -> Unit)? = null,
 ) {
     val systemBars = WindowInsets.systemBars.asPaddingValues()
     val content = state as? LogbookUiState.Content
@@ -136,7 +139,14 @@ fun LogbookContent(
             } else {
                 FilterRow(selected = content.filter, onSelect = onSelectFilter, modifier = Modifier.padding(top = 20.dp))
                 content.refreshError?.let { RefreshNotice(it, onRetry = onRefresh) }
-                if (content.isEmpty) {
+                if (content.filter == LogbookFilter.ALL || content.filter == LogbookFilter.SAMPLINGS) {
+                    activeSamplingCard?.let {
+                        Box(modifier = Modifier.padding(top = 16.dp)) {
+                            it()
+                        }
+                    }
+                }
+                if (content.isEmpty && (activeSamplingCard == null || (content.filter != LogbookFilter.ALL && content.filter != LogbookFilter.SAMPLINGS))) {
                     EmptyState(content.filter)
                 } else {
                     content.groups.forEach { Group(it) }
