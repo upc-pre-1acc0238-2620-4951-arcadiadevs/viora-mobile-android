@@ -13,7 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import pe.edu.upc.viora.core.designsystem.theme.Harvest100
+import pe.edu.upc.viora.core.designsystem.theme.Harvest300
 
 /**
  * Segmented progress bar showing the progress towards statistical representativeness (e.g. 3 of 5 trees).
@@ -24,7 +24,7 @@ fun SamplingSegmentedBar(
     totalCount: Int = 5,
     modifier: Modifier = Modifier,
     height: Dp = 14.dp,
-    activeColor: Color = Harvest100,
+    activeColor: Color = Harvest300,
     inactiveColor: Color = Color(0x3DF9F6F1),
 ) {
     Row(

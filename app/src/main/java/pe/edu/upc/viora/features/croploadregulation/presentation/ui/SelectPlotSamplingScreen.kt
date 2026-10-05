@@ -62,7 +62,6 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.Selec
 private val ScreenPadding = 24.dp
 
 /**
- * P51 · Selección de Parcela para Muestreo.
  * Uses [plotSilhouetteSlot] to decouple visual representation from plotmanagement domain models.
  */
 @Composable
@@ -332,7 +331,10 @@ private fun PlotSamplingCard(
                 overflow = TextOverflow.Ellipsis,
             )
 
-            val areaStr = String.format(Locale.ROOT, "%.1f", plot.areaHectares)
+            val areaStr = java.text.NumberFormat.getNumberInstance().apply {
+                minimumFractionDigits = 1
+                maximumFractionDigits = 2
+            }.format(plot.areaHectares)
             Text(
                 text = "${plot.variety} · $areaStr ha",
                 style = MaterialTheme.typography.bodySmall.copy(
@@ -343,6 +345,7 @@ private fun PlotSamplingCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+
 
             val targetTrees = (plot.sampledTreesCount + plot.treesNeeded).coerceAtLeast(plot.sampledTreesCount)
             val statusText = when (plot.samplingStatus) {

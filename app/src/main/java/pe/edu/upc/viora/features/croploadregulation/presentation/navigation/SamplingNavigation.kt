@@ -113,9 +113,8 @@ fun NavGraphBuilder.samplingNavGraph(
                 },
                 onContinueLater = {
                     navController.navigate(LogbookGraph) {
-                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                        popUpTo<SamplingGraph> { inclusive = true }
                         launchSingleTop = true
-                        restoreState = true
                     }
                 },
             )

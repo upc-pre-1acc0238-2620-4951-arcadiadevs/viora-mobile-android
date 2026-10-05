@@ -43,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
@@ -341,16 +342,39 @@ fun RegisterTreeSampleScreen(
                         ),
                         singleLine = true,
                         decorationBox = { innerTextField ->
-                            if (circumferenceText.isEmpty()) {
-                                Text(
-                                    text = stringResource(R.string.sampling_trunk_circumference_hint),
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontSize = 14.sp,
-                                        color = Neutral600,
-                                    ),
-                                )
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.CenterStart,
+                            ) {
+                                if (circumferenceText.isEmpty()) {
+                                    Text(
+                                        text = stringResource(R.string.sampling_trunk_circumference_hint),
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontSize = 14.sp,
+                                            color = Neutral600,
+                                        ),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                    innerTextField()
+                                } else {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    ) {
+                                        innerTextField()
+                                        Text(
+                                            text = stringResource(R.string.sampling_trunk_circumference_suffix),
+                                            style = MaterialTheme.typography.bodyLarge.copy(
+                                                fontSize = 14.sp,
+                                                color = Neutral600,
+                                            ),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    }
+                                }
                             }
-                            innerTextField()
                         },
                         modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
                     )

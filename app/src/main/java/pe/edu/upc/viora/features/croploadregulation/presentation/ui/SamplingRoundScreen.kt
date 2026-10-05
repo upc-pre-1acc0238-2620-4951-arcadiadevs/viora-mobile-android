@@ -35,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -274,7 +275,7 @@ fun SamplingRoundScreen(
                 SamplingSegmentedBar(
                     completedCount = state.evaluatedTreesCount,
                     totalCount = state.targetTreesCount,
-                    activeColor = Harvest100,
+                    activeColor = Harvest300,
                     inactiveColor = Color(0x3DF9F6F1),
                 )
 
@@ -338,8 +339,10 @@ fun SamplingRoundScreen(
                         .background(Neutral0)
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                 ) {
+                    val localCount = state.samples.count { !it.isSynced }
+                    val displayCount = if (localCount > 0) localCount else state.evaluatedTreesCount
                     Text(
-                        text = state.evaluatedTreesCount.toString(),
+                        text = displayCount.toString(),
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontSize = 28.sp,
                             lineHeight = 32.sp,
@@ -348,10 +351,10 @@ fun SamplingRoundScreen(
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = if (state.hasRecoveredConnection) {
-                            stringResource(R.string.sampling_stat_synced)
-                        } else {
+                        text = if (localCount > 0) {
                             stringResource(R.string.sampling_stat_saved_locally)
+                        } else {
+                            stringResource(R.string.sampling_stat_synced)
                         },
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontSize = 12.sp,
@@ -365,8 +368,13 @@ fun SamplingRoundScreen(
             Spacer(Modifier.height(24.dp))
 
             // Evaluated Trees Section
+            val treesTitle = if (state.evaluatedTreesCount > 0) {
+                stringResource(R.string.sampling_evaluated_trees_title_with_count, state.evaluatedTreesCount)
+            } else {
+                stringResource(R.string.sampling_evaluated_trees_title)
+            }
             Text(
-                text = stringResource(R.string.sampling_evaluated_trees_title),
+                text = treesTitle,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontSize = 22.sp,
                     lineHeight = 28.sp,
@@ -376,13 +384,28 @@ fun SamplingRoundScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                state.samples.forEach { sample ->
-                    EvaluatedTreeItem(
-                        sample = sample,
-                        isOffline = state.isOffline,
-                        isSynced = state.hasRecoveredConnection,
+            if (state.samples.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 48.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.sampling_evaluated_trees_empty),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 14.sp,
+                            lineHeight = 20.sp,
+                        ),
+                        color = Neutral600,
+                        textAlign = TextAlign.Center,
                     )
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    state.samples.forEach { sample ->
+                        EvaluatedTreeItem(sample = sample)
+                    }
                 }
             }
         }
@@ -411,19 +434,29 @@ fun SamplingRoundScreen(
                     .padding(horizontal = 12.dp, vertical = 4.dp),
             )
 
-            // Row with "Agregar árbol N" and "Finalizar"
+            // Row with "Agregar árbol N" / "Otro árbol" and "Finalizar" / "Finalizar ronda"
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // "Agregar árbol N" Button (Harvest300)
+                val isSampleComplete = state.isRepresentative || state.evaluatedTreesCount >= 5
+                val addTreeBg = if (isSampleComplete) Neutral0 else Harvest300
+                val iconCircleBg = if (isSampleComplete) Neutral100 else Neutral0
+                val iconTint = if (isSampleComplete) Neutral900 else Green900
+                val addTreeText = if (isSampleComplete) {
+                    stringResource(R.string.sampling_action_another_tree)
+                } else {
+                    stringResource(R.string.sampling_action_add_tree, state.evaluatedTreesCount + 1)
+                }
+
+                // Left Button
                 Row(
                     modifier = Modifier
                         .weight(1f)
                         .height(56.dp)
                         .clip(CircleShape)
-                        .background(Harvest300)
+                        .background(addTreeBg)
                         .clickable(role = Role.Button) {
                             onAddTree(state.nextTreeIdentifier, state.evaluatedTreesCount + 1)
                         }
@@ -435,19 +468,19 @@ fun SamplingRoundScreen(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(CircleShape)
-                            .background(Neutral0),
+                            .background(iconCircleBg),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_add),
                             contentDescription = null,
-                            tint = Green900,
+                            tint = iconTint,
                             modifier = Modifier.size(24.dp),
                         )
                     }
 
                     Text(
-                        text = stringResource(R.string.sampling_action_add_tree, state.evaluatedTreesCount + 1),
+                        text = addTreeText,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontSize = 14.sp,
                             lineHeight = 20.sp,
@@ -458,14 +491,20 @@ fun SamplingRoundScreen(
                     )
                 }
 
-                // "Finalizar" Button (Enabled if >= 5 or representative)
-                val isEnabled = state.isRepresentative && !state.isSubmitting
+                // Right Button: "Finalizar" / "Finalizar ronda"
+                val isEnabled = isSampleComplete && !state.isSubmitting
                 val finalizeBg = if (isEnabled) Green900 else Neutral200
                 val finalizeText = if (isEnabled) Neutral50 else Neutral600
+                val finalizeLabel = if (isSampleComplete) {
+                    stringResource(R.string.sampling_action_finalize_round)
+                } else {
+                    stringResource(R.string.sampling_action_finish)
+                }
 
                 Box(
                     modifier = Modifier
-                        .size(width = 130.dp, height = 56.dp)
+                        .weight(1f)
+                        .height(56.dp)
                         .clip(CircleShape)
                         .background(finalizeBg)
                         .clickable(enabled = isEnabled, role = Role.Button, onClick = onFinishSampling),
@@ -479,7 +518,7 @@ fun SamplingRoundScreen(
                         )
                     } else {
                         Text(
-                            text = stringResource(R.string.sampling_action_finish),
+                            text = finalizeLabel,
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontSize = 15.sp,
                                 lineHeight = 20.sp,
@@ -496,8 +535,6 @@ fun SamplingRoundScreen(
 @Composable
 private fun EvaluatedTreeItem(
     sample: TreeSample,
-    isOffline: Boolean = false,
-    isSynced: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -554,39 +591,31 @@ private fun EvaluatedTreeItem(
             )
         }
 
-        // Sync pill badge
-        val badgeBg = if (isSynced) Green200 else Harvest100
-        val badgeIcon = if (isSynced) R.drawable.ic_task_alt else R.drawable.ic_cloud_sync
-        val badgeIconTint = if (isSynced) Green800 else Harvest800
-        val badgeText = when {
-            isSynced -> stringResource(R.string.sampling_badge_synced)
-            isOffline -> stringResource(R.string.sampling_badge_pending_sync)
-            else -> stringResource(R.string.sampling_saved_on_phone_badge)
-        }
-        val badgeTextColor = if (isSynced) Green800 else Harvest800
-
-        Row(
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(badgeBg)
-                .padding(start = 8.dp, end = 10.dp, top = 4.dp, bottom = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                painter = painterResource(badgeIcon),
-                contentDescription = null,
-                tint = badgeIconTint,
-                modifier = Modifier.size(14.dp),
-            )
-            Text(
-                text = badgeText,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 11.sp,
-                    lineHeight = 14.sp,
-                ),
-                color = badgeTextColor,
-            )
+        // Sync pill badge ONLY when the sample exists in local (not synced with API)
+        if (!sample.isSynced) {
+            Row(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Harvest100)
+                    .padding(start = 8.dp, end = 10.dp, top = 4.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_cloud_sync),
+                    contentDescription = null,
+                    tint = Harvest800,
+                    modifier = Modifier.size(14.dp),
+                )
+                Text(
+                    text = stringResource(R.string.sampling_saved_on_phone_badge),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                    ),
+                    color = Harvest800,
+                )
+            }
         }
     }
 }
@@ -665,6 +694,28 @@ private fun SamplingRoundScreenPreview_RecoveredConnection() {
                 targetTreesCount = 5,
                 isOffline = false,
                 hasRecoveredConnection = true,
+            ),
+            onNavigateBack = {},
+            onAddTree = { _, _ -> },
+            onFinishSampling = {},
+            onContinueLater = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFF3F0EA)
+@Composable
+private fun SamplingRoundScreenPreview_Empty() {
+    VioraTheme {
+        SamplingRoundScreen(
+            state = SamplingSessionUiState(
+                plotId = "1",
+                plotName = "Magollo",
+                campaignYear = 2026,
+                samples = emptyList(),
+                targetTreesCount = 5,
+                isOffline = false,
+                hasRecoveredConnection = false,
             ),
             onNavigateBack = {},
             onAddTree = { _, _ -> },

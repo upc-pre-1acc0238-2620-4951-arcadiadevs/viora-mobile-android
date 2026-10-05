@@ -130,11 +130,51 @@ fun LogbookContent(
                 modifier = Modifier.padding(horizontal = ScreenPadding),
             )
             Spacer(Modifier.height(28.dp))
-            HomeHeadline(
-                lead = stringResource(R.string.logbook_headline_lead),
-                emphasis = stringResource(R.string.logbook_headline_emphasis),
-                modifier = Modifier.padding(horizontal = ScreenPadding),
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = ScreenPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                HomeHeadline(
+                    lead = stringResource(R.string.logbook_headline_lead),
+                    emphasis = stringResource(R.string.logbook_headline_emphasis),
+                )
+                if (content != null && content.pendingLocalCount > 0) {
+                    Row(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Harvest100)
+                            .padding(start = 6.dp, end = 14.dp, top = 6.dp, bottom = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Neutral0),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_cloud_sync),
+                                contentDescription = null,
+                                tint = Harvest800,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
+                        Text(
+                            text = stringResource(R.string.logbook_saved_on_phone_badge, content.pendingLocalCount),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = 13.sp,
+                                lineHeight = 18.sp,
+                            ),
+                            color = Harvest800,
+                        )
+                    }
+                }
+            }
             if (content == null) {
                 Box(Modifier.fillMaxWidth().padding(vertical = 48.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = Green900)
@@ -143,11 +183,8 @@ fun LogbookContent(
                 FilterRow(selected = content.filter, onSelect = onSelectFilter, modifier = Modifier.padding(top = 20.dp))
                 content.refreshError?.let { RefreshNotice(it, onRetry = onRefresh) }
 
-                val showActiveCard = (content.filter == LogbookFilter.ALL || content.filter == LogbookFilter.SAMPLINGS) &&
-                    content.activeSampling != null
-
-                if (showActiveCard) {
-                    val active = content.activeSampling!!
+                val active = content.activeSampling
+                if ((content.filter == LogbookFilter.ALL || content.filter == LogbookFilter.SAMPLINGS) && active != null) {
                     Box(modifier = Modifier.padding(top = 16.dp)) {
                         ActiveSamplingCard(
                             plotName = active.plotName,

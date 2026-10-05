@@ -51,6 +51,7 @@ sealed interface LogbookUiState {
         val filter: LogbookFilter,
         val groups: List<LogbookGroup>,
         val activeSampling: ActiveSamplingUiModel? = null,
+        val pendingLocalCount: Int = 0,
         val refreshError: AppError?,
         val lastPlotRefresh: Instant?,
         val isRefreshing: Boolean,

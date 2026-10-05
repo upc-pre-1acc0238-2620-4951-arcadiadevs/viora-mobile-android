@@ -22,6 +22,8 @@ import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.domain.fold
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.GetPlotSamplingOverviewUseCase
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.GetThinningEventsUseCase
+import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObserveActiveSamplingUseCase
+import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObservePendingDraftSamplesCountUseCase
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningEvent
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.SamplingStatus
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.ThinningEventType
@@ -54,6 +56,8 @@ class LogbookViewModel @Inject constructor(
     private val clock: Clock,
     private val getPlotSamplingOverview: GetPlotSamplingOverviewUseCase? = null,
     private val getThinningEvents: GetThinningEventsUseCase? = null,
+    observeActiveSampling: ObserveActiveSamplingUseCase? = null,
+    observePendingDraftSamplesCount: ObservePendingDraftSamplesCountUseCase? = null,
 ) : ViewModel() {
 
     private data class RefreshState(
@@ -67,6 +71,7 @@ class LogbookViewModel @Inject constructor(
         val filter: LogbookFilter = LogbookFilter.ALL,
         val activeSampling: ActiveSamplingUiModel? = null,
         val thinningEvents: List<ThinningEvent> = emptyList(),
+        val pendingCount: Int = 0,
     )
 
     private val refreshState = MutableStateFlow(RefreshState())
@@ -74,13 +79,32 @@ class LogbookViewModel @Inject constructor(
     private val activeSamplingState = MutableStateFlow<ActiveSamplingUiModel?>(null)
     private val thinningEventsState = MutableStateFlow<List<ThinningEvent>>(emptyList())
 
+    private val draftSamplingFlow = combine(
+        observeActiveSampling?.invoke() ?: kotlinx.coroutines.flow.flowOf(null),
+        observePendingDraftSamplesCount?.invoke() ?: kotlinx.coroutines.flow.flowOf(0),
+    ) { activeDraft, pendingCount ->
+        activeDraft to pendingCount
+    }
+
     private val localState = combine(
         refreshState,
         filter,
         activeSamplingState,
         thinningEventsState,
-    ) { refresh, selectedFilter, active, events ->
-        LocalState(refresh, selectedFilter, active, events)
+        draftSamplingFlow,
+    ) { refresh, selectedFilter, activeServer, events, draftInfo ->
+        val (activeDraft, pendingCount) = draftInfo
+        val active = activeDraft?.let {
+            val total = if (it.treesNeeded > 0) it.sampledTreesCount + it.treesNeeded else it.sampledTreesCount
+            ActiveSamplingUiModel(
+                plotId = it.plotId,
+                plotName = it.plotName,
+                completedTrees = it.sampledTreesCount,
+                targetTrees = total.coerceAtLeast(1),
+            )
+        } ?: activeServer
+
+        LocalState(refresh, selectedFilter, active, events, pendingCount)
     }
 
     val uiState: StateFlow<LogbookUiState> = combine(
@@ -89,7 +113,7 @@ class LogbookViewModel @Inject constructor(
         observePlotsLastRefresh(),
         localState,
     ) { settlements, plots, lastPlotRefresh, local ->
-        val (refresh, selected, activeSampling, thinningEvents) = local
+        val (refresh, selected, activeSampling, thinningEvents, pendingCount) = local
         if (settlements.isEmpty() && thinningEvents.isEmpty() && activeSampling == null && !refresh.hasFinishedOnce) {
             LogbookUiState.Loading
         } else {
@@ -97,6 +121,7 @@ class LogbookViewModel @Inject constructor(
                 filter = selected,
                 groups = groupsFor(selected, settlements, plots, thinningEvents),
                 activeSampling = activeSampling,
+                pendingLocalCount = pendingCount,
                 refreshError = refresh.error,
                 lastPlotRefresh = lastPlotRefresh,
                 isRefreshing = refresh.isRefreshing,

@@ -15,6 +15,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -34,7 +35,11 @@ import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
 
 /** The plot's real outline drawn inside a soft green tile; blank when the outline is unknown. */
 @Composable
-fun PlotSilhouette(outline: List<GeoPoint>, modifier: Modifier = Modifier) {
+fun PlotSilhouette(
+    outline: List<GeoPoint>,
+    modifier: Modifier = Modifier,
+    showTreeGrid: Boolean = false,
+) {
     val points = remember(outline) { normalizeOutline(outline) }
     Box(
         modifier = modifier
@@ -52,6 +57,27 @@ fun PlotSilhouette(outline: List<GeoPoint>, modifier: Modifier = Modifier) {
                     close()
                 }
                 drawPath(path, color = Green200)
+                if (showTreeGrid) {
+                    clipPath(path) {
+                        val step = 7.dp.toPx()
+                        val dotRadius = 1.3.dp.toPx()
+                        val strokeWidth = 0.9.dp.toPx()
+                        var y = step / 2
+                        while (y < size.height) {
+                            var x = step / 2
+                            while (x < size.width) {
+                                drawCircle(
+                                    color = Green800.copy(alpha = 0.65f),
+                                    radius = dotRadius,
+                                    center = Offset(x, y),
+                                    style = Stroke(width = strokeWidth),
+                                )
+                                x += step
+                            }
+                            y += step
+                        }
+                    }
+                }
                 drawPath(path, color = Green800, style = Stroke(width = 2.dp.toPx(), join = StrokeJoin.Round))
             }
         }
@@ -78,8 +104,11 @@ class PlotSilhouettesViewModel @Inject constructor(
 fun PlotSilhouetteById(
     plotId: String,
     modifier: Modifier = Modifier,
+    showTreeGrid: Boolean = false,
     viewModel: PlotSilhouettesViewModel = hiltViewModel(),
 ) {
     val map = viewModel.outlines.collectAsStateWithLifecycle().value
-    PlotSilhouette(outline = map[plotId].orEmpty(), modifier = modifier)
+    PlotSilhouette(outline = map[plotId].orEmpty(), modifier = modifier, showTreeGrid = showTreeGrid)
 }
+
+
