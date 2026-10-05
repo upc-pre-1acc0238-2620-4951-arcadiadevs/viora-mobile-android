@@ -41,6 +41,7 @@ import pe.edu.upc.viora.core.designsystem.component.VioraTabBarActionColors
 import pe.edu.upc.viora.core.designsystem.theme.Spacing
 import pe.edu.upc.viora.core.navigation.HomeRoute
 import pe.edu.upc.viora.core.navigation.TopLevelDestination
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SelectPlotSamplingRoute
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourOverlay
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTargets
@@ -144,7 +145,7 @@ fun VioraApp(modifier: Modifier = Modifier) {
                     onActionSelected = { index ->
                         barMode = TabBarMode.Rest
                         if (index == 0) {
-                            navController.navigate(pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SelectPlotSamplingRoute)
+                            navController.navigate(SelectPlotSamplingRoute)
                         }
                     },
                     onCollapsedBarClick = { barMode = TabBarMode.Rest },
