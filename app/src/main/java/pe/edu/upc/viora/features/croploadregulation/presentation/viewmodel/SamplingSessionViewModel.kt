@@ -15,11 +15,15 @@ import pe.edu.upc.viora.core.domain.fold
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.SubmitSamplingBatchUseCase
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingSummary
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toDomain
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toEntity
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.SamplingSessionUiState
 
 @HiltViewModel
 class SamplingSessionViewModel @Inject constructor(
     private val submitSamplingBatch: SubmitSamplingBatchUseCase,
+    private val draftDao: DraftTreeSampleDao,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SamplingSessionUiState())
@@ -34,6 +38,19 @@ class SamplingSessionViewModel @Inject constructor(
                 samples = emptyList(),
                 targetTreesCount = 5,
             )
+            viewModelScope.launch {
+                val drafts = draftDao.getSamples(plotId, campaignYear).map { it.toDomain() }
+                if (drafts.isNotEmpty()) {
+                    _uiState.update { it.copy(samples = drafts) }
+                }
+            }
+        } else if (_uiState.value.samples.isEmpty()) {
+            viewModelScope.launch {
+                val drafts = draftDao.getSamples(plotId, campaignYear).map { it.toDomain() }
+                if (drafts.isNotEmpty()) {
+                    _uiState.update { it.copy(samples = drafts) }
+                }
+            }
         }
     }
 
@@ -43,15 +60,50 @@ class SamplingSessionViewModel @Inject constructor(
         fruitSetCount: Int,
         trunkCircumferenceCm: Double?,
     ) {
+        val currentState = _uiState.value
         val sample = TreeSample(
-            treeIdentifier = treeIdentifier.ifBlank { _uiState.value.nextTreeIdentifier },
+            treeIdentifier = treeIdentifier.ifBlank { currentState.nextTreeIdentifier },
             shootsCount = shootsCount,
             fruitSetCount = fruitSetCount,
             trunkCircumferenceCm = trunkCircumferenceCm,
             observedOn = LocalDate.now(),
+            isSynced = false,
         )
         _uiState.update { current ->
             current.copy(samples = current.samples + sample)
+        }
+        viewModelScope.launch {
+            val entity = sample.toEntity(currentState.plotId, currentState.plotName, currentState.campaignYear)
+            draftDao.insertSample(entity)
+
+            val batchId = "batch-${LocalDate.now()}-${UUID.randomUUID().toString().take(6)}"
+            submitSamplingBatch(
+                plotId = currentState.plotId,
+                campaignYear = currentState.campaignYear,
+                batchId = batchId,
+                samples = listOf(sample),
+            ).fold(
+                onSuccess = { summary ->
+                    draftDao.markSampleAsSynced(entity.id)
+                    _uiState.update { current ->
+                        val updated = current.samples.map {
+                            if (it.treeIdentifier == sample.treeIdentifier) it.copy(isSynced = true) else it
+                        }
+                        current.copy(
+                            samples = updated,
+                            submissionSummary = summary,
+                            isOffline = false,
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    val isOffline = error is pe.edu.upc.viora.core.domain.AppError.Offline ||
+                        error is pe.edu.upc.viora.core.domain.AppError.Timeout
+                    if (isOffline) {
+                        _uiState.update { it.copy(isOffline = true) }
+                    }
+                },
+            )
         }
     }
 
@@ -66,13 +118,17 @@ class SamplingSessionViewModel @Inject constructor(
         val batchId = "batch-${LocalDate.now()}-${UUID.randomUUID().toString().take(6)}"
 
         viewModelScope.launch {
+            val unsyncedSamples = state.samples.filter { !it.isSynced }
+            val samplesToSend = if (unsyncedSamples.isEmpty()) state.samples else unsyncedSamples
+
             submitSamplingBatch(
                 plotId = state.plotId,
                 campaignYear = state.campaignYear,
                 batchId = batchId,
-                samples = state.samples,
+                samples = samplesToSend,
             ).fold(
                 onSuccess = { summary ->
+                    draftDao.clearSamples(state.plotId, state.campaignYear)
                     val hadRecovered = _uiState.value.isOffline
                     _uiState.update {
                         it.copy(

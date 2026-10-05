@@ -11,3 +11,4 @@ class GetPlotSamplingOverviewUseCase @Inject constructor(
     suspend operator fun invoke(campaignYear: Int? = null): AppResult<List<PlotSamplingOverview>> =
         repository.getPlotSamplingOverview(campaignYear)
 }
+

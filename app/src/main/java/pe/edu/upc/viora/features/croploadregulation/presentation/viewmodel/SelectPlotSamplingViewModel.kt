@@ -19,6 +19,7 @@ class SelectPlotSamplingViewModel @Inject constructor(
     private val getPlotSamplingOverview: GetPlotSamplingOverviewUseCase,
 ) : ViewModel() {
 
+    private val currentYear = java.time.Year.now().value
     private val _uiState = MutableStateFlow<SelectPlotSamplingUiState>(SelectPlotSamplingUiState.Loading)
     val uiState: StateFlow<SelectPlotSamplingUiState> = _uiState.asStateFlow()
 
@@ -46,11 +47,10 @@ class SelectPlotSamplingViewModel @Inject constructor(
         loadPlots()
     }
 
-    private val currentYear = java.time.Year.now().value
-
     private fun loadPlots() {
         viewModelScope.launch {
             getPlotSamplingOverview(campaignYear = currentYear).fold(
+
                 onSuccess = { plots ->
                     val defaultSelected = (_uiState.value as? SelectPlotSamplingUiState.Content)?.selectedPlotId
                         ?: plots.firstOrNull { it.samplingStatus == SamplingStatus.IN_PROGRESS }?.plotId
