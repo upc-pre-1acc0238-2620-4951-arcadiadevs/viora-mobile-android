@@ -17,6 +17,7 @@ import pe.edu.upc.viora.core.navigation.PlaceholderScreen
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
+import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
@@ -63,7 +64,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
         }
         navigation<LogbookGraph>(startDestination = LogbookRoute) {
-            composable<LogbookRoute> { PlaceholderScreen(title = stringResource(R.string.nav_logbook)) }
+            composable<LogbookRoute> { LogbookScreen() }
         }
     }
 }

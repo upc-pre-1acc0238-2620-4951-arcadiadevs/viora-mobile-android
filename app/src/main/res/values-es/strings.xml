@@ -478,4 +478,25 @@
     <string name="home_focus_title">Lote en foco</string>
     <string name="home_focus_hint">Las tarjetas del Inicio hablan de este lote.</string>
     <string name="home_focus_change">Cambiar el lote en foco</string>
+
+    <string name="logbook_headline_lead">Tu</string>
+    <string name="logbook_headline_emphasis">bitácora.</string>
+    <string name="logbook_filter_all">Todo</string>
+    <string name="logbook_filter_samplings">Muestreos</string>
+    <string name="logbook_filter_thinnings">Aclareos</string>
+    <string name="logbook_filter_harvests">Cosechas</string>
+    <string name="logbook_period_this_week">Esta semana</string>
+    <string name="logbook_period_this_month">Este mes</string>
+    <string name="logbook_period_earlier">Anteriores</string>
+    <string name="logbook_harvest_title">Cosecha asentada</string>
+    <string name="logbook_harvest_details">%1$s · campaña %2$d · %3$s kg</string>
+    <string name="logbook_harvest_audited">%1$s · auditada</string>
+    <string name="logbook_unknown_plot">Lote</string>
+    <string name="logbook_showing_saved_data">Mostrando datos guardados. Toca para reintentar.</string>
+    <string name="logbook_empty_harvests_title">Aún no hay cosechas asentadas</string>
+    <string name="logbook_empty_harvests_body">Cuando asientes una campaña, aparecerá aquí.</string>
+    <string name="logbook_empty_samplings_title">Aún no hay muestreos</string>
+    <string name="logbook_empty_samplings_body">Tus muestreos se listarán aquí cuando los registres.</string>
+    <string name="logbook_empty_thinnings_title">Aún no hay aclareos</string>
+    <string name="logbook_empty_thinnings_body">Tus aclareos se listarán aquí cuando los registres.</string>
 </resources>

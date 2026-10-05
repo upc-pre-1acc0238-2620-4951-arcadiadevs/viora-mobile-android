@@ -476,4 +476,25 @@
     <string name="home_focus_title">Plot in focus</string>
     <string name="home_focus_hint">The cards of the Home talk about this plot.</string>
     <string name="home_focus_change">Change the plot in focus</string>
+
+    <string name="logbook_headline_lead">Your</string>
+    <string name="logbook_headline_emphasis">logbook.</string>
+    <string name="logbook_filter_all">All</string>
+    <string name="logbook_filter_samplings">Samplings</string>
+    <string name="logbook_filter_thinnings">Thinnings</string>
+    <string name="logbook_filter_harvests">Harvests</string>
+    <string name="logbook_period_this_week">This week</string>
+    <string name="logbook_period_this_month">This month</string>
+    <string name="logbook_period_earlier">Earlier</string>
+    <string name="logbook_harvest_title">Harvest settled</string>
+    <string name="logbook_harvest_details">%1$s · season %2$d · %3$s kg</string>
+    <string name="logbook_harvest_audited">%1$s · audited</string>
+    <string name="logbook_unknown_plot">Plot</string>
+    <string name="logbook_showing_saved_data">Showing saved data. Tap to try again.</string>
+    <string name="logbook_empty_harvests_title">No settled harvests yet</string>
+    <string name="logbook_empty_harvests_body">When you settle a season, it will show up here.</string>
+    <string name="logbook_empty_samplings_title">No samplings yet</string>
+    <string name="logbook_empty_samplings_body">Your samplings will be listed here once you record them.</string>
+    <string name="logbook_empty_thinnings_title">No thinnings yet</string>
+    <string name="logbook_empty_thinnings_body">Your thinnings will be listed here once you record them.</string>
 </resources>
