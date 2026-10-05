@@ -1,42 +1,44 @@
 package pe.edu.upc.viora
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import pe.edu.upc.viora.core.designsystem.component.TabBarAction
 import pe.edu.upc.viora.core.designsystem.component.TabBarItem
 import pe.edu.upc.viora.core.designsystem.component.TabBarMode
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBar
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarActionColors
 import pe.edu.upc.viora.core.designsystem.theme.Spacing
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.core.navigation.HomeRoute
 import pe.edu.upc.viora.core.navigation.TopLevelDestination
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourOverlay
@@ -45,6 +47,7 @@ import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTargets
 import pe.edu.upc.viora.features.home.presentation.tour.LocalHomeTourTargets
 import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeTourViewModel
+import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.navigation.AppNavHost
@@ -60,14 +63,21 @@ fun VioraApp(modifier: Modifier = Modifier) {
     val tourViewModel: HomeTourViewModel = hiltViewModel()
     val tourPending by tourViewModel.isPending.collectAsStateWithLifecycle()
     var tourRunning by remember { mutableStateOf(false) }
-    val selectedIndex = tabs.indexOfFirst { tab ->
+    // -1 on the plot screens (detail, alternation...): they belong to no tab, they are opened on
+    // top of the tab the producer was in, which stays highlighted.
+    val tabIndex = tabs.indexOfFirst { tab ->
         currentDestination?.hierarchy?.any { it.hasRoute(tab.graph::class) } == true
     }
+    var originIndex by rememberSaveable { mutableIntStateOf(0) }
+    LaunchedEffect(tabIndex) { if (tabIndex >= 0) originIndex = tabIndex }
+    val onPlotScreen = tabIndex < 0
+    val selectedIndex = if (onPlotScreen) originIndex else tabIndex
     // Tab roots show the bar, and so do the detail screens the design keeps it on (the plot
-    // detail, sensors); the rest (wizards, full-screen maps) take the whole screen.
+    // detail, sensors, alternation); the rest (wizards, full-screen maps) take the whole screen.
     val showTabBar = tabs.any { currentDestination?.hasRoute(it.startRoute) == true } ||
         currentDestination?.hasRoute<PlotDetailRoute>() == true ||
-        currentDestination?.hasRoute<SensorsRoute>() == true
+        currentDestination?.hasRoute<SensorsRoute>() == true ||
+        currentDestination?.hasRoute<HarvestHistoryRoute>() == true
 
     val items = tabs.map { TabBarItem(icon = it.icon, label = stringResource(it.label)) }
     val actionLabel = stringResource(R.string.nav_action_add)
@@ -114,10 +124,14 @@ fun VioraApp(modifier: Modifier = Modifier) {
                     items = items,
                     selectedIndex = selectedIndex.coerceAtLeast(0),
                     onItemClick = { index ->
-                        navController.navigate(tabs[index].graph) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
+                        // From a plot screen, first close it: back to the root of the tab it came from.
+                        if (onPlotScreen) navController.popBackStack(tabs[originIndex].startRoute, inclusive = false)
+                        if (!(onPlotScreen && index == originIndex)) {
+                            navController.navigate(tabs[index].graph) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     },
                     actionLabel = actionLabel,

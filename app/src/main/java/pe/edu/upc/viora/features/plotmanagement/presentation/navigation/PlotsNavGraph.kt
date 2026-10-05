@@ -14,6 +14,8 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotsScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.AdjustOutlineScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.EditPlotScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.RegisterPlotScreen
+import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
+import pe.edu.upc.viora.features.phenology.presentation.navigation.harvestHistoryComposable
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.sensorsComposable
 
@@ -40,7 +42,7 @@ data class EditPlotRoute(val plotId: String)
 @Serializable
 data class AdjustOutlineRoute(val plotId: String)
 
-/** The "Lotes" tab: the list, the registration wizard reached from it and each plot's detail. */
+/** The "Lotes" tab: just the list. The screens it opens are [plotScreens], outside any tab. */
 fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
     navigation<PlotsGraph>(startDestination = PlotsRoute) {
         composable<PlotsRoute> {
@@ -50,34 +52,48 @@ fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
                 onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
             )
         }
-        composable<PlotsMapRoute> {
-            PlotsMapScreen(onBack = { navController.popBackStack() })
-        }
-        composable<RegisterPlotRoute> {
-            RegisterPlotScreen(
-                onLeave = { navController.popBackStack() },
-                // The wizard is replaced by the detail, so "back" from there returns to the list.
-                onSaved = { id ->
-                    navController.navigate(PlotDetailRoute(plotId = id.value, justSaved = true)) {
-                        popUpTo<RegisterPlotRoute> { inclusive = true }
-                    }
-                },
-            )
-        }
-        composable<PlotDetailRoute> { entry ->
-            PlotDetailScreen(
-                onBack = { navController.popBackStack() },
-                onEdit = { navController.navigate(EditPlotRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
-                onAdjustOutline = { navController.navigate(AdjustOutlineRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
-                onSensors = { navController.navigate(SensorsRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
-            )
-        }
-        composable<EditPlotRoute> {
-            EditPlotScreen(onBack = { navController.popBackStack() })
-        }
-        composable<AdjustOutlineRoute> {
-            AdjustOutlineScreen(onBack = { navController.popBackStack() })
-        }
-        sensorsComposable(navController)
     }
+}
+
+/**
+ * The screens about a plot (map, registration wizard, detail, edit, outline, sensors and
+ * alternation). They sit at the root of the navigation, outside every tab graph, because the
+ * producer reaches them from several tabs (Home and Lotes). If they belonged to the Lotes graph,
+ * opening one from the Home would push it into the Home's back stack while the tab bar showed
+ * Lotes, and the Home tab would then bring that screen back instead of the Home.
+ */
+fun NavGraphBuilder.plotScreens(navController: NavController) {
+    composable<PlotsMapRoute> {
+        PlotsMapScreen(onBack = { navController.popBackStack() })
+    }
+    composable<RegisterPlotRoute> {
+        RegisterPlotScreen(
+            onLeave = { navController.popBackStack() },
+            // The wizard is replaced by the detail, so "back" from there returns to the list.
+            onSaved = { id ->
+                navController.navigate(PlotDetailRoute(plotId = id.value, justSaved = true)) {
+                    popUpTo<RegisterPlotRoute> { inclusive = true }
+                }
+            },
+        )
+    }
+    composable<PlotDetailRoute> { entry ->
+        PlotDetailScreen(
+            onBack = { navController.popBackStack() },
+            onEdit = { navController.navigate(EditPlotRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
+            onAdjustOutline = { navController.navigate(AdjustOutlineRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
+            onSensors = { navController.navigate(SensorsRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
+            onHarvestHistory = { plotName ->
+                navController.navigate(HarvestHistoryRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
+            },
+        )
+    }
+    composable<EditPlotRoute> {
+        EditPlotScreen(onBack = { navController.popBackStack() })
+    }
+    composable<AdjustOutlineRoute> {
+        AdjustOutlineScreen(onBack = { navController.popBackStack() })
+    }
+    sensorsComposable(navController)
+    harvestHistoryComposable(navController)
 }

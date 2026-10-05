@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -10,6 +11,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -40,8 +43,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
@@ -53,10 +58,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
+import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral200
@@ -66,11 +73,15 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.features.phenology.domain.entity.BbiClass
+import pe.edu.upc.viora.features.phenology.presentation.ui.formatIndex
+import pe.edu.upc.viora.features.phenology.presentation.ui.sentenceRes
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.LotHarvest
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotDetailUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.PlotDetailViewModel
@@ -93,6 +104,7 @@ fun PlotDetailScreen(
     onEdit: () -> Unit,
     onAdjustOutline: () -> Unit,
     onSensors: () -> Unit = {},
+    onHarvestHistory: (plotName: String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: PlotDetailViewModel = hiltViewModel(),
 ) {
@@ -106,6 +118,7 @@ fun PlotDetailScreen(
         onEdit = onEdit,
         onAdjustOutline = onAdjustOutline,
         onSensors = onSensors,
+        onHarvestHistory = onHarvestHistory,
         archiveState = archiveState,
         onArchive = viewModel::archive,
         onDismissArchiveFailure = viewModel::dismissArchiveFailure,
@@ -121,6 +134,7 @@ fun PlotDetailContent(
     onEdit: () -> Unit = {},
     onAdjustOutline: () -> Unit = {},
     onSensors: () -> Unit = {},
+    onHarvestHistory: (plotName: String) -> Unit = {},
     archiveState: ArchiveState = ArchiveState.Idle,
     onArchive: () -> Unit = {},
     onDismissArchiveFailure: () -> Unit = {},
@@ -137,7 +151,9 @@ fun PlotDetailContent(
             onEdit = onEdit,
             onAdjustOutline = onAdjustOutline,
             onSensors = onSensors,
+            onHarvestHistory = onHarvestHistory,
             activeHectares = state.activeHectares,
+            harvest = state.harvest,
             archiveState = archiveState,
             onArchive = onArchive,
             onDismissArchiveFailure = onDismissArchiveFailure,
@@ -154,7 +170,9 @@ private fun PlotDetailBody(
     onEdit: () -> Unit,
     onAdjustOutline: () -> Unit,
     onSensors: () -> Unit,
+    onHarvestHistory: (plotName: String) -> Unit,
     activeHectares: Double,
+    harvest: LotHarvest?,
     archiveState: ArchiveState,
     onArchive: () -> Unit,
     onDismissArchiveFailure: () -> Unit,
@@ -192,6 +210,8 @@ private fun PlotDetailBody(
             exploring = exploring,
             onExploringChange = { exploring = it },
             sheetHeight = if (exploring) loweredSheetHeight else openSheetHeight,
+            harvest = harvest,
+            onHarvestHistory = { onHarvestHistory(plot.name) },
             modifier = Modifier.align(Alignment.BottomCenter),
         )
         if (optionsOpen) {
@@ -298,6 +318,8 @@ private fun DetailSheet(
     exploring: Boolean,
     onExploringChange: (Boolean) -> Unit,
     sheetHeight: Dp,
+    harvest: LotHarvest?,
+    onHarvestHistory: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -310,7 +332,10 @@ private fun DetailSheet(
             .padding(horizontal = 24.dp),
     ) {
         Grabber(exploring = exploring, onExploringChange = onExploringChange)
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier.verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = plot.name,
@@ -349,7 +374,60 @@ private fun DetailSheet(
                         modifier = Modifier.weight(1f),
                     )
                 }
+                VioraSectionHeader(title = stringResource(R.string.plot_detail_your_lot))
+                LotSectionCard(
+                    icon = R.drawable.ic_history,
+                    title = stringResource(R.string.lot_section_harvest),
+                    subtitle = harvestSubtitle(harvest),
+                    background = Harvest100,
+                    onClick = onHarvestHistory,
+                )
             }
+        }
+    }
+}
+
+/** "Índice 0,51 · vecería severa", or how many campaigns are missing, or the generic line until it is known. */
+@Composable
+private fun harvestSubtitle(harvest: LotHarvest?): String = when {
+    harvest == null -> stringResource(R.string.lot_section_harvest_hint)
+    harvest.index != null -> stringResource(
+        R.string.plot_detail_harvest_index,
+        formatIndex(harvest.index),
+        stringResource(BbiClass.of(harvest.index).sentenceRes()),
+    )
+    else -> pluralStringResource(R.plurals.plot_detail_harvest_missing, harvest.missingCampaigns, harvest.missingCampaigns)
+}
+
+/** A section of the plot as a card (Figma P26 "Tu lote"): icon, title and line, and an arrow to open it. */
+@Composable
+private fun LotSectionCard(
+    @DrawableRes icon: Int,
+    title: String,
+    subtitle: String,
+    background: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(28.dp))
+            .background(background)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(48.dp).clip(CircleShape).background(Neutral0), contentAlignment = Alignment.Center) {
+            Icon(painterResource(icon), contentDescription = null, tint = Neutral900, modifier = Modifier.size(24.dp))
+        }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(title, style = MaterialTheme.typography.titleSmall, color = Neutral900)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Neutral700)
+        }
+        Box(Modifier.size(40.dp).clip(CircleShape).background(Green800), contentAlignment = Alignment.Center) {
+            Icon(painterResource(R.drawable.ic_arrow_forward), contentDescription = null, tint = Neutral0, modifier = Modifier.size(20.dp))
         }
     }
 }
@@ -470,7 +548,14 @@ private val previewPlot = Plot(
 @Preview(showBackground = true, backgroundColor = 0xFFF3F0EA, heightDp = 420)
 @Composable
 private fun DetailSheetPreview() {
-    VioraTheme { DetailSheet(plot = previewPlot, exploring = false, onExploringChange = {}, sheetHeight = 320.dp) }
+    VioraTheme { DetailSheet(
+            plot = previewPlot,
+            exploring = false,
+            onExploringChange = {},
+            sheetHeight = 320.dp,
+            harvest = LotHarvest(index = 0.51, missingCampaigns = 0),
+            onHarvestHistory = {},
+        ) }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF1B1916)

@@ -20,8 +20,16 @@ sealed interface PlotDetailUiState {
         val showSavedNotice: Boolean,
         /** Hectares of all the producer's active plots, used to show what archiving this one frees. */
         val activeHectares: Double = plot.areaHectares,
+        /** What the alternation card says; null until the plot's harvest history is known. */
+        val harvest: LotHarvest? = null,
     ) : PlotDetailUiState
 }
+
+/**
+ * The plot's bearing index for the "Tu lote" card: [index] is null while there are not enough
+ * campaigns, and then [missingCampaigns] says how many are still needed.
+ */
+data class LotHarvest(val index: Double?, val missingCampaigns: Int)
 
 /** Progress of archiving the plot being shown. */
 enum class ArchiveState { Idle, Working, Failed, Done }

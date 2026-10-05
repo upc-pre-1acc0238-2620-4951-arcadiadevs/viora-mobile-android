@@ -104,73 +104,11 @@
             "id"
           ]
         }
-      },
-      {
-        "tableName": "sensor_nodes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `depth_cm` INTEGER, `status` TEXT NOT NULL, `last_reading_at` TEXT, `last_temperature_celsius` REAL, `last_humidity_percent` REAL, PRIMARY KEY(`id`))",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "plotId",
-            "columnName": "plot_id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "type",
-            "columnName": "type",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "depthCm",
-            "columnName": "depth_cm",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "status",
-            "columnName": "status",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "lastReadingAt",
-            "columnName": "last_reading_at",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "lastTemperatureCelsius",
-            "columnName": "last_temperature_celsius",
-            "affinity": "REAL"
-          },
-          {
-            "fieldPath": "lastHumidityPercent",
-            "columnName": "last_humidity_percent",
-            "affinity": "REAL"
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "id"
-          ]
-        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '47683a2b6d8362298189866132037dfe')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6329ac86022af5397d00cebd13031b8d')"
     ]
   }
 }

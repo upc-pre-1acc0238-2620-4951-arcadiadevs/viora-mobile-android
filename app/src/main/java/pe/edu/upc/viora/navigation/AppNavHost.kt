@@ -17,12 +17,15 @@ import pe.edu.upc.viora.core.navigation.PlaceholderScreen
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
-import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
-import pe.edu.upc.viora.features.telemetry.presentation.navigation.alertsNavGraph
+import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
+import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
+import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotScreens
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNavGraph
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.alertsNavGraph
 
 /**
  * Composition root of navigation. It lives outside `core/` on purpose: this is the one place
@@ -44,6 +47,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 HomeScreen(
                     onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
                     onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
+                    onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id.value, plotName = name)) },
                     onOpenPlots = {
                         navController.navigate(PlotsGraph) {
                             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -56,6 +60,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             }
         }
         plotsNavGraph(navController)
+        plotScreens(navController)
         alertsNavGraph(
             navController = navController,
             onOpenPlot = { plotId -> navController.navigate(PlotDetailRoute(plotId = plotId)) },
@@ -64,7 +69,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
         }
         navigation<LogbookGraph>(startDestination = LogbookRoute) {
-            composable<LogbookRoute> { PlaceholderScreen(title = stringResource(R.string.nav_logbook)) }
+            composable<LogbookRoute> { LogbookScreen() }
         }
     }
 }
