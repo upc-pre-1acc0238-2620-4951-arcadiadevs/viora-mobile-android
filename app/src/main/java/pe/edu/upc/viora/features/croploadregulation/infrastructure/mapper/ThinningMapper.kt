@@ -23,26 +23,24 @@ fun TreeSample.toRequestDto(): TreeSampleRequestDto {
         else -> null
     }
     return TreeSampleRequestDto(
-        treeIdentifier = treeIdentifier,
-        shootsCount = shootsCount,
+        treeTag = treeIdentifier,
+        shootCount = shootsCount,
         fruitSetCount = fruitSetCount,
         trunkDiameterMm = diameterMm?.let { Math.round(it * 10.0) / 10.0 },
-        observedOn = observedOn.toString(),
+        samplingDate = observedOn.toString(),
     )
 }
 
 fun SamplingSummaryResponseDto.toDomain(): SamplingSummary = SamplingSummary(
-    prescriptionId = prescriptionId,
     plotId = plotId,
     campaignYear = campaignYear,
-    status = status,
-    evaluatedTreesCount = evaluatedTreesCount,
-    targetTreesCount = targetTreesCount,
-    coveragePercentage = coveragePercentage,
-    meanFruitsPerShoot = meanFruitsPerShoot,
+    evaluatedTreesCount = sampledTreesCount,
+    sampledShootsCount = sampledShootsCount,
     sampledFruitSetCount = sampledFruitSetCount,
+    meanFruitsPerShoot = meanFruitsPerShoot,
     isRepresentative = isRepresentative,
-    updatedAt = parseInstantOrNow(updatedAt),
+    treesNeeded = treesNeeded,
+    loadUnit = loadUnit,
 )
 
 fun PlotSamplingStateResponseDto.toDomain(): PlotSamplingOverview = PlotSamplingOverview(
@@ -68,7 +66,7 @@ fun ThinningEventItemDto.toDomain(): ThinningEvent = ThinningEvent(
         else -> ThinningEventType.SAMPLING_COMPLETED
     },
     prescriptionId = prescriptionId,
-    executionId = executionId,
+    confirmationId = confirmationId,
     plotId = plotId,
     plotName = plotName,
     campaignYear = campaignYear,
@@ -80,7 +78,7 @@ fun ThinningEventItemDto.toDomain(): ThinningEvent = ThinningEvent(
     isRepresentative = isRepresentative,
     removalPercentage = removalPercentage,
     removedKg = removedKg,
-    executionDate = executionDate?.let { parseLocalDateOrNull(it) },
+    executedDate = executedDate?.let { parseLocalDateOrNull(it) },
     laborCrewSize = laborCrewSize,
     timeliness = when (timeliness) {
         "OPTIMAL" -> Timeliness.OPTIMAL

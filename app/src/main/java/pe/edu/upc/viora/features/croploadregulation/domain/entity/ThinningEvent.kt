@@ -12,7 +12,7 @@ data class ThinningEvent(
     val id: String,
     val eventType: ThinningEventType,
     val prescriptionId: String,
-    val executionId: String? = null,
+    val confirmationId: String? = null,
     val plotId: String,
     val plotName: String,
     val campaignYear: Int,
@@ -24,7 +24,10 @@ data class ThinningEvent(
     val isRepresentative: Boolean? = null,
     val removalPercentage: Double? = null,
     val removedKg: Double? = null,
-    val executionDate: LocalDate? = null,
+    val executedDate: LocalDate? = null,
     val laborCrewSize: Int? = null,
     val timeliness: Timeliness? = null,
-)
+) {
+    val executionId: String? get() = confirmationId
+    val executionDate: LocalDate? get() = executedDate
+}

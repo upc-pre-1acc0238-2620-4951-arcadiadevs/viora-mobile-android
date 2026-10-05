@@ -141,8 +141,12 @@ fun VioraApp(modifier: Modifier = Modifier) {
                     onActionClick = {
                         barMode = if (barMode == TabBarMode.Actions) TabBarMode.Rest else TabBarMode.Actions
                     },
-                    // The logging screens do not exist yet: picking an option only closes the menu.
-                    onActionSelected = { barMode = TabBarMode.Rest },
+                    onActionSelected = { index ->
+                        barMode = TabBarMode.Rest
+                        if (index == 0) {
+                            navController.navigate(pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SelectPlotSamplingRoute)
+                        }
+                    },
                     onCollapsedBarClick = { barMode = TabBarMode.Rest },
                     barRowModifier = Modifier.homeTourTarget(HomeTourTarget.Register),
                     modifier = Modifier.navigationBarsPadding().padding(bottom = Spacing.sm),

@@ -21,12 +21,24 @@ interface ThinningService {
 
     /**
      * Gets the current accumulated sampling summary for a plot (P54).
+     * Query param view defaults to "summary".
      */
-    @GET("plots/{plotId}/samplings/summary")
+    @GET("plots/{plotId}/samplings")
     suspend fun getSamplingSummary(
         @Path("plotId") plotId: String,
         @Query("campaignYear") campaignYear: Int? = null,
+        @Query("view") view: String = "summary",
     ): Response<SamplingSummaryResponseDto>
+
+    /**
+     * Gets the sampling statistics plus individual tree evaluations (P54 Detailed).
+     */
+    @GET("plots/{plotId}/samplings")
+    suspend fun getSamplingDetailed(
+        @Path("plotId") plotId: String,
+        @Query("campaignYear") campaignYear: Int? = null,
+        @Query("view") view: String = "detailed",
+    ): Response<SamplingDetailedResponseDto>
 
     /**
      * Gets the chronological timeline of thinning and sampling milestones (P50 Bitácora).

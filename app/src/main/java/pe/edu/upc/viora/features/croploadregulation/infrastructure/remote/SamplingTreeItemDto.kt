@@ -3,11 +3,11 @@ package pe.edu.upc.viora.features.croploadregulation.infrastructure.remote
 import kotlinx.serialization.Serializable
 
 /**
- * Payload to record one tree sample evaluated in the orchard (P52 / P53).
- * [trunkDiameterMm] is optional and can be null when not measured in the field.
+ * Individual evaluated tree item inside [SamplingDetailedResponseDto].
  */
 @Serializable
-data class TreeSampleRequestDto(
+data class SamplingTreeItemDto(
+    val roundId: String,
     val treeTag: String,
     val shootCount: Int,
     val fruitSetCount: Int,

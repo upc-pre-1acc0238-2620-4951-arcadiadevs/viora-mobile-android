@@ -34,8 +34,8 @@ class ThinningRepositoryImpl @Inject constructor(
         samples: List<TreeSample>,
     ): AppResult<SamplingSummary> {
         val payload = SamplingBatchRequestDto(
+            clientBatchId = batchId,
             campaignYear = campaignYear,
-            samplingBatchId = batchId,
             samples = samples.map { it.toRequestDto() },
         )
         return apiCaller.call { service.submitSamplingBatch(plotId, payload) }

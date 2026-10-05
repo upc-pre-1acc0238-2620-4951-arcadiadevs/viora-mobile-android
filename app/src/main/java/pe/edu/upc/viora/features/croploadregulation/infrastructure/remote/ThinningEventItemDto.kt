@@ -11,7 +11,7 @@ data class ThinningEventItemDto(
     val id: String,
     val eventType: String,
     val prescriptionId: String,
-    val executionId: String? = null,
+    val confirmationId: String? = null,
     val plotId: String,
     val plotName: String,
     val campaignYear: Int,
@@ -25,7 +25,7 @@ data class ThinningEventItemDto(
     // Properties present when THINNING_EXECUTED
     val removalPercentage: Double? = null,
     val removedKg: Double? = null,
-    val executionDate: String? = null,
+    val executedDate: String? = null,
     val laborCrewSize: Int? = null,
     val timeliness: String? = null,
 )
