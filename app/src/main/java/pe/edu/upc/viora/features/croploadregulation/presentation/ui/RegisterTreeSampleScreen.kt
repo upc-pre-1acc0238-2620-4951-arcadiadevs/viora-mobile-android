@@ -154,7 +154,7 @@ fun RegisterTreeSampleScreen(
 
             // Headline: "Árbol *A-14.*"
             Text(
-                text = "${stringResource(R.string.sampling_register_tree_headline_lead)}\n",
+                text = stringResource(R.string.sampling_register_tree_headline_lead),
                 style = MaterialTheme.typography.displayMedium.copy(
                     fontSize = 44.sp,
                     lineHeight = 46.sp,
@@ -171,7 +171,6 @@ fun RegisterTreeSampleScreen(
                     letterSpacing = (-1).sp,
                 ),
                 color = Neutral900,
-                modifier = Modifier.padding(top = (-10).dp),
             )
 
             Spacer(Modifier.height(16.dp))

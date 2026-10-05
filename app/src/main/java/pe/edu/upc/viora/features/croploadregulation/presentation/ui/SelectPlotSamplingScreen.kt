@@ -171,7 +171,7 @@ fun SelectPlotSamplingContent(
 
             // Headline: "¿Dónde vas a *muestrear?*"
             Text(
-                text = "${stringResource(R.string.sampling_select_plot_headline_lead)}\n",
+                text = stringResource(R.string.sampling_select_plot_headline_lead),
                 style = MaterialTheme.typography.displayMedium.copy(
                     fontSize = 40.sp,
                     lineHeight = 44.sp,
@@ -188,7 +188,6 @@ fun SelectPlotSamplingContent(
                     letterSpacing = (-1).sp,
                 ),
                 color = Neutral900,
-                modifier = Modifier.padding(top = (-10).dp),
             )
 
             Spacer(Modifier.height(16.dp))

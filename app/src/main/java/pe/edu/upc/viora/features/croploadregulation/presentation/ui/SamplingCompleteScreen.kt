@@ -196,7 +196,7 @@ fun SamplingCompleteScreen(
 
             // Headline: "Ronda *completa.*" vs "Ronda *guardada.*"
             Text(
-                text = "${stringResource(R.string.sampling_complete_headline_lead)}\n",
+                text = stringResource(R.string.sampling_complete_headline_lead),
                 style = MaterialTheme.typography.displayMedium.copy(
                     fontSize = 48.sp,
                     lineHeight = 50.sp,
@@ -217,7 +217,6 @@ fun SamplingCompleteScreen(
                     letterSpacing = (-1.2).sp,
                 ),
                 color = Neutral900,
-                modifier = Modifier.padding(top = (-12).dp),
             )
 
             Spacer(Modifier.height(16.dp))
