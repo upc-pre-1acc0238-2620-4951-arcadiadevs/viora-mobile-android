@@ -13,6 +13,7 @@ import pe.edu.upc.viora.features.telemetry.domain.repository.SensorRepository
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toDomainOrNull
 import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toEntity
+import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toCalibrationRequestDto
 import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toRequestDto
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.SensorNodeDto
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.SensorService
@@ -38,6 +39,29 @@ class SensorRepositoryImpl @Inject constructor(
 
     override suspend fun linkNode(newNode: NewSensorNode): AppResult<SensorNode> =
         apiCaller.call { service.linkNode(newNode.plotId, newNode.toRequestDto()) }.cached()
+
+    override suspend fun updateNode(node: SensorNode): AppResult<SensorNode> {
+        val result = apiCaller.call {
+            service.updateNode(node.plotId, node.id, node.toCalibrationRequestDto())
+        }
+        if (result is AppResult.Failure) return result
+
+        val remoteEntity = (result as AppResult.Success).value.toEntity()
+        // The calibration endpoint owns the technical fields; keep the UI transmission
+        // state locally because the API contract does not expose it in TS42.
+        val entity = remoteEntity.copy(status = node.status.name)
+        val updated = entity.toDomainOrNull()
+            ?: return AppResult.Failure(AppError.Unknown(IllegalStateException("Server returned an unreadable node")))
+        return guarded { sensorNodeDao.upsertAll(listOf(entity)) }.let { stored ->
+            if (stored is AppResult.Failure) stored else AppResult.Success(updated)
+        }
+    }
+
+    override suspend fun unlinkNode(plotId: String, nodeId: String): AppResult<Unit> {
+        val result = apiCaller.callUnit { service.unlinkNode(plotId, nodeId) }
+        if (result is AppResult.Failure) return result
+        return guarded { sensorNodeDao.delete(plotId, nodeId) }
+    }
 
     private suspend fun AppResult<SensorNodeDto>.cached(): AppResult<SensorNode> {
         if (this is AppResult.Failure) return this
