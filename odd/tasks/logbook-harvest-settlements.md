@@ -48,4 +48,4 @@ The Logbook tab is a `PlaceholderScreen` and `features/harvestsettlement` is emp
 - `ic_task_alt` hand-authored from the baseline Material path (Figma uses the Rounded variant).
 
 ## Next step
-Device check once the backend GET is deployed; then merge the feature into `develop` (gitflow).
+Shipped in release 0.11.0. Device check once the backend GET is deployed.
