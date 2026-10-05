@@ -96,6 +96,7 @@ fun SensorsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onHarvestHistory: () -> Unit = {},
+    onNodeClick: (SensorNode) -> Unit = {},
     viewModel: SensorsViewModel = hiltViewModel(),
     linkViewModel: LinkNodeViewModel = hiltViewModel(),
 ) {
@@ -120,6 +121,7 @@ fun SensorsScreen(
             showSheet = true
         },
         onMore = { showMore = true },
+        onNodeClick = onNodeClick,
         modifier = modifier,
     )
 
@@ -184,6 +186,7 @@ fun SensorsScreenContent(
     onLinkNode: () -> Unit,
     modifier: Modifier = Modifier,
     onMore: () -> Unit = {},
+    onNodeClick: (SensorNode) -> Unit = {},
 ) {
     val plotName = when (state) {
         is SensorsUiState.Content -> state.plotName
@@ -344,7 +347,7 @@ fun SensorsScreenContent(
                     // List of Sensor Cards
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         state.nodes.forEach { node ->
-                            SensorCard(node = node)
+                            SensorCard(node = node, onClick = { onNodeClick(node) })
                         }
                     }
                 }
@@ -402,13 +405,13 @@ fun SensorsScreenContent(
 
 /** Card for one sensor node (US14). */
 @Composable
-private fun SensorCard(node: SensorNode, modifier: Modifier = Modifier) {
+private fun SensorCard(node: SensorNode, onClick: () -> Unit = {}, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
             .background(Neutral0)
-            .clickable(role = Role.Button) { /* Node detail/calibration */ }
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(start = 14.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically,

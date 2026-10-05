@@ -17,6 +17,7 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.Reg
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.harvestHistoryComposable
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.configureNodeComposable
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.sensorsComposable
 
 /** The plot registration wizard. It hides the tab bar because it is not a tab root. */
@@ -95,5 +96,6 @@ fun NavGraphBuilder.plotScreens(navController: NavController) {
         AdjustOutlineScreen(onBack = { navController.popBackStack() })
     }
     sensorsComposable(navController)
+    configureNodeComposable(navController)
     harvestHistoryComposable(navController)
 }
