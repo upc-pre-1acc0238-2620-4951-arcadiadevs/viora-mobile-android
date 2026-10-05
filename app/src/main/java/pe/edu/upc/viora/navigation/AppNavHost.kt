@@ -24,6 +24,8 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDeta
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotScreens
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNavGraph
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.alertsNavGraph
 
 /**
  * Composition root of navigation. It lives outside `core/` on purpose: this is the one place
@@ -53,13 +55,16 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                             restoreState = true
                         }
                     },
-                    // The alerts center (T14) belongs to the alerts feature.
-                    onOpenAlerts = {},
+                    onOpenAlerts = { navController.navigate(AlertsCenterRoute) },
                 )
             }
         }
         plotsNavGraph(navController)
         plotScreens(navController)
+        alertsNavGraph(
+            navController = navController,
+            onOpenPlot = { plotId -> navController.navigate(PlotDetailRoute(plotId = plotId)) },
+        )
         navigation<PlanGraph>(startDestination = PlanRoute) {
             composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
         }

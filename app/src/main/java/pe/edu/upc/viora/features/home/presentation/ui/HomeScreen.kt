@@ -133,7 +133,8 @@ fun HomeScreenContent(
                 date = today,
                 isOffline = state.isOffline,
                 lastRefresh = state.lastRefresh,
-                onOpenAlerts = onOpenAlerts,
+                onOpenAlerts = {},
+                hasUnreadAlerts = state.activeAlertsCount > 0,
                 modifier = Modifier.padding(horizontal = ScreenPadding),
             )
             Spacer(Modifier.height(28.dp))
@@ -167,6 +168,13 @@ fun HomeScreenContent(
                 )
                 is HomeUiState.Content -> {
                     sections()
+                    HomeTodayInFieldSection(
+                        activeAlertsCount = state.activeAlertsCount,
+                        onOpenAlerts = onOpenAlerts,
+                        modifier = Modifier
+                            .padding(top = 28.dp)
+                            .homeTourTarget(HomeTourTarget.Field),
+                    )
                     val focused = state.focusedPlot
                     val alternation = state.alternation
                     if (focused != null && alternation != null) {
