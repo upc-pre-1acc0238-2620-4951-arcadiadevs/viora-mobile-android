@@ -14,4 +14,10 @@ interface SensorRepository {
 
     /** Links a new virtual sensor node (US13). */
     suspend fun linkNode(newNode: NewSensorNode): AppResult<SensorNode>
+
+    /** Updates the editable configuration of a virtual sensor node (US15). */
+    suspend fun updateNode(node: SensorNode): AppResult<SensorNode>
+
+    /** Removes a virtual sensor from the active inventory while preserving telemetry history (US16). */
+    suspend fun unlinkNode(plotId: String, nodeId: String): AppResult<Unit>
 }
