@@ -578,4 +578,25 @@
     <string name="logbook_empty_samplings_body">Your samplings will be listed here once you record them.</string>
     <string name="logbook_empty_thinnings_title">No thinnings yet</string>
     <string name="logbook_empty_thinnings_body">Your thinnings will be listed here once you record them.</string>
+
+    <!-- US15 / US16: configure and unlink a sensor node -->
+    <string name="sensors_cancel">Cancel</string>
+    <string name="sensors_config_depth_hint">Changing the depth starts a new series; the previous one is kept.</string>
+    <string name="sensors_config_depth_label">PROBE DEPTH</string>
+    <string name="sensors_config_last_reading">LAST READING</string>
+    <string name="sensors_config_name_label">Node name</string>
+    <string name="sensors_config_soil_reading">soil moisture at %1$d cm</string>
+    <string name="sensors_config_subtitle">%1$s · sensors</string>
+    <string name="sensors_config_title_emphasis">probe.</string>
+    <string name="sensors_config_title_lead">Your</string>
+    <string name="sensors_save_changes">Save changes</string>
+    <string name="sensors_status_active">Active</string>
+    <string name="sensors_transmit_subtitle">If you pause it, previous readings are kept.</string>
+    <string name="sensors_transmit_title">Transmit readings</string>
+    <string name="sensors_unlink_action">Unlink node</string>
+    <string name="sensors_unlink_body">It leaves your active sensors, but its 182 days of readings stay in the plot history.</string>
+    <string name="sensors_unlink_confirm">Unlink node</string>
+    <string name="sensors_unlink_count_label">nodes in the plot</string>
+    <string name="sensors_unlink_title_emphasis">%1$s?</string>
+    <string name="sensors_unlink_title_lead">Unlink</string>
 </resources>
