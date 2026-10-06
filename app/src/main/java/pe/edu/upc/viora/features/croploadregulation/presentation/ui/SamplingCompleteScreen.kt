@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -72,11 +73,28 @@ fun SamplingCompleteScreen(
     totalFruitsCount: Int = 0,
     meanFruitsPerShoot: Double = 0.0,
     isOffline: Boolean = false,
+    isLoading: Boolean = false,
     onClose: () -> Unit,
     onViewPlotPlan: () -> Unit,
     onBackToLogbook: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (isLoading) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Neutral100),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator(
+                color = Green800,
+                modifier = Modifier.size(36.dp),
+                strokeWidth = 3.dp,
+            )
+        }
+        return
+    }
+
     val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
 
     val treesCount = summary?.evaluatedTreesCount ?: evaluatedTreesCount

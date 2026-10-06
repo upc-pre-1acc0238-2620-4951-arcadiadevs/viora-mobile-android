@@ -67,7 +67,7 @@ private val ScreenPadding = 24.dp
 @Composable
 fun SelectPlotSamplingScreen(
     onNavigateBack: () -> Unit,
-    onPlotSelected: (plotId: String, plotName: String) -> Unit,
+    onPlotSelected: (plotId: String, plotName: String, isCompleted: Boolean) -> Unit,
     plotSilhouetteSlot: @Composable (plotId: String, modifier: Modifier) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SelectPlotSamplingViewModel = hiltViewModel(),
@@ -78,7 +78,13 @@ fun SelectPlotSamplingScreen(
         state = state,
         onNavigateBack = onNavigateBack,
         onSelectPlot = viewModel::selectPlot,
-        onConfirmPlot = { plot -> onPlotSelected(plot.plotId, plot.plotName) },
+        onConfirmPlot = { plot ->
+            onPlotSelected(
+                plot.plotId,
+                plot.plotName,
+                plot.samplingStatus == SamplingStatus.COMPLETED,
+            )
+        },
         plotSilhouetteSlot = plotSilhouetteSlot,
         modifier = modifier,
     )

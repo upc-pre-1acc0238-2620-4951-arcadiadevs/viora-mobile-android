@@ -8,16 +8,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -82,9 +80,6 @@ fun RegisterTreeSampleScreen(
     onSaveTree: (identifier: String, shootsCount: Int, fruitsCount: Int, circumferenceCm: Double?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-
     var treeTag by remember(defaultIdentifier) { mutableStateOf(defaultIdentifier) }
     var shootsCount by remember(initialShootsCount) { mutableIntStateOf(initialShootsCount) }
     var fruitSetCount by remember(initialFruitSetCount) { mutableIntStateOf(initialFruitSetCount) }
@@ -102,63 +97,65 @@ fun RegisterTreeSampleScreen(
         plotName
     }
 
-    Box(
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Neutral100),
+            .background(Neutral100)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding(),
     ) {
+        // Top Navigation Bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = ScreenPadding, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Neutral0),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_close),
+                    contentDescription = stringResource(R.string.nav_action_close),
+                    tint = Neutral900,
+                )
+            }
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(R.string.sampling_register_tree_title, treeIndex, targetTreesCount),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 15.sp,
+                        lineHeight = 20.sp,
+                    ),
+                    color = Neutral900,
+                )
+                Text(
+                    text = subtitleText,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp,
+                    ),
+                    color = Neutral600,
+                )
+            }
+
+            Spacer(Modifier.size(48.dp))
+        }
+
+        // Scrollable Form Content
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .imePadding()
+                .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(
-                    top = topInset + 8.dp,
-                    start = ScreenPadding,
-                    end = ScreenPadding,
-                ),
+                .padding(horizontal = ScreenPadding),
         ) {
-            // Top Navigation Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(
-                    onClick = onClose,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Neutral0),
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
-                        contentDescription = stringResource(R.string.nav_action_close),
-                        tint = Neutral900,
-                    )
-                }
-
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(R.string.sampling_register_tree_title, treeIndex, targetTreesCount),
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 15.sp,
-                            lineHeight = 20.sp,
-                        ),
-                        color = Neutral900,
-                    )
-                    Text(
-                        text = subtitleText,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 12.sp,
-                            lineHeight = 16.sp,
-                        ),
-                        color = Neutral600,
-                    )
-                }
-
-                Spacer(Modifier.size(48.dp))
-            }
 
             Spacer(Modifier.height(24.dp))
 
@@ -405,9 +402,15 @@ fun RegisterTreeSampleScreen(
                 }
             }
 
-            Spacer(Modifier.height(44.dp))
+            Spacer(Modifier.height(16.dp))
+        }
 
-            // Bottom CTA: Guardar árbol (disabled if out of range)
+        // Bottom CTA: Guardar árbol (docked above navigation bar)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = ScreenPadding, vertical = 12.dp),
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -445,8 +448,6 @@ fun RegisterTreeSampleScreen(
                     )
                 }
             }
-
-            Spacer(Modifier.height(bottomInset + 24.dp))
         }
     }
 }

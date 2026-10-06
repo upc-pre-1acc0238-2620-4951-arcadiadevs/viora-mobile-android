@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.croploadregulation.domain.repository
 
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.PlotSamplingOverview
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingDetailedReport
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingSummary
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningEvent
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
@@ -17,6 +18,11 @@ interface ThinningRepository {
      * Retrieves the accumulated sampling statistics for [plotId] and [campaignYear].
      */
     suspend fun getSamplingSummary(plotId: String, campaignYear: Int? = null): AppResult<SamplingSummary>
+
+    /**
+     * Retrieves the sampling statistics plus individual tree evaluations (P54 Detailed).
+     */
+    suspend fun getSamplingDetailed(plotId: String, campaignYear: Int? = null): AppResult<SamplingDetailedReport>
 
     /**
      * Submits a batch of field tree samples.

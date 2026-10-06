@@ -7,10 +7,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class SamplingTreeItemDto(
-    val roundId: String,
-    val treeTag: String,
-    val shootCount: Int,
-    val fruitSetCount: Int,
+    val roundId: String? = null,
+    val treeTag: String = "",
+    val shootCount: Int = 0,
+    val fruitSetCount: Int = 0,
     val trunkDiameterMm: Double? = null,
-    val samplingDate: String, // "YYYY-MM-DD"
+    val samplingDate: String = "", // "YYYY-MM-DD"
 )

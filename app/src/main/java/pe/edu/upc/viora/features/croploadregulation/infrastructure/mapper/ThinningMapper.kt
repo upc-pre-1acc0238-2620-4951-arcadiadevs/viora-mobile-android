@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import kotlin.math.PI
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.PlotSamplingOverview
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingDetailedReport
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingSummary
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningEvent
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
@@ -12,21 +13,23 @@ import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.SamplingS
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.ThinningEventType
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.Timeliness
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.PlotSamplingStateResponseDto
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.SamplingDetailedResponseDto
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.SamplingSummaryResponseDto
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.SamplingTreeItemDto
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.ThinningEventItemDto
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.TreeSampleRequestDto
 
 fun TreeSample.toRequestDto(): TreeSampleRequestDto {
     val diameterMm = when {
-        trunkDiameterMm != null -> trunkDiameterMm
+        trunkDiameterMm != null && trunkDiameterMm > 0 -> trunkDiameterMm
         trunkCircumferenceCm != null && trunkCircumferenceCm > 0 -> (trunkCircumferenceCm * 10.0) / PI
-        else -> null
+        else -> 100.0
     }
     return TreeSampleRequestDto(
         treeTag = treeIdentifier,
         shootCount = shootsCount,
         fruitSetCount = fruitSetCount,
-        trunkDiameterMm = diameterMm?.let { Math.round(it * 10.0) / 10.0 },
+        trunkDiameterMm = Math.round(diameterMm * 10.0) / 10.0,
         samplingDate = observedOn.toString(),
     )
 }
@@ -88,6 +91,31 @@ fun ThinningEventItemDto.toDomain(): ThinningEvent = ThinningEvent(
     },
 )
 
+fun SamplingDetailedResponseDto.toDomain(): SamplingDetailedReport = SamplingDetailedReport(
+    summary = SamplingSummary(
+        plotId = plotId,
+        campaignYear = campaignYear,
+        evaluatedTreesCount = sampledTreesCount,
+        sampledShootsCount = sampledShootsCount,
+        sampledFruitSetCount = sampledFruitSetCount,
+        meanFruitsPerShoot = meanFruitsPerShoot,
+        isRepresentative = isRepresentative,
+        treesNeeded = treesNeeded,
+        loadUnit = loadUnit,
+    ),
+    trees = trees.map { it.toDomain() },
+)
+
+fun SamplingTreeItemDto.toDomain(): TreeSample = TreeSample(
+    treeIdentifier = treeTag,
+    shootsCount = shootCount,
+    fruitSetCount = fruitSetCount,
+    trunkDiameterMm = trunkDiameterMm,
+    trunkCircumferenceCm = trunkDiameterMm?.let { (it * PI) / 10.0 },
+    observedOn = parseLocalDateOrNull(samplingDate) ?: LocalDate.now(),
+    isSynced = true,
+)
+
 private fun parseInstantOrNow(iso: String): Instant = try {
     Instant.parse(iso)
 } catch (_: DateTimeParseException) {
@@ -95,7 +123,11 @@ private fun parseInstantOrNow(iso: String): Instant = try {
 }
 
 private fun parseLocalDateOrNull(iso: String): LocalDate? = try {
-    LocalDate.parse(iso)
+    when {
+        iso.isBlank() -> null
+        iso.contains("T") -> LocalDate.parse(iso.substringBefore("T"))
+        else -> LocalDate.parse(iso)
+    }
 } catch (_: DateTimeParseException) {
     null
 }

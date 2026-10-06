@@ -7,14 +7,14 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class SamplingDetailedResponseDto(
-    val plotId: String,
-    val campaignYear: Int,
-    val sampledTreesCount: Int,
-    val sampledShootsCount: Int,
-    val sampledFruitSetCount: Int,
-    val meanFruitsPerShoot: Double,
-    val isRepresentative: Boolean,
-    val treesNeeded: Int,
+    val plotId: String = "",
+    val campaignYear: Int = 0,
+    val sampledTreesCount: Int = 0,
+    val sampledShootsCount: Int = 0,
+    val sampledFruitSetCount: Int = 0,
+    val meanFruitsPerShoot: Double = 0.0,
+    val isRepresentative: Boolean = false,
+    val treesNeeded: Int = 0,
     val loadUnit: String = "FRUITS_PER_SHOOT",
     val trees: List<SamplingTreeItemDto> = emptyList(),
 )

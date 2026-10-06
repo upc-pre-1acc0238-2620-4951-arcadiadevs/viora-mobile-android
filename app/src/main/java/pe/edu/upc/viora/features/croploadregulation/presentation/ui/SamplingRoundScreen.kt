@@ -9,16 +9,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -84,31 +81,21 @@ fun SamplingRoundScreen(
     onContinueLater: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-
-    Box(
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Neutral100),
+            .background(Neutral100)
+            .statusBarsPadding()
+            .navigationBarsPadding(),
     ) {
-        Column(
+        // Top Navigation Bar
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(
-                    top = topInset + 8.dp,
-                    bottom = bottomInset + 24.dp,
-                    start = ScreenPadding,
-                    end = ScreenPadding,
-                ),
+                .fillMaxWidth()
+                .padding(horizontal = ScreenPadding, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Top Navigation Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
                 IconButton(
                     onClick = onNavigateBack,
                     modifier = Modifier
@@ -157,6 +144,13 @@ fun SamplingRoundScreen(
                 }
             }
 
+        // Scrollable content
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = ScreenPadding),
+        ) {
             // Connectivity Banner
             if (state.isOffline) {
                 Spacer(Modifier.height(16.dp))
@@ -433,7 +427,6 @@ fun SamplingRoundScreen(
                         EvaluatedTreeItem(
                             sample = sample,
                             isOffline = state.isOffline,
-                            hasRecoveredConnection = state.hasRecoveredConnection,
                         )
                     }
                 }
@@ -483,9 +476,15 @@ fun SamplingRoundScreen(
                     .padding(horizontal = 12.dp, vertical = 4.dp),
             )
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
+        }
 
-            // Row with "Agregar árbol N" / "Otro árbol" and "Finalizar" / "Finalizar ronda"
+        // Docked Action Bar pinned above the system navigation bar
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = ScreenPadding, vertical = 12.dp),
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -586,8 +585,7 @@ fun SamplingRoundScreen(
 @Composable
 private fun EvaluatedTreeItem(
     sample: TreeSample,
-    isOffline: Boolean,
-    hasRecoveredConnection: Boolean,
+    isOffline: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -645,7 +643,7 @@ private fun EvaluatedTreeItem(
         }
 
         // Sync state badge
-        if (hasRecoveredConnection && sample.isSynced) {
+        if (sample.isSynced) {
             Row(
                 modifier = Modifier
                     .clip(CircleShape)
@@ -670,7 +668,7 @@ private fun EvaluatedTreeItem(
                     color = Green800,
                 )
             }
-        } else if (!sample.isSynced) {
+        } else {
             Row(
                 modifier = Modifier
                     .clip(CircleShape)

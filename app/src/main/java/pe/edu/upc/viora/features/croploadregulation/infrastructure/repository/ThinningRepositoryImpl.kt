@@ -7,6 +7,7 @@ import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.domain.map
 import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.PlotSamplingOverview
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingDetailedReport
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingSummary
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningEvent
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
@@ -51,6 +52,10 @@ class ThinningRepositoryImpl @Inject constructor(
 
     override suspend fun getSamplingSummary(plotId: String, campaignYear: Int?): AppResult<SamplingSummary> =
         apiCaller.call { service.getSamplingSummary(plotId, campaignYear) }
+            .map { it.toDomain() }
+
+    override suspend fun getSamplingDetailed(plotId: String, campaignYear: Int?): AppResult<SamplingDetailedReport> =
+        apiCaller.call { service.getSamplingDetailed(plotId, campaignYear) }
             .map { it.toDomain() }
 
     override suspend fun submitSamplingBatch(

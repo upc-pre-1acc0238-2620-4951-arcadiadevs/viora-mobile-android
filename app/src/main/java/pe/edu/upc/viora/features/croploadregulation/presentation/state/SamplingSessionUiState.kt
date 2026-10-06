@@ -11,6 +11,7 @@ data class SamplingSessionUiState(
     val campaignYear: Int = java.time.Year.now().value,
     val samples: List<TreeSample> = emptyList(),
     val targetTreesCount: Int = 5,
+    val isLoading: Boolean = false,
     val isSubmitting: Boolean = false,
     val submissionSummary: SamplingSummary? = null,
     val isOffline: Boolean = false,
@@ -19,22 +20,22 @@ data class SamplingSessionUiState(
     val error: AppError? = null,
 ) {
     val evaluatedTreesCount: Int
-        get() = samples.size
+        get() = submissionSummary?.evaluatedTreesCount ?: samples.size
 
     val treesMissing: Int
-        get() = (targetTreesCount - evaluatedTreesCount).coerceAtLeast(0)
+        get() = submissionSummary?.treesNeeded ?: (targetTreesCount - evaluatedTreesCount).coerceAtLeast(0)
 
     val isRepresentative: Boolean
-        get() = evaluatedTreesCount >= targetTreesCount
+        get() = submissionSummary?.isRepresentative ?: (evaluatedTreesCount >= targetTreesCount)
 
     val totalShootsCount: Int
-        get() = samples.sumOf { it.shootsCount }
+        get() = submissionSummary?.sampledShootsCount ?: samples.sumOf { it.shootsCount }
 
     val totalFruitsCount: Int
-        get() = samples.sumOf { it.fruitSetCount }
+        get() = submissionSummary?.sampledFruitSetCount ?: samples.sumOf { it.fruitSetCount }
 
     val meanFruitsPerShoot: Double
-        get() = if (totalShootsCount > 0) totalFruitsCount.toDouble() / totalShootsCount else 0.0
+        get() = submissionSummary?.meanFruitsPerShoot ?: if (totalShootsCount > 0) totalFruitsCount.toDouble() / totalShootsCount else 0.0
 
     val nextTreeIdentifier: String
         get() = "A-${String.format(Locale.ROOT, "%02d", evaluatedTreesCount + 1)}"

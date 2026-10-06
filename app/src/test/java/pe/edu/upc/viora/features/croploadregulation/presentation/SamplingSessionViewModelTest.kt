@@ -20,6 +20,7 @@ import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.SubmitSamplingBatchUseCase
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.PlotSamplingOverview
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingDetailedReport
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingSummary
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningEvent
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
@@ -72,6 +73,21 @@ private class FakeThinningRepo : ThinningRepository {
             treesNeeded = 2,
         ),
     )
+    var detailedResult: AppResult<SamplingDetailedReport> = AppResult.Success(
+        SamplingDetailedReport(
+            summary = SamplingSummary(
+                plotId = "1",
+                campaignYear = 2026,
+                evaluatedTreesCount = 0,
+                sampledShootsCount = 0,
+                sampledFruitSetCount = 0,
+                meanFruitsPerShoot = 0.0,
+                isRepresentative = false,
+                treesNeeded = 5,
+            ),
+            trees = emptyList(),
+        ),
+    )
     val submittedBatches = mutableListOf<List<TreeSample>>()
 
     override suspend fun getPlotSamplingOverview(campaignYear: Int?): AppResult<List<PlotSamplingOverview>> =
@@ -79,6 +95,9 @@ private class FakeThinningRepo : ThinningRepository {
 
     override suspend fun getSamplingSummary(plotId: String, campaignYear: Int?): AppResult<SamplingSummary> =
         submitResult
+
+    override suspend fun getSamplingDetailed(plotId: String, campaignYear: Int?): AppResult<SamplingDetailedReport> =
+        detailedResult
 
     override suspend fun submitSamplingBatch(
         plotId: String,
@@ -111,6 +130,35 @@ class SamplingSessionViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
+        fakeDao.items.clear()
+        fakeRepo.submittedBatches.clear()
+        fakeRepo.submitResult = AppResult.Success(
+            SamplingSummary(
+                plotId = "1",
+                campaignYear = 2026,
+                evaluatedTreesCount = 3,
+                sampledShootsCount = 120,
+                sampledFruitSetCount = 70,
+                meanFruitsPerShoot = 0.58,
+                isRepresentative = false,
+                treesNeeded = 2,
+            ),
+        )
+        fakeRepo.detailedResult = AppResult.Success(
+            SamplingDetailedReport(
+                summary = SamplingSummary(
+                    plotId = "1",
+                    campaignYear = 2026,
+                    evaluatedTreesCount = 0,
+                    sampledShootsCount = 0,
+                    sampledFruitSetCount = 0,
+                    meanFruitsPerShoot = 0.0,
+                    isRepresentative = false,
+                    treesNeeded = 5,
+                ),
+                trees = emptyList(),
+            ),
+        )
     }
 
     @After
@@ -146,7 +194,7 @@ class SamplingSessionViewModelTest {
             ),
         )
 
-        val viewModel = SamplingSessionViewModel(useCase, fakeDao, fakeContext)
+        val viewModel = SamplingSessionViewModel(useCase, fakeRepo, fakeDao, fakeContext)
         viewModel.initSession(plotId = "plot-1", plotName = "Lote Norte", campaignYear = 2026)
 
         val state = viewModel.uiState.value
@@ -174,7 +222,7 @@ class SamplingSessionViewModelTest {
             ),
         )
 
-        val viewModel = SamplingSessionViewModel(useCase, fakeDao, fakeContext)
+        val viewModel = SamplingSessionViewModel(useCase, fakeRepo, fakeDao, fakeContext)
         viewModel.initSession(plotId = "plot-1", plotName = "Lote Norte", campaignYear = 2026)
 
         val state = viewModel.uiState.value
@@ -185,9 +233,48 @@ class SamplingSessionViewModelTest {
     }
 
     @Test
+    fun `initSession loads detailed sampling and summary from repo when local drafts are empty`() = runTest {
+        // No local drafts (e.g. plot completed or opening on a new device)
+        fakeRepo.detailedResult = AppResult.Success(
+            SamplingDetailedReport(
+                summary = SamplingSummary(
+                    plotId = "plot-1",
+                    campaignYear = 2026,
+                    evaluatedTreesCount = 5,
+                    sampledShootsCount = 200,
+                    sampledFruitSetCount = 120,
+                    meanFruitsPerShoot = 0.60,
+                    isRepresentative = true,
+                    treesNeeded = 0,
+                ),
+                trees = listOf(
+                    TreeSample(treeIdentifier = "A-01", shootsCount = 40, fruitSetCount = 24, isSynced = true),
+                    TreeSample(treeIdentifier = "A-02", shootsCount = 40, fruitSetCount = 24, isSynced = true),
+                    TreeSample(treeIdentifier = "A-03", shootsCount = 40, fruitSetCount = 24, isSynced = true),
+                    TreeSample(treeIdentifier = "A-04", shootsCount = 40, fruitSetCount = 24, isSynced = true),
+                    TreeSample(treeIdentifier = "A-05", shootsCount = 40, fruitSetCount = 24, isSynced = true),
+                ),
+            ),
+        )
+        val viewModel = SamplingSessionViewModel(useCase, fakeRepo, fakeDao, fakeContext)
+        viewModel.initSession(plotId = "plot-1", plotName = "Lote Norte", campaignYear = 2026)
+
+        val state = viewModel.uiState.value
+        assertEquals(5, state.samples.size)
+        assertEquals(5, state.evaluatedTreesCount)
+        assertEquals(200, state.totalShootsCount)
+        assertEquals(120, state.totalFruitsCount)
+        assertEquals(0.60, state.meanFruitsPerShoot, 0.001)
+        assertTrue(state.isRepresentative)
+        assertEquals(5, state.submissionSummary?.evaluatedTreesCount)
+        assertFalse(state.isLoading)
+        assertFalse(state.isOffline)
+    }
+
+    @Test
     fun `addSample records sample locally and sets isOffline if network fails`() = runTest {
         fakeRepo.submitResult = AppResult.Failure(AppError.Offline)
-        val viewModel = SamplingSessionViewModel(useCase, fakeDao, fakeContext)
+        val viewModel = SamplingSessionViewModel(useCase, fakeRepo, fakeDao, fakeContext)
         viewModel.initSession(plotId = "plot-1", plotName = "Lote Norte", campaignYear = 2026)
 
         viewModel.addSample(
@@ -208,7 +295,7 @@ class SamplingSessionViewModelTest {
 
     @Test
     fun `addSample records sample and syncs immediately to backend when online`() = runTest {
-        val viewModel = SamplingSessionViewModel(useCase, fakeDao, fakeContext)
+        val viewModel = SamplingSessionViewModel(useCase, fakeRepo, fakeDao, fakeContext)
         viewModel.initSession(plotId = "plot-1", plotName = "Lote Norte", campaignYear = 2026)
 
         viewModel.addSample(

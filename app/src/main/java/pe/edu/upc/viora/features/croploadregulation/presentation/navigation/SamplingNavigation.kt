@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.croploadregulation.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,8 +57,23 @@ fun NavGraphBuilder.samplingNavGraph(
         composable<SelectPlotSamplingRoute> {
             SelectPlotSamplingScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onPlotSelected = { plotId, plotName ->
-                    navController.navigate(SamplingRoundRoute(plotId = plotId, plotName = plotName))
+                onPlotSelected = { plotId, plotName, isCompleted ->
+                    if (isCompleted) {
+                        navController.navigate(
+                            SamplingCompleteRoute(
+                                plotId = plotId,
+                                plotName = plotName,
+                                isOffline = false,
+                            ),
+                        )
+                    } else {
+                        navController.navigate(
+                            SamplingRoundRoute(
+                                plotId = plotId,
+                                plotName = plotName,
+                            ),
+                        )
+                    }
                 },
                 plotSilhouetteSlot = plotSilhouetteSlot,
             )
@@ -69,7 +85,9 @@ fun NavGraphBuilder.samplingNavGraph(
                 navController.getBackStackEntry<SamplingGraph>()
             }
             val sessionViewModel: SamplingSessionViewModel = hiltViewModel(parentEntry)
-            sessionViewModel.initSession(plotId = route.plotId, plotName = route.plotName)
+            LaunchedEffect(route.plotId, route.plotName) {
+                sessionViewModel.initSession(plotId = route.plotId, plotName = route.plotName)
+            }
             val sessionState = sessionViewModel.uiState.collectAsStateWithLifecycle().value
 
             SamplingRoundScreen(
@@ -147,6 +165,9 @@ fun NavGraphBuilder.samplingNavGraph(
                 navController.getBackStackEntry<SamplingGraph>()
             }
             val sessionViewModel: SamplingSessionViewModel = hiltViewModel(parentEntry)
+            LaunchedEffect(route.plotId, route.plotName) {
+                sessionViewModel.initSession(plotId = route.plotId, plotName = route.plotName)
+            }
             val sessionState = sessionViewModel.uiState.collectAsStateWithLifecycle().value
 
             SamplingCompleteScreen(
@@ -157,9 +178,12 @@ fun NavGraphBuilder.samplingNavGraph(
                 totalFruitsCount = sessionState.totalFruitsCount,
                 meanFruitsPerShoot = sessionState.meanFruitsPerShoot,
                 isOffline = route.isOffline || sessionState.isOffline,
+                isLoading = sessionState.isLoading,
                 onClose = {
-                    navController.navigate(LogbookGraph) {
-                        popUpTo<SamplingGraph> { inclusive = true }
+                    if (!navController.popBackStack()) {
+                        navController.navigate(LogbookGraph) {
+                            popUpTo<SamplingGraph> { inclusive = true }
+                        }
                     }
                 },
                 onViewPlotPlan = {
