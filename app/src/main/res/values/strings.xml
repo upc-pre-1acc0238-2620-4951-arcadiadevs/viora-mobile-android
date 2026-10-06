@@ -618,6 +618,11 @@
     <string name="climate_last_sync">Synced %1$s</string>
     <string name="climate_offline_badge">OFFLINE · SAVED DATA</string>
     <string name="climate_lot_card_subtitle">7-day forecast · %1$.1f°C / %2$.1f°C</string>
+    <string name="climate_temp_celsius_value">%1$.1f°C</string>
+    <string name="climate_temp_degrees_value">%1$d°</string>
+    <string name="climate_temp_min_celsius_format">/ %1$d°C</string>
+    <string name="climate_percentage_value">%1$.0f%%</string>
+    <string name="climate_wind_speed_value">%1$.1f km/h</string>
     <string name="climate_error_title">Couldn\'t load forecast</string>
     <string name="climate_retry">Try again</string>
 </resources>

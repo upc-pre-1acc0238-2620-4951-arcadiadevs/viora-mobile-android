@@ -55,7 +55,7 @@ class ClimateViewModel @Inject constructor(
         when {
             dailyForecasts.isNotEmpty() -> ClimateUiState.Content(
                 plotId = plotId,
-                plotName = plot?.name ?: initialPlotName.ifEmpty { "Plot" },
+                plotName = plot?.name ?: initialPlotName,
                 variety = plot?.variety,
                 areaHectares = plot?.areaHectares,
                 estimatedTrees = plot?.estimatedTrees,

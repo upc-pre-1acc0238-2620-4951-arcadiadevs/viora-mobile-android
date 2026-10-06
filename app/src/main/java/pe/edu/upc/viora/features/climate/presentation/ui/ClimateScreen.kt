@@ -47,15 +47,15 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalDate
 import java.time.format.TextStyle
-import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
+import pe.edu.upc.viora.core.designsystem.theme.Spacing
 import pe.edu.upc.viora.core.designsystem.theme.Green100
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -159,7 +159,7 @@ fun ClimateContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .statusBarsPadding()
-                        .padding(24.dp),
+                        .padding(Spacing.lg),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
@@ -168,20 +168,20 @@ fun ClimateContent(
                         style = MaterialTheme.typography.headlineMedium,
                         color = Neutral900,
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(Spacing.xs))
                     Text(
                         text = stringResource(state.error.messageRes()),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Neutral600,
                         textAlign = TextAlign.Center,
                     )
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(Spacing.lg))
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(Spacing.lg))
                             .background(Green800)
                             .clickable(role = Role.Button, onClick = onRefresh)
-                            .padding(horizontal = 24.dp, vertical = 12.dp),
+                            .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
                     ) {
                         Text(
                             text = stringResource(R.string.climate_retry),
@@ -203,7 +203,7 @@ fun ClimateContent(
                             .verticalScroll(rememberScrollState())
                             .statusBarsPadding()
                             .navigationBarsPadding()
-                            .padding(bottom = VioraTabBarDefaults.ContentBottomPadding + 16.dp),
+                            .padding(bottom = VioraTabBarDefaults.ContentBottomPadding + Spacing.md),
                     ) {
                         ClimateTopBar(
                             plotName = state.plotName,
@@ -214,30 +214,30 @@ fun ClimateContent(
                         )
 
                         if (state.isOffline) {
-                            OfflineNoticePill(modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp))
+                            OfflineNoticePill(modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.xxs))
                         }
 
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(Spacing.xs))
 
                         val selectedDay = state.selectedDay
                         if (selectedDay != null) {
                             HeroForecastCard(
                                 day = selectedDay,
                                 isToday = state.selectedDayIndex == 0,
-                                modifier = Modifier.padding(horizontal = 24.dp),
+                                modifier = Modifier.padding(horizontal = Spacing.lg),
                             )
                         }
 
-                        Spacer(Modifier.height(20.dp))
+                        Spacer(Modifier.height(Spacing.lg))
 
                         Text(
                             text = stringResource(R.string.climate_forecast_section_title),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = Neutral900,
-                            modifier = Modifier.padding(horizontal = 24.dp),
+                            modifier = Modifier.padding(horizontal = Spacing.lg),
                         )
 
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(Spacing.sm))
 
                         WeeklyForecastCarousel(
                             forecasts = state.dailyForecasts,
@@ -245,11 +245,11 @@ fun ClimateContent(
                             onSelectDay = onSelectDay,
                         )
 
-                        Spacer(Modifier.height(24.dp))
+                        Spacer(Modifier.height(Spacing.lg))
 
                         ThermalTrendCard(
                             forecasts = state.dailyForecasts,
-                            modifier = Modifier.padding(horizontal = 24.dp),
+                            modifier = Modifier.padding(horizontal = Spacing.lg),
                         )
                     }
                 }
@@ -269,7 +269,7 @@ private fun ClimateTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 12.dp),
+            .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -282,7 +282,7 @@ private fun ClimateTopBar(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = Spacing.sm),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -323,17 +323,17 @@ private fun OfflineNoticePill(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Spacing.md))
             .background(Neutral200)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
+            .padding(horizontal = Spacing.md, vertical = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_cloud),
             contentDescription = null,
             tint = Neutral700,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(Spacing.md),
         )
         Text(
             text = stringResource(R.string.climate_offline_badge),
@@ -356,8 +356,8 @@ private fun HeroForecastCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
             .background(cardBackground)
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         // Date & Today tag
         Row(
@@ -365,9 +365,10 @@ private fun HeroForecastCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val dayOfWeek = day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
-                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-            val formattedDate = "$dayOfWeek, ${day.date.dayOfMonth} ${day.date.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())}"
+            val locale = LocalConfiguration.current.locales[0]
+            val dayOfWeek = day.date.dayOfWeek.getDisplayName(TextStyle.FULL, locale)
+                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
+            val formattedDate = "$dayOfWeek, ${day.date.dayOfMonth} ${day.date.month.getDisplayName(TextStyle.SHORT, locale)}"
 
             Text(
                 text = formattedDate,
@@ -378,9 +379,9 @@ private fun HeroForecastCard(
             if (isToday) {
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(Spacing.sm))
                         .background(Green800)
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                        .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
                 ) {
                     Text(
                         text = stringResource(R.string.climate_today),
@@ -400,16 +401,16 @@ private fun HeroForecastCard(
             Column {
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
-                        text = "${day.maxTempCelsius.toInt()}°",
-                        style = MaterialTheme.typography.displayMedium.copy(fontSize = 54.sp, fontWeight = FontWeight.Bold),
+                        text = stringResource(R.string.climate_temp_degrees_value, day.maxTempCelsius.toInt()),
+                        style = MaterialTheme.typography.displayLarge.copy(fontWeight = FontWeight.Bold),
                         color = Neutral900,
                     )
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(Spacing.xs))
                     Text(
-                        text = "/ ${day.minTempCelsius.toInt()}°C",
+                        text = stringResource(R.string.climate_temp_min_celsius_format, day.minTempCelsius.toInt()),
                         style = MaterialTheme.typography.headlineSmall,
                         color = Neutral600,
-                        modifier = Modifier.padding(bottom = 8.dp),
+                        modifier = Modifier.padding(bottom = Spacing.xs),
                     )
                 }
                 val amplitude = day.maxTempCelsius - day.minTempCelsius
@@ -422,7 +423,7 @@ private fun HeroForecastCard(
 
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(Spacing.xxxl)
                     .clip(CircleShape)
                     .background(Neutral0),
                 contentAlignment = Alignment.Center,
@@ -431,7 +432,7 @@ private fun HeroForecastCard(
                     painter = painterResource(if (day.precipitationProbability > 40.0) R.drawable.ic_water_drop else R.drawable.ic_cloud),
                     contentDescription = null,
                     tint = if (day.isFrostRisk) Terracotta600 else Harvest700,
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier.size(Spacing.xl),
                 )
             }
         }
@@ -441,19 +442,19 @@ private fun HeroForecastCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(Spacing.md))
                     .background(Neutral0)
-                    .padding(14.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    .padding(Spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.Top,
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_warning),
                     contentDescription = null,
                     tint = Terracotta600,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(Spacing.lg),
                 )
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
                     Text(
                         text = stringResource(R.string.climate_alert_frost_title),
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
@@ -470,17 +471,17 @@ private fun HeroForecastCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(Spacing.md))
                     .background(Neutral0)
-                    .padding(14.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    .padding(Spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_check),
                     contentDescription = null,
                     tint = Green800,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(Spacing.lg),
                 )
                 Text(
                     text = stringResource(R.string.climate_condition_optimal_desc),
@@ -493,35 +494,35 @@ private fun HeroForecastCard(
         // 4-Metric Grid
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             MetricTile(
                 icon = R.drawable.ic_thermostat,
                 label = stringResource(R.string.climate_metric_temp_max),
-                value = String.format(Locale.getDefault(), "%.1f°C", day.maxTempCelsius),
+                value = stringResource(R.string.climate_temp_celsius_value, day.maxTempCelsius),
                 modifier = Modifier.weight(1f),
             )
             MetricTile(
                 icon = R.drawable.ic_thermostat,
                 label = stringResource(R.string.climate_metric_temp_min),
-                value = String.format(Locale.getDefault(), "%.1f°C", day.minTempCelsius),
+                value = stringResource(R.string.climate_temp_celsius_value, day.minTempCelsius),
                 modifier = Modifier.weight(1f),
             )
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             MetricTile(
                 icon = R.drawable.ic_water_drop,
                 label = stringResource(R.string.climate_metric_precipitation),
-                value = String.format(Locale.getDefault(), "%.0f%%", day.precipitationProbability),
+                value = stringResource(R.string.climate_percentage_value, day.precipitationProbability),
                 modifier = Modifier.weight(1f),
             )
             MetricTile(
                 icon = R.drawable.ic_air,
                 label = stringResource(R.string.climate_metric_wind),
-                value = String.format(Locale.getDefault(), "%.1f km/h", day.windSpeedKmh),
+                value = stringResource(R.string.climate_wind_speed_value, day.windSpeedKmh),
                 modifier = Modifier.weight(1f),
             )
         }
@@ -537,15 +538,15 @@ private fun MetricTile(
 ) {
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Spacing.md))
             .background(Neutral0)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         Box(
             modifier = Modifier
-                .size(32.dp)
+                .size(Spacing.xl)
                 .clip(CircleShape)
                 .background(Green100),
             contentAlignment = Alignment.Center,
@@ -554,13 +555,13 @@ private fun MetricTile(
                 painter = painterResource(icon),
                 contentDescription = null,
                 tint = Green900,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(Spacing.md),
             )
         }
         Column {
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                style = MaterialTheme.typography.labelSmall,
                 color = Neutral600,
             )
             Text(
@@ -579,8 +580,8 @@ private fun WeeklyForecastCarousel(
     onSelectDay: (Int) -> Unit,
 ) {
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(horizontal = Spacing.lg),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         itemsIndexed(forecasts) { index, day ->
             val isSelected = index == selectedIndex
@@ -607,8 +608,9 @@ private fun DayCarouselCard(
     val textColor = if (isSelected) Neutral0 else Neutral900
     val subTextColor = if (isSelected) Green100 else Neutral600
 
-    val dayName = day.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+    val locale = LocalConfiguration.current.locales[0]
+    val dayName = day.date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
+        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
 
     Column(
         modifier = Modifier
@@ -621,9 +623,9 @@ private fun DayCarouselCard(
                 shape = RoundedCornerShape(20.dp),
             )
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(vertical = 12.dp, horizontal = 4.dp),
+            .padding(vertical = Spacing.sm, horizontal = Spacing.xxs),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         Text(
             text = dayName,
@@ -640,16 +642,16 @@ private fun DayCarouselCard(
             painter = painterResource(if (day.precipitationProbability > 40.0) R.drawable.ic_water_drop else R.drawable.ic_cloud),
             contentDescription = null,
             tint = if (isSelected) Harvest300 else if (day.isFrostRisk) Terracotta600 else Neutral700,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(Spacing.lg),
         )
 
         Text(
-            text = "${day.maxTempCelsius.toInt()}°",
+            text = stringResource(R.string.climate_temp_degrees_value, day.maxTempCelsius.toInt()),
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
             color = textColor,
         )
         Text(
-            text = "${day.minTempCelsius.toInt()}°",
+            text = stringResource(R.string.climate_temp_degrees_value, day.minTempCelsius.toInt()),
             style = MaterialTheme.typography.labelSmall,
             color = subTextColor,
         )
@@ -666,18 +668,18 @@ private fun ThermalTrendCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .background(Neutral0)
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_thermostat),
                 contentDescription = null,
                 tint = Green800,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(Spacing.lg),
             )
             Text(
                 text = stringResource(R.string.climate_thermal_trend_title),
@@ -686,20 +688,21 @@ private fun ThermalTrendCard(
             )
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             val globalMin = forecasts.minOfOrNull { it.minTempCelsius } ?: 10.0
             val globalMax = forecasts.maxOfOrNull { it.maxTempCelsius } ?: 35.0
             val span = (globalMax - globalMin).coerceAtLeast(1.0)
 
+            val locale = LocalConfiguration.current.locales[0]
             forecasts.forEach { day ->
-                val dayLabel = day.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                val dayLabel = day.date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
                 val leftFraction = ((day.minTempCelsius - globalMin) / span).toFloat().coerceIn(0f, 1f)
                 val rightFraction = ((day.maxTempCelsius - globalMin) / span).toFloat().coerceIn(0f, 1f)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 ) {
                     Text(
                         text = "$dayLabel ${day.date.dayOfMonth}",
@@ -709,7 +712,7 @@ private fun ThermalTrendCard(
                     )
 
                     Text(
-                        text = "${day.minTempCelsius.toInt()}°",
+                        text = stringResource(R.string.climate_temp_degrees_value, day.minTempCelsius.toInt()),
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                         color = Neutral600,
                         modifier = Modifier.width(26.dp),
@@ -720,21 +723,21 @@ private fun ThermalTrendCard(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .height(Spacing.xs)
+                            .clip(RoundedCornerShape(Spacing.xxs))
                             .background(Neutral100),
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(rightFraction)
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(4.dp))
+                                .height(Spacing.xs)
+                                .clip(RoundedCornerShape(Spacing.xxs))
                                 .background(if (day.isFrostRisk) Terracotta600 else Green800),
                         )
                     }
 
                     Text(
-                        text = "${day.maxTempCelsius.toInt()}°",
+                        text = stringResource(R.string.climate_temp_degrees_value, day.maxTempCelsius.toInt()),
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                         color = Neutral900,
                         modifier = Modifier.width(26.dp),
