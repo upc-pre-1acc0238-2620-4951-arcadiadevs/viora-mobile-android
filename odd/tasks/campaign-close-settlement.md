@@ -51,7 +51,7 @@ The app can only read settlements (Logbook, release 0.11.0). There is no way to 
 ## Tasks
 - [x] T1 — Contract and data (online): domain fields, DTOs (nullable new fields), settle request DTO, `@POST` with `@Header("Idempotency-Key")`, `ProblemDetailDto` + `AppError.Conflict` carrying `existingSettlement`, repository `settle` (upsert cache on success), use case; tests. Route: delegated writer (writer trigger: 2+ non-trivial files).
 - [x] T2 — Offline queue: WorkManager + Hilt work deps, `pending_settlements` entity/DAO, DB v4 + `MIGRATION_3_4` (incl. incidents), `SettlementSyncWorker`, enqueue on Offline/Timeout, observe/edit/discard pending; tests. Route: delegated writer.
-- [ ] T3 — P70–P72 UI: Home harvest card + P70 sheet, P71 form (date picker, kilos, live total/t/ha/split bar, mill ticket, calibre), P72 confirm + 409 dialog, ViewModel, strings; tests. Route: delegated writer.
+- [x] T3 — P70–P72 UI: Home harvest card + P70 sheet, P71 form (date picker, kilos, live total/t/ha/split bar, mill ticket, calibre), P72 confirm + 409 dialog, ViewModel, strings; tests. Route: delegated writer.
 - [ ] T4 — P73: closed receipt (online) and offline pending screen, route, "Listo", "Ver expediente del lote", "Corregir los kilos", "Ver comprobante" from 409; tests. Route: delegated writer.
 
 ## Progress
@@ -68,5 +68,11 @@ The app can only read settlements (Logbook, release 0.11.0). There is no way to 
   - Sync rules in `HarvestSettlementRepositoryImpl.syncPending()`; worker is a thin shell (no worker test: no Robolectric/work-testing). Offline/timeout/5xx/401 retry; 400/403/404/422 → FAILED (editing resets to PENDING); 409 → CONFLICT row with the server summary, dismissed via `discardPending`. Stale results never overwrite an edit made mid-sync.
   - "Por registrar" must exclude plots with a PENDING or FAILED row; CONFLICT rows show the P72-409 content.
 
+- T3 done in `cf077e2` (Home harvest card + P70 picker) and `c2669b1` (P71 form + P72 confirm/409 dialogs). ~2460 authored lines (UI + 35 new tests). Writer: `./gradlew testDebugUnitTest assembleDebug` green (374 tests); `lintDebug` 0 errors, no warnings in new files besides es plural `MissingQuantity` (same as existing). Parent spot check: settle/entry/home tests green. Not checked on a device.
+  - Two ViewModels: `HarvestEntryViewModel` (Home card + P70) and `SettleHarvestViewModel` (P71 route `SettleHarvestRoute(plotId, campaignYear)` + P72 dialogs). One idempotency key per form screen.
+  - Grade table: 17 grades from the backend `CommercialSizeScale` (60/70 … 381/410); a grade sends its midpoint; typed 1–999.
+  - Deviations: Home card without the illustration and "Siguiente" tab, progress = registered/total; "kg" suffix at the field edge; split caption under the bar; calibre placeholder; "Entendido" also closes the form; validation shows the generic mapped message.
+  - Temporary wiring in `AppNavHost`: `onSettled`/`onQueued` pop to Home, `onViewReceipt` opens the Logbook.
+
 ## Next step
-T3: P70–P72 UI and the Home harvest card.
+T4: P73 closed (online) and offline screens, replacing the temporary callbacks; pop the form from the back stack.
