@@ -12,6 +12,7 @@ val Tierra = Color(0xFFC15A2E)
 // that have no Material 3 role, e.g. the Home phase cards or the floating tab bar.
 val Green100 = Color(0xFFE9EEEB)
 val Green200 = Color(0xFFD4DBD7)
+val Green700 = Color(0xFF485A4F)
 val Green800 = Forest
 val Green900 = Shadow
 val Harvest100 = Color(0xFFFFF0B4)
@@ -28,6 +29,7 @@ val Neutral50 = Color(0xFFF9F6F1)
 val Neutral100 = Color(0xFFF3F0EA)
 val Neutral200 = Color(0xFFD7D4CE)
 val Neutral300 = Color(0xFFC0BDB8)
+val Neutral500 = Color(0xFF7D7A75)
 val Neutral600 = Color(0xFF5C5A57)
 val Neutral700 = Color(0xFF413F3C)
 val Neutral900 = Color(0xFF1B1916)

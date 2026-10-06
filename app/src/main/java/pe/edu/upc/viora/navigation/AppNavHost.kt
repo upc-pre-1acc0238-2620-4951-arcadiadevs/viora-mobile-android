@@ -17,6 +17,8 @@ import pe.edu.upc.viora.core.navigation.PlaceholderScreen
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
+import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.SettleHarvestRoute
+import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.settleHarvestComposable
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestEntrySection
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
@@ -64,12 +66,26 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     },
                     sections = {
                         HarvestEntrySection(
-                            onSettle = { _, _ -> /* the settle form route arrives in the next commit */ },
+                            onSettle = { plotId, year -> navController.navigate(SettleHarvestRoute(plotId = plotId, campaignYear = year)) },
                         )
                     },
                 )
             }
         }
+        // T4 adds the P73 receipt routes; until then a settled or queued harvest returns to Home
+        // and "Ver comprobante" opens the Logbook, which already lists settled campaigns.
+        settleHarvestComposable(
+            navController = navController,
+            onSettled = { _, _ -> navController.popBackStack() },
+            onQueued = { _, _ -> navController.popBackStack() },
+            onViewReceipt = { _, _ ->
+                navController.navigate(LogbookGraph) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+        )
         plotsNavGraph(navController)
         plotScreens(navController)
         climateNavGraph(navController)
