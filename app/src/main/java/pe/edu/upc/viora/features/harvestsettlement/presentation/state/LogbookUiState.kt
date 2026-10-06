@@ -13,6 +13,7 @@ enum class LogbookPeriod { THIS_WEEK, THIS_MONTH, EARLIER }
 /** A settled campaign as a logbook row. [plotName] is null when the plot is not in the cache. */
 data class SettledHarvestEntry(
     val id: String,
+    val plotId: String,
     val plotName: String?,
     val campaignYear: Int,
     val totalYieldKg: Double,

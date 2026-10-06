@@ -14,6 +14,10 @@ data class HarvestSettlementDto(
     val totalYieldKg: Double,
     val commercialFruitsPerKg: Double? = null,
     val notes: String? = null,
+    val receiptNumber: String? = null,
+    val weighedOn: String? = null,
+    val millTicketNumber: String? = null,
+    val commercialSizeGrade: String? = null,
     val status: String? = null,
     val settledAt: String? = null,
     val thinningBalance: ThinningBalanceDto? = null,
@@ -42,4 +46,25 @@ data class StabilizationDto(
     val interannualVarianceKg2: Double? = null,
     val coefficientOfVariation: Double? = null,
     val requiredConsecutivePairs: Int = 0,
+)
+
+/** Body of `POST /plots/{plotId}/harvest-settlements`; [weighedOn] is an ISO `yyyy-MM-dd` date. */
+@Serializable
+data class SettleHarvestRequestDto(
+    val campaignYear: Int,
+    val greenOlivesKg: Double,
+    val blackOlivesKg: Double,
+    val weighedOn: String,
+    val millTicketNumber: String? = null,
+    val commercialFruitsPerKg: Double? = null,
+    val notes: String? = null,
+)
+
+/** The `existingSettlement` ProblemDetail property of a 409 `HARVESTSETTLEMENT_CONFLICT`. */
+@Serializable
+data class ExistingSettlementDto(
+    val campaignYear: Int,
+    val totalYieldKg: Double,
+    val receiptNumber: String? = null,
+    val weighedOn: String? = null,
 )

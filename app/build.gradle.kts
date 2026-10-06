@@ -39,8 +39,8 @@ android {
         applicationId = "pe.edu.upc.viora"
         minSdk = 26
         targetSdk = 37
-        versionCode = 4
-        versionName = "0.11.0"
+        versionCode = 5
+        versionName = "0.15.0"
 
         // The Maps SDK reads this string resource at startup.
         resValue("string", "mapbox_access_token", mapboxPublicToken)
@@ -98,6 +98,11 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+
+    // Background work (offline settlement sync)
+    implementation(libs.androidx.work.runtime.ktx)
 
     // Network
     implementation(libs.retrofit)

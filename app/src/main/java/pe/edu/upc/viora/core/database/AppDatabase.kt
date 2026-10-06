@@ -4,6 +4,8 @@ import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementDao
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementEntity
+import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.PendingSettlementDao
+import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.PendingSettlementEntity
 import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexDao
 import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexEntity
 import pe.edu.upc.viora.features.phenology.infrastructure.local.HarvestRecordDao
@@ -42,8 +44,9 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
         HarvestSettlementEntity::class,
         TelemetryReadingEntity::class,
         ForecastDayEntity::class,
+        PendingSettlementEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -56,4 +59,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun harvestSettlementDao(): HarvestSettlementDao
     abstract fun telemetryReadingDao(): TelemetryReadingDao
     abstract fun forecastDayDao(): ForecastDayDao
+    abstract fun pendingSettlementDao(): PendingSettlementDao
 }
