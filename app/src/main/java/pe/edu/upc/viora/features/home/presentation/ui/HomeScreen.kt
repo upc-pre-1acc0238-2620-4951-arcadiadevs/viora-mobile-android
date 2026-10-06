@@ -73,6 +73,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     viewModel: HomeViewModel = hiltViewModel(),
+    sections: @Composable ColumnScope.() -> Unit = {},
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     HomeScreenContent(
@@ -86,6 +87,7 @@ fun HomeScreen(
         onOpenWeatherForecast = onOpenWeatherForecast,
         onFocusPlot = viewModel::focusPlot,
         modifier = modifier,
+        sections = sections,
     )
 }
 

@@ -670,4 +670,21 @@
     <string name="metric_top_microclimate">Microclima · nodo virtual</string>
     <string name="metric_top_soil">Sonda a %1$d cm · nodo virtual</string>
     <string name="metric_chip_soil">Suelo</string>
+    <string name="settle_entry_eyebrow">AHORA · COSECHA</string>
+    <plurals name="settle_entry_unit">
+        <item quantity="one">lote</item>
+        <item quantity="other">lotes</item>
+    </plurals>
+    <string name="settle_entry_body">por registrar. Con tu cosecha calculo tu alternancia.</string>
+    <string name="settle_entry_progress">%1$d de %2$d lotes registrados</string>
+    <string name="settle_entry_action">Registrar cosecha</string>
+    <string name="settle_picker_title_lead">¿Qué lote</string>
+    <string name="settle_picker_title_emphasis">cosechaste?</string>
+    <plurals name="settle_picker_subtitle">
+        <item quantity="one">Campaña %1$d · %2$d lote por registrar</item>
+        <item quantity="other">Campaña %1$d · %2$d lotes por registrar</item>
+    </plurals>
+    <string name="settle_picker_status">Por registrar</string>
+    <string name="settle_picker_note">Ten a mano la boleta de la almazara con el pesaje de verde y negra por separado.</string>
+    <string name="settle_plot_subtitle">%1$s · %2$s ha</string>
 </resources>

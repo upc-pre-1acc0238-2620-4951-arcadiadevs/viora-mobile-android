@@ -17,6 +17,7 @@ import pe.edu.upc.viora.core.navigation.PlaceholderScreen
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
+import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestEntrySection
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
@@ -60,6 +61,11 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     onOpenAlerts = { navController.navigate(AlertsCenterRoute) },
                     onOpenWeatherForecast = { id, name ->
                         navController.navigate(PlotClimateRoute(plotId = id.value, plotName = name))
+                    },
+                    sections = {
+                        HarvestEntrySection(
+                            onSettle = { _, _ -> /* the settle form route arrives in the next commit */ },
+                        )
                     },
                 )
             }

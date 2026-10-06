@@ -668,4 +668,21 @@
     <string name="metric_top_microclimate">Microclimate · virtual node</string>
     <string name="metric_top_soil">Probe at %1$d cm · virtual node</string>
     <string name="metric_chip_soil">Soil</string>
+    <string name="settle_entry_eyebrow">NOW · HARVEST</string>
+    <plurals name="settle_entry_unit">
+        <item quantity="one">plot</item>
+        <item quantity="other">plots</item>
+    </plurals>
+    <string name="settle_entry_body">to register. With your harvest I work out your alternation.</string>
+    <string name="settle_entry_progress">%1$d of %2$d plots registered</string>
+    <string name="settle_entry_action">Register harvest</string>
+    <string name="settle_picker_title_lead">Which plot</string>
+    <string name="settle_picker_title_emphasis">did you harvest?</string>
+    <plurals name="settle_picker_subtitle">
+        <item quantity="one">Season %1$d · %2$d plot to register</item>
+        <item quantity="other">Season %1$d · %2$d plots to register</item>
+    </plurals>
+    <string name="settle_picker_status">To register</string>
+    <string name="settle_picker_note">Keep the mill ticket at hand, with the green and black weighing apart.</string>
+    <string name="settle_plot_subtitle">%1$s · %2$s ha</string>
 </resources>
