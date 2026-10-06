@@ -50,7 +50,7 @@ The app can only read settlements (Logbook, release 0.11.0). There is no way to 
 
 ## Tasks
 - [x] T1 — Contract and data (online): domain fields, DTOs (nullable new fields), settle request DTO, `@POST` with `@Header("Idempotency-Key")`, `ProblemDetailDto` + `AppError.Conflict` carrying `existingSettlement`, repository `settle` (upsert cache on success), use case; tests. Route: delegated writer (writer trigger: 2+ non-trivial files).
-- [ ] T2 — Offline queue: WorkManager + Hilt work deps, `pending_settlements` entity/DAO, DB v4 + `MIGRATION_3_4` (incl. incidents), `SettlementSyncWorker`, enqueue on Offline/Timeout, observe/edit/discard pending; tests. Route: delegated writer.
+- [x] T2 — Offline queue: WorkManager + Hilt work deps, `pending_settlements` entity/DAO, DB v4 + `MIGRATION_3_4` (incl. incidents), `SettlementSyncWorker`, enqueue on Offline/Timeout, observe/edit/discard pending; tests. Route: delegated writer.
 - [ ] T3 — P70–P72 UI: Home harvest card + P70 sheet, P71 form (date picker, kilos, live total/t/ha/split bar, mill ticket, calibre), P72 confirm + 409 dialog, ViewModel, strings; tests. Route: delegated writer.
 - [ ] T4 — P73: closed receipt (online) and offline pending screen, route, "Listo", "Ver expediente del lote", "Corregir los kilos", "Ver comprobante" from 409; tests. Route: delegated writer.
 
@@ -62,5 +62,11 @@ The app can only read settlements (Logbook, release 0.11.0). There is no way to 
   - Null optionals are omitted from the request (`explicitNulls=false`).
   - Room schema unchanged: cached rows map the four new fields to null until T2 adds the columns.
 
+- T2 done in `8865fd8` (DB v4: receipt columns, `pending_settlements`, `MIGRATION_3_4` incl. `agroclimatic_incidents` IF NOT EXISTS; SQL asserted byte for byte against 4.json) and `e5226fd` (offline queue + WorkManager). ~1770 lines incl. ~400 generated schema and ~450 tests; 26 new tests. Writer: `./gradlew testDebugUnitTest assembleDebug` green (339 tests). Parent spot check: `AppMigrationsTest` + `SettlementQueueTest` green.
+  - Deps: `work-runtime-ktx` 2.12.0, `hilt-work` 1.4.0, `hilt-compiler` 1.4.0 (ksp). `VioraApplication` provides `HiltWorkerFactory`; default initializer removed in the manifest.
+  - `settle(draft, key?)` → `Settled` | `AlreadySettled(existing)` | `Queued(pending)`. Key is stable per plot/year draft and generated before the first online attempt.
+  - Sync rules in `HarvestSettlementRepositoryImpl.syncPending()`; worker is a thin shell (no worker test: no Robolectric/work-testing). Offline/timeout/5xx/401 retry; 400/403/404/422 → FAILED (editing resets to PENDING); 409 → CONFLICT row with the server summary, dismissed via `discardPending`. Stale results never overwrite an edit made mid-sync.
+  - "Por registrar" must exclude plots with a PENDING or FAILED row; CONFLICT rows show the P72-409 content.
+
 ## Next step
-T2: add the four columns to `HarvestSettlementEntity` in v4 as well as the pending queue.
+T3: P70–P72 UI and the Home harvest card.
