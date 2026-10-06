@@ -6,6 +6,11 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -115,7 +120,10 @@ class ApiCallerTest {
 
         val error = (ping() as AppResult.Failure).error
 
-        assertEquals(AppError.Conflict("Duplicate name", "PLOT_CONFLICT"), error)
+        assertEquals(
+            AppError.Conflict("Duplicate name", "PLOT_CONFLICT", buildJsonObject { put("extra", "ignored") }),
+            error,
+        )
     }
 
     @Test
@@ -187,6 +195,45 @@ class ApiCallerTest {
 
         val error = (caller.callUnit { service.delete() } as AppResult.Failure).error
 
-        assertEquals(AppError.Conflict("Already removed", "PLOT_CONFLICT"), error)
+        assertEquals(
+            AppError.Conflict("Already removed", "PLOT_CONFLICT", buildJsonObject { put("extra", "ignored") }),
+            error,
+        )
+    }
+
+    @Test
+    fun `409 keeps nested problem properties for the caller to decode`() = runTest {
+        server.enqueue(
+            MockResponse().setResponseCode(409).setBody(
+                """{"status":409,"detail":"d","code":"HARVESTSETTLEMENT_CONFLICT","existingSettlement":{"campaignYear":2026,"totalYieldKg":10.5}}""",
+            ),
+        )
+
+        val error = (ping() as AppResult.Failure).error as AppError.Conflict
+
+        assertEquals(setOf("existingSettlement"), error.properties!!.keys)
+        assertEquals(
+            2026,
+            error.properties!!["existingSettlement"]!!.jsonObject["campaignYear"]!!.jsonPrimitive.int,
+        )
+    }
+
+    @Test
+    fun `409 without extra members or with an unparseable body has no properties`() = runTest {
+        server.enqueue(
+            MockResponse().setResponseCode(409)
+                .setBody("""{"status":409,"detail":"d","code":"X","timestamp":"t"}"""),
+        )
+        assertEquals(AppError.Conflict("d", "X", null), (ping() as AppResult.Failure).error)
+
+        server.enqueue(MockResponse().setResponseCode(409).setBody("not json"))
+        assertEquals(AppError.Conflict(null, null, null), (ping() as AppResult.Failure).error)
+    }
+
+    @Test
+    fun `non-conflict errors do not carry extra properties`() = runTest {
+        server.enqueue(problem(400, "VALIDATION_ERROR", "bad"))
+
+        assertEquals(AppError.Validation("bad", "VALIDATION_ERROR"), (ping() as AppResult.Failure).error)
     }
 }

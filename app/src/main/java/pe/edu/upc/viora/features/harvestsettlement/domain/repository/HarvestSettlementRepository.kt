@@ -3,6 +3,8 @@ package pe.edu.upc.viora.features.harvestsettlement.domain.repository
 import kotlinx.coroutines.flow.Flow
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.HarvestSettlement
+import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettleHarvestDraft
+import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettleOutcome
 
 interface HarvestSettlementRepository {
     /** Emits the cached settlements of every plot, newest `settledAt` first. */
@@ -17,4 +19,12 @@ interface HarvestSettlementRepository {
      * when every plot refreshed.
      */
     suspend fun refreshAll(plotIds: List<String>): AppResult<Unit>
+
+    /**
+     * Settles the plot's harvest for the campaign, sending [idempotencyKey] so a retry never
+     * creates a second settlement. On success the settlement is cached. A 409 is not a failure:
+     * it returns [SettleOutcome.AlreadySettled]. Offline, timeouts and other errors are returned
+     * as failures and nothing is cached.
+     */
+    suspend fun settle(draft: SettleHarvestDraft, idempotencyKey: String): AppResult<SettleOutcome>
 }

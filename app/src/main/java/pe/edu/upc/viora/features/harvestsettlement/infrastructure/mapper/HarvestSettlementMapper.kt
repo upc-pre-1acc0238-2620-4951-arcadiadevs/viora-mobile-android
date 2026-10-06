@@ -4,13 +4,17 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.HarvestSettlement
+import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettleHarvestDraft
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementStatus
+import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementSummary
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.StabilizationCurve
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.StabilizationStatus
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.ThinningBalance
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.ThinningStatus
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementEntity
+import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.ExistingSettlementDto
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.HarvestSettlementDto
+import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.SettleHarvestRequestDto
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.StabilizationDto
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.ThinningBalanceDto
 
@@ -48,6 +52,35 @@ fun HarvestSettlementDto.toEntity(): HarvestSettlementEntity {
     )
 }
 
+/**
+ * Domain view of a fresh server response. Unlike the cached entity it carries the receipt fields,
+ * which the Room schema does not store yet.
+ */
+fun HarvestSettlementDto.toDomain(): HarvestSettlement = toEntity().toDomain().copy(
+    receiptNumber = receiptNumber,
+    weighedOn = weighedOn.toLocalDateOrNull(),
+    millTicketNumber = millTicketNumber,
+    commercialSizeGrade = commercialSizeGrade,
+)
+
+fun SettleHarvestDraft.toRequestDto(): SettleHarvestRequestDto = SettleHarvestRequestDto(
+    campaignYear = campaignYear,
+    greenOlivesKg = greenOlivesKg,
+    blackOlivesKg = blackOlivesKg,
+    weighedOn = weighedOn.toString(),
+    millTicketNumber = millTicketNumber,
+    commercialFruitsPerKg = commercialFruitsPerKg,
+    notes = notes,
+)
+
+fun ExistingSettlementDto.toDomain(): SettlementSummary = SettlementSummary(
+    campaignYear = campaignYear,
+    totalYieldKg = totalYieldKg,
+    receiptNumber = receiptNumber,
+    weighedOn = weighedOn.toLocalDateOrNull(),
+)
+
+/** The Room schema does not store the receipt fields yet, so cached rows map them to null. */
 fun HarvestSettlementEntity.toDomain(): HarvestSettlement = HarvestSettlement(
     id = id,
     reportId = reportId,
@@ -62,7 +95,7 @@ fun HarvestSettlementEntity.toDomain(): HarvestSettlement = HarvestSettlement(
     settledAt = settledAt.toInstantOrNull() ?: Instant.EPOCH,
     thinningBalance = ThinningBalance(
         status = thinningStatus.toThinningStatus(),
-        executedDate = thinningExecutedDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
+        executedDate = thinningExecutedDate.toLocalDateOrNull(),
         prescribedRemovalPercentage = thinningPrescribedPct,
         actualRemovalPercentage = thinningActualPct,
         deviationPercentagePoints = thinningDeviationPp,
@@ -106,3 +139,5 @@ private fun String?.toInstantOrNull(): Instant? = this?.let { raw ->
         .recoverCatching { OffsetDateTime.parse(raw).toInstant() }
         .getOrNull()
 }
+
+private fun String?.toLocalDateOrNull(): LocalDate? = this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }

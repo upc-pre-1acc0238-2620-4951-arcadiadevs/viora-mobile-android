@@ -22,6 +22,7 @@ import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestS
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.mapper.toEntity
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.HarvestSettlementDto
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.HarvestSettlementService
+import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.SettleHarvestRequestDto
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.repository.HarvestSettlementRepositoryImpl
 import retrofit2.Response
 
@@ -36,6 +37,9 @@ private class FakeHarvestSettlementDao : HarvestSettlementDao {
         rows.value = byId.values.toList()
     }
 
+    override suspend fun findByPlotAndYear(plotId: String, campaignYear: Int): HarvestSettlementEntity? =
+        rows.value.firstOrNull { it.plotId == plotId && it.campaignYear == campaignYear }
+
     override suspend fun deleteByPlot(plotId: String) {
         rows.value = rows.value.filter { it.plotId != plotId }
     }
@@ -49,6 +53,12 @@ private class FakeHarvestSettlementService : HarvestSettlementService {
         requested += plotId
         return (responses[plotId] ?: { Response.success(emptyList()) })()
     }
+
+    override suspend fun settle(
+        plotId: String,
+        idempotencyKey: String,
+        request: SettleHarvestRequestDto,
+    ): Response<HarvestSettlementDto> = error("settle is covered by HarvestSettlementSettleTest")
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -60,6 +70,7 @@ class HarvestSettlementRepositoryImplTest {
         service = service,
         dao = dao,
         apiCaller = ApiCaller(ApiErrorMapper(Json), UnconfinedTestDispatcher()),
+        json = Json,
     )
 
     private fun dto(id: String, plotId: String, year: Int, settledAt: String) = HarvestSettlementDto(

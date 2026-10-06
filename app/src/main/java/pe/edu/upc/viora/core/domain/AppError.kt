@@ -1,5 +1,7 @@
 package pe.edu.upc.viora.core.domain
 
+import kotlinx.serialization.json.JsonObject
+
 /**
  * Failure vocabulary shared by every bounded context. Pure Kotlin: infrastructure maps
  * transport/persistence problems into these types so presentation never sees HTTP or IO details.
@@ -21,8 +23,16 @@ sealed interface AppError {
     /** The resource does not exist or is no longer active (HTTP 404). */
     data class NotFound(val detail: String? = null, val code: String? = null) : AppError
 
-    /** A business conflict such as a duplicated name or campaign (HTTP 409). */
-    data class Conflict(val detail: String? = null, val code: String? = null) : AppError
+    /**
+     * A business conflict such as a duplicated name or campaign (HTTP 409). [properties] keeps the
+     * ProblemDetail members beyond the standard ones (e.g. `existingSettlement`) so a caller can
+     * decode the payload it expects; null when the body had none.
+     */
+    data class Conflict(
+        val detail: String? = null,
+        val code: String? = null,
+        val properties: JsonObject? = null,
+    ) : AppError
 
     /** Optimistic locking failed: the resource changed on the server, reload it (HTTP 412). */
     data class PreconditionFailed(val detail: String? = null, val code: String? = null) : AppError

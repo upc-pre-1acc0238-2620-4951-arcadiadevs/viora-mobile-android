@@ -31,6 +31,8 @@ import pe.edu.upc.viora.features.harvestsettlement.domain.entity.StabilizationCu
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.StabilizationStatus
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.ThinningBalance
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.ThinningStatus
+import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettleHarvestDraft
+import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettleOutcome
 import pe.edu.upc.viora.features.harvestsettlement.domain.repository.HarvestSettlementRepository
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.LogbookFilter
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.LogbookPeriod
@@ -275,6 +277,8 @@ private class FakeSettlements : HarvestSettlementRepository {
 
     override fun observeAll(): Flow<List<HarvestSettlement>> = cache
     override suspend fun refresh(plotId: String): AppResult<Unit> = refreshResult
+    override suspend fun settle(draft: SettleHarvestDraft, idempotencyKey: String): AppResult<SettleOutcome> =
+        error("not used")
     override suspend fun refreshAll(plotIds: List<String>): AppResult<Unit> {
         refreshedIds += plotIds
         gate?.await()
