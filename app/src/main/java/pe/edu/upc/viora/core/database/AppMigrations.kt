@@ -44,5 +44,21 @@ object AppMigrations {
         )
     }
 
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+    /** Adds the hourly telemetry readings and the 7-day forecast caches of the plot climate. */
+    val MIGRATION_3_4 = Migration(3, 4) { connection ->
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS `telemetry_readings` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, " +
+                "`observed_at_epoch_ms` INTEGER NOT NULL, `air_temperature_celsius` REAL, " +
+                "`relative_humidity_percent` REAL, `soil_moisture_30cm_percent` REAL, " +
+                "`soil_moisture_60cm_percent` REAL, PRIMARY KEY(`id`))",
+        )
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS `forecast_days` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, " +
+                "`forecast_date` TEXT NOT NULL, `max_temperature_celsius` REAL NOT NULL, " +
+                "`min_temperature_celsius` REAL NOT NULL, `precipitation_probability_percent` REAL NOT NULL, " +
+                "`wind_speed_kmh` REAL NOT NULL, `synced_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        )
+    }
+
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
 }

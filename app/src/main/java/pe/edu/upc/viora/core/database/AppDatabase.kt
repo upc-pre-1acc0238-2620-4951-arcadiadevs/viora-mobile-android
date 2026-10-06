@@ -14,6 +14,10 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.IncidentDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.IncidentEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeEntity
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.ForecastDayDao
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.ForecastDayEntity
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReadingDao
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReadingEntity
 
 /**
  * The single Room database of the app. Every bounded context contributes its entities and DAOs
@@ -36,8 +40,10 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeEntity
         HarvestRecordEntity::class,
         BearingIndexEntity::class,
         HarvestSettlementEntity::class,
+        TelemetryReadingEntity::class,
+        ForecastDayEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -48,4 +54,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun harvestRecordDao(): HarvestRecordDao
     abstract fun bearingIndexDao(): BearingIndexDao
     abstract fun harvestSettlementDao(): HarvestSettlementDao
+    abstract fun telemetryReadingDao(): TelemetryReadingDao
+    abstract fun forecastDayDao(): ForecastDayDao
 }
