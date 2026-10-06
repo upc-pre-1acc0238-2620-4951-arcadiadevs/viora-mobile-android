@@ -16,6 +16,7 @@ sealed interface SettleDialog {
 /**
  * State of the settle form (P71) and its dialogs (P72). [totalKg], [greenShare] and
  * [tonnesPerHectare] are null while the kilos are not valid (or the plot is not cached yet).
+ * [isEditing] is true when the form corrects a settlement still pending on the phone.
  */
 data class SettleHarvestUiState(
     val plotId: String,
@@ -35,6 +36,7 @@ data class SettleHarvestUiState(
     val calibreGrade: CommercialSizeGrade?,
     val calibreError: Boolean,
     val canSave: Boolean,
+    val isEditing: Boolean,
     val isSaving: Boolean,
     val error: AppError?,
     val dialog: SettleDialog?,

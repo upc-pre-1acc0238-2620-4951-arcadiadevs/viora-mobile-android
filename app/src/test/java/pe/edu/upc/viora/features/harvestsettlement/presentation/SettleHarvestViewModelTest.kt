@@ -24,7 +24,9 @@ import org.junit.Before
 import org.junit.Test
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePendingSettlementsUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.SettleHarvestUseCase
+import pe.edu.upc.viora.features.harvestsettlement.application.usecase.UpdatePendingSettlementUseCase
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.PendingStatus
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettleOutcome
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementSummary
@@ -57,7 +59,9 @@ class SettleHarvestViewModelTest {
         val vm = SettleHarvestViewModel(
             savedStateHandle = SavedStateHandle(mapOf("plotId" to "p1", "campaignYear" to 2026)),
             observePlot = ObservePlotUseCase(plots),
+            observePending = ObservePendingSettlementsUseCase(repository),
             settleHarvest = SettleHarvestUseCase(repository),
+            updatePending = UpdatePendingSettlementUseCase(repository),
             clock = clock,
         )
         vm.uiState.launchIn(CoroutineScope(Dispatchers.Main))
@@ -334,5 +338,79 @@ class SettleHarvestViewModelTest {
         assertNull(vm.uiState.value.dialog)
         assertEquals("12500", vm.uiState.value.greenText)
         assertTrue(repository.settled.isEmpty())
+    }
+
+    @Test
+    fun `a pending settlement prefills the form and switches to edit mode`() = runTest {
+        val saved = testDraft("p1", 2026).copy(millTicketNumber = "B-004512", commercialFruitsPerKg = CommercialSizeGrade.SCALE[4].midpoint)
+        repository.pending.value = listOf(testPending(saved, PendingStatus.PENDING))
+
+        val state = viewModel().uiState.value
+
+        assertTrue(state.isEditing)
+        assertEquals("12500", state.greenText)
+        assertEquals("8300", state.blackText)
+        assertEquals("B-004512", state.millTicket)
+        assertEquals(LocalDate.of(2026, 5, 14), state.weighedOn)
+        assertEquals(CommercialSizeGrade.SCALE[4], state.calibreGrade)
+        assertTrue(state.canSave)
+    }
+
+    @Test
+    fun `without a pending settlement the form is not in edit mode`() = runTest {
+        repository.pending.value = listOf(testPending(testDraft("other", 2026), PendingStatus.PENDING))
+
+        assertFalse(viewModel().uiState.value.isEditing)
+    }
+
+    @Test
+    fun `a conflict row is not edited`() = runTest {
+        repository.pending.value = listOf(testPending(testDraft("p1", 2026), PendingStatus.CONFLICT))
+
+        assertFalse(viewModel().uiState.value.isEditing)
+    }
+
+    @Test
+    fun `saving in edit mode updates the pending row instead of settling anew`() = runTest {
+        repository.pending.value = listOf(testPending(testDraft("p1", 2026), PendingStatus.FAILED))
+        val vm = viewModel()
+        vm.onGreenChange("13000")
+        vm.requestConfirm()
+
+        vm.confirm()
+
+        assertEquals(1, repository.updated.size)
+        assertEquals(13_000.0, repository.updated.single().greenOlivesKg, 0.0)
+        assertTrue(repository.settled.isEmpty())
+        assertEquals(listOf("p1" to 2026), queuedCalls)
+        assertTrue(settledCalls.isEmpty())
+    }
+
+    @Test
+    fun `a pending row that synced meanwhile sends the producer to the closed receipt`() = runTest {
+        repository.pending.value = listOf(testPending(testDraft("p1", 2026), PendingStatus.PENDING))
+        repository.updateResult = AppResult.Failure(AppError.NotFound("No pending settlement for the campaign"))
+        val vm = viewModel()
+        vm.requestConfirm()
+
+        vm.confirm()
+
+        assertEquals(listOf("p1" to 2026), settledCalls)
+        assertTrue(queuedCalls.isEmpty())
+        assertFalse(vm.uiState.value.isSaving)
+    }
+
+    @Test
+    fun `another update failure keeps the form with the error`() = runTest {
+        repository.pending.value = listOf(testPending(testDraft("p1", 2026), PendingStatus.PENDING))
+        repository.updateResult = AppResult.Failure(AppError.Offline)
+        val vm = viewModel()
+        vm.requestConfirm()
+
+        vm.confirm()
+
+        assertEquals(AppError.Offline, vm.uiState.value.error)
+        assertNull(vm.uiState.value.dialog)
+        assertTrue(settledCalls.isEmpty() && queuedCalls.isEmpty())
     }
 }
