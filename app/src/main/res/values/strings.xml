@@ -599,4 +599,25 @@
     <string name="sensors_unlink_count_label">nodes in the plot</string>
     <string name="sensors_unlink_title_emphasis">%1$s?</string>
     <string name="sensors_unlink_title_lead">Unlink</string>
+
+    <!-- Climate & Weather Forecast (US19) -->
+    <string name="climate_screen_title">Climate &amp; Forecast</string>
+    <string name="climate_screen_subtitle">%1$s · 7-day forecast</string>
+    <string name="climate_forecast_section_title">7-day forecast</string>
+    <string name="climate_metric_temp_max">MAX TEMP</string>
+    <string name="climate_metric_temp_min">MIN TEMP</string>
+    <string name="climate_metric_precipitation">RAIN PROBABILITY</string>
+    <string name="climate_metric_wind">WIND SPEED</string>
+    <string name="climate_alert_frost_title">Frost risk alert</string>
+    <string name="climate_alert_frost_desc">Temperatures dropping near frost threshold. Review thermal blankets or micro-sprinkler frost protection.</string>
+    <string name="climate_condition_optimal_title">Favorable conditions</string>
+    <string name="climate_condition_optimal_desc">Moderate temperatures favorable for vegetative development and olive tree respiration.</string>
+    <string name="climate_today">Today</string>
+    <string name="climate_thermal_amplitude">Thermal amplitude: %1$.1f°C</string>
+    <string name="climate_thermal_trend_title">Thermal trend</string>
+    <string name="climate_last_sync">Synced %1$s</string>
+    <string name="climate_offline_badge">OFFLINE · SAVED DATA</string>
+    <string name="climate_lot_card_subtitle">7-day forecast · %1$.1f°C / %2$.1f°C</string>
+    <string name="climate_error_title">Couldn\'t load forecast</string>
+    <string name="climate_retry">Try again</string>
 </resources>

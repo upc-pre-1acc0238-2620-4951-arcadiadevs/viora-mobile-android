@@ -601,4 +601,25 @@
     <string name="sensors_unlink_count_label">nodos en el lote</string>
     <string name="sensors_unlink_title_emphasis">%1$s?</string>
     <string name="sensors_unlink_title_lead">¿Desvincular</string>
+
+    <!-- Climate & Weather Forecast (US19) -->
+    <string name="climate_screen_title">Clima y pronóstico</string>
+    <string name="climate_screen_subtitle">%1$s · pronóstico a 7 días</string>
+    <string name="climate_forecast_section_title">Pronóstico a 7 días</string>
+    <string name="climate_metric_temp_max">TEMP. MÁXIMA</string>
+    <string name="climate_metric_temp_min">TEMP. MÍNIMA</string>
+    <string name="climate_metric_precipitation">PROB. LLUVIA</string>
+    <string name="climate_metric_wind">VEL. VIENTO</string>
+    <string name="climate_alert_frost_title">Riesgo de helada</string>
+    <string name="climate_alert_frost_desc">Temperaturas mínimas críticas previstas. Revisar medidas de protección térmica o microaspersión.</string>
+    <string name="climate_condition_optimal_title">Condiciones favorables</string>
+    <string name="climate_condition_optimal_desc">Temperaturas moderadas favorables para el desarrollo vegetativo y floración del olivo.</string>
+    <string name="climate_today">Hoy</string>
+    <string name="climate_thermal_amplitude">Amplitud térmica: %1$.1f°C</string>
+    <string name="climate_thermal_trend_title">Tendencia térmica</string>
+    <string name="climate_last_sync">Sincronizado %1$s</string>
+    <string name="climate_offline_badge">SIN CONEXIÓN · DATOS GUARDADOS</string>
+    <string name="climate_lot_card_subtitle">Pronóstico a 7 días · %1$.1f°C / %2$.1f°C</string>
+    <string name="climate_error_title">No se pudo cargar el pronóstico</string>
+    <string name="climate_retry">Reintentar</string>
 </resources>
