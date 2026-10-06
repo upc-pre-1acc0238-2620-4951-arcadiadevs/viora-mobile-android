@@ -25,6 +25,8 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.Register
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotScreens
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNavGraph
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.climateNavGraph
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.alertsNavGraph
 
 /**
@@ -56,11 +58,15 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                         }
                     },
                     onOpenAlerts = { navController.navigate(AlertsCenterRoute) },
+                    onOpenWeatherForecast = { id, name ->
+                        navController.navigate(PlotClimateRoute(plotId = id.value, plotName = name))
+                    },
                 )
             }
         }
         plotsNavGraph(navController)
         plotScreens(navController)
+        climateNavGraph(navController)
         alertsNavGraph(
             navController = navController,
             onOpenPlot = { plotId -> navController.navigate(PlotDetailRoute(plotId = plotId)) },
