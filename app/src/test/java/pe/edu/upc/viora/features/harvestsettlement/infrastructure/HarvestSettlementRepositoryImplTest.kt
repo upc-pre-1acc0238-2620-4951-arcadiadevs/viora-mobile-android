@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.harvestsettlement.infrastructure
 
 import java.io.IOException
+import java.time.Clock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,8 +70,11 @@ class HarvestSettlementRepositoryImplTest {
     private val repository = HarvestSettlementRepositoryImpl(
         service = service,
         dao = dao,
+        pendingDao = InMemoryPendingSettlementDao(),
+        scheduler = RecordingSyncScheduler(),
         apiCaller = ApiCaller(ApiErrorMapper(Json), UnconfinedTestDispatcher()),
         json = Json,
+        clock = Clock.systemUTC(),
     )
 
     private fun dto(id: String, plotId: String, year: Int, settledAt: String) = HarvestSettlementDto(

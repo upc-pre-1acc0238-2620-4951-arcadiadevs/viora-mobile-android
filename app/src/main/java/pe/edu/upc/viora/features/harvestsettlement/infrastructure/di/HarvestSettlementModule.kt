@@ -8,10 +8,12 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import pe.edu.upc.viora.core.database.AppDatabase
 import pe.edu.upc.viora.features.harvestsettlement.domain.repository.HarvestSettlementRepository
+import pe.edu.upc.viora.features.harvestsettlement.domain.service.SettlementSyncScheduler
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementDao
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.PendingSettlementDao
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.HarvestSettlementService
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.repository.HarvestSettlementRepositoryImpl
+import pe.edu.upc.viora.features.harvestsettlement.infrastructure.sync.WorkManagerSettlementSyncScheduler
 import retrofit2.Retrofit
 
 @Module
@@ -38,4 +40,7 @@ interface HarvestSettlementRepositoryModule {
 
     @Binds
     fun bindHarvestSettlementRepository(impl: HarvestSettlementRepositoryImpl): HarvestSettlementRepository
+
+    @Binds
+    fun bindSettlementSyncScheduler(impl: WorkManagerSettlementSyncScheduler): SettlementSyncScheduler
 }

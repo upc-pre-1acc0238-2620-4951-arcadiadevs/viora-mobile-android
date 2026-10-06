@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.harvestsettlement.infrastructure
 
+import java.time.Clock
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,7 +35,7 @@ import pe.edu.upc.viora.features.harvestsettlement.infrastructure.repository.Har
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
-private class InMemorySettlementDao : HarvestSettlementDao {
+internal class InMemorySettlementDao : HarvestSettlementDao {
     val rows = MutableStateFlow<List<HarvestSettlementEntity>>(emptyList())
     var failOnUpsert = false
 
@@ -88,8 +89,11 @@ class HarvestSettlementSettleTest {
         repository = HarvestSettlementRepositoryImpl(
             service = service,
             dao = dao,
+            pendingDao = InMemoryPendingSettlementDao(),
+            scheduler = RecordingSyncScheduler(),
             apiCaller = ApiCaller(ApiErrorMapper(json), UnconfinedTestDispatcher()),
             json = json,
+            clock = Clock.systemUTC(),
         )
     }
 
@@ -210,10 +214,12 @@ class HarvestSettlementSettleTest {
     }
 
     @Test
-    fun `an unreachable server passes through as Offline`() = runTest {
+    fun `an unreachable server is queued instead of failing`() = runTest {
         server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START))
 
-        assertEquals(AppResult.Failure(AppError.Offline), repository.settle(draft, "key-1"))
+        val outcome = (repository.settle(draft, "key-1") as AppResult.Success).value
+
+        assertEquals("key-1", (outcome as SettleOutcome.Queued).pending.idempotencyKey)
     }
 
     @Test

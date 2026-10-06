@@ -36,4 +36,10 @@ sealed interface SettleOutcome {
      * one, and is null when neither is available.
      */
     data class AlreadySettled(val existing: SettlementSummary?) : SettleOutcome
+
+    /**
+     * The server could not be reached (offline or timeout): the draft was saved as [pending]
+     * with its idempotency key and a sync was scheduled. The settlement is not on the server yet.
+     */
+    data class Queued(val pending: PendingSettlement) : SettleOutcome
 }
