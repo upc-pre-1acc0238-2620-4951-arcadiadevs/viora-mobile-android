@@ -126,11 +126,13 @@ fun NavGraphBuilder.samplingNavGraph(
                 navController.getBackStackEntry<SamplingGraph>()
             }
             val sessionViewModel: SamplingSessionViewModel = hiltViewModel(parentEntry)
+            val sessionState = sessionViewModel.uiState.collectAsStateWithLifecycle().value
 
             RegisterTreeSampleScreen(
                 plotName = route.plotName,
                 treeIndex = route.treeIndex,
                 defaultIdentifier = route.defaultIdentifier,
+                isOffline = sessionState.isOffline,
                 onClose = { navController.popBackStack() },
                 onSaveTree = { id, shoots, fruits, circumference ->
                     sessionViewModel.addSample(id, shoots, fruits, circumference)

@@ -13,7 +13,8 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -76,11 +77,13 @@ fun RegisterTreeSampleScreen(
     defaultIdentifier: String = "A-01",
     initialShootsCount: Int = 0,
     initialFruitSetCount: Int = 0,
+    isOffline: Boolean = false,
     onClose: () -> Unit,
     onSaveTree: (identifier: String, shootsCount: Int, fruitsCount: Int, circumferenceCm: Double?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     var treeTag by remember(defaultIdentifier) { mutableStateOf(defaultIdentifier) }
     var shootsCount by remember(initialShootsCount) { mutableIntStateOf(initialShootsCount) }
@@ -93,6 +96,12 @@ fun RegisterTreeSampleScreen(
     val liveRatio = if (shootsCount > 0) fruitSetCount.toDouble() / shootsCount else 0.0
     val formattedRatio = String.format(Locale.ROOT, "%.2f", liveRatio).replace('.', ',')
 
+    val subtitleText = if (isOffline) {
+        stringResource(R.string.sampling_register_tree_subtitle, plotName)
+    } else {
+        plotName
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -101,10 +110,10 @@ fun RegisterTreeSampleScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(
                     top = topInset + 8.dp,
-                    bottom = 100.dp,
                     start = ScreenPadding,
                     end = ScreenPadding,
                 ),
@@ -139,7 +148,7 @@ fun RegisterTreeSampleScreen(
                         color = Neutral900,
                     )
                     Text(
-                        text = stringResource(R.string.sampling_register_tree_subtitle, plotName),
+                        text = subtitleText,
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontSize = 12.sp,
                             lineHeight = 16.sp,
@@ -223,7 +232,7 @@ fun RegisterTreeSampleScreen(
                 }
             }
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(16.dp))
 
             // Counter 1: Brotes observados
             CounterCard(
@@ -234,7 +243,7 @@ fun RegisterTreeSampleScreen(
                 onIncrement = { shootsCount++ },
             )
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(12.dp))
 
             // Counter 2: Frutos cuajados (highlighted with Terracotta when out of range)
             CounterCard(
@@ -277,7 +286,7 @@ fun RegisterTreeSampleScreen(
                 }
             }
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(12.dp))
 
             // Live Calculation Chip (Harvest100)
             Row(
@@ -311,7 +320,7 @@ fun RegisterTreeSampleScreen(
                 )
             }
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(12.dp))
 
             // Field: Contorno del tronco (opcional)
             Row(
@@ -395,16 +404,10 @@ fun RegisterTreeSampleScreen(
                     )
                 }
             }
-        }
 
-        // Bottom CTA: Guardar árbol (disabled if out of range)
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = ScreenPadding, vertical = 16.dp),
-        ) {
+            Spacer(Modifier.height(44.dp))
+
+            // Bottom CTA: Guardar árbol (disabled if out of range)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -442,6 +445,8 @@ fun RegisterTreeSampleScreen(
                     )
                 }
             }
+
+            Spacer(Modifier.height(bottomInset + 24.dp))
         }
     }
 }

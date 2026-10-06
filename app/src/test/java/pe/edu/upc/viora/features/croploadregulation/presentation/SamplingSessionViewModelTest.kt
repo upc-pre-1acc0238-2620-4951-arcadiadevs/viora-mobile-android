@@ -205,4 +205,26 @@ class SamplingSessionViewModelTest {
         assertEquals(1, fakeDao.items.size)
         assertFalse(fakeDao.items[0].isSynced)
     }
+
+    @Test
+    fun `addSample records sample and syncs immediately to backend when online`() = runTest {
+        val viewModel = SamplingSessionViewModel(useCase, fakeDao, fakeContext)
+        viewModel.initSession(plotId = "plot-1", plotName = "Lote Norte", campaignYear = 2026)
+
+        viewModel.addSample(
+            treeIdentifier = "A-01",
+            shootsCount = 42,
+            fruitSetCount = 24,
+            trunkCircumferenceCm = 85.0,
+        )
+
+        val state = viewModel.uiState.value
+        assertEquals(1, state.samples.size)
+        assertEquals("A-01", state.samples[0].treeIdentifier)
+        assertTrue(state.samples[0].isSynced)
+        assertFalse(state.isOffline)
+        assertEquals(1, fakeRepo.submittedBatches.size)
+        assertEquals(1, fakeDao.items.size)
+        assertTrue(fakeDao.items[0].isSynced)
+    }
 }

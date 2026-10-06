@@ -671,11 +671,6 @@ private fun EvaluatedTreeItem(
                 )
             }
         } else if (!sample.isSynced) {
-            val badgeText = if (isOffline) {
-                stringResource(R.string.sampling_badge_pending_sync)
-            } else {
-                stringResource(R.string.sampling_saved_on_phone_badge)
-            }
             Row(
                 modifier = Modifier
                     .clip(CircleShape)
@@ -691,7 +686,7 @@ private fun EvaluatedTreeItem(
                     modifier = Modifier.size(14.dp),
                 )
                 Text(
-                    text = badgeText,
+                    text = stringResource(R.string.sampling_saved_on_phone_badge),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Medium,
                         fontSize = 11.sp,
