@@ -30,7 +30,7 @@ The app can only read settlements (Logbook, release 0.11.0). There is no way to 
 - Entry point: a Home "AHORA · COSECHA" card with "{n} lotes por registrar" and "Registrar cosecha →". It is contributed by `harvestsettlement` through the existing `HomeScreen` `sections` slot. The Logbook has no "+" menu and is not an entry point.
 - "Por registrar" for campaign Y = active plot without a settlement for Y and without a pending local settlement for Y.
 - Offline: an Offline/Timeout POST is stored in a Room `pending_settlements` table and sent by a WorkManager `SettlementSyncWorker` when the network is back. The `Idempotency-Key` is generated once per draft and reused on every retry. Pending entries can be corrected ("Corregir los kilos") or are replaced on edit; after sync they are immutable.
-- DB goes to v4 with `MIGRATION_3_4`. It also creates `agroclimatic_incidents` IF NOT EXISTS: `52bd186` (develop) added that table to the v3 schema without a migration, so phones on 0.11.0 would fail to open the DB.
+- DB goes to v5 with `MIGRATION_4_5` (develop's v4 is the teammate's telemetry migration and stays untouched). It also creates `agroclimatic_incidents` IF NOT EXISTS: `52bd186` (develop) added that table to the v3 schema without a migration, so installs from 0.11.0 (v3) lack it, and a 3→4→5 upgrade gets it in 4→5 before Room validates.
 - Calibre de venta: grade dropdown ("101/110 · frutos por kg") sends a representative number (grade midpoint), plus free numeric entry as the helper text suggests.
 
 ## Scope
@@ -50,7 +50,7 @@ The app can only read settlements (Logbook, release 0.11.0). There is no way to 
 
 ## Tasks
 - [x] T1 — Contract and data (online): domain fields, DTOs (nullable new fields), settle request DTO, `@POST` with `@Header("Idempotency-Key")`, `ProblemDetailDto` + `AppError.Conflict` carrying `existingSettlement`, repository `settle` (upsert cache on success), use case; tests. Route: delegated writer (writer trigger: 2+ non-trivial files).
-- [x] T2 — Offline queue: WorkManager + Hilt work deps, `pending_settlements` entity/DAO, DB v4 + `MIGRATION_3_4` (incl. incidents), `SettlementSyncWorker`, enqueue on Offline/Timeout, observe/edit/discard pending; tests. Route: delegated writer.
+- [x] T2 — Offline queue: WorkManager + Hilt work deps, `pending_settlements` entity/DAO, DB v5 + `MIGRATION_4_5` (incl. incidents), `SettlementSyncWorker`, enqueue on Offline/Timeout, observe/edit/discard pending; tests. Route: delegated writer.
 - [x] T3 — P70–P72 UI: Home harvest card + P70 sheet, P71 form (date picker, kilos, live total/t/ha/split bar, mill ticket, calibre), P72 confirm + 409 dialog, ViewModel, strings; tests. Route: delegated writer.
 - [x] T4 — P73: closed receipt (online) and offline pending screen, route, "Listo", "Ver expediente del lote", "Corregir los kilos", "Ver comprobante" from 409; tests. Route: delegated writer.
 
@@ -62,7 +62,7 @@ The app can only read settlements (Logbook, release 0.11.0). There is no way to 
   - Null optionals are omitted from the request (`explicitNulls=false`).
   - Room schema unchanged: cached rows map the four new fields to null until T2 adds the columns.
 
-- T2 done in `8865fd8` (DB v4: receipt columns, `pending_settlements`, `MIGRATION_3_4` incl. `agroclimatic_incidents` IF NOT EXISTS; SQL asserted byte for byte against 4.json) and `e5226fd` (offline queue + WorkManager). ~1770 lines incl. ~400 generated schema and ~450 tests; 26 new tests. Writer: `./gradlew testDebugUnitTest assembleDebug` green (339 tests). Parent spot check: `AppMigrationsTest` + `SettlementQueueTest` green.
+- T2 done in `8865fd8` (DB v5: receipt columns, `pending_settlements`, `MIGRATION_4_5` incl. `agroclimatic_incidents` IF NOT EXISTS; SQL asserted byte for byte against 5.json) and `e5226fd` (offline queue + WorkManager). ~1770 lines incl. ~400 generated schema and ~450 tests; 26 new tests. Writer: `./gradlew testDebugUnitTest assembleDebug` green (339 tests). Parent spot check: `AppMigrationsTest` + `SettlementQueueTest` green.
   - Deps: `work-runtime-ktx` 2.12.0, `hilt-work` 1.4.0, `hilt-compiler` 1.4.0 (ksp). `VioraApplication` provides `HiltWorkerFactory`; default initializer removed in the manifest.
   - `settle(draft, key?)` → `Settled` | `AlreadySettled(existing)` | `Queued(pending)`. Key is stable per plot/year draft and generated before the first online attempt.
   - Sync rules in `HarvestSettlementRepositoryImpl.syncPending()`; worker is a thin shell (no worker test: no Robolectric/work-testing). Offline/timeout/5xx/401 retry; 400/403/404/422 → FAILED (editing resets to PENDING); 409 → CONFLICT row with the server summary, dismissed via `discardPending`. Stale results never overwrite an edit made mid-sync.
@@ -86,7 +86,8 @@ The app can only read settlements (Logbook, release 0.11.0). There is no way to 
 - Edit mode keeps the normal form title/button; closing it returns to Home, not P73.
 - Validation errors show the generic message, not the backend detail.
 - Device check of P70–P73 against Figma, and an end-to-end run once the backend contract (receipt, `weighedOn`, `Idempotency-Key`, 409 body) is deployed.
-- Teammate notice: `52bd186` changed the v3 schema without a migration; fixed here by `MIGRATION_3_4`.
+- Teammate notice: `52bd186` changed the v3 schema without a migration; fixed here by `MIGRATION_4_5`.
+- Rebased onto develop `d272dfc` (teammate's v4 = `telemetry_readings` + `forecast_days`, untouched). Our schema moved to v5: `MIGRATION_4_5` + exported `5.json`; `AppMigrationsTest` asserts against v5. Strings and `AppNavHost` conflicts kept both sides.
 
 ## Next step
 Merge into `develop` (gitflow) when the user approves.
