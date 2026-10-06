@@ -28,5 +28,9 @@ data class CommercialSizeGrade(val lower: Int, val upper: Int) {
                 lower = upper + 1
             }
         }
+
+        /** The grade a count of [fruitsPerKg] falls in, or null outside the scale. */
+        fun forCount(fruitsPerKg: Double): CommercialSizeGrade? =
+            SCALE.firstOrNull { fruitsPerKg >= it.lower && fruitsPerKg < it.upper + 1 }
     }
 }

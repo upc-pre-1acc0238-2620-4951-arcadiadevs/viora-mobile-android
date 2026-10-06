@@ -98,8 +98,20 @@ internal class FakeSettleRepository : HarvestSettlementRepository {
     }
 
     override fun observePending(): Flow<List<PendingSettlement>> = pending
-    override suspend fun updatePending(draft: SettleHarvestDraft): AppResult<Unit> = error("not used")
-    override suspend fun discardPending(plotId: String, campaignYear: Int): AppResult<Unit> = error("not used")
+    var updateResult: AppResult<Unit> = AppResult.Success(Unit)
+    val updated = mutableListOf<SettleHarvestDraft>()
+    val discarded = mutableListOf<Pair<String, Int>>()
+
+    override suspend fun updatePending(draft: SettleHarvestDraft): AppResult<Unit> {
+        updated += draft
+        return updateResult
+    }
+
+    override suspend fun discardPending(plotId: String, campaignYear: Int): AppResult<Unit> {
+        discarded += plotId to campaignYear
+        pending.value = pending.value.filterNot { it.draft.plotId == plotId && it.draft.campaignYear == campaignYear }
+        return AppResult.Success(Unit)
+    }
     override suspend fun syncPending(): SettlementSyncResult = error("not used")
 }
 

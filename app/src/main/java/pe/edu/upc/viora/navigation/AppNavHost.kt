@@ -17,7 +17,9 @@ import pe.edu.upc.viora.core.navigation.PlaceholderScreen
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
+import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.CampaignClosedRoute
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.SettleHarvestRoute
+import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.campaignClosedComposable
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.settleHarvestComposable
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestEntrySection
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
@@ -72,18 +74,23 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 )
             }
         }
-        // T4 adds the P73 receipt routes; until then a settled or queued harvest returns to Home
-        // and "Ver comprobante" opens the Logbook, which already lists settled campaigns.
+        // The form is replaced by the P73 receipt (inclusive pop), so Back never returns to it.
         settleHarvestComposable(
             navController = navController,
-            onSettled = { _, _ -> navController.popBackStack() },
-            onQueued = { _, _ -> navController.popBackStack() },
-            onViewReceipt = { _, _ ->
-                navController.navigate(LogbookGraph) {
-                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
+            onSettled = { plotId, year -> navController.openCampaignReceipt(plotId, year, popForm = true) },
+            onQueued = { plotId, year -> navController.openCampaignReceipt(plotId, year, popForm = true) },
+            onViewReceipt = { plotId, year -> navController.openCampaignReceipt(plotId, year, popForm = true) },
+        )
+        campaignClosedComposable(
+            navController = navController,
+            onOpenPlot = { plotId ->
+                navController.navigate(PlotDetailRoute(plotId = plotId)) { popUpTo<CampaignClosedRoute> { inclusive = true } }
+            },
+            onOpenAlternation = { plotId, plotName ->
+                navController.navigate(HarvestHistoryRoute(plotId = plotId, plotName = plotName))
+            },
+            onCorrect = { plotId, year ->
+                navController.navigate(SettleHarvestRoute(plotId = plotId, campaignYear = year)) { popUpTo<CampaignClosedRoute> { inclusive = true } }
             },
         )
         plotsNavGraph(navController)
@@ -97,7 +104,16 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
         }
         navigation<LogbookGraph>(startDestination = LogbookRoute) {
-            composable<LogbookRoute> { LogbookScreen() }
+            composable<LogbookRoute> {
+                LogbookScreen(onOpenSettlement = { plotId, year -> navController.openCampaignReceipt(plotId, year, popForm = false) })
+            }
         }
+    }
+}
+
+/** Opens the P73 receipt of a campaign; with [popForm] the settle form leaves the back stack. */
+private fun NavHostController.openCampaignReceipt(plotId: String, year: Int, popForm: Boolean) {
+    navigate(CampaignClosedRoute(plotId = plotId, campaignYear = year)) {
+        if (popForm) popUpTo<SettleHarvestRoute> { inclusive = true }
     }
 }
