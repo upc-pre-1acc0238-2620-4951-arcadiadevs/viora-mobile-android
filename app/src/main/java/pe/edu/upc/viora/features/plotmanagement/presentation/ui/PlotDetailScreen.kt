@@ -105,6 +105,7 @@ fun PlotDetailScreen(
     onAdjustOutline: () -> Unit,
     onSensors: () -> Unit = {},
     onHarvestHistory: (plotName: String) -> Unit = {},
+    onClimate: (plotName: String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: PlotDetailViewModel = hiltViewModel(),
 ) {
@@ -119,6 +120,7 @@ fun PlotDetailScreen(
         onAdjustOutline = onAdjustOutline,
         onSensors = onSensors,
         onHarvestHistory = onHarvestHistory,
+        onClimate = onClimate,
         archiveState = archiveState,
         onArchive = viewModel::archive,
         onDismissArchiveFailure = viewModel::dismissArchiveFailure,
@@ -135,6 +137,7 @@ fun PlotDetailContent(
     onAdjustOutline: () -> Unit = {},
     onSensors: () -> Unit = {},
     onHarvestHistory: (plotName: String) -> Unit = {},
+    onClimate: (plotName: String) -> Unit = {},
     archiveState: ArchiveState = ArchiveState.Idle,
     onArchive: () -> Unit = {},
     onDismissArchiveFailure: () -> Unit = {},
@@ -152,6 +155,7 @@ fun PlotDetailContent(
             onAdjustOutline = onAdjustOutline,
             onSensors = onSensors,
             onHarvestHistory = onHarvestHistory,
+            onClimate = onClimate,
             activeHectares = state.activeHectares,
             harvest = state.harvest,
             archiveState = archiveState,
@@ -171,6 +175,7 @@ private fun PlotDetailBody(
     onAdjustOutline: () -> Unit,
     onSensors: () -> Unit,
     onHarvestHistory: (plotName: String) -> Unit,
+    onClimate: (plotName: String) -> Unit,
     activeHectares: Double,
     harvest: LotHarvest?,
     archiveState: ArchiveState,
@@ -212,6 +217,7 @@ private fun PlotDetailBody(
             sheetHeight = if (exploring) loweredSheetHeight else openSheetHeight,
             harvest = harvest,
             onHarvestHistory = { onHarvestHistory(plot.name) },
+            onClimate = { onClimate(plot.name) },
             modifier = Modifier.align(Alignment.BottomCenter),
         )
         if (optionsOpen) {
@@ -320,6 +326,7 @@ private fun DetailSheet(
     sheetHeight: Dp,
     harvest: LotHarvest?,
     onHarvestHistory: () -> Unit,
+    onClimate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -381,6 +388,13 @@ private fun DetailSheet(
                     subtitle = harvestSubtitle(harvest),
                     background = Harvest100,
                     onClick = onHarvestHistory,
+                )
+                LotSectionCard(
+                    icon = R.drawable.ic_cloud,
+                    title = stringResource(R.string.lot_section_climate),
+                    subtitle = stringResource(R.string.lot_section_climate_hint),
+                    background = Neutral0,
+                    onClick = onClimate,
                 )
             }
         }
@@ -555,6 +569,7 @@ private fun DetailSheetPreview() {
             sheetHeight = 320.dp,
             harvest = LotHarvest(index = 0.51, missingCampaigns = 0),
             onHarvestHistory = {},
+            onClimate = {},
         ) }
 }
 

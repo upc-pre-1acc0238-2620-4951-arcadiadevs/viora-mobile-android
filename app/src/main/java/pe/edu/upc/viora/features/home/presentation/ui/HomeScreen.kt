@@ -70,6 +70,7 @@ fun HomeScreen(
     onOpenPlots: () -> Unit,
     onOpenAlerts: () -> Unit,
     onOpenAlternation: (plotId: PlotId, plotName: String) -> Unit,
+    onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -82,6 +83,7 @@ fun HomeScreen(
         onOpenPlots = onOpenPlots,
         onOpenAlerts = onOpenAlerts,
         onOpenAlternation = onOpenAlternation,
+        onOpenWeatherForecast = onOpenWeatherForecast,
         onFocusPlot = viewModel::focusPlot,
         modifier = modifier,
     )
@@ -98,6 +100,7 @@ fun HomeScreenContent(
     onOpenPlots: () -> Unit = {},
     onOpenAlerts: () -> Unit = {},
     onOpenAlternation: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
+    onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onFocusPlot: (PlotId) -> Unit = {},
     today: LocalDate = LocalDate.now(),
     sections: @Composable ColumnScope.() -> Unit = {},
@@ -171,6 +174,9 @@ fun HomeScreenContent(
                     HomeTodayInFieldSection(
                         activeAlertsCount = state.activeAlertsCount,
                         onOpenAlerts = onOpenAlerts,
+                        onOpenWeatherForecast = {
+                            state.focusedPlot?.let { onOpenWeatherForecast(it.id, it.name) }
+                        },
                         modifier = Modifier
                             .padding(top = 28.dp)
                             .homeTourTarget(HomeTourTarget.Field),

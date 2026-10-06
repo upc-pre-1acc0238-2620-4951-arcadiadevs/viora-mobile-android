@@ -19,6 +19,8 @@ import pe.edu.upc.viora.features.phenology.presentation.navigation.harvestHistor
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.configureNodeComposable
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.sensorsComposable
+import pe.edu.upc.viora.features.climate.presentation.navigation.ClimateRoute
+import pe.edu.upc.viora.features.climate.presentation.navigation.climateComposable
 
 /** The plot registration wizard. It hides the tab bar because it is not a tab root. */
 @Serializable
@@ -87,6 +89,9 @@ fun NavGraphBuilder.plotScreens(navController: NavController) {
             onHarvestHistory = { plotName ->
                 navController.navigate(HarvestHistoryRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
             },
+            onClimate = { plotName ->
+                navController.navigate(ClimateRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
+            },
         )
     }
     composable<EditPlotRoute> {
@@ -98,4 +103,5 @@ fun NavGraphBuilder.plotScreens(navController: NavController) {
     sensorsComposable(navController)
     configureNodeComposable(navController)
     harvestHistoryComposable(navController)
+    climateComposable(navController)
 }

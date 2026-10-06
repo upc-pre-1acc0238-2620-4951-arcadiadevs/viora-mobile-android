@@ -17,6 +17,7 @@ import pe.edu.upc.viora.core.navigation.PlaceholderScreen
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
+import pe.edu.upc.viora.features.climate.presentation.navigation.ClimateRoute
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
@@ -48,6 +49,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
                     onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
                     onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id.value, plotName = name)) },
+                    onOpenWeatherForecast = { id, name -> navController.navigate(ClimateRoute(plotId = id.value, plotName = name)) },
                     onOpenPlots = {
                         navController.navigate(PlotsGraph) {
                             popUpTo(navController.graph.findStartDestination().id) { saveState = true }

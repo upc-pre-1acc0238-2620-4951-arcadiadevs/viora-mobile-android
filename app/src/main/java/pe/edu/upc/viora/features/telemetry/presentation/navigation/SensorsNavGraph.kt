@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.features.climate.presentation.navigation.ClimateRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.telemetry.presentation.ui.SensorsScreen
 
@@ -21,6 +22,7 @@ fun NavGraphBuilder.sensorsComposable(navController: NavController) {
         SensorsScreen(
             onBack = { navController.popBackStack() },
             onHarvestHistory = { navController.navigate(HarvestHistoryRoute(plotId = route.plotId, plotName = route.plotName)) },
+            onClimate = { navController.navigate(ClimateRoute(plotId = route.plotId, plotName = route.plotName)) },
             onNodeClick = { node ->
                 navController.navigate(ConfigureNodeRoute(plotId = route.plotId, nodeId = node.id, plotName = route.plotName))
             },
