@@ -2,6 +2,8 @@ package pe.edu.upc.viora.core.database
 
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
+import pe.edu.upc.viora.features.climate.infrastructure.local.WeatherForecastDao
+import pe.edu.upc.viora.features.climate.infrastructure.local.WeatherForecastEntity
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementDao
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementEntity
 import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexDao
@@ -36,8 +38,9 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeEntity
         HarvestRecordEntity::class,
         BearingIndexEntity::class,
         HarvestSettlementEntity::class,
+        WeatherForecastEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -48,4 +51,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun harvestRecordDao(): HarvestRecordDao
     abstract fun bearingIndexDao(): BearingIndexDao
     abstract fun harvestSettlementDao(): HarvestSettlementDao
+    abstract fun weatherForecastDao(): WeatherForecastDao
 }

@@ -44,5 +44,16 @@ object AppMigrations {
         )
     }
 
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+    /** Adds the 7-day weather forecasts cache. */
+    val MIGRATION_3_4 = Migration(3, 4) { connection ->
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS `weather_forecasts` (`plot_id` TEXT NOT NULL, " +
+                "`forecast_date` TEXT NOT NULL, `max_temperature` REAL NOT NULL, `min_temperature` REAL NOT NULL, " +
+                "`precipitation_probability` REAL NOT NULL, `wind_speed_kmh` REAL NOT NULL, " +
+                "`is_frost_risk` INTEGER NOT NULL, `synced_at` TEXT NOT NULL, " +
+                "PRIMARY KEY(`plot_id`, `forecast_date`))",
+        )
+    }
+
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
 }
