@@ -132,6 +132,7 @@ class LogbookViewModel @Inject constructor(
                     entries = items.map {
                         SettledHarvestEntry(
                             id = it.id,
+                            plotId = it.plotId,
                             plotName = names[it.plotId],
                             campaignYear = it.campaignYear,
                             totalYieldKg = it.totalYieldKg,
