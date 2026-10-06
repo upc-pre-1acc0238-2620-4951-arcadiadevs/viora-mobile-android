@@ -199,11 +199,23 @@ class HarvestSettlementMapperTest {
     }
 
     @Test
-    fun cachedRowsMapReceiptFieldsToNull() {
-        val settlement = minimalDto.copy(receiptNumber = "VR-26-0001").toEntity().toDomain()
+    fun cachedRowsRoundTripTheReceiptFields() {
+        val entity = minimalDto.copy(
+            receiptNumber = "VR-26-0001",
+            weighedOn = "2026-10-03",
+            millTicketNumber = "T-9",
+            commercialSizeGrade = "101/110",
+        ).toEntity()
 
-        assertNull(settlement.receiptNumber)
-        assertNull(settlement.weighedOn)
+        assertEquals("VR-26-0001", entity.receiptNumber)
+        assertEquals("2026-10-03", entity.weighedOn)
+        assertEquals("T-9", entity.millTicketNumber)
+        assertEquals("101/110", entity.commercialSizeGrade)
+        val settlement = entity.toDomain()
+        assertEquals("VR-26-0001", settlement.receiptNumber)
+        assertEquals(LocalDate.of(2026, 10, 3), settlement.weighedOn)
+        assertEquals("T-9", settlement.millTicketNumber)
+        assertEquals("101/110", settlement.commercialSizeGrade)
     }
 
     @Test

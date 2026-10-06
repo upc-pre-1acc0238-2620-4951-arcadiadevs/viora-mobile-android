@@ -184,7 +184,7 @@ class HarvestSettlementSettleTest {
         val outcome = (result as AppResult.Success).value as SettleOutcome.AlreadySettled
         assertEquals(2026, outcome.existing!!.campaignYear)
         assertEquals(2000.5, outcome.existing!!.totalYieldKg, 0.0)
-        assertNull(outcome.existing!!.receiptNumber)
+        assertEquals("VR-26-0001", outcome.existing!!.receiptNumber)
     }
 
     @Test

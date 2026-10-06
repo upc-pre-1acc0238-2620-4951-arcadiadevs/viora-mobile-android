@@ -60,5 +60,38 @@ object AppMigrations {
         )
     }
 
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+    /**
+     * The statements of [MIGRATION_4_5], kept visible so a test can compare them with the exported
+     * `5.json`. The `agroclimatic_incidents` table is created here because it joined the v3 schema
+     * without a migration: installs from 0.11.0 (v3) lack it, and a 3->4->5 upgrade gets it here before
+     * Room validates the schema.
+     * `IF NOT EXISTS` keeps the migration safe for databases that already have it.
+     */
+    internal val MIGRATION_4_5_STATEMENTS = listOf(
+        "ALTER TABLE `harvest_settlements` ADD COLUMN `receipt_number` TEXT",
+        "ALTER TABLE `harvest_settlements` ADD COLUMN `weighed_on` TEXT",
+        "ALTER TABLE `harvest_settlements` ADD COLUMN `mill_ticket_number` TEXT",
+        "ALTER TABLE `harvest_settlements` ADD COLUMN `commercial_size_grade` TEXT",
+        "CREATE TABLE IF NOT EXISTS `pending_settlements` (`plot_id` TEXT NOT NULL, " +
+            "`campaign_year` INTEGER NOT NULL, `green_olives_kg` REAL NOT NULL, " +
+            "`black_olives_kg` REAL NOT NULL, `weighed_on` TEXT NOT NULL, `mill_ticket_number` TEXT, " +
+            "`commercial_fruits_per_kg` REAL, `notes` TEXT, `idempotency_key` TEXT NOT NULL, " +
+            "`status` TEXT NOT NULL, `last_error_code` TEXT, `attempt_count` INTEGER NOT NULL, " +
+            "`existing_total_yield_kg` REAL, `existing_receipt_number` TEXT, `existing_weighed_on` TEXT, " +
+            "`created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, " +
+            "PRIMARY KEY(`plot_id`, `campaign_year`))",
+        "CREATE TABLE IF NOT EXISTS `agroclimatic_incidents` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, " +
+            "`plot_name` TEXT NOT NULL, `plot_variety` TEXT NOT NULL, `type` TEXT NOT NULL, " +
+            "`severity` TEXT NOT NULL, `status` TEXT NOT NULL, `headline_key` TEXT NOT NULL, " +
+            "`metric_name` TEXT NOT NULL, `current_value` REAL NOT NULL, `threshold_value` REAL NOT NULL, " +
+            "`unit` TEXT NOT NULL, `triggered_at` TEXT NOT NULL, `stress_duration_minutes` INTEGER NOT NULL, " +
+            "`snoozed_until` TEXT, PRIMARY KEY(`id`))",
+    )
+
+    /** Adds the receipt columns to the settlements cache, the offline settlement queue and the incidents cache. */
+    val MIGRATION_4_5 = Migration(4, 5) { connection ->
+        MIGRATION_4_5_STATEMENTS.forEach { connection.execSQL(it) }
+    }
+
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
 }

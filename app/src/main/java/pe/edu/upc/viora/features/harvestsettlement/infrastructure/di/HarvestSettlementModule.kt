@@ -9,6 +9,7 @@ import javax.inject.Singleton
 import pe.edu.upc.viora.core.database.AppDatabase
 import pe.edu.upc.viora.features.harvestsettlement.domain.repository.HarvestSettlementRepository
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementDao
+import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.PendingSettlementDao
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.HarvestSettlementService
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.repository.HarvestSettlementRepositoryImpl
 import retrofit2.Retrofit
@@ -25,6 +26,10 @@ object HarvestSettlementModule {
     @Provides
     fun provideHarvestSettlementDao(database: AppDatabase): HarvestSettlementDao =
         database.harvestSettlementDao()
+
+    @Provides
+    fun providePendingSettlementDao(database: AppDatabase): PendingSettlementDao =
+        database.pendingSettlementDao()
 }
 
 @Module

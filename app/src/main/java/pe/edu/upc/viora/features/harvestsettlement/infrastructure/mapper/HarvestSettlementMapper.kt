@@ -49,19 +49,14 @@ fun HarvestSettlementDto.toEntity(): HarvestSettlementEntity {
         interannualVarianceKg2 = curve.interannualVarianceKg2,
         coefficientOfVariation = curve.coefficientOfVariation,
         requiredConsecutivePairs = curve.requiredConsecutivePairs,
+        receiptNumber = receiptNumber,
+        weighedOn = weighedOn,
+        millTicketNumber = millTicketNumber,
+        commercialSizeGrade = commercialSizeGrade,
     )
 }
 
-/**
- * Domain view of a fresh server response. Unlike the cached entity it carries the receipt fields,
- * which the Room schema does not store yet.
- */
-fun HarvestSettlementDto.toDomain(): HarvestSettlement = toEntity().toDomain().copy(
-    receiptNumber = receiptNumber,
-    weighedOn = weighedOn.toLocalDateOrNull(),
-    millTicketNumber = millTicketNumber,
-    commercialSizeGrade = commercialSizeGrade,
-)
+fun HarvestSettlementDto.toDomain(): HarvestSettlement = toEntity().toDomain()
 
 fun SettleHarvestDraft.toRequestDto(): SettleHarvestRequestDto = SettleHarvestRequestDto(
     campaignYear = campaignYear,
@@ -80,7 +75,6 @@ fun ExistingSettlementDto.toDomain(): SettlementSummary = SettlementSummary(
     weighedOn = weighedOn.toLocalDateOrNull(),
 )
 
-/** The Room schema does not store the receipt fields yet, so cached rows map them to null. */
 fun HarvestSettlementEntity.toDomain(): HarvestSettlement = HarvestSettlement(
     id = id,
     reportId = reportId,
@@ -91,6 +85,10 @@ fun HarvestSettlementEntity.toDomain(): HarvestSettlement = HarvestSettlement(
     totalYieldKg = totalYieldKg,
     commercialFruitsPerKg = commercialFruitsPerKg,
     notes = notes,
+    receiptNumber = receiptNumber,
+    weighedOn = weighedOn.toLocalDateOrNull(),
+    millTicketNumber = millTicketNumber,
+    commercialSizeGrade = commercialSizeGrade,
     status = status.toSettlementStatus(),
     settledAt = settledAt.toInstantOrNull() ?: Instant.EPOCH,
     thinningBalance = ThinningBalance(
