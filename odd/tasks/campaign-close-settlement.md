@@ -52,7 +52,7 @@ The app can only read settlements (Logbook, release 0.11.0). There is no way to 
 - [x] T1 — Contract and data (online): domain fields, DTOs (nullable new fields), settle request DTO, `@POST` with `@Header("Idempotency-Key")`, `ProblemDetailDto` + `AppError.Conflict` carrying `existingSettlement`, repository `settle` (upsert cache on success), use case; tests. Route: delegated writer (writer trigger: 2+ non-trivial files).
 - [x] T2 — Offline queue: WorkManager + Hilt work deps, `pending_settlements` entity/DAO, DB v4 + `MIGRATION_3_4` (incl. incidents), `SettlementSyncWorker`, enqueue on Offline/Timeout, observe/edit/discard pending; tests. Route: delegated writer.
 - [x] T3 — P70–P72 UI: Home harvest card + P70 sheet, P71 form (date picker, kilos, live total/t/ha/split bar, mill ticket, calibre), P72 confirm + 409 dialog, ViewModel, strings; tests. Route: delegated writer.
-- [ ] T4 — P73: closed receipt (online) and offline pending screen, route, "Listo", "Ver expediente del lote", "Corregir los kilos", "Ver comprobante" from 409; tests. Route: delegated writer.
+- [x] T4 — P73: closed receipt (online) and offline pending screen, route, "Listo", "Ver expediente del lote", "Corregir los kilos", "Ver comprobante" from 409; tests. Route: delegated writer.
 
 ## Progress
 - Branch `feature/campaign-close-settlement` created from `develop` (`52bd186`).
@@ -74,5 +74,19 @@ The app can only read settlements (Logbook, release 0.11.0). There is no way to 
   - Deviations: Home card without the illustration and "Siguiente" tab, progress = registered/total; "kg" suffix at the field edge; split caption under the bar; calibre placeholder; "Entendido" also closes the form; validation shows the generic mapped message.
   - Temporary wiring in `AppNavHost`: `onSettled`/`onQueued` pop to Home, `onViewReceipt` opens the Logbook.
 
+- T4 done in `a01d353` (P73 closed/offline receipt, `CampaignClosedRoute`) and `90f2264` (edit pending before sync). ~1150 lines incl. ~310 tests; 16 new tests. Parent check on the final tree: `./gradlew testDebugUnitTest assembleDebug` green, 390 tests, 0 failures. Writer: `lintDebug` no errors (warnings not counted).
+  - States: Loading, Closed, Pending (failed flag), Conflict, Missing. CONFLICT wins over a cached settlement, which wins over PENDING/FAILED. Pending switches to Closed live when the sync lands.
+  - Fallbacks: no `receiptNumber` → number pill hidden; no `weighedOn` → `settledAt` (device zone). Calibre tile from `commercialSizeGrade`, else the grade containing `commercialFruitsPerKg`; hidden when absent.
+  - Navigation: settle/queue/409 receipt open `CampaignClosedRoute` popping the form; "Listo" → Home; "Ver expediente del lote" → `PlotDetailRoute`; alternation tile → `HarvestHistoryRoute`; "Corregir los kilos" → form in edit mode (`UpdatePendingSettlementUseCase`, same key; `NotFound` → closed receipt). Logbook "Cosecha asentada" rows now open the receipt.
+  - Extras not in Figma: "Por corregir" pill and error footer for FAILED rows; Missing screen ("No encontramos este comprobante").
+- Branch total vs `52bd186` (excluding schemas): 70 files, +5343 / −26.
+
+## Follow-ups
+- Logbook does not list pending local settlements ("N en el teléfono").
+- Edit mode keeps the normal form title/button; closing it returns to Home, not P73.
+- Validation errors show the generic message, not the backend detail.
+- Device check of P70–P73 against Figma, and an end-to-end run once the backend contract (receipt, `weighedOn`, `Idempotency-Key`, 409 body) is deployed.
+- Teammate notice: `52bd186` changed the v3 schema without a migration; fixed here by `MIGRATION_3_4`.
+
 ## Next step
-T4: P73 closed (online) and offline screens, replacing the temporary callbacks; pop the form from the back stack.
+Merge into `develop` (gitflow) when the user approves.
