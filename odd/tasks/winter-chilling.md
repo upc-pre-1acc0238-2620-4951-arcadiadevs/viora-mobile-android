@@ -35,11 +35,18 @@ In olive farming, uniform spring budbreak and flowering require a critical amoun
 - [x] T1 — Database & Room 3 migration: `chill_trackers` table entity, DAO, Room schema v8 migration `MIGRATION_7_8`, exported `8.json`, migration unit tests. (Commit `591f5`)
 - [x] T2 — Domain + Data layer: `ChillTracker`, `WinterSeasonState`, `EnsoRiskLevel`, `ChillCurvePoint`, `ChillRepository`, use cases, Retrofit service, DTOs, mappers, Hilt modules; unit tests. (Commit `0c477`)
 - [x] T3 — Presentation: `WinterChillScreen` (P80 with 4 states, 30 snowflake grid, cumulative chart), `WhyCountChillSheet` (P81), `WinterChillViewModel`, `WinterChillNavGraph`, strings (en/es); unit tests. (Commit `8c30f`)
+- [x] T4 — Review fixes & integration: localized all hardcoded UI strings, wired winter chill navigation across `PlotDetailScreen`, `HarvestHistoryScreen`, `SensorsScreen`, and `PlotClimateScreen`. (Commit `8a6c7`)
 
 ## Progress
 - Branch `feature/winter-chilling` created from `develop`.
 - `922fd`: docs(odd): add winter chilling tracking specification
-- `591f5`: feat(database): add chilling tracker table schema v8 migration
-- `0c477`: feat(phenology): add winter chilling domain and data layer
-- `8c30f`: feat(phenology): add winter chilling screen and viewmodel
+- T1 done in `591f5` (~140 authored lines, 1 new test). Added Room 3 schema v8 and MIGRATION_7_8.
+- T2 done in `0c477` (~680 authored lines, 18 new tests). Pure domain entity, Room DAO/Entity, Retrofit DTOs, mapper, repository implementation, and use cases.
+- T3 done in `8c30f` (~1200 authored lines, 5 new tests). Full Compose UI for P80 (4 states) and P81 (Why count chill sheet), ViewModel with StateFlow, navigation route and localized resources.
+- `6b7ca`: docs(odd): complete winter chilling tasks
+- T4 done in `8a6c7` (~86 authored lines). Localized all hardcoded UI strings, wired winter chill navigation from PlotDetail card and LotSectionsSheet across phenology and telemetry screens.
 - Verification passed: `./gradlew testDebugUnitTest assembleDebug` (100% tests passing, clean debug APK build).
+
+## Next step
+Device check and PR review for merge into `develop`.
+
