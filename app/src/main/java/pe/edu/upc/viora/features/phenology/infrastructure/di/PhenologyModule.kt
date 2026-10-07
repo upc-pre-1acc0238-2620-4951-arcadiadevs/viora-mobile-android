@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import pe.edu.upc.viora.core.database.AppDatabase
 import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexDao
+import pe.edu.upc.viora.features.phenology.infrastructure.local.ChillTrackerDao
 import pe.edu.upc.viora.features.phenology.infrastructure.local.HarvestRecordDao
 import pe.edu.upc.viora.features.phenology.infrastructure.remote.PhenologyService
 import retrofit2.Retrofit
@@ -25,4 +26,7 @@ object PhenologyModule {
 
     @Provides
     fun provideBearingIndexDao(database: AppDatabase): BearingIndexDao = database.bearingIndexDao()
+
+    @Provides
+    fun provideChillTrackerDao(database: AppDatabase): ChillTrackerDao = database.chillTrackerDao()
 }
