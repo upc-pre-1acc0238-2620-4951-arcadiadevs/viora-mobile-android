@@ -33,9 +33,11 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
 
+import androidx.compose.ui.graphics.Color
+
 /**
- * 30-snowflake grid representing the 30 required Erez chill portions.
- * Adapts colors to the winter season state (normal, halted, completed).
+ * 30-snowflake grid (3 rows of 10) representing the 30 required Erez chill portions.
+ * Directly embedded in the Hero card as designed in Figma P80.
  */
 @Composable
 fun ChillSnowflakeGrid(
@@ -43,50 +45,17 @@ fun ChillSnowflakeGrid(
     threshold: Int = 30,
     state: WinterSeasonState = WinterSeasonState.ACCUMULATING,
     modifier: Modifier = Modifier,
+    activeColor: Color = Color.White,
+    inactiveColor: Color = Color.White.copy(alpha = 0.25f),
 ) {
-    val activeColor = when (state) {
-        WinterSeasonState.CHILL_HALTED -> Terracotta500
-        WinterSeasonState.COMPLETED -> Green800
-        else -> Harvest800
-    }
-
-    val activeBg = when (state) {
-        WinterSeasonState.CHILL_HALTED -> Terracotta100
-        WinterSeasonState.COMPLETED -> Harvest100
-        else -> Harvest100
-    }
+    val totalSnowflakes = threshold.coerceAtLeast(30)
+    val columnsPerRow = 10
+    val rows = (totalSnowflakes + columnsPerRow - 1) / columnsPerRow
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(Neutral0)
-            .border(1.dp, Neutral200, RoundedCornerShape(20.dp))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.winter_chill_grid_title),
-                style = MaterialTheme.typography.titleMedium,
-                color = Neutral700,
-            )
-            Text(
-                text = stringResource(R.string.winter_chill_grid_counter, accumulated, threshold),
-                style = MaterialTheme.typography.labelLarge,
-                color = activeColor,
-            )
-        }
-
-        // 3 rows of 10 snowflakes = 30 portions
-        val totalSnowflakes = threshold.coerceAtLeast(30)
-        val columnsPerRow = 10
-        val rows = (totalSnowflakes + columnsPerRow - 1) / columnsPerRow
-
         for (rowIndex in 0 until rows) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -97,28 +66,16 @@ fun ChillSnowflakeGrid(
                     val portionIndex = rowIndex * columnsPerRow + colIndex
                     if (portionIndex < totalSnowflakes) {
                         val isFilled = portionIndex < accumulated
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(if (isFilled) activeBg else Neutral0)
-                                .border(
-                                    width = 1.dp,
-                                    color = if (isFilled) activeColor.copy(alpha = 0.3f) else Neutral200,
-                                    shape = CircleShape,
-                                ),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_ac_unit),
-                                contentDescription = null,
-                                tint = if (isFilled) activeColor else Neutral300,
-                                modifier = Modifier.size(16.dp),
-                            )
-                        }
+                        Icon(
+                            painter = painterResource(R.drawable.ic_ac_unit),
+                            contentDescription = null,
+                            tint = if (isFilled) activeColor else inactiveColor,
+                            modifier = Modifier.size(20.dp),
+                        )
                     }
                 }
             }
         }
     }
 }
+
