@@ -845,4 +845,40 @@
     <string name="settle_receipt_correct">Correct the kilos</string>
     <string name="settle_receipt_missing_title">We could not find this receipt</string>
     <string name="settle_receipt_missing_body">Check your connection and open it again from the Logbook.</string>
+
+    <!-- Winter Chilling (US22) -->
+    <string name="winter_chill_title">Winter chill</string>
+    <string name="winter_chill_subtitle">Winter chill · %1$s</string>
+    <string name="winter_chill_portions_hero">%1$d of %2$d</string>
+    <string name="winter_chill_portions_caption_accumulating">chill portions. %1$d remaining for even bloom.</string>
+    <string name="winter_chill_portions_caption_halted">Chill halted. Temperatures above 24 °C destroy fixating portions.</string>
+    <string name="winter_chill_portions_caption_completed">Stimulus completed. 30 of 30 portions reached. Even budbreak assured.</string>
+    <string name="winter_chill_portions_caption_off_season">Off-season. Winter chilling is evaluated between June 1 and August 31.</string>
+    <string name="winter_chill_status_accumulating">Accumulating</string>
+    <string name="winter_chill_status_halted">Chill halted</string>
+    <string name="winter_chill_status_completed">Stimulus completed</string>
+    <string name="winter_chill_status_off_season">Off-season</string>
+    <string name="winter_chill_enso_title">Coastal El Niño</string>
+    <string name="winter_chill_enso_neutral">Neutral</string>
+    <string name="winter_chill_enso_active">Active (+1.8 °C sea)</string>
+    <string name="winter_chill_warm_days_title">Winter heat</string>
+    <string name="winter_chill_warm_days_value">%1$d days > 24 °C</string>
+    <string name="winter_chill_projection_title">Projection</string>
+    <string name="winter_chill_projection_vs_last">vs last winter (%1$s)</string>
+    <string name="winter_chill_curve_title">Cumulative accumulation (Erez)</string>
+    <string name="winter_chill_curve_legend_this_year">This winter</string>
+    <string name="winter_chill_curve_legend_last_year">Last winter</string>
+    <string name="winter_chill_curve_legend_threshold">Threshold 30</string>
+    <string name="winter_chill_why_button">Why count chill?</string>
+    <string name="winter_chill_why_sheet_title">Why count chill?</string>
+    <string name="winter_chill_why_sheet_intro">Olive trees need to accumulate chilling during winter dormancy (June 1 to August 31) to induce uniform floral buds in spring.</string>
+    <string name="winter_chill_why_sheet_erez_title">Erez dynamic model</string>
+    <string name="winter_chill_why_sheet_erez_formula">8 °C night + 18 °C day = +1 portion</string>
+    <string name="winter_chill_why_sheet_erez_explanation">Unlike simple chill hours, Erez\'s dynamic model has two stages: chilling temperatures (3–9 °C) form an intermediate product, and moderate temperatures fixate the portion. Temperatures above 24 °C destroy the accumulated precursor.</string>
+    <string name="winter_chill_why_sheet_variety_title">Sevillana &amp; Criolla varieties</string>
+    <string name="winter_chill_why_sheet_variety_text">In the southern Peruvian coast (Tacna, Moquegua, Arequipa), these varieties require a minimum of 30 portions for synchronized bloom without blind buds.</string>
+    <string name="winter_chill_why_sheet_close">Got it</string>
+    <string name="winter_chill_updated">Updated %1$s</string>
+    <string name="winter_chill_timeline">1 Jun – 31 Aug · rest period towards budbreak</string>
+    <string name="winter_chill_empty_state">No chilling data available for this plot.</string>
 </resources>
