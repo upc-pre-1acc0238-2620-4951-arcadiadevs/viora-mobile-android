@@ -89,6 +89,9 @@ fun NavGraphBuilder.plotScreens(navController: NavController) {
             onHarvestHistory = { plotName ->
                 navController.navigate(HarvestHistoryRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
             },
+            onWinterChill = { plotName ->
+                navController.navigate(WinterChillRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
+            },
         )
     }
     composable<EditPlotRoute> {

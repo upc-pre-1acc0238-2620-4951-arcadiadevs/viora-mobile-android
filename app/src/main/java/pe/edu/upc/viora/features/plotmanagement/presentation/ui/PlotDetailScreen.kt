@@ -105,6 +105,7 @@ fun PlotDetailScreen(
     onAdjustOutline: () -> Unit,
     onSensors: () -> Unit = {},
     onHarvestHistory: (plotName: String) -> Unit = {},
+    onWinterChill: (plotName: String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: PlotDetailViewModel = hiltViewModel(),
 ) {
@@ -119,6 +120,7 @@ fun PlotDetailScreen(
         onAdjustOutline = onAdjustOutline,
         onSensors = onSensors,
         onHarvestHistory = onHarvestHistory,
+        onWinterChill = onWinterChill,
         archiveState = archiveState,
         onArchive = viewModel::archive,
         onDismissArchiveFailure = viewModel::dismissArchiveFailure,
@@ -135,6 +137,7 @@ fun PlotDetailContent(
     onAdjustOutline: () -> Unit = {},
     onSensors: () -> Unit = {},
     onHarvestHistory: (plotName: String) -> Unit = {},
+    onWinterChill: (plotName: String) -> Unit = {},
     archiveState: ArchiveState = ArchiveState.Idle,
     onArchive: () -> Unit = {},
     onDismissArchiveFailure: () -> Unit = {},
@@ -152,6 +155,7 @@ fun PlotDetailContent(
             onAdjustOutline = onAdjustOutline,
             onSensors = onSensors,
             onHarvestHistory = onHarvestHistory,
+            onWinterChill = onWinterChill,
             activeHectares = state.activeHectares,
             harvest = state.harvest,
             archiveState = archiveState,
@@ -171,6 +175,7 @@ private fun PlotDetailBody(
     onAdjustOutline: () -> Unit,
     onSensors: () -> Unit,
     onHarvestHistory: (plotName: String) -> Unit,
+    onWinterChill: (plotName: String) -> Unit = {},
     activeHectares: Double,
     harvest: LotHarvest?,
     archiveState: ArchiveState,
@@ -212,6 +217,7 @@ private fun PlotDetailBody(
             sheetHeight = if (exploring) loweredSheetHeight else openSheetHeight,
             harvest = harvest,
             onHarvestHistory = { onHarvestHistory(plot.name) },
+            onWinterChill = { onWinterChill(plot.name) },
             modifier = Modifier.align(Alignment.BottomCenter),
         )
         if (optionsOpen) {
@@ -320,6 +326,7 @@ private fun DetailSheet(
     sheetHeight: Dp,
     harvest: LotHarvest?,
     onHarvestHistory: () -> Unit,
+    onWinterChill: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -381,6 +388,13 @@ private fun DetailSheet(
                     subtitle = harvestSubtitle(harvest),
                     background = Harvest100,
                     onClick = onHarvestHistory,
+                )
+                LotSectionCard(
+                    icon = R.drawable.ic_ac_unit,
+                    title = stringResource(R.string.winter_chill_title),
+                    subtitle = stringResource(R.string.winter_chill_timeline),
+                    background = Harvest100,
+                    onClick = onWinterChill,
                 )
             }
         }

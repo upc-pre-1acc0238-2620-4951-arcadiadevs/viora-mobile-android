@@ -881,4 +881,13 @@
     <string name="winter_chill_updated">Updated %1$s</string>
     <string name="winter_chill_timeline">1 Jun – 31 Aug · rest period towards budbreak</string>
     <string name="winter_chill_empty_state">No chilling data available for this plot.</string>
+    <string name="winter_chill_grid_title">Portion progress</string>
+    <string name="winter_chill_grid_counter">%1$d / %2$d</string>
+    <string name="winter_chill_why_eyebrow">PHYSIOLOGY &amp; EREZ MODEL</string>
+    <string name="winter_chill_curve_threshold_label">Threshold: %1$d</string>
+    <string name="winter_chill_month_jun">Jun</string>
+    <string name="winter_chill_month_jul">Jul</string>
+    <string name="winter_chill_month_aug">Aug</string>
+    <string name="winter_chill_month_aug_end">31 Aug</string>
+    <string name="winter_chill_prev_winter_default_date">5 Aug</string>
 </resources>

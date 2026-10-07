@@ -84,7 +84,7 @@ fun WhyCountChillSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = "FISIOLOGÍA Y MODELO DE EREZ",
+                text = stringResource(R.string.winter_chill_why_eyebrow),
                 style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.88.sp),
                 color = Neutral600,
             )

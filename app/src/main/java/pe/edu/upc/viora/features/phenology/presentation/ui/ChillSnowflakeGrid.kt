@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -70,12 +71,12 @@ fun ChillSnowflakeGrid(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Progreso por porción",
+                text = stringResource(R.string.winter_chill_grid_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = Neutral700,
             )
             Text(
-                text = "$accumulated / $threshold",
+                text = stringResource(R.string.winter_chill_grid_counter, accumulated, threshold),
                 style = MaterialTheme.typography.labelLarge,
                 color = activeColor,
             )

@@ -333,7 +333,8 @@ private fun MetricsCardsRow(state: WinterChillUiState.Content) {
 
         // Card 3: Proyección
         val projDateStr = state.projectedCompletionDate?.let { formatDateShort(it) } ?: "—"
-        val prevDateStr = state.previousWinterCompletionDate?.let { formatDateShort(it) } ?: "5 ago"
+        val prevDateStr = state.previousWinterCompletionDate?.let { formatDateShort(it) }
+            ?: stringResource(R.string.winter_chill_prev_winter_default_date)
         MetricCard(
             title = stringResource(R.string.winter_chill_projection_title),
             value = projDateStr,
@@ -470,13 +471,6 @@ private fun ErrorBody(
     }
 }
 
-private fun formatDateShort(date: LocalDate): String {
-    val monthName = when (date.monthValue) {
-        6 -> "jun"
-        7 -> "jul"
-        8 -> "ago"
-        9 -> "sep"
-        else -> date.month.name.take(3).lowercase()
-    }
-    return "${date.dayOfMonth} $monthName"
-}
+private fun formatDateShort(date: LocalDate, locale: Locale = Locale.getDefault()): String =
+    DateTimeFormatter.ofPattern("d MMM", locale).format(date).replace(".", "")
+

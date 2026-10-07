@@ -883,4 +883,13 @@
     <string name="winter_chill_updated">Actualizado %1$s</string>
     <string name="winter_chill_timeline">1 jun – 31 ago · reposo invernal hacia brotación</string>
     <string name="winter_chill_empty_state">Sin datos de frío para este cuartel.</string>
+    <string name="winter_chill_grid_title">Progreso por porción</string>
+    <string name="winter_chill_grid_counter">%1$d / %2$d</string>
+    <string name="winter_chill_why_eyebrow">FISIOLOGÍA Y MODELO DE EREZ</string>
+    <string name="winter_chill_curve_threshold_label">Umbral: %1$d</string>
+    <string name="winter_chill_month_jun">Jun</string>
+    <string name="winter_chill_month_jul">Jul</string>
+    <string name="winter_chill_month_aug">Ago</string>
+    <string name="winter_chill_month_aug_end">31 Ago</string>
+    <string name="winter_chill_prev_winter_default_date">5 ago</string>
 </resources>

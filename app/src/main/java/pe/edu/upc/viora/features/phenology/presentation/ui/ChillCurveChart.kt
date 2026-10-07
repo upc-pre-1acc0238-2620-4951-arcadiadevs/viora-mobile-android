@@ -86,11 +86,16 @@ fun ChillCurveChart(
                 color = Neutral900,
             )
             Text(
-                text = "Umbral: ${threshold.toInt()}",
+                text = stringResource(R.string.winter_chill_curve_threshold_label, threshold.toInt()),
                 style = MaterialTheme.typography.labelMedium,
                 color = Neutral600,
             )
         }
+
+        val junLabel = stringResource(R.string.winter_chill_month_jun)
+        val julLabel = stringResource(R.string.winter_chill_month_jul)
+        val augLabel = stringResource(R.string.winter_chill_month_aug)
+        val augEndLabel = stringResource(R.string.winter_chill_month_aug_end)
 
         Canvas(
             modifier = Modifier
@@ -134,10 +139,10 @@ fun ChillCurveChart(
 
             // X-axis month labels (Jun, Jul, Ago)
             val months = listOf(
-                Pair(0f, "Jun"),
-                Pair(30f, "Jul"),
-                Pair(61f, "Ago"),
-                Pair(92f, "31 Ago"),
+                Pair(0f, junLabel),
+                Pair(30f, julLabel),
+                Pair(61f, augLabel),
+                Pair(92f, augEndLabel),
             )
             months.forEach { (day, label) ->
                 val x = xToPx(day)
