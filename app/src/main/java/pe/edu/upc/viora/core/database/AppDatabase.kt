@@ -18,6 +18,8 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeEntity
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleEntity
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.ForecastDayDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.ForecastDayEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReadingDao
@@ -48,8 +50,9 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
         ForecastDayEntity::class,
         PendingSettlementEntity::class,
         DraftTreeSampleEntity::class,
+        ThinningEventEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -64,4 +67,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun forecastDayDao(): ForecastDayDao
     abstract fun pendingSettlementDao(): PendingSettlementDao
     abstract fun draftTreeSampleDao(): DraftTreeSampleDao
+    abstract fun thinningEventDao(): ThinningEventDao
 }

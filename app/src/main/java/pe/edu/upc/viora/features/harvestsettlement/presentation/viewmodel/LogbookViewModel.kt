@@ -9,21 +9,25 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
-import pe.edu.upc.viora.core.domain.fold
+import pe.edu.upc.viora.core.domain.onSuccess
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.GetPlotSamplingOverviewUseCase
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.GetThinningEventsUseCase
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObserveActiveSamplingUseCase
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObservePendingDraftSamplesCountUseCase
+import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObserveThinningEventsUseCase
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningEvent
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.SamplingStatus
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.ThinningEventType
@@ -58,6 +62,7 @@ class LogbookViewModel @Inject constructor(
     private val getThinningEvents: GetThinningEventsUseCase? = null,
     observeActiveSampling: ObserveActiveSamplingUseCase? = null,
     observePendingDraftSamplesCount: ObservePendingDraftSamplesCountUseCase? = null,
+    observeThinningEvents: ObserveThinningEventsUseCase? = null,
 ) : ViewModel() {
 
     private data class RefreshState(
@@ -70,18 +75,20 @@ class LogbookViewModel @Inject constructor(
         val refresh: RefreshState = RefreshState(),
         val filter: LogbookFilter = LogbookFilter.ALL,
         val activeSampling: ActiveSamplingUiModel? = null,
-        val thinningEvents: List<ThinningEvent> = emptyList(),
+        val thinningEvents: List<ThinningEvent>? = null,
         val pendingCount: Int = 0,
     )
 
     private val refreshState = MutableStateFlow(RefreshState())
     private val filter = MutableStateFlow(LogbookFilter.ALL)
     private val activeSamplingState = MutableStateFlow<ActiveSamplingUiModel?>(null)
-    private val thinningEventsState = MutableStateFlow<List<ThinningEvent>>(emptyList())
+
+    /** Read from the Room cache, so the timeline is drawn before the network answers. */
+    private val thinningEvents: Flow<List<ThinningEvent>?> = observeThinningEvents?.invoke() ?: flowOf(null)
 
     private val draftSamplingFlow = combine(
-        observeActiveSampling?.invoke() ?: kotlinx.coroutines.flow.flowOf(null),
-        observePendingDraftSamplesCount?.invoke() ?: kotlinx.coroutines.flow.flowOf(0),
+        observeActiveSampling?.invoke() ?: flowOf(null),
+        observePendingDraftSamplesCount?.invoke() ?: flowOf(0),
     ) { activeDraft, pendingCount ->
         activeDraft to pendingCount
     }
@@ -90,11 +97,11 @@ class LogbookViewModel @Inject constructor(
         refreshState,
         filter,
         activeSamplingState,
-        thinningEventsState,
+        thinningEvents,
         draftSamplingFlow,
     ) { refresh, selectedFilter, activeServer, events, draftInfo ->
         val (activeDraft, pendingCount) = draftInfo
-        val completedPlotIds = events
+        val completedPlotIds = events.orEmpty()
             .filter { it.eventType == ThinningEventType.SAMPLING_COMPLETED }
             .map { it.plotId }
             .toSet()
@@ -128,12 +135,13 @@ class LogbookViewModel @Inject constructor(
         localState,
     ) { settlements, plots, lastPlotRefresh, local ->
         val (refresh, selected, activeSampling, thinningEvents, pendingCount) = local
-        if (settlements.isEmpty() && thinningEvents.isEmpty() && activeSampling == null && !refresh.hasFinishedOnce) {
+        // A timeline downloaded before (even an empty one) is drawn at once; only a first visit waits.
+        if (settlements.isEmpty() && thinningEvents == null && activeSampling == null && !refresh.hasFinishedOnce) {
             LogbookUiState.Loading
         } else {
             LogbookUiState.Content(
                 filter = selected,
-                groups = groupsFor(selected, settlements, plots, thinningEvents),
+                groups = groupsFor(selected, settlements, plots, thinningEvents.orEmpty()),
                 activeSampling = activeSampling,
                 pendingLocalCount = pendingCount,
                 refreshError = refresh.error,
@@ -166,50 +174,46 @@ class LogbookViewModel @Inject constructor(
         }
     }
 
-    /** The plot ids come from the cache; with nothing cached yet the plots are downloaded first. */
-    private suspend fun refreshAll(): AppResult<Unit> {
+    /**
+     * The three feeds of the logbook are independent, so they are downloaded at the same time (one
+     * after the other they took ~9 s on Render). The plot ids come from the cache; with nothing
+     * cached yet the plots are downloaded first, and only the settlements wait for them.
+     */
+    private suspend fun refreshAll(): AppResult<Unit> = coroutineScope {
+        launch { refreshActiveSampling() }
+        // The answer fills the Room cache that [thinningEvents] observes.
+        launch { getThinningEvents?.invoke(campaignYear = null, plotId = null) }
+        refreshSettlementsOfCachedPlots()
+    }
+
+    private suspend fun refreshSettlementsOfCachedPlots(): AppResult<Unit> {
         var plots = observePlots().first()
         if (plots.isEmpty()) {
             val plotsResult = refreshPlots()
             if (plotsResult is AppResult.Failure) return plotsResult
             plots = observePlots().first()
         }
-
-        // Query active sampling in progress from infrastructure
-        getPlotSamplingOverview?.let { useCase ->
-            useCase(campaignYear = null).fold(
-                onSuccess = { overviews ->
-                    val inProgress = overviews.firstOrNull {
-                        it.samplingStatus == SamplingStatus.IN_PROGRESS &&
-                            it.treesNeeded > 0 &&
-                            it.sampledTreesCount < 5
-                    }
-                    val active = inProgress?.let {
-                        val total = if (it.treesNeeded > 0) it.sampledTreesCount + it.treesNeeded else it.sampledTreesCount
-                        ActiveSamplingUiModel(
-                            plotId = it.plotId,
-                            plotName = it.plotName,
-                            completedTrees = it.sampledTreesCount,
-                            targetTrees = total.coerceAtLeast(1),
-                        )
-                    }
-                    activeSamplingState.value = active
-                },
-                onFailure = { /* keep current state */ },
-            )
-        }
-
-        // Query real thinning and sampling timeline events
-        getThinningEvents?.let { useCase ->
-            useCase(campaignYear = null, plotId = null).fold(
-                onSuccess = { events ->
-                    thinningEventsState.value = events
-                },
-                onFailure = { /* keep current state */ },
-            )
-        }
-
         return refreshSettlements(plots.map { it.id.value })
+    }
+
+    /** The server's sampling in progress, shown when the phone has no draft of its own. */
+    private suspend fun refreshActiveSampling() {
+        getPlotSamplingOverview?.invoke(campaignYear = null)?.onSuccess { overviews ->
+            val inProgress = overviews.firstOrNull {
+                it.samplingStatus == SamplingStatus.IN_PROGRESS &&
+                    it.treesNeeded > 0 &&
+                    it.sampledTreesCount < 5
+            }
+            activeSamplingState.value = inProgress?.let {
+                val total = if (it.treesNeeded > 0) it.sampledTreesCount + it.treesNeeded else it.sampledTreesCount
+                ActiveSamplingUiModel(
+                    plotId = it.plotId,
+                    plotName = it.plotName,
+                    completedTrees = it.sampledTreesCount,
+                    targetTrees = total.coerceAtLeast(1),
+                )
+            }
+        }
     }
 
     private fun groupsFor(

@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import pe.edu.upc.viora.core.database.AppDatabase
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventDao
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.ThinningService
 import retrofit2.Retrofit
 
@@ -22,4 +23,8 @@ object ThinningModule {
     @Provides
     fun provideDraftTreeSampleDao(database: AppDatabase): DraftTreeSampleDao =
         database.draftTreeSampleDao()
+
+    @Provides
+    fun provideThinningEventDao(database: AppDatabase): ThinningEventDao =
+        database.thinningEventDao()
 }

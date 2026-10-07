@@ -1,8 +1,12 @@
 package pe.edu.upc.viora.features.croploadregulation.infrastructure.repository
 
+import java.time.Clock
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map as flowMap
+import pe.edu.upc.viora.core.database.CacheMetadataDao
+import pe.edu.upc.viora.core.database.CacheMetadataEntity
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.domain.map
 import pe.edu.upc.viora.core.network.ApiCaller
@@ -17,6 +21,8 @@ import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toRequ
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.SamplingStatus
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.ThinningEventType
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toEntity
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.SamplingBatchRequestDto
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.ThinningService
 
@@ -24,6 +30,9 @@ class ThinningRepositoryImpl @Inject constructor(
     private val service: ThinningService,
     private val apiCaller: ApiCaller,
     private val draftDao: DraftTreeSampleDao,
+    private val eventDao: ThinningEventDao,
+    private val cacheMetadataDao: CacheMetadataDao,
+    private val clock: Clock,
 ) : ThinningRepository {
 
     override suspend fun getPlotSamplingOverview(campaignYear: Int?): AppResult<List<PlotSamplingOverview>> =
@@ -83,6 +92,11 @@ class ThinningRepositoryImpl @Inject constructor(
     ): AppResult<List<ThinningEvent>> =
         apiCaller.call { service.getThinningEvents(campaignYear, plotId) }
             .map { envelope ->
+                // Only the unfiltered feed replaces the cache; a filtered answer is a subset of it.
+                if (campaignYear == null && plotId == null) {
+                    eventDao.replaceAll(envelope.events.map { it.toEntity() })
+                    cacheMetadataDao.upsert(CacheMetadataEntity(EVENTS_CACHE_KEY, clock.millis()))
+                }
                 val events = envelope.events.map { it.toDomain() }
                 events.filter { it.eventType == ThinningEventType.SAMPLING_COMPLETED }
                     .forEach { completed ->
@@ -90,6 +104,11 @@ class ThinningRepositoryImpl @Inject constructor(
                     }
                 events
             }
+
+    override fun observeThinningEvents(): Flow<List<ThinningEvent>?> =
+        combine(eventDao.observeAll(), cacheMetadataDao.observeFetchedAt(EVENTS_CACHE_KEY)) { rows, fetchedAt ->
+            if (fetchedAt == null) null else rows.map { it.toDomain() }
+        }
 
     override fun observeActiveSampling(): Flow<PlotSamplingOverview?> =
         draftDao.observeAllSamples().flowMap { drafts ->
@@ -120,4 +139,8 @@ class ThinningRepositoryImpl @Inject constructor(
 
     override fun observePendingDraftSamplesCount(): Flow<Int> =
         draftDao.observePendingDraftSamplesCount()
+
+    private companion object {
+        const val EVENTS_CACHE_KEY = "thinning_events"
+    }
 }
