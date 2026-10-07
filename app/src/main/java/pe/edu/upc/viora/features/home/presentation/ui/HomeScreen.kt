@@ -68,7 +68,7 @@ fun HomeScreen(
     onRegisterPlot: () -> Unit,
     onOpenPlot: (PlotId) -> Unit,
     onOpenPlots: () -> Unit,
-    onOpenAlerts: (plotId: String?) -> Unit,
+    onOpenAlerts: () -> Unit,
     onOpenAlternation: (plotId: PlotId, plotName: String) -> Unit,
     modifier: Modifier = Modifier,
     onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
@@ -102,7 +102,7 @@ fun HomeScreenContent(
     modifier: Modifier = Modifier,
     onOpenPlot: (PlotId) -> Unit = {},
     onOpenPlots: () -> Unit = {},
-    onOpenAlerts: (plotId: String?) -> Unit = {},
+    onOpenAlerts: () -> Unit = {},
     onOpenAlternation: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenSoilMoisture: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
@@ -141,7 +141,7 @@ fun HomeScreenContent(
                 date = today,
                 isOffline = state.isOffline,
                 lastRefresh = state.lastRefresh,
-                onOpenAlerts = { onOpenAlerts((state as? HomeUiState.Content)?.focusedPlot?.id?.value) },
+                onOpenAlerts = onOpenAlerts,
                 hasUnreadAlerts = state.activeAlertsCount > 0,
                 modifier = Modifier.padding(horizontal = ScreenPadding),
             )
@@ -179,7 +179,7 @@ fun HomeScreenContent(
                     HomeTodayInFieldSection(
                         plotId = state.focusedPlot?.id?.value,
                         activeAlertsCount = state.activeAlertsCount,
-                        onOpenAlerts = { onOpenAlerts(state.focusedPlot?.id?.value) },
+                        onOpenAlerts = onOpenAlerts,
                         onOpenWeatherForecast = {
                             state.focusedPlot?.let { onOpenWeatherForecast(it.id, it.name) }
                         },
