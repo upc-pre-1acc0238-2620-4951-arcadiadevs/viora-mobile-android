@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -45,6 +46,8 @@ import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlots
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RefreshPlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
+import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 
 /**
  * Logbook (P50): shows settled harvest campaigns, field samplings, and thinning events.
@@ -63,7 +66,13 @@ class LogbookViewModel @Inject constructor(
     observeActiveSampling: ObserveActiveSamplingUseCase? = null,
     observePendingDraftSamplesCount: ObservePendingDraftSamplesCountUseCase? = null,
     observeThinningEvents: ObserveThinningEventsUseCase? = null,
+    observeIncidents: ObserveIncidentsUseCase? = null,
 ) : ViewModel() {
+
+    /** The bell of the header carries the unread dot while any plot has an active alert (as on the Home). */
+    val hasActiveAlerts: StateFlow<Boolean> = (observeIncidents?.invoke(null) ?: flowOf(emptyList()))
+        .map { incidents -> incidents.any { it.status != IncidentStatus.NORMALIZED } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), false)
 
     private data class RefreshState(
         val isRefreshing: Boolean = false,

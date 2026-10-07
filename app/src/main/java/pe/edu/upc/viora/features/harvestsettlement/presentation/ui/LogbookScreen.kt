@@ -41,7 +41,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Instant
 import java.time.LocalDate
-import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
@@ -61,6 +60,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.presentation.formatDecimal
+import pe.edu.upc.viora.core.presentation.formatWhole
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.component.ActiveSamplingCard
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementStatus
@@ -87,14 +88,18 @@ fun LogbookScreen(
     modifier: Modifier = Modifier,
     viewModel: LogbookViewModel = hiltViewModel(),
     onContinueSampling: (plotId: String, plotName: String) -> Unit = { _, _ -> },
+    onOpenAlerts: () -> Unit = {},
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
+    val hasActiveAlerts = viewModel.hasActiveAlerts.collectAsStateWithLifecycle().value
     LogbookContent(
         state = state,
         onSelectFilter = viewModel::selectFilter,
         onRefresh = viewModel::refresh,
         onOpenSettlement = onOpenSettlement,
         onContinueSampling = onContinueSampling,
+        onOpenAlerts = onOpenAlerts,
+        hasActiveAlerts = hasActiveAlerts,
         modifier = modifier,
     )
 }
@@ -109,6 +114,8 @@ fun LogbookContent(
     modifier: Modifier = Modifier,
     today: LocalDate = LocalDate.now(),
     onContinueSampling: (plotId: String, plotName: String) -> Unit = { _, _ -> },
+    onOpenAlerts: () -> Unit = {},
+    hasActiveAlerts: Boolean = false,
 ) {
     val systemBars = WindowInsets.systemBars.asPaddingValues()
     val content = state as? LogbookUiState.Content
@@ -130,7 +137,8 @@ fun LogbookContent(
                 date = today,
                 isOffline = content?.offline == true,
                 lastRefresh = content?.lastPlotRefresh,
-                onOpenAlerts = {},
+                onOpenAlerts = onOpenAlerts,
+                hasUnreadAlerts = hasActiveAlerts,
                 modifier = Modifier.padding(horizontal = ScreenPadding),
             )
             Spacer(Modifier.height(28.dp))
@@ -356,7 +364,7 @@ private fun SettledHarvestRow(entry: SettledHarvestEntry, onClick: () -> Unit, m
 private fun SamplingEventRow(entry: SettledHarvestEntry, modifier: Modifier = Modifier) {
     val plot = entry.plotName ?: stringResource(R.string.logbook_unknown_plot)
     val trees = entry.evaluatedTreesCount ?: 0
-    val mean = String.format(Locale.ROOT, "%.2f", entry.meanFruitsPerShoot ?: 0.0).replace('.', ',')
+    val mean = formatDecimal(entry.meanFruitsPerShoot ?: 0.0, 2)
     val details = stringResource(R.string.logbook_sampling_completed_desc, plot, trees, mean)
 
     Row(
@@ -408,7 +416,7 @@ private fun SamplingEventRow(entry: SettledHarvestEntry, modifier: Modifier = Mo
 @Composable
 private fun ThinningEventRow(entry: SettledHarvestEntry, modifier: Modifier = Modifier) {
     val plot = entry.plotName ?: stringResource(R.string.logbook_unknown_plot)
-    val percent = String.format(Locale.ROOT, "%.0f", entry.removalPercentage ?: 0.0)
+    val percent = formatWhole(entry.removalPercentage ?: 0.0)
     val timeliness = entry.timeliness ?: ""
     val details = stringResource(R.string.logbook_thinning_executed_desc, plot, percent, timeliness)
 
