@@ -4,6 +4,8 @@ import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementDao
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementEntity
+import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.PendingSettlementDao
+import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.PendingSettlementEntity
 import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexDao
 import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexEntity
 import pe.edu.upc.viora.features.phenology.infrastructure.local.HarvestRecordDao
@@ -14,8 +16,12 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.IncidentDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.IncidentEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeEntity
-import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleEntity
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleEntity
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.ForecastDayDao
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.ForecastDayEntity
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReadingDao
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReadingEntity
 
 /**
  * The single Room database of the app. Every bounded context contributes its entities and DAOs
@@ -38,9 +44,12 @@ import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTr
         HarvestRecordEntity::class,
         BearingIndexEntity::class,
         HarvestSettlementEntity::class,
+        TelemetryReadingEntity::class,
+        ForecastDayEntity::class,
+        PendingSettlementEntity::class,
         DraftTreeSampleEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -51,5 +60,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun harvestRecordDao(): HarvestRecordDao
     abstract fun bearingIndexDao(): BearingIndexDao
     abstract fun harvestSettlementDao(): HarvestSettlementDao
+    abstract fun telemetryReadingDao(): TelemetryReadingDao
+    abstract fun forecastDayDao(): ForecastDayDao
+    abstract fun pendingSettlementDao(): PendingSettlementDao
     abstract fun draftTreeSampleDao(): DraftTreeSampleDao
 }

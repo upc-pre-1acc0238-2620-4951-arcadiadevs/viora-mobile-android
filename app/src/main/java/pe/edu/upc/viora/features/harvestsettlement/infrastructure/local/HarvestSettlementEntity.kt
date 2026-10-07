@@ -62,4 +62,12 @@ data class HarvestSettlementEntity(
     val coefficientOfVariation: Double?,
     @ColumnInfo(name = "required_consecutive_pairs")
     val requiredConsecutivePairs: Int,
+    @ColumnInfo(name = "receipt_number")
+    val receiptNumber: String? = null,
+    @ColumnInfo(name = "weighed_on")
+    val weighedOn: String? = null,
+    @ColumnInfo(name = "mill_ticket_number")
+    val millTicketNumber: String? = null,
+    @ColumnInfo(name = "commercial_size_grade")
+    val commercialSizeGrade: String? = null,
 )

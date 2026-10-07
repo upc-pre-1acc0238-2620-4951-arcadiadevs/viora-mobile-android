@@ -79,10 +79,11 @@ private val ScreenPadding = 24.dp
 
 /**
  * Logbook / "Bitácora" (Figma P50): greeting, headline, filters, active in-progress sampling
- * and settled campaigns, field samplings and thinnings grouped by period.
+ * and settled campaigns, field samplings and thinnings grouped by period. A settled row opens its P73 receipt.
  */
 @Composable
 fun LogbookScreen(
+    onOpenSettlement: (plotId: String, year: Int) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LogbookViewModel = hiltViewModel(),
     onContinueSampling: (plotId: String, plotName: String) -> Unit = { _, _ -> },
@@ -92,6 +93,7 @@ fun LogbookScreen(
         state = state,
         onSelectFilter = viewModel::selectFilter,
         onRefresh = viewModel::refresh,
+        onOpenSettlement = onOpenSettlement,
         onContinueSampling = onContinueSampling,
         modifier = modifier,
     )
@@ -103,6 +105,7 @@ fun LogbookContent(
     state: LogbookUiState,
     onSelectFilter: (LogbookFilter) -> Unit,
     onRefresh: () -> Unit,
+    onOpenSettlement: (plotId: String, year: Int) -> Unit,
     modifier: Modifier = Modifier,
     today: LocalDate = LocalDate.now(),
     onContinueSampling: (plotId: String, plotName: String) -> Unit = { _, _ -> },
@@ -200,7 +203,7 @@ fun LogbookContent(
                 if (content.isEmpty) {
                     EmptyState(content.filter)
                 } else {
-                    content.groups.forEach { Group(it) }
+                    content.groups.forEach { Group(it, onOpenSettlement) }
                 }
             }
         }
@@ -272,7 +275,7 @@ private fun EmptyState(filter: LogbookFilter) {
 }
 
 @Composable
-private fun Group(group: LogbookGroup) {
+private fun Group(group: LogbookGroup, onOpenSettlement: (plotId: String, year: Int) -> Unit) {
     Column(modifier = Modifier.padding(top = 32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         VioraSectionHeader(
             title = stringResource(group.period.titleRes()),
@@ -280,7 +283,11 @@ private fun Group(group: LogbookGroup) {
         )
         group.entries.forEach { entry ->
             when (entry.type) {
-                LogbookRowType.HARVEST -> SettledHarvestRow(entry, modifier = Modifier.padding(horizontal = ScreenPadding))
+                LogbookRowType.HARVEST -> SettledHarvestRow(
+                    entry = entry,
+                    onClick = { onOpenSettlement(entry.plotId, entry.campaignYear) },
+                    modifier = Modifier.padding(horizontal = ScreenPadding),
+                )
                 LogbookRowType.SAMPLING -> SamplingEventRow(entry, modifier = Modifier.padding(horizontal = ScreenPadding))
                 LogbookRowType.THINNING -> ThinningEventRow(entry, modifier = Modifier.padding(horizontal = ScreenPadding))
             }
@@ -290,7 +297,7 @@ private fun Group(group: LogbookGroup) {
 
 /** "Cosecha asentada" row (Figma P50 "Registro"): icon, title, "plot · campaign · kg", check. */
 @Composable
-private fun SettledHarvestRow(entry: SettledHarvestEntry, modifier: Modifier = Modifier) {
+private fun SettledHarvestRow(entry: SettledHarvestEntry, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val plot = entry.plotName ?: stringResource(R.string.logbook_unknown_plot)
     val details = stringResource(R.string.logbook_harvest_details, plot, entry.campaignYear, formatKg(entry.totalYieldKg))
     val subtitle = if (entry.status == SettlementStatus.AUDITED) {
@@ -303,6 +310,7 @@ private fun SettledHarvestRow(entry: SettledHarvestEntry, modifier: Modifier = M
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
             .background(Neutral0)
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(start = 10.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -463,8 +471,8 @@ private fun LogbookPeriod.titleRes(): Int = when (this) {
 }
 
 private val previewEntries = listOf(
-    SettledHarvestEntry("1", "La Yarada 02", 2025, 24_000.0, SettlementStatus.SETTLED, Instant.parse("2026-11-17T10:00:00Z")),
-    SettledHarvestEntry("2", null, 2024, 7_750.0, SettlementStatus.AUDITED, Instant.parse("2026-11-16T10:00:00Z")),
+    SettledHarvestEntry("1", "p1", "La Yarada 02", 2025, 24_000.0, SettlementStatus.SETTLED, Instant.parse("2026-11-17T10:00:00Z")),
+    SettledHarvestEntry("2", "p2", null, 2024, 7_750.0, SettlementStatus.AUDITED, Instant.parse("2026-11-16T10:00:00Z")),
 )
 
 @Preview(showBackground = true, backgroundColor = 0xFFF3F0EA, heightDp = 800)
@@ -481,6 +489,7 @@ private fun LogbookPreview() {
             ),
             onSelectFilter = {},
             onRefresh = {},
+            onOpenSettlement = { _, _ -> },
             today = LocalDate.of(2026, 11, 18),
         )
     }

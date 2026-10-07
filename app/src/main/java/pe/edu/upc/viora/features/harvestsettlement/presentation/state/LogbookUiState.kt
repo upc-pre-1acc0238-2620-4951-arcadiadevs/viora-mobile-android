@@ -15,6 +15,7 @@ enum class LogbookRowType { HARVEST, SAMPLING, THINNING }
 /** A logbook row (settled campaign, sampling or thinning). [plotName] is null when the plot is not in the cache. */
 data class SettledHarvestEntry(
     val id: String,
+    val plotId: String,
     val plotName: String?,
     val campaignYear: Int,
     val totalYieldKg: Double = 0.0,

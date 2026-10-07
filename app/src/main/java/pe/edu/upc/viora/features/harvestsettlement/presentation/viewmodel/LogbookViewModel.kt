@@ -226,6 +226,7 @@ class LogbookViewModel @Inject constructor(
         val harvestEntries = settlements.map {
             SettledHarvestEntry(
                 id = it.id,
+                plotId = it.plotId,
                 plotName = names[it.plotId],
                 campaignYear = it.campaignYear,
                 totalYieldKg = it.totalYieldKg,
@@ -240,6 +241,7 @@ class LogbookViewModel @Inject constructor(
             .map {
                 SettledHarvestEntry(
                     id = it.id,
+                    plotId = it.plotId,
                     plotName = it.plotName.ifBlank { names[it.plotId] },
                     campaignYear = it.campaignYear,
                     settledAt = it.occurredAt,
@@ -254,6 +256,7 @@ class LogbookViewModel @Inject constructor(
             .map {
                 SettledHarvestEntry(
                     id = it.id,
+                    plotId = it.plotId,
                     plotName = it.plotName.ifBlank { names[it.plotId] },
                     campaignYear = it.campaignYear,
                     settledAt = it.occurredAt,

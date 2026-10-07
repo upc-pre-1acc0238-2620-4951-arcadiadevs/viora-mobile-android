@@ -50,7 +50,9 @@ import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeTourViewModel
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.TelemetryDetailRoute
 import pe.edu.upc.viora.navigation.AppNavHost
 
 /** App shell: navigation host plus the producer's floating tab bar on top-level screens. */
@@ -78,6 +80,8 @@ fun VioraApp(modifier: Modifier = Modifier) {
     val showTabBar = tabs.any { currentDestination?.hasRoute(it.startRoute) == true } ||
         currentDestination?.hasRoute<PlotDetailRoute>() == true ||
         currentDestination?.hasRoute<SensorsRoute>() == true ||
+        currentDestination?.hasRoute<PlotClimateRoute>() == true ||
+        currentDestination?.hasRoute<TelemetryDetailRoute>() == true ||
         currentDestination?.hasRoute<HarvestHistoryRoute>() == true
 
     val items = tabs.map { TabBarItem(icon = it.icon, label = stringResource(it.label)) }

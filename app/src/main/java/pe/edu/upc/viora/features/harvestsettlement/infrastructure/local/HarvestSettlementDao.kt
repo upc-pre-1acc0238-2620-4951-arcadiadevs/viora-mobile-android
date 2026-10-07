@@ -12,6 +12,9 @@ interface HarvestSettlementDao {
     @Query("SELECT * FROM harvest_settlements")
     fun observeAll(): Flow<List<HarvestSettlementEntity>>
 
+    @Query("SELECT * FROM harvest_settlements WHERE plot_id = :plotId AND campaign_year = :campaignYear LIMIT 1")
+    suspend fun findByPlotAndYear(plotId: String, campaignYear: Int): HarvestSettlementEntity?
+
     @Upsert
     suspend fun upsertAll(entities: List<HarvestSettlementEntity>)
 

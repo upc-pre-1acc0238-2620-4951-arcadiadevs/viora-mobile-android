@@ -44,23 +44,66 @@ object AppMigrations {
         )
     }
 
-    /** Adds the draft tree samples cache for in-progress sampling rounds. */
+    /** Adds the hourly telemetry readings and the 7-day forecast caches of the plot climate. */
     val MIGRATION_3_4 = Migration(3, 4) { connection ->
         connection.execSQL(
-            "CREATE TABLE IF NOT EXISTS `draft_tree_samples` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, " +
-                "`plot_name` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, `tree_identifier` TEXT NOT NULL, " +
-                "`shoots_count` INTEGER NOT NULL, `fruit_set_count` INTEGER NOT NULL, " +
-                "`trunk_circumference_cm` REAL, `trunk_diameter_mm` REAL, `observed_on` TEXT NOT NULL, " +
-                "`created_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+            "CREATE TABLE IF NOT EXISTS `telemetry_readings` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, " +
+                "`observed_at_epoch_ms` INTEGER NOT NULL, `air_temperature_celsius` REAL, " +
+                "`relative_humidity_percent` REAL, `soil_moisture_30cm_percent` REAL, " +
+                "`soil_moisture_60cm_percent` REAL, PRIMARY KEY(`id`))",
         )
-    }
-
-    /** Adds the is_synced column to draft_tree_samples. */
-    val MIGRATION_4_5 = Migration(4, 5) { connection ->
         connection.execSQL(
-            "ALTER TABLE `draft_tree_samples` ADD COLUMN `is_synced` INTEGER NOT NULL DEFAULT 0",
+            "CREATE TABLE IF NOT EXISTS `forecast_days` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, " +
+                "`forecast_date` TEXT NOT NULL, `max_temperature_celsius` REAL NOT NULL, " +
+                "`min_temperature_celsius` REAL NOT NULL, `precipitation_probability_percent` REAL NOT NULL, " +
+                "`wind_speed_kmh` REAL NOT NULL, `synced_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         )
     }
 
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+    /**
+     * The statements of [MIGRATION_4_5], kept visible so a test can compare them with the exported
+     * `5.json`. The `agroclimatic_incidents` table is created here because it joined the v3 schema
+     * without a migration: installs from 0.11.0 (v3) lack it, and a 3->4->5 upgrade gets it here before
+     * Room validates the schema.
+     * `IF NOT EXISTS` keeps the migration safe for databases that already have it.
+     */
+    internal val MIGRATION_4_5_STATEMENTS = listOf(
+        "ALTER TABLE `harvest_settlements` ADD COLUMN `receipt_number` TEXT",
+        "ALTER TABLE `harvest_settlements` ADD COLUMN `weighed_on` TEXT",
+        "ALTER TABLE `harvest_settlements` ADD COLUMN `mill_ticket_number` TEXT",
+        "ALTER TABLE `harvest_settlements` ADD COLUMN `commercial_size_grade` TEXT",
+        "CREATE TABLE IF NOT EXISTS `pending_settlements` (`plot_id` TEXT NOT NULL, " +
+            "`campaign_year` INTEGER NOT NULL, `green_olives_kg` REAL NOT NULL, " +
+            "`black_olives_kg` REAL NOT NULL, `weighed_on` TEXT NOT NULL, `mill_ticket_number` TEXT, " +
+            "`commercial_fruits_per_kg` REAL, `notes` TEXT, `idempotency_key` TEXT NOT NULL, " +
+            "`status` TEXT NOT NULL, `last_error_code` TEXT, `attempt_count` INTEGER NOT NULL, " +
+            "`existing_total_yield_kg` REAL, `existing_receipt_number` TEXT, `existing_weighed_on` TEXT, " +
+            "`created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, " +
+            "PRIMARY KEY(`plot_id`, `campaign_year`))",
+        "CREATE TABLE IF NOT EXISTS `agroclimatic_incidents` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, " +
+            "`plot_name` TEXT NOT NULL, `plot_variety` TEXT NOT NULL, `type` TEXT NOT NULL, " +
+            "`severity` TEXT NOT NULL, `status` TEXT NOT NULL, `headline_key` TEXT NOT NULL, " +
+            "`metric_name` TEXT NOT NULL, `current_value` REAL NOT NULL, `threshold_value` REAL NOT NULL, " +
+            "`unit` TEXT NOT NULL, `triggered_at` TEXT NOT NULL, `stress_duration_minutes` INTEGER NOT NULL, " +
+            "`snoozed_until` TEXT, PRIMARY KEY(`id`))",
+    )
+
+    /** Adds the receipt columns to the settlements cache, the offline settlement queue and the incidents cache. */
+    val MIGRATION_4_5 = Migration(4, 5) { connection ->
+        MIGRATION_4_5_STATEMENTS.forEach { connection.execSQL(it) }
+    }
+
+    internal const val MIGRATION_5_6_SQL =
+        "CREATE TABLE IF NOT EXISTS `draft_tree_samples` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, " +
+            "`plot_name` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, `tree_identifier` TEXT NOT NULL, " +
+            "`shoots_count` INTEGER NOT NULL, `fruit_set_count` INTEGER NOT NULL, " +
+            "`trunk_circumference_cm` REAL, `trunk_diameter_mm` REAL, `observed_on` TEXT NOT NULL, " +
+            "`is_synced` INTEGER NOT NULL DEFAULT 0, `created_at` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+
+    /** Adds the draft tree samples cache for in-progress field sampling rounds. */
+    val MIGRATION_5_6 = Migration(5, 6) { connection ->
+        connection.execSQL(MIGRATION_5_6_SQL)
+    }
+
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
 }
