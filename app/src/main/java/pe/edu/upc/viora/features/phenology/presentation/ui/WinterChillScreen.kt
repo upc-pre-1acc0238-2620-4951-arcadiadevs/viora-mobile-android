@@ -47,8 +47,16 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
+import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
+import pe.edu.upc.viora.core.designsystem.theme.Green100
+import pe.edu.upc.viora.core.designsystem.theme.Green200
+import pe.edu.upc.viora.core.designsystem.theme.Green700
+import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
+import pe.edu.upc.viora.core.designsystem.theme.Harvest100
+import pe.edu.upc.viora.core.designsystem.theme.Harvest300
+import pe.edu.upc.viora.core.designsystem.theme.Harvest800
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
@@ -271,7 +279,7 @@ private fun ContentBody(
             varietyName = state.varietyName.ifBlank { stringResource(R.string.variety_sevillana) },
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(VioraTabBarDefaults.ContentBottomPadding + 8.dp))
     }
 }
 
@@ -317,7 +325,7 @@ private fun HeroSection(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(32.dp))
-            .background(Color(0xFF727272))
+            .background(Green900)
             .padding(22.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -335,7 +343,7 @@ private fun HeroSection(
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.8f)),
+                        .background(Green200),
                 )
                 Text(
                     text = eyebrowText,
@@ -399,7 +407,7 @@ private fun HeroSection(
                     fontSize = 30.sp,
                     lineHeight = 36.sp,
                 ),
-                color = Color.White.copy(alpha = 0.85f),
+                color = Green200,
                 modifier = Modifier.padding(bottom = 12.dp),
             )
         }
@@ -457,7 +465,7 @@ private fun ChillTimelineBar(
                     .fillMaxWidth(fraction = progress.coerceIn(0.05f, 1f))
                     .height(6.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFE6E6E6)),
+                    .background(Harvest300),
             )
 
             // Circle thumb
@@ -470,8 +478,8 @@ private fun ChillTimelineBar(
                     modifier = Modifier
                         .size(16.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFF9F6F1))
-                        .border(2.dp, Color(0xFFE6E6E6), CircleShape),
+                        .background(Neutral50)
+                        .border(2.dp, Harvest300, CircleShape),
                 )
             }
         }
@@ -549,7 +557,7 @@ private fun AsymmetricMetricsRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         // Left Column: Tall projection card (252dp)
-        val leftCardBg = if (state.isCompleted) Color(0xFFBFBFBF) else Color(0xFFC7C7CC)
+        val leftCardBg = if (state.isCompleted) Green100 else Green200
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -573,12 +581,12 @@ private fun AsymmetricMetricsRow(
                             fontWeight = FontWeight.Medium,
                             fontSize = 12.sp,
                         ),
-                        color = Neutral900,
+                        color = Green800,
                     )
                     Icon(
                         painter = painterResource(R.drawable.ic_calendar_month),
                         contentDescription = null,
-                        tint = Neutral900,
+                        tint = Green800,
                         modifier = Modifier.size(16.dp),
                     )
                 }
@@ -595,7 +603,7 @@ private fun AsymmetricMetricsRow(
                             fontSize = 80.sp,
                             lineHeight = 82.sp,
                         ),
-                        color = Color(0xFF727272),
+                        color = Green900,
                     )
                     Text(
                         text = monthStr,
@@ -605,7 +613,7 @@ private fun AsymmetricMetricsRow(
                             fontSize = 30.sp,
                             lineHeight = 34.sp,
                         ),
-                        color = Color(0xFF727272),
+                        color = Green900,
                         modifier = Modifier.padding(bottom = 10.dp),
                     )
                 }
@@ -618,7 +626,7 @@ private fun AsymmetricMetricsRow(
                         fontSize = 12.sp,
                         lineHeight = 16.sp,
                     ),
-                    color = Neutral900,
+                    color = Green800,
                 )
             }
 
@@ -637,7 +645,7 @@ private fun AsymmetricMetricsRow(
                         modifier = Modifier
                             .size(5.dp)
                             .clip(CircleShape)
-                            .background(Neutral700),
+                            .background(Green700),
                     )
                     Text(
                         text = bottomChipText,
@@ -646,7 +654,7 @@ private fun AsymmetricMetricsRow(
                             fontWeight = FontWeight.Medium,
                             fontSize = 11.sp,
                         ),
-                        color = Neutral900,
+                        color = Green900,
                     )
                 }
             }
@@ -736,7 +744,7 @@ private fun AsymmetricMetricsRow(
                     .fillMaxWidth()
                     .weight(1f)
                     .clip(RoundedCornerShape(28.dp))
-                    .background(Color(0xFFAEAEB2))
+                    .background(Harvest100)
                     .clickable(role = Role.Button, onClick = onEnsoClick)
                     .padding(14.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
@@ -779,7 +787,7 @@ private fun AsymmetricMetricsRow(
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 12.sp,
                         ),
-                        color = Neutral900,
+                        color = Harvest800,
                     )
                     Text(
                         text = ensoSub,
@@ -787,7 +795,7 @@ private fun AsymmetricMetricsRow(
                             fontFamily = RobotoFamily,
                             fontSize = 11.sp,
                         ),
-                        color = Neutral600,
+                        color = Harvest800,
                     )
                 }
             }

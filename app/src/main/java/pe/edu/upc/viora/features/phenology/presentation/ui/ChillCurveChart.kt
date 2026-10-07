@@ -50,6 +50,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillCurvePoint
 import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
 
@@ -84,6 +85,22 @@ fun ChillCurveChart(
             fontSize = 10.sp,
             fontWeight = FontWeight.Normal,
             color = Neutral600,
+        )
+    }
+    val thresholdLabelStyle = remember {
+        TextStyle(
+            fontFamily = RobotoFamily,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Normal,
+            color = Terracotta700,
+        )
+    }
+    val projLabelStyle = remember {
+        TextStyle(
+            fontFamily = RobotoFamily,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Normal,
+            color = Green800,
         )
     }
     val badgeTextStyle = remember {
@@ -147,7 +164,7 @@ fun ChillCurveChart(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 ChartLegendItem(
-                    color = Neutral900,
+                    color = Green800,
                     text = stringResource(R.string.winter_chill_chart_legend_current),
                     isDashed = false,
                 )
@@ -157,7 +174,7 @@ fun ChillCurveChart(
                     isDashed = true,
                 )
                 ChartLegendItem(
-                    color = Neutral500,
+                    color = Terracotta500,
                     text = stringResource(R.string.winter_chill_chart_legend_threshold, threshold.toInt()),
                     isDashed = true,
                 )
@@ -199,7 +216,7 @@ fun ChillCurveChart(
                 // Threshold line at y=30 (dashed)
                 val thresholdY = yToPx(threshold.toFloat())
                 drawLine(
-                    color = Neutral500,
+                    color = Terracotta500,
                     start = Offset(paddingLeft, thresholdY),
                     end = Offset(size.width - paddingRight, thresholdY),
                     strokeWidth = 1.5.dp.toPx(),
@@ -208,7 +225,7 @@ fun ChillCurveChart(
                 drawText(
                     textMeasurer = textMeasurer,
                     text = thresholdVarietyText,
-                    style = smallLabelStyle,
+                    style = thresholdLabelStyle,
                     topLeft = Offset(paddingLeft, thresholdY - 14.dp.toPx()),
                 )
 
@@ -278,7 +295,7 @@ fun ChillCurveChart(
                     }
                     drawPath(
                         path = areaPath,
-                        color = Neutral200.copy(alpha = 0.45f),
+                        color = Green800.copy(alpha = 0.12f),
                         style = Fill,
                     )
 
@@ -291,7 +308,7 @@ fun ChillCurveChart(
                     }
                     drawPath(
                         path = thisPath,
-                        color = Neutral900,
+                        color = Green800,
                         style = Stroke(width = 2.5.dp.toPx()),
                     )
                 }
@@ -306,24 +323,24 @@ fun ChillCurveChart(
                     }
                     drawPath(
                         path = projPath,
-                        color = Neutral900,
+                        color = Green800,
                         style = Stroke(
                             width = 2.dp.toPx(),
                             pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f),
                         ),
                     )
 
-                    // Projected finish point dot (white with black border)
+                    // Projected finish point dot (white with Green800 border)
                     val projX = xToPx(projDay)
-                    drawCircle(color = Neutral900, radius = 5.dp.toPx(), center = Offset(projX, thresholdY))
+                    drawCircle(color = Green800, radius = 5.dp.toPx(), center = Offset(projX, thresholdY))
                     drawCircle(color = Neutral0, radius = 3.dp.toPx(), center = Offset(projX, thresholdY))
 
                     // Projected date label above
-                    val projTextLayout = textMeasurer.measure(projDateLabel, smallLabelStyle)
+                    val projTextLayout = textMeasurer.measure(projDateLabel, projLabelStyle)
                     drawText(
                         textMeasurer = textMeasurer,
                         text = projDateLabel,
-                        style = smallLabelStyle,
+                        style = projLabelStyle,
                         topLeft = Offset(projX - projTextLayout.size.width / 2f, thresholdY - 14.dp.toPx()),
                     )
                 }
@@ -334,7 +351,7 @@ fun ChillCurveChart(
 
                 // Vertical line
                 drawLine(
-                    color = Neutral900.copy(alpha = 0.35f),
+                    color = Green800.copy(alpha = 0.35f),
                     start = Offset(todayX, todayY),
                     end = Offset(todayX, yToPx(0f)),
                     strokeWidth = 1.dp.toPx(),
@@ -342,7 +359,7 @@ fun ChillCurveChart(
 
                 // Outer and inner circle for today
                 drawCircle(color = Neutral0, radius = 6.dp.toPx(), center = Offset(todayX, todayY))
-                drawCircle(color = Neutral900, radius = 4.dp.toPx(), center = Offset(todayX, todayY))
+                drawCircle(color = Green800, radius = 4.dp.toPx(), center = Offset(todayX, todayY))
 
                 // Floating badge: "Hoy · 24"
                 val badgeLayout = textMeasurer.measure(todayCalloutText, badgeTextStyle)
@@ -352,7 +369,7 @@ fun ChillCurveChart(
                 val badgeTop = todayY - badgeHeight / 2f
 
                 drawRoundRect(
-                    color = Neutral900,
+                    color = Green800,
                     topLeft = Offset(badgeLeft, badgeTop),
                     size = Size(badgeWidth, badgeHeight),
                     cornerRadius = CornerRadius(100f, 100f),

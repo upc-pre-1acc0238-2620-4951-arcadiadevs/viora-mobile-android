@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
@@ -34,6 +33,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.theme.Green200
+import pe.edu.upc.viora.core.designsystem.theme.Green700
+import pe.edu.upc.viora.core.designsystem.theme.Green800
+import pe.edu.upc.viora.core.designsystem.theme.Green900
+import pe.edu.upc.viora.core.designsystem.theme.Harvest300
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral200
@@ -153,7 +158,7 @@ fun WhyCountChillSheet(
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color(0xFF606060))
+                            .background(Green800)
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                     ) {
                         Text(
@@ -176,7 +181,7 @@ fun WhyCountChillSheet(
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color(0xFFB0B0B6))
+                            .background(Harvest300)
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                     ) {
                         Text(
@@ -232,7 +237,7 @@ fun WhyCountChillSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFB0B0B8).copy(alpha = 0.5f))
+                        .background(Green200)
                         .padding(horizontal = 12.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -242,7 +247,7 @@ fun WhyCountChillSheet(
                             .width(4.dp)
                             .height(28.dp)
                             .clip(RoundedCornerShape(2.dp))
-                            .background(Color(0xFF505050)),
+                            .background(Green700),
                     )
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
@@ -278,7 +283,7 @@ fun WhyCountChillSheet(
                             .width(4.dp)
                             .height(28.dp)
                             .clip(RoundedCornerShape(2.dp))
-                            .background(Color(0xFF8E8E93)),
+                            .background(Terracotta500),
                     )
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
@@ -314,7 +319,7 @@ fun WhyCountChillSheet(
                             .width(4.dp)
                             .height(28.dp)
                             .clip(RoundedCornerShape(2.dp))
-                            .background(Neutral900),
+                            .background(Green900),
                     )
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
@@ -346,7 +351,7 @@ fun WhyCountChillSheet(
                     .fillMaxWidth()
                     .height(52.dp)
                     .clip(CircleShape)
-                    .background(Neutral900)
+                    .background(Green900)
                     .clickable(role = Role.Button, onClick = onDismiss),
                 contentAlignment = Alignment.Center,
             ) {
