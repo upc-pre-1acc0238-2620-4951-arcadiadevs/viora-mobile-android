@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,14 +32,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green700
@@ -54,6 +59,7 @@ import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Spacing
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.ThousandsVisualTransformation
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestRules
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestUiState
@@ -146,38 +152,47 @@ private fun KilosEntry(
             Box(Modifier.size(10.dp).clip(CircleShape).background(dot))
             Text(label, style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp), color = Neutral700)
         }
-        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                enabled = enabled,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                textStyle = MaterialTheme.typography.displayMedium.copy(
-                    fontFamily = NewsreaderFamily,
-                    fontSize = 44.sp,
-                    lineHeight = 48.sp,
-                    letterSpacing = (-0.88).sp,
-                    color = if (error) Terracotta700 else Neutral900,
-                ),
-                cursorBrush = SolidColor(if (error) Terracotta500 else Neutral900),
-                modifier = Modifier.weight(1f).onFocusChanged { focused = it.isFocused }.semantics { contentDescription = label },
-                decorationBox = { inner ->
-                    Box {
-                        if (value.isEmpty()) {
-                            Text("0", style = MaterialTheme.typography.displayMedium.copy(fontSize = 44.sp, lineHeight = 48.sp, letterSpacing = (-0.88).sp), color = Neutral200)
-                        }
-                        inner()
+        val unit = stringResource(R.string.harvest_kilos_unit)
+        val numberStyle = MaterialTheme.typography.displayMedium.copy(
+            fontFamily = NewsreaderFamily,
+            fontSize = 44.sp,
+            lineHeight = 48.sp,
+            letterSpacing = (-0.88).sp,
+        )
+        // Where the number (or the "0" placeholder) ends, so the unit follows it as in Figma
+        // ("12 500 kg") while the whole row stays the touch target of the field.
+        var numberEnd by remember { mutableFloatStateOf(0f) }
+        var placeholderEnd by remember { mutableFloatStateOf(0f) }
+        val unitGap = with(LocalDensity.current) { 6.dp.toPx() }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            enabled = enabled,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            visualTransformation = ThousandsVisualTransformation,
+            textStyle = numberStyle.copy(color = if (error) Terracotta700 else Neutral900),
+            cursorBrush = SolidColor(if (error) Terracotta500 else Neutral900),
+            onTextLayout = { layout -> numberEnd = if (layout.lineCount > 0) layout.getLineRight(0) else 0f },
+            modifier = Modifier.fillMaxWidth().onFocusChanged { focused = it.isFocused }.semantics { contentDescription = label },
+            decorationBox = { inner ->
+                Box {
+                    if (value.isEmpty()) {
+                        Text("0", style = numberStyle, color = Neutral200, onTextLayout = { placeholderEnd = it.getLineRight(0) })
                     }
-                },
-            )
-            Text(
-                stringResource(R.string.harvest_kilos_unit),
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                color = Neutral600,
-                modifier = Modifier.padding(bottom = 10.dp),
-            )
-        }
+                    inner()
+                    Text(
+                        unit,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                        color = Neutral600,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .offset { IntOffset((if (value.isEmpty()) placeholderEnd else numberEnd).roundToInt() + unitGap.roundToInt(), 0) }
+                            .padding(bottom = 10.dp),
+                    )
+                }
+            },
+        )
         Box(Modifier.fillMaxWidth().height(1.5.dp).background(line))
         if (error) ErrorLine(errorText, Modifier.padding(top = 4.dp))
     }
@@ -207,15 +222,7 @@ private fun TotalBlock(state: SettleHarvestUiState) {
                 )
             }
         }
-        val share = state.greenShare
-        SplitBar(share)
-        if (share != null) {
-            Text(
-                stringResource(R.string.settle_split_caption, formatPercent(share), formatPercent(1 - share)),
-                style = MaterialTheme.typography.labelSmall,
-                color = Neutral600,
-            )
-        }
+        SplitBar(state.greenShare)
     }
 }
 
@@ -261,7 +268,7 @@ internal fun TextFieldCard(
             cursorBrush = SolidColor(Green800),
             modifier = Modifier.fillMaxWidth().semantics { contentDescription = label },
             decorationBox = { inner ->
-                Box(Modifier.padding(vertical = 13.dp)) {
+                Box(Modifier.padding(vertical = 4.dp)) {
                     if (value.isEmpty()) Text(placeholder, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.sp), color = Neutral600)
                     inner()
                 }
@@ -295,7 +302,7 @@ internal fun CalibreCard(
                     stringResource(R.string.settle_calibre_grade, grade.label),
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.sp),
                     color = Neutral900,
-                    modifier = Modifier.weight(1f).clickable(enabled = !state.isSaving, role = Role.Button, onClickLabel = openLabel) { open = true }.padding(vertical = 13.dp),
+                    modifier = Modifier.weight(1f).clickable(enabled = !state.isSaving, role = Role.Button, onClickLabel = openLabel) { open = true }.padding(vertical = 4.dp),
                 )
             } else {
                 BasicTextField(
@@ -308,7 +315,7 @@ internal fun CalibreCard(
                     cursorBrush = SolidColor(Green800),
                     modifier = Modifier.weight(1f).semantics { contentDescription = openLabel },
                     decorationBox = { inner ->
-                        Box(Modifier.padding(vertical = 13.dp)) {
+                        Box(Modifier.padding(vertical = 4.dp)) {
                             if (state.calibreText.isEmpty()) {
                                 Text(stringResource(R.string.settle_calibre_placeholder), style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.sp), color = Neutral600)
                             }

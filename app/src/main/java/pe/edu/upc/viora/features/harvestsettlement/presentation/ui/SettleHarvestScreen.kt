@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.harvestsettlement.presentation.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -99,6 +102,11 @@ internal fun SettleHarvestContent(
     modifier: Modifier = Modifier,
 ) {
     var pickingDate by rememberSaveable { mutableStateOf(false) }
+    // Back or the close button ask before throwing away kilos the producer already typed.
+    var askDiscard by rememberSaveable { mutableStateOf(false) }
+    val hasTyped = listOf(state.greenText, state.blackText, state.millTicket, state.calibreText).any { it.isNotBlank() }
+    val close = { if (hasTyped && !state.isSaving) askDiscard = true else onClose() }
+    BackHandler(enabled = hasTyped && !state.isSaving) { askDiscard = true }
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerLow)) {
         Column(
             modifier = Modifier
@@ -111,7 +119,7 @@ internal fun SettleHarvestContent(
                 .padding(top = 8.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            FormHeader(state, onClose)
+            FormHeader(state, close)
             val headline = MaterialTheme.typography.displayLarge.copy(fontSize = 44.sp, lineHeight = 46.sp, letterSpacing = (-1.1).sp)
             Column(Modifier.padding(top = 20.dp, bottom = 8.dp)) {
                 Text(stringResource(R.string.settle_form_headline_lead), style = headline, color = Neutral900)
@@ -178,6 +186,27 @@ internal fun SettleHarvestContent(
             },
         )
         null -> Unit
+    }
+    if (askDiscard) {
+        AlertDialog(
+            onDismissRequest = { askDiscard = false },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            title = { Text(stringResource(R.string.settle_discard_title), style = MaterialTheme.typography.headlineSmall) },
+            text = { Text(stringResource(R.string.settle_discard_body), style = MaterialTheme.typography.bodyMedium) },
+            confirmButton = {
+                TextButton(onClick = { askDiscard = false }) { Text(stringResource(R.string.discard_keep)) }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        askDiscard = false
+                        onClose()
+                    },
+                ) { Text(stringResource(R.string.discard_confirm), color = Terracotta700) }
+            },
+            tonalElevation = 0.dp,
+        )
     }
 }
 
