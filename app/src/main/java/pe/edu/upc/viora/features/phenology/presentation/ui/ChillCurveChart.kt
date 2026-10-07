@@ -135,14 +135,13 @@ fun ChillCurveChart(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(28.dp))
                 .background(Neutral0)
-                .border(1.dp, Neutral200, RoundedCornerShape(28.dp))
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             // Legend row (top)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 ChartLegendItem(
@@ -422,6 +421,8 @@ private fun ChartLegendItem(
             text = text,
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
             color = Neutral700,
+            maxLines = 1,
+            softWrap = false,
         )
     }
 }

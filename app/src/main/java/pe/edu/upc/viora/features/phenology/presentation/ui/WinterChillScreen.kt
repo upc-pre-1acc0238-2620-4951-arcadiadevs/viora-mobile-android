@@ -50,6 +50,7 @@ import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
+import pe.edu.upc.viora.core.designsystem.theme.Neutral100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
@@ -87,7 +88,7 @@ fun WinterChillScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Neutral50)
+            .background(Neutral100)
             .statusBarsPadding(),
     ) {
         val content = state as? WinterChillUiState.Content
@@ -542,12 +543,13 @@ private fun AsymmetricMetricsRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         // Left Column: Tall projection card (252dp)
+        val leftCardBg = if (state.isCompleted) Color(0xFFBFBFBF) else Color(0xFFC7C7CC)
         Column(
             modifier = Modifier
                 .weight(1f)
                 .height(252.dp)
-                .clip(RoundedCornerShape(26.dp))
-                .background(Color(0xFFC7C7CC))
+                .clip(RoundedCornerShape(28.dp))
+                .background(leftCardBg)
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -587,7 +589,7 @@ private fun AsymmetricMetricsRow(
                             fontSize = 80.sp,
                             lineHeight = 82.sp,
                         ),
-                        color = Neutral900,
+                        color = Color(0xFF727272),
                     )
                     Text(
                         text = monthStr,
@@ -597,7 +599,7 @@ private fun AsymmetricMetricsRow(
                             fontSize = 30.sp,
                             lineHeight = 34.sp,
                         ),
-                        color = Neutral700,
+                        color = Color(0xFF727272),
                         modifier = Modifier.padding(bottom = 10.dp),
                     )
                 }
@@ -662,7 +664,7 @@ private fun AsymmetricMetricsRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(28.dp))
                     .background(Neutral0)
                     .padding(14.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
@@ -727,8 +729,8 @@ private fun AsymmetricMetricsRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color(0xFFC7C7CC))
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(Color(0xFFAEAEB2))
                     .clickable(role = Role.Button, onClick = onEnsoClick)
                     .padding(14.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
