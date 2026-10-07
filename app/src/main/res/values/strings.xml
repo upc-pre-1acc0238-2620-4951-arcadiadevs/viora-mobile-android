@@ -332,6 +332,26 @@
     <string name="alerts_action_retry">Try again</string>
     <string name="alerts_nav_back">Go back</string>
     <string name="alerts_nav_settings">Alert settings</string>
+    <string name="alerts_plot_filter_open">Filter by plot</string>
+    <string name="alerts_plot_filter_title_lead">Filter</string>
+    <string name="alerts_plot_filter_title_emphasis">by plot.</string>
+    <string name="alerts_plot_filter_hint">Pick the plot whose alerts you want to see</string>
+    <string name="alerts_plot_filter_all">All plots</string>
+    <string name="alerts_plot_filter_no_active">No active alerts</string>
+    <string name="alerts_plot_filter_note">Alerts without a plot only show under “All plots”.</string>
+    <string name="alerts_plot_filter_close">Close</string>
+    <plurals name="alerts_plot_filter_active">
+        <item quantity="one">%1$d active alert</item>
+        <item quantity="other">%1$d active alerts</item>
+    </plurals>
+    <plurals name="alerts_plot_filter_critical">
+        <item quantity="one">%1$d critical</item>
+        <item quantity="other">%1$d critical</item>
+    </plurals>
+    <plurals name="alerts_plot_filter_warning">
+        <item quantity="one">%1$d warning</item>
+        <item quantity="other">%1$d warnings</item>
+    </plurals>
     <string name="alert_severity_critical">Critical</string>
     <string name="alert_severity_warning">Warning</string>
     <string name="alert_time_today">Today</string>
