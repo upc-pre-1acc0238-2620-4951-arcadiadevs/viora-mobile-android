@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -43,6 +44,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -59,10 +61,12 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green200
+import pe.edu.upc.viora.core.designsystem.theme.Green700
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
+import pe.edu.upc.viora.core.designsystem.theme.Harvest400
 import pe.edu.upc.viora.core.designsystem.theme.Harvest700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral100
@@ -72,6 +76,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
@@ -372,7 +377,10 @@ private fun ForecastCard(state: PlotClimateUiState.Content, locale: Locale) {
             )
             return@Column
         }
-        val currentTemperature = state.series.latest(TelemetryMetric.TEMPERATURE)?.value
+        // The "now" dot only makes sense with a recent reading (the probes may be days behind).
+        val currentTemperature = state.series.latest(TelemetryMetric.TEMPERATURE)
+            ?.takeIf { Duration.between(it.observedAt, state.now) <= FRESH_READING }
+            ?.value
         forecast.days.take(MAX_FORECAST_DAYS).forEach { day ->
             val isToday = day.date == state.today
             ForecastRow(
@@ -431,13 +439,20 @@ private fun ForecastRow(
             )
         }
         Row(Modifier.width(64.dp), verticalAlignment = Alignment.CenterVertically) {
-            WeatherGlyph(sky = day.sky, glyphSize = 24.dp)
+            // Figma: the sun in yellow, clouds in ink; the chance of rain with its drop.
+            WeatherGlyph(sky = day.sky, glyphSize = 24.dp, tint = if (day.sky == SkyCondition.SUNNY) Harvest400 else Neutral900)
             if (day.precipitationProbabilityPercent > 0) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_water_drop),
+                    contentDescription = null,
+                    tint = Green700,
+                    modifier = Modifier.padding(start = 4.dp).size(14.dp),
+                )
                 Text(
                     text = formatPercent(locale, day.precipitationProbabilityPercent.toDouble()),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Neutral600,
-                    modifier = Modifier.padding(start = 4.dp),
+                    color = Green700,
+                    modifier = Modifier.padding(start = 1.dp),
                 )
             }
         }
@@ -460,17 +475,20 @@ private fun ForecastRow(
         Text(
             text = formatDegrees(locale, day.maxTemperatureCelsius),
             style = MaterialTheme.typography.titleSmall,
-            color = Neutral900,
+            color = if (extreme) Terracotta700 else Neutral900,
             modifier = Modifier.width(36.dp),
         )
     }
 }
 
 private fun heatColor(heat: HeatLevel): Color = when (heat) {
-    HeatLevel.NORMAL -> Green800
-    HeatLevel.WARM -> Harvest300
+    HeatLevel.NORMAL -> Green700
+    HeatLevel.WARM -> Harvest400
     HeatLevel.EXTREME -> Terracotta500
 }
+
+/** A reading older than this is not "now" (same rule as the Home weather card). */
+private val FRESH_READING: Duration = Duration.ofHours(3)
 
 /** The day's range drawn inside the week's range; the white dot is the temperature right now. */
 @Composable
