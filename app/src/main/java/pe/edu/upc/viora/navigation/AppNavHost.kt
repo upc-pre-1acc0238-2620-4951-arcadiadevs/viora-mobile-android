@@ -34,6 +34,12 @@ import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRo
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.climateNavGraph
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.alertsNavGraph
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRoundRoute
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
+
 /**
  * Composition root of navigation. It lives outside `core/` on purpose: this is the one place
  * allowed to know every feature, so `core/` never depends on `features/`.
@@ -62,7 +68,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                             restoreState = true
                         }
                     },
-                    onOpenAlerts = { navController.navigate(AlertsCenterRoute) },
+                    onOpenAlerts = { plotId -> navController.navigate(AlertsCenterRoute(plotId = plotId)) },
                     onOpenWeatherForecast = { id, name ->
                         navController.navigate(PlotClimateRoute(plotId = id.value, plotName = name))
                     },
@@ -100,12 +106,28 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             navController = navController,
             onOpenPlot = { plotId -> navController.navigate(PlotDetailRoute(plotId = plotId)) },
         )
+        samplingNavGraph(
+            navController = navController,
+            plotSilhouetteSlot = { plotId, slotModifier ->
+                PlotSilhouetteById(plotId = plotId, modifier = slotModifier)
+            },
+        )
         navigation<PlanGraph>(startDestination = PlanRoute) {
             composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
         }
         navigation<LogbookGraph>(startDestination = LogbookRoute) {
             composable<LogbookRoute> {
-                LogbookScreen(onOpenSettlement = { plotId, year -> navController.openCampaignReceipt(plotId, year, popForm = false) })
+                LogbookScreen(
+                    onOpenSettlement = { plotId, year -> navController.openCampaignReceipt(plotId, year, popForm = false) },
+                    onContinueSampling = { plotId, plotName ->
+                        navController.navigate(
+                            SamplingRoundRoute(
+                                plotId = plotId,
+                                plotName = plotName,
+                            ),
+                        )
+                    },
+                )
             }
         }
     }

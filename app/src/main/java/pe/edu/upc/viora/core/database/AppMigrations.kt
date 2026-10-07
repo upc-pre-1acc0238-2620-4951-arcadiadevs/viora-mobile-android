@@ -93,5 +93,17 @@ object AppMigrations {
         MIGRATION_4_5_STATEMENTS.forEach { connection.execSQL(it) }
     }
 
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+    internal const val MIGRATION_5_6_SQL =
+        "CREATE TABLE IF NOT EXISTS `draft_tree_samples` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, " +
+            "`plot_name` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, `tree_identifier` TEXT NOT NULL, " +
+            "`shoots_count` INTEGER NOT NULL, `fruit_set_count` INTEGER NOT NULL, " +
+            "`trunk_circumference_cm` REAL, `trunk_diameter_mm` REAL, `observed_on` TEXT NOT NULL, " +
+            "`is_synced` INTEGER NOT NULL DEFAULT 0, `created_at` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+
+    /** Adds the draft tree samples cache for in-progress field sampling rounds. */
+    val MIGRATION_5_6 = Migration(5, 6) { connection ->
+        connection.execSQL(MIGRATION_5_6_SQL)
+    }
+
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
 }

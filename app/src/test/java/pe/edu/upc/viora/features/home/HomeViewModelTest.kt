@@ -49,6 +49,9 @@ import pe.edu.upc.viora.features.telemetry.domain.entity.AgroclimaticIncident
 import pe.edu.upc.viora.features.telemetry.domain.entity.AlertsSummary
 import pe.edu.upc.viora.features.telemetry.domain.entity.IncidentDetail
 import pe.edu.upc.viora.features.telemetry.domain.repository.IncidentRepository
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentSeverity
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
 
 private class CachedPlots : PlotRepository {
     val plots = MutableStateFlow<List<Plot>>(emptyList())
@@ -76,10 +79,14 @@ private class FakeFocus : FocusedPlotRepository {
 private class FakeIncidentRepository : IncidentRepository {
     val incidents = MutableStateFlow<List<AgroclimaticIncident>>(emptyList())
     var refreshCalls = 0
+    val refreshedPlots = mutableListOf<String?>()
 
-    override fun observeIncidents(plotId: String?): Flow<List<AgroclimaticIncident>> = incidents
+    override fun observeIncidents(plotId: String?): Flow<List<AgroclimaticIncident>> =
+        if (plotId == null) incidents else incidents.map { list -> list.filter { it.plotId == plotId } }
+
     override suspend fun refresh(plotId: String?, status: String?, severity: String?): AppResult<AlertsSummary> {
         refreshCalls++
+        refreshedPlots += plotId
         return AppResult.Success(AlertsSummary(0, 0, 0, 0))
     }
     override suspend fun getIncidentDetail(incidentId: String): AppResult<IncidentDetail> = AppResult.Failure(AppError.Offline)
@@ -189,5 +196,53 @@ class HomeViewModelTest {
 
         assertEquals(listOf(2022, 2023, 2024, 2025), alternation.records.map { it.campaignYear })
         assertEquals(2.5, alternation.areaHectares, 0.0)
+    }
+
+    private fun incident(
+        id: String,
+        plotId: String,
+        status: IncidentStatus = IncidentStatus.ACTIVE,
+    ) = AgroclimaticIncident(
+        id = id,
+        plotId = plotId,
+        plotName = "Plot $plotId",
+        plotVariety = "Sevillana",
+        type = IncidentType.HEAT_WAVE,
+        severity = IncidentSeverity.WARNING,
+        status = status,
+        headlineKey = "heat_warning",
+        metricName = "temperature",
+        currentValue = 35.0,
+        thresholdValue = 32.0,
+        unit = "°C",
+        triggeredAt = "2026-10-06T12:00:00Z",
+        stressDurationMinutes = 60,
+    )
+
+    @Test
+    fun `active alerts count only reflects the focused plot and updates when focus changes`() = runTest {
+        plots.plots.value = listOf(plot("y", "La Yarada 02", 2.5), plot("n", "Lote Norte", 1.5))
+        incidentsRepo.incidents.value = listOf(
+            incident("inc-1", "y", IncidentStatus.ACTIVE),
+            incident("inc-2", "y", IncidentStatus.SNOOZED),
+            incident("inc-3", "n", IncidentStatus.ACTIVE),
+        )
+        val vm = viewModel()
+
+        // By default, largest plot "y" is focused (2.5 ha > 1.5 ha) -> 2 active alerts for "y"
+        assertEquals(2L, contentOf(vm).activeAlertsCount)
+
+        // Changing focus to "n" -> 1 active alert for "n"
+        vm.focusPlot(PlotId("n"))
+        assertEquals(1L, (vm.uiState.value as HomeUiState.Content).activeAlertsCount)
+    }
+
+    @Test
+    fun `the incidents of the plot in focus are refreshed`() = runTest {
+        plots.plots.value = listOf(plot("y", "La Yarada 02", 2.5))
+        val vm = viewModel()
+        contentOf(vm)
+
+        assertTrue(incidentsRepo.refreshedPlots.contains("y"))
     }
 }
