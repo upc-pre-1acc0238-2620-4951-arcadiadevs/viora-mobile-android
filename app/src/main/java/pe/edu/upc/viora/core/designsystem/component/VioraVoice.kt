@@ -1,4 +1,4 @@
-package pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration
+package pe.edu.upc.viora.core.designsystem.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -19,9 +19,12 @@ import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 
-/** Viora talking: its isotype next to a short sentence in italic serif (Figma "Voz de Viora"). */
+/**
+ * Viora talking (Figma component "Editorial/Voz de Viora"): its isotype next to one or two lines
+ * in italic serif. The one place every screen takes it from, so the voice looks the same everywhere.
+ */
 @Composable
-fun VoiceLine(text: String, modifier: Modifier = Modifier) {
+fun VioraVoice(text: String, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp),

@@ -39,8 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
+import java.time.format.FormatStyle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -53,9 +54,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
+import pe.edu.upc.viora.core.presentation.formatDecimal
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingSummary
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.component.SamplingSegmentedBar
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.component.VoiceOfViora
 
 private val ScreenPadding = 24.dp
 
@@ -102,9 +103,9 @@ fun SamplingCompleteScreen(
     val fruitsCount = summary?.sampledFruitSetCount ?: totalFruitsCount
     val shootsCount = summary?.sampledShootsCount ?: totalShootsCount
 
-    val formattedMean = String.format(Locale.ROOT, "%.2f", mean).replace('.', ',')
-    val timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ROOT)
-    val syncTimeStr = LocalTime.now().format(timeFormatter).lowercase()
+    val formattedMean = formatDecimal(mean, 2)
+    // "9:42 a. m." in the app's language, as the sync chips of the design.
+    val syncTimeStr = LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
 
     Box(
         modifier = modifier
@@ -245,7 +246,7 @@ fun SamplingCompleteScreen(
             } else {
                 stringResource(R.string.sampling_complete_voice, plotName)
             }
-            VoiceOfViora(
+            VioraVoice(
                 text = voiceText,
                 modifier = Modifier.fillMaxWidth(),
             )

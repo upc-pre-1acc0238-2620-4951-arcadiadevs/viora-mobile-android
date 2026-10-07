@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Harvest800
@@ -78,13 +79,8 @@ internal fun ClimateTopBar(
 
 /** The two-line serif headline whose second line is italic ("El clima de / *tu lote.*"). */
 @Composable
-internal fun ClimateHeadline(lead: String, emphasis: String, modifier: Modifier = Modifier) {
-    val base = MaterialTheme.typography.displaySmall.copy(fontSize = 36.sp, lineHeight = 40.sp)
-    Column(modifier) {
-        Text(text = lead, style = base, color = Neutral900)
-        Text(text = emphasis, style = base.merge(NewsreaderItalic), color = Neutral900)
-    }
-}
+internal fun ClimateHeadline(lead: String, emphasis: String, modifier: Modifier = Modifier) =
+    EditorialHeadline(lead = lead, emphasis = emphasis, modifier = modifier)
 
 /** A pill the producer taps to pick a plot, a metric or a range. */
 @Composable
