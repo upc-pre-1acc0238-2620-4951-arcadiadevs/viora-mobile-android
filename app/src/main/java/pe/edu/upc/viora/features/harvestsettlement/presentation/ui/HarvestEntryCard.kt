@@ -4,10 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -27,6 +29,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.PhaseCardArtwork
+import pe.edu.upc.viora.core.designsystem.component.PhaseIllustration
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
@@ -35,8 +39,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 
 /**
- * Home "AHORA · COSECHA" card (Figma P70 behind the sheet): how many plots are left to register
- * in the campaign, how far along the producer is, and the "Registrar cosecha" pill.
+ * Home "AHORA · COSECHA" card (Figma P10 "Fase · Cosecha", P70 behind the sheet): how many plots
+ * are left to register in the campaign, how far along the producer is, and the "Registrar cosecha"
+ * pill, over the phase blob and the olive basket drawing.
  */
 @Composable
 fun HarvestEntryCard(
@@ -46,15 +51,23 @@ fun HarvestEntryCard(
     onRegister: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val onDark = Neutral50.copy(alpha = 0.78f)
-    val actionLabel = stringResource(R.string.settle_entry_action)
-    Column(
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(32.dp))
-            .background(Green900)
-            .padding(start = 22.dp, end = 22.dp, top = 24.dp, bottom = 22.dp),
+            .background(Green900),
     ) {
+        PhaseCardArtwork(PhaseIllustration.HARVEST)
+        HarvestEntryContent(pendingCount, registeredCount, totalCount, onRegister)
+    }
+}
+
+/** The texts, the progress and the pill of [HarvestEntryCard], drawn over its artwork. */
+@Composable
+private fun HarvestEntryContent(pendingCount: Int, registeredCount: Int, totalCount: Int, onRegister: () -> Unit) {
+    val onDark = Neutral50.copy(alpha = 0.78f)
+    val actionLabel = stringResource(R.string.settle_entry_action)
+    Column(Modifier.padding(start = 22.dp, end = 22.dp, top = 24.dp, bottom = 22.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(7.dp).clip(CircleShape).background(Harvest300))
             Text(
@@ -102,8 +115,23 @@ fun HarvestEntryCard(
 private fun ProgressCapsule(registered: Int, total: Int, modifier: Modifier = Modifier) {
     val fraction = if (total > 0) (registered.toFloat() / total).coerceIn(0f, 1f) else 0f
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Box(Modifier.fillMaxWidth().height(12.dp).clip(RoundedCornerShape(6.dp)).background(Neutral50.copy(alpha = 0.14f))) {
-            if (fraction > 0f) Box(Modifier.fillMaxWidth(fraction).height(12.dp).clip(RoundedCornerShape(6.dp)).background(Harvest300))
+        BoxWithConstraints(Modifier.fillMaxWidth().height(12.dp)) {
+            Box(Modifier.fillMaxWidth().height(12.dp).clip(RoundedCornerShape(6.dp)).background(Neutral50.copy(alpha = 0.14f)))
+            if (fraction > 0f) {
+                Box(Modifier.fillMaxWidth(fraction).height(12.dp).clip(RoundedCornerShape(6.dp)).background(Harvest300))
+                // Figma: an 18 dp knob whose end overlaps the end of the filled part by 6 dp.
+                val knobX = (maxWidth * fraction - 12.dp).coerceIn(0.dp, maxWidth - 18.dp)
+                Box(
+                    Modifier
+                        .offset(x = knobX, y = (-3).dp)
+                        .size(18.dp)
+                        .clip(CircleShape)
+                        .background(Harvest300)
+                        .padding(3.dp)
+                        .clip(CircleShape)
+                        .background(Neutral50),
+                )
+            }
         }
         Text(
             stringResource(R.string.settle_entry_progress, registered, total),
