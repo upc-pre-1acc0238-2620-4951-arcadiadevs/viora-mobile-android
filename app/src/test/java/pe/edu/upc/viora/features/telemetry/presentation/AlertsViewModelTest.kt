@@ -30,6 +30,7 @@ import pe.edu.upc.viora.features.telemetry.domain.repository.IncidentRepository
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentSeverity
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
+import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsFilter
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsUiState
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.AlertsViewModel
 
@@ -150,7 +151,7 @@ class AlertsViewModelTest {
     }
 
     @Test
-    fun `when plotId is provided, observes and refreshes incidents for that plot only`() = runTest {
+    fun `a plotId argument preselects that plot but every plot is still observed and refreshed`() = runTest {
         fakeRepo.incidentsFlow.value = listOf(
             incident("1", "plot-1", IncidentSeverity.CRITICAL),
             incident("2", "plot-2", IncidentSeverity.WARNING),
@@ -163,9 +164,8 @@ class AlertsViewModelTest {
             refreshIncidents = RefreshIncidentsUseCase(fakeRepo),
         )
 
-        assertEquals("plot-1", viewModel.plotId)
-        assertTrue(fakeRepo.observedPlotIds.contains("plot-1"))
-        assertTrue(fakeRepo.refreshedPlotIds.contains("plot-1"))
+        assertEquals(listOf<String?>(null), fakeRepo.observedPlotIds)
+        assertEquals(listOf<String?>(null), fakeRepo.refreshedPlotIds)
 
         val states = mutableListOf<AlertsUiState>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -177,6 +177,8 @@ class AlertsViewModelTest {
         val content = lastState as AlertsUiState.Content
         assertEquals(1, content.incidents.size)
         assertEquals("plot-1", content.incidents.first().plotId)
+        assertEquals("plot-1", content.selectedPlotId)
+        assertEquals(2, content.plotOptions.size)
 
         job.cancel()
     }
@@ -195,7 +197,6 @@ class AlertsViewModelTest {
             refreshIncidents = RefreshIncidentsUseCase(fakeRepo),
         )
 
-        assertEquals(null, viewModel.plotId)
         assertTrue(fakeRepo.observedPlotIds.contains(null))
         assertTrue(fakeRepo.refreshedPlotIds.contains(null))
 
@@ -209,6 +210,110 @@ class AlertsViewModelTest {
         val content = lastState as AlertsUiState.Content
         assertEquals(2, content.incidents.size)
 
+        job.cancel()
+    }
+
+    private fun contentOf(vm: AlertsViewModel): AlertsUiState.Content = vm.uiState.value as AlertsUiState.Content
+
+    @Test
+    fun `choosing a plot narrows the alerts and counts the capsules of that plot only`() = runTest {
+        fakeRepo.incidentsFlow.value = listOf(
+            incident("1", "plot-1", IncidentSeverity.CRITICAL),
+            incident("2", "plot-2", IncidentSeverity.WARNING),
+            incident("3", "plot-2", IncidentSeverity.CRITICAL),
+        )
+        val vm = AlertsViewModel(
+            savedStateHandle = SavedStateHandle(),
+            observeIncidents = ObserveIncidentsUseCase(fakeRepo),
+            refreshIncidents = RefreshIncidentsUseCase(fakeRepo),
+        )
+        val job = collecting(vm)
+
+        assertEquals(3L, contentOf(vm).summary.activeCount)
+        assertTrue(contentOf(vm).canFilterByPlot)
+
+        vm.selectPlot("plot-2")
+        val content = contentOf(vm)
+        assertEquals(listOf("2", "3"), content.incidents.map { it.id })
+        assertEquals(2L, content.summary.activeCount)
+        assertEquals(1L, content.summary.criticalCount)
+        assertEquals(1L, content.summary.warningCount)
+        assertEquals(listOf("Plot plot-2"), content.affectedPlotNames)
+
+        vm.selectPlot(null)
+        assertEquals(3, contentOf(vm).incidents.size)
+        job.cancel()
+    }
+
+    @Test
+    fun `the severity capsules filter inside the chosen plot`() = runTest {
+        fakeRepo.incidentsFlow.value = listOf(
+            incident("1", "plot-1", IncidentSeverity.CRITICAL),
+            incident("2", "plot-2", IncidentSeverity.WARNING),
+            incident("3", "plot-2", IncidentSeverity.CRITICAL),
+        )
+        val vm = AlertsViewModel(
+            savedStateHandle = SavedStateHandle(),
+            observeIncidents = ObserveIncidentsUseCase(fakeRepo),
+            refreshIncidents = RefreshIncidentsUseCase(fakeRepo),
+        )
+        val job = collecting(vm)
+
+        vm.selectPlot("plot-2")
+        vm.setFilter(AlertsFilter.CRITICAL)
+
+        assertEquals(listOf("3"), contentOf(vm).incidents.map { it.id })
+        job.cancel()
+    }
+
+    @Test
+    fun `plot options put the plots with critical alerts first`() = runTest {
+        fakeRepo.incidentsFlow.value = listOf(
+            incident("1", "plot-a", IncidentSeverity.WARNING),
+            incident("2", "plot-b", IncidentSeverity.CRITICAL),
+        )
+        val vm = AlertsViewModel(
+            savedStateHandle = SavedStateHandle(),
+            observeIncidents = ObserveIncidentsUseCase(fakeRepo),
+            refreshIncidents = RefreshIncidentsUseCase(fakeRepo),
+        )
+        val job = collecting(vm)
+
+        val options = contentOf(vm).plotOptions
+        assertEquals(listOf("plot-b", "plot-a"), options.map { it.plotId })
+        assertEquals(IncidentSeverity.CRITICAL, options.first().worstSeverity)
+        job.cancel()
+    }
+
+    @Test
+    fun `a chosen plot without alerts falls back to every plot`() = runTest {
+        fakeRepo.incidentsFlow.value = listOf(
+            incident("1", "plot-1", IncidentSeverity.CRITICAL),
+            incident("2", "plot-2", IncidentSeverity.WARNING),
+        )
+        val vm = AlertsViewModel(
+            savedStateHandle = SavedStateHandle(mapOf("plotId" to "plot-9")),
+            observeIncidents = ObserveIncidentsUseCase(fakeRepo),
+            refreshIncidents = RefreshIncidentsUseCase(fakeRepo),
+        )
+        val job = collecting(vm)
+
+        assertEquals(null, contentOf(vm).selectedPlotId)
+        assertEquals(2, contentOf(vm).incidents.size)
+        job.cancel()
+    }
+
+    @Test
+    fun `a single plot with alerts hides the plot filter button`() = runTest {
+        fakeRepo.incidentsFlow.value = listOf(incident("1", "plot-1", IncidentSeverity.CRITICAL))
+        val vm = AlertsViewModel(
+            savedStateHandle = SavedStateHandle(),
+            observeIncidents = ObserveIncidentsUseCase(fakeRepo),
+            refreshIncidents = RefreshIncidentsUseCase(fakeRepo),
+        )
+        val job = collecting(vm)
+
+        assertTrue(!contentOf(vm).canFilterByPlot)
         job.cancel()
     }
 }

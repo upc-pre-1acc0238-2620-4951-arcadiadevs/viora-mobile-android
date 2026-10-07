@@ -220,7 +220,7 @@ class HomeViewModelTest {
     )
 
     @Test
-    fun `active alerts count only reflects the focused plot and updates when focus changes`() = runTest {
+    fun `active alerts count every plot and does not change with the focused plot`() = runTest {
         plots.plots.value = listOf(plot("y", "La Yarada 02", 2.5), plot("n", "Lote Norte", 1.5))
         incidentsRepo.incidents.value = listOf(
             incident("inc-1", "y", IncidentStatus.ACTIVE),
@@ -229,20 +229,20 @@ class HomeViewModelTest {
         )
         val vm = viewModel()
 
-        // By default, largest plot "y" is focused (2.5 ha > 1.5 ha) -> 2 active alerts for "y"
-        assertEquals(2L, contentOf(vm).activeAlertsCount)
+        // "y" is focused (largest plot), but the alert of "n" counts too: 3 active alerts
+        assertEquals(3L, contentOf(vm).activeAlertsCount)
 
-        // Changing focus to "n" -> 1 active alert for "n"
+        // Changing focus to "n" keeps the same count
         vm.focusPlot(PlotId("n"))
-        assertEquals(1L, (vm.uiState.value as HomeUiState.Content).activeAlertsCount)
+        assertEquals(3L, (vm.uiState.value as HomeUiState.Content).activeAlertsCount)
     }
 
     @Test
-    fun `the incidents of the plot in focus are refreshed`() = runTest {
+    fun `the incidents of every plot are refreshed`() = runTest {
         plots.plots.value = listOf(plot("y", "La Yarada 02", 2.5))
         val vm = viewModel()
         contentOf(vm)
 
-        assertTrue(incidentsRepo.refreshedPlots.contains("y"))
+        assertEquals(listOf<String?>(null), incidentsRepo.refreshedPlots)
     }
 }
