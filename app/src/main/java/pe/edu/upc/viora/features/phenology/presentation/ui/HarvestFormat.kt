@@ -1,53 +1,45 @@
 package pe.edu.upc.viora.features.phenology.presentation.ui
 
 import androidx.annotation.StringRes
-import java.text.NumberFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.presentation.formatDecimal
+import pe.edu.upc.viora.core.presentation.formatWhole
+import pe.edu.upc.viora.core.presentation.vioraNumberFormat
 import pe.edu.upc.viora.features.phenology.domain.entity.BbiClass
 
-/** "24 000" in Spanish, "24,000" in English: whole kilograms with the language's separators. */
-fun formatKg(kg: Double): String =
-    NumberFormat.getNumberInstance().apply {
-        minimumFractionDigits = 0
-        maximumFractionDigits = 1
-    }.format(kg)
+/** "24 000" in Spanish, "24,000" in English: kilograms with the app's separators. */
+fun formatKg(kg: Double): String = vioraNumberFormat(0, 1).format(kg)
 
 /** Tonnes per hectare of a harvest of [kg] kilograms on [areaHectares] hectares. */
 fun tonnesPerHectare(kg: Double, areaHectares: Double): Double = kg / 1_000 / areaHectares
 
-/** "8,5": one decimal, in the device's language. */
+/**
+ * "8,5": one decimal as in Figma. A yield under 0,1 t/ha (a few kilos on a large plot) keeps two
+ * decimals ("0,02") so it is not written as an empty "0,0".
+ */
 fun formatTonnesPerHectare(value: Double): String =
-    NumberFormat.getNumberInstance().apply {
-        minimumFractionDigits = 1
-        maximumFractionDigits = 1
-    }.format(value)
+    formatDecimal(value, if (value > 0.0 && value < SMALL_YIELD) 2 else 1)
+
+private const val SMALL_YIELD = 0.1
 
 /** "7,8k" for bars that are too narrow for the whole number; below a tonne the plain kilos. */
 fun formatKgCompact(kg: Double): String =
     if (kg < 1_000) {
-        NumberFormat.getIntegerInstance().format(kg)
+        formatWhole(kg)
     } else {
-        NumberFormat.getNumberInstance().apply {
-            minimumFractionDigits = 0
-            maximumFractionDigits = 1
-        }.format(kg / 1_000) + "k"
+        vioraNumberFormat(0, 1).format(kg / 1_000) + "k"
     }
 
-/** "0,51": the index with two decimals, in the device's language. */
-fun formatIndex(value: Double): String =
-    NumberFormat.getNumberInstance().apply {
-        minimumFractionDigits = 2
-        maximumFractionDigits = 2
-    }.format(value)
+/** "0,51": the index with two decimals. */
+fun formatIndex(value: Double): String = formatDecimal(value, 2)
 
 /** "32 %" for a 0..1 ratio. */
-fun formatPercent(ratio: Double): String =
-    NumberFormat.getPercentInstance().apply { maximumFractionDigits = 0 }.format(ratio)
+fun formatPercent(ratio: Double): String = formatWhole(ratio * 100) + "\u00A0%"
 
 /** "14 mar 2025" for the moment a record was stored, in the device's zone and language. */
 fun formatRecordDate(instant: Instant, zone: ZoneId = ZoneId.systemDefault(), locale: Locale = Locale.getDefault()): String =

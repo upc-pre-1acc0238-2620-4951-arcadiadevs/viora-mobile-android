@@ -26,6 +26,7 @@ class AppMigrationsTest {
 
     private val v5 = createSqlByTable(5)
     private val v6 = createSqlByTable(6)
+    private val v7 = createSqlByTable(7)
 
     @Test
     fun `new tables are created exactly as the exported v5 schema`() {
@@ -67,10 +68,21 @@ class AppMigrationsTest {
     }
 
     @Test
-    fun `migrations 3 to 4, 4 to 5 and 5 to 6 are registered`() {
-        assertTrue(AppMigrations.ALL.any { it.startVersion == 3 && it.endVersion == 4 })
-        assertTrue(AppMigrations.ALL.any { it.startVersion == 4 && it.endVersion == 5 })
-        assertTrue(AppMigrations.ALL.any { it.startVersion == 5 && it.endVersion == 6 })
+    fun `new thinning_events table in v7 matches migration`() {
+        assertEquals(v7.getValue("thinning_events"), AppMigrations.MIGRATION_6_7_SQL)
+    }
+
+    @Test
+    fun `every other v7 table is untouched since v6`() {
+        assertEquals(v6.keys + "thinning_events", v7.keys)
+        v6.keys.forEach { assertEquals(v6[it], v7[it]) }
+    }
+
+    @Test
+    fun `every version from 1 to the current one has a migration`() {
+        (1 until 7).forEach { from ->
+            assertTrue("missing $from -> ${from + 1}", AppMigrations.ALL.any { it.startVersion == from && it.endVersion == from + 1 })
+        }
     }
 
     private fun tableOf(createSql: String) = createSql.substringAfter("EXISTS `").substringBefore("`")

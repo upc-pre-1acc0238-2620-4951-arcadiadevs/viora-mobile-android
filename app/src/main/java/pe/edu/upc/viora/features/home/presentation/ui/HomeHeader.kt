@@ -136,15 +136,18 @@ private fun AlertsBell(hasUnread: Boolean, onClick: () -> Unit) {
 
 @Composable
 private fun headerSubtitle(date: LocalDate, isOffline: Boolean, lastRefresh: Instant?): String {
+    // Read from the configuration so the texts follow the language when it changes.
+    val locale = LocalConfiguration.current.locales[0]
     if (isOffline) {
+        // Android writes "Hace 4 días"; it goes mid-sentence ("actualizado hace 4 días").
         val updated = lastRefresh?.let {
-            DateUtils.getRelativeTimeSpanString(it.toEpochMilli(), System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString()
+            DateUtils.getRelativeTimeSpanString(it.toEpochMilli(), System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)
+                .toString()
+                .replaceFirstChar { char -> char.lowercase(locale) }
         }
         if (updated != null) return stringResource(R.string.home_subtitle_offline, updated)
     }
     val pattern = stringResource(R.string.home_date_pattern)
-    // Read from the configuration so the date follows the language when it changes.
-    val locale = LocalConfiguration.current.locales[0]
     val text = DateTimeFormatter.ofPattern(pattern, locale).format(date)
         .replaceFirstChar { it.titlecase(locale) }
     return stringResource(R.string.home_subtitle_synced, text)

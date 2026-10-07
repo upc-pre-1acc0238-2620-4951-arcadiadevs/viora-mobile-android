@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.telemetry.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.telemetry.domain.entity.AgroclimaticIncident
 import pe.edu.upc.viora.features.telemetry.domain.entity.AlertsSummary
@@ -14,6 +15,12 @@ interface IncidentRepository {
 
     /** Emits the cached incidents, optionally filtered by [plotId], ordered by detection time descending. */
     fun observeIncidents(plotId: String? = null): Flow<List<AgroclimaticIncident>>
+
+    /**
+     * When the incidents of [plotId] (or of every plot, with null) were last downloaded, in epoch
+     * millis; null while they never were. Lets a screen tell "no alerts" from "not loaded yet".
+     */
+    fun observeLastRefresh(plotId: String? = null): Flow<Long?> = flowOf(null)
 
     /** Refreshes incidents from the backend API and updates the local Room database cache. */
     suspend fun refresh(plotId: String? = null, status: String? = null, severity: String? = null): AppResult<AlertsSummary>

@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,7 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
-import pe.edu.upc.viora.core.designsystem.theme.Neutral50
+
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
@@ -69,7 +70,7 @@ fun AlertsCenterScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Neutral50)
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .navigationBarsPadding(),
     ) {

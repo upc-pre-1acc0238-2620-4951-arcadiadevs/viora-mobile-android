@@ -3,21 +3,18 @@ package pe.edu.upc.viora.features.telemetry.infrastructure.remote
 import kotlinx.serialization.Serializable
 
 /**
- * DTO for `GET /api/v1/plots/{plotId}/telemetries` (TS19, `TelemetrySeriesResource`).
- *
- * The field names follow the domain model of the report (tables 69-70); check them against the
- * backend Swagger and adjust here if they differ: nothing outside `infrastructure` depends on them.
+ * One item of `GET /api/v1/plots/{plotId}/telemetries` (US17 / TS19, backend `TelemetryResource`):
+ * the endpoint answers a plain array of readings. The node has a single soil probe, which the
+ * design places at 30 cm (Figma P90 "sonda a 30 cm").
  */
 @Serializable
-data class TelemetrySeriesDto(
-    val readings: List<HourlyReadingDto>,
-)
-
-@Serializable
 data class HourlyReadingDto(
-    val observedAt: String,
-    val airTemperature: Double? = null,
-    val relativeHumidity: Double? = null,
-    val soilMoisture30cm: Double? = null,
-    val soilMoisture60cm: Double? = null,
+    val recordedAt: String,
+    val temperature: Double? = null,
+    val humidity: Double? = null,
+    val soilMoisture: Double? = null,
+    val id: String? = null,
+    val plotId: String? = null,
+    val solarRadiation: Double? = null,
+    val stemWaterPotential: Double? = null,
 )

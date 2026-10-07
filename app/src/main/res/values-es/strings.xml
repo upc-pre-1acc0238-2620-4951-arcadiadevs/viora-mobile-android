@@ -285,8 +285,11 @@
     <string name="sensors_virtual_notice">Son nodos virtuales: simulo sus lecturas con el clima de tus coordenadas, sin instalar equipos.</string>
     <string name="sensors_chip_active">%1$d activos</string>
     <string name="sensors_chip_paused">%1$d en pausa</string>
-    <string name="sensors_empty">Esta parcela aún no tiene nodos sensores. Vincula el primero.</string>
+    <string name="sensors_empty">Vincula un nodo virtual y empezaré a simular humedad del suelo y microclima con el clima de tus coordenadas. No necesitas instalar equipos.</string>
     <string name="sensors_link_action">Vincular un nodo</string>
+    <string name="sensors_empty_title_lead">"Este lote aún no tiene "</string>
+    <string name="sensors_empty_title_emphasis">sensores</string>
+    <string name="sensors_link_first">Vincular el primero</string>
     <string name="sensors_pause_footnote">En pausa no genera lecturas nuevas; lo que ya midió se conserva.</string>
     <string name="sensors_type_microclima_subtitle">Microclima · aire y temperatura</string>
     <string name="sensors_type_sonda_subtitle">Suelo · %1$d cm</string>
@@ -362,7 +365,7 @@
     <string name="alert_detail_share">Compartir con técnico</string>
     <string name="alert_detail_rule_chip">Umbral térmico</string>
     <string name="alert_chart_title">Máximas de la semana</string>
-    <string name="alert_chart_threshold_label">umbral %1$d%2$s</string>
+    <string name="alert_chart_threshold_label">umbral %1$s</string>
     <string name="alert_checklist_header">Qué hacer · %1$d de %2$d</string>
     <string name="alert_checklist_title">Qué hacer</string>
     <string name="alert_checklist_progress">%1$d de %2$d</string>
@@ -383,11 +386,8 @@
     <string name="home_today_in_field_title">Hoy en tu campo</string>
     <string name="home_today_in_field_action">7 días</string>
     <string name="home_weather_now">Ahora</string>
-    <string name="home_weather_temp">27°</string>
-    <string name="home_weather_condition">Soleado</string>
-    <string name="home_weather_range">Máx 29° · Mín 14°</string>
-    <string name="home_weather_alert_badge">Jue 34°</string>
-    <string name="home_soil_moisture_value">34 %</string>
+    <string name="home_weather_today">Hoy</string>
+    <string name="home_weather_hot_day">%1$s %2$s</string>
     <string name="home_soil_moisture_label">Humedad del suelo</string>
     <string name="home_alerts_widget_label">alertas activas</string>
     <string name="home_alerts_widget_label_singular">alerta activa</string>
@@ -418,7 +418,7 @@
     <string name="harvest_gauge_description">Índice de vecería %1$s de 1, %2$s</string>
     <string name="harvest_offline_banner">Sin conexión · índice calculado el %1$s</string>
     <string name="harvest_offline_banner_plain">Sin conexión</string>
-    <string name="harvest_voice_break_cycle">Aclarear este año ayuda a romper el ciclo: %1$d no tiene por qué ser OFF.</string>
+    <string name="harvest_voice_break_cycle">Aclarar este año ayuda a romper el ciclo: %1$d no tiene por qué ser OFF.</string>
     <string name="harvest_voice_recover">Tras un año flojo el olivar se recupera: cuídalo para que %1$d sea bueno.</string>
     <string name="harvest_voice_steady">Tu cosecha se mantiene pareja. Sigue registrando cada campaña.</string>
     <string name="harvest_voice_ask_year">¿Recuerdas cuánto cosechaste en %1$d? Con ese dato ya tengo tu índice.</string>
@@ -799,6 +799,8 @@
     <string name="settle_calibre_other">Escribir otro número</string>
     <string name="settle_calibre_open">Elegir un calibre</string>
     <string name="settle_close_notice">Al asentarla, la campaña %1$d se cierra</string>
+    <string name="settle_discard_title">¿Descartar esta cosecha?</string>
+    <string name="settle_discard_body">Perderás los kilos y datos que escribiste para este lote.</string>
     <string name="settle_submit">Asentar cosecha</string>
     <string name="settle_confirm_lead">¿Asentar la</string>
     <string name="settle_confirm_emphasis">cosecha %1$d?</string>

@@ -16,5 +16,5 @@ interface TelemetryService {
         @Path("plotId") plotId: String,
         @Query("startDate") startDate: String,
         @Query("endDate") endDate: String,
-    ): Response<TelemetrySeriesDto>
+    ): Response<List<HourlyReadingDto>>
 }

@@ -1,9 +1,13 @@
 package pe.edu.upc.viora.features.telemetry.infrastructure.repository
 
+import java.time.Clock
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import pe.edu.upc.viora.core.database.CacheMetadataDao
+import pe.edu.upc.viora.core.database.CacheMetadataEntity
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.network.ApiCaller
@@ -22,6 +26,8 @@ class IncidentRepositoryImpl @Inject constructor(
     private val service: IncidentService,
     private val incidentDao: IncidentDao,
     private val apiCaller: ApiCaller,
+    private val cacheMetadataDao: CacheMetadataDao,
+    private val clock: Clock,
 ) : IncidentRepository {
 
     override fun observeIncidents(plotId: String?): Flow<List<AgroclimaticIncident>> {
@@ -54,9 +60,11 @@ class IncidentRepositoryImpl @Inject constructor(
             if (plotId != null) {
                 incidentDao.upsertAll(entities)
                 incidentDao.deleteExceptForPlot(plotId, entities.map { it.id })
+                if (status == null && severity == null) stampRefresh(plotId)
             } else if (status == null && severity == null) {
                 incidentDao.upsertAll(entities)
                 incidentDao.deleteExcept(entities.map { it.id })
+                stampRefresh(null)
             } else {
                 incidentDao.upsertAll(entities)
             }
@@ -66,6 +74,19 @@ class IncidentRepositoryImpl @Inject constructor(
             is AppResult.Failure -> cacheResult
             is AppResult.Success -> AppResult.Success(summaryDto.summary.toDomain())
         }
+    }
+
+    /** A plot counts as downloaded by its own refresh or by the refresh of every plot. */
+    override fun observeLastRefresh(plotId: String?): Flow<Long?> {
+        val all = cacheMetadataDao.observeFetchedAt(cacheKey(null))
+        if (plotId == null) return all
+        return combine(all, cacheMetadataDao.observeFetchedAt(cacheKey(plotId))) { everyPlot, onePlot ->
+            listOfNotNull(everyPlot, onePlot).maxOrNull()
+        }
+    }
+
+    private suspend fun stampRefresh(plotId: String?) {
+        cacheMetadataDao.upsert(CacheMetadataEntity(cacheKey(plotId), clock.millis()))
     }
 
     override suspend fun getIncidentDetail(incidentId: String): AppResult<IncidentDetail> {
@@ -112,6 +133,8 @@ class IncidentRepositoryImpl @Inject constructor(
             is AppResult.Success -> AppResult.Success(remote.value.summary.toDomain())
         }
     }
+
+    private fun cacheKey(plotId: String?) = if (plotId == null) "incidents" else "incidents:$plotId"
 
     private suspend fun guarded(block: suspend () -> Unit): AppResult<Unit> = try {
         block()

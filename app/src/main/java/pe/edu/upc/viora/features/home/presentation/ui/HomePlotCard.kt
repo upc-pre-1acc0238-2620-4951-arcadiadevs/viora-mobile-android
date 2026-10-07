@@ -26,10 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,8 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green100
-import pe.edu.upc.viora.core.designsystem.theme.Green200
-import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
@@ -47,6 +42,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.ShadowTint
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.TreeGrid
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.drawPlot
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.drawTerrain
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.normalizeOutline
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.plotSummary
 
@@ -86,7 +84,7 @@ fun HomePlotCard(plot: Plot, onClick: () -> Unit, modifier: Modifier = Modifier)
             .clickable(role = Role.Button, onClick = onClick),
     ) {
         Box(modifier = Modifier.fillMaxWidth().height(116.dp).background(Green100)) {
-            OutlineArt(plot = plot, modifier = Modifier.fillMaxSize().padding(vertical = 20.dp))
+            OutlineArt(plot = plot, modifier = Modifier.fillMaxSize())
             StatusChip(
                 text = stringResource(R.string.home_plot_status_no_data),
                 modifier = Modifier.align(Alignment.TopStart).padding(start = 14.dp, top = 14.dp),
@@ -130,22 +128,20 @@ private fun StatusChip(text: String, modifier: Modifier = Modifier) {
     }
 }
 
-/** The plot's real polygon, centred and scaled to fit, drawn on the card's tile. */
+/**
+ * The plot's real polygon on the card's tile, drawn as Figma "Ilustración/Lote": terrain lines,
+ * the outline with its trees, placed right of centre so the status chip has room on the left.
+ */
 @Composable
 private fun OutlineArt(plot: Plot, modifier: Modifier = Modifier) {
     val points = remember(plot.outline) { normalizeOutline(plot.outline) }
-    if (points.isEmpty()) return
     Canvas(modifier = modifier) {
-        val side = minOf(size.width, size.height)
-        val origin = Offset((size.width - side) / 2, (size.height - side) / 2)
-        val path = Path().apply {
-            points.forEachIndexed { index, point ->
-                val position = Offset(origin.x + point.x * side, origin.y + point.y * side)
-                if (index == 0) moveTo(position.x, position.y) else lineTo(position.x, position.y)
-            }
-            close()
-        }
-        drawPath(path, color = Green200)
-        drawPath(path, color = Green800, style = Stroke(width = 2.dp.toPx(), join = StrokeJoin.Round))
+        drawTerrain()
+        // Figma: the plot spans x 100–240 and y 16–102 of the 272 x 116 tile.
+        drawPlot(
+            points = points,
+            area = Rect(left = size.width * 0.34f, top = 14.dp.toPx(), right = size.width * 0.93f, bottom = size.height - 12.dp.toPx()),
+            trees = TreeGrid.Card,
+        )
     }
 }

@@ -42,6 +42,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.util.Locale
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
+import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
@@ -53,10 +55,10 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
+import pe.edu.upc.viora.core.presentation.vioraNumberFormat
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.PlotSamplingOverview
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.SamplingStatus
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.SelectPlotSamplingUiState
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.component.VoiceOfViora
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.SelectPlotSamplingViewModel
 
 private val ScreenPadding = 24.dp
@@ -175,30 +177,15 @@ fun SelectPlotSamplingContent(
             Spacer(Modifier.height(28.dp))
 
             // Headline: "¿Dónde vas a *muestrear?*"
-            Text(
-                text = stringResource(R.string.sampling_select_plot_headline_lead),
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontSize = 40.sp,
-                    lineHeight = 44.sp,
-                    letterSpacing = (-1).sp,
-                ),
-                color = Neutral900,
-            )
-            Text(
-                text = stringResource(R.string.sampling_select_plot_headline_emphasis),
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontSize = 40.sp,
-                    lineHeight = 44.sp,
-                    fontStyle = FontStyle.Italic,
-                    letterSpacing = (-1).sp,
-                ),
-                color = Neutral900,
+            EditorialHeadline(
+                lead = stringResource(R.string.sampling_select_plot_headline_lead),
+                emphasis = stringResource(R.string.sampling_select_plot_headline_emphasis),
             )
 
             Spacer(Modifier.height(16.dp))
 
             // Editorial / Voice of Viora
-            VoiceOfViora(
+            VioraVoice(
                 text = stringResource(R.string.sampling_select_plot_voice),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -337,10 +324,7 @@ private fun PlotSamplingCard(
                 overflow = TextOverflow.Ellipsis,
             )
 
-            val areaStr = java.text.NumberFormat.getNumberInstance().apply {
-                minimumFractionDigits = 1
-                maximumFractionDigits = 2
-            }.format(plot.areaHectares)
+            val areaStr = vioraNumberFormat(1, 2).format(plot.areaHectares)
             Text(
                 text = "${plot.variety} · $areaStr ha",
                 style = MaterialTheme.typography.bodySmall.copy(

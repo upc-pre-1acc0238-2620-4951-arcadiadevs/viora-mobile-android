@@ -73,7 +73,9 @@ object HarvestPresenter {
             steady -> Outlook.STEADY
             last.bearing == BearingYear.ON -> Outlook.OFF_LIKELY
             last.bearing == BearingYear.OFF -> Outlook.ON_LIKELY
-            else -> Outlook.STEADY
+            // The index says the plot alternates, so a last year labelled "even" cannot mean
+            // "steady": the swing is read from the last two harvests instead (Victor, 2026-10-07).
+            else -> swingOf(ordered)
         }
         val nextYear = last.campaignYear + 1
         return HarvestSummary(
@@ -92,6 +94,16 @@ object HarvestPresenter {
             nextYear = nextYear,
             outlook = outlook,
         )
+    }
+
+    /** Up after the previous campaign: an OFF is likely next; down: an ON. Equal or alone: steady. */
+    private fun swingOf(ordered: List<HarvestRecord>): Outlook {
+        val (previous, last) = ordered.takeLast(2).takeIf { it.size == 2 } ?: return Outlook.STEADY
+        return when {
+            last.totalYieldKg > previous.totalYieldKg -> Outlook.OFF_LIKELY
+            last.totalYieldKg < previous.totalYieldKg -> Outlook.ON_LIKELY
+            else -> Outlook.STEADY
+        }
     }
 
     /** The oldest interval of the plot, or null when there is none to show. */

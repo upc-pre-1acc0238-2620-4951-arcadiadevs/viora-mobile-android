@@ -21,6 +21,7 @@ fun NavGraphBuilder.sensorsComposable(navController: NavController) {
         SensorsScreen(
             onBack = { navController.popBackStack() },
             onHarvestHistory = { navController.navigate(HarvestHistoryRoute(plotId = route.plotId, plotName = route.plotName)) },
+            onClimate = { navController.navigate(PlotClimateRoute(plotId = route.plotId, plotName = route.plotName)) },
             onNodeClick = { node ->
                 navController.navigate(ConfigureNodeRoute(plotId = route.plotId, nodeId = node.id, plotName = route.plotName))
             },

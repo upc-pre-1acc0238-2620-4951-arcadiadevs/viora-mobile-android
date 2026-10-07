@@ -39,7 +39,7 @@ class TelemetryRepositoryImpl @Inject constructor(
         val start = end.minus(Duration.ofHours(range.hours))
         val remote = apiCaller.call { service.getTelemetries(plotId, start.toString(), end.toString()) }
         if (remote is AppResult.Failure) return remote
-        val entities = (remote as AppResult.Success).value.readings.mapNotNull { it.toEntity(plotId) }
+        val entities = (remote as AppResult.Success).value.mapNotNull { it.toEntity(plotId) }
         return guarded {
             readingDao.upsertAll(entities)
             readingDao.deleteBefore(plotId, end.minus(Duration.ofHours(TelemetryRange.LAST_30_DAYS.hours)).toEpochMilli())

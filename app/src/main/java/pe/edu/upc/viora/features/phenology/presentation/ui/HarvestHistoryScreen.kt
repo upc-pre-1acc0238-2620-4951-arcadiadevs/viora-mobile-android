@@ -50,6 +50,7 @@ import kotlinx.coroutines.delay
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
+import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
@@ -88,7 +89,6 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.VoiceLine
 
 private const val NOTICE_MILLIS = 3_500L
 
@@ -97,6 +97,7 @@ fun HarvestHistoryScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onSensors: () -> Unit = {},
+    onClimate: () -> Unit = {},
     viewModel: HarvestHistoryViewModel = hiltViewModel(),
     editor: CampaignEditorViewModel = hiltViewModel(),
 ) {
@@ -160,7 +161,11 @@ fun HarvestHistoryScreen(
             current = LotSection.HARVEST,
             onSelect = { section ->
                 showMore = false
-                if (section == LotSection.SENSORS) onSensors()
+                when (section) {
+                    LotSection.SENSORS -> onSensors()
+                    LotSection.CLIMATE -> onClimate()
+                    else -> Unit
+                }
             },
             onDismiss = { showMore = false },
         )
@@ -332,7 +337,7 @@ private fun ContentBody(
         } else {
             ProgressCard(count = state.records.size)
         }
-        VoiceLine(text = voiceText(summary.voice))
+        VioraVoice(text = voiceText(summary.voice))
         if (index != null && bbiClass != null) InsightCards(state)
 
         VioraSectionHeader(

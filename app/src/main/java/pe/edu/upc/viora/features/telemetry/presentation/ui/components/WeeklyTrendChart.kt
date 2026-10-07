@@ -74,9 +74,7 @@ fun WeeklyTrendChart(
     val locale = LocalConfiguration.current.locales[0]
 
     val peakPoint = weeklyTrend.maxByOrNull { it.value }
-    val peakDisplay = peakPoint?.let {
-        if (it.value % 1.0 == 0.0) "${it.value.toInt()}$unit" else "${it.value} $unit"
-    } ?: "${thresholdValue.toInt()}$unit"
+    val peakDisplay = formatMetricValue(locale, peakPoint?.value ?: thresholdValue, unit)
 
     val tubeHeight = 176.dp
     val tubeShape = RoundedCornerShape(18.dp)
@@ -232,7 +230,7 @@ fun WeeklyTrendChart(
 
                     // "umbral 32°" label placed just above the dashed line on the left, rendered in front of test-tubes
                     Text(
-                        text = stringResource(R.string.alert_chart_threshold_label, thresholdValue.toInt(), unit),
+                        text = stringResource(R.string.alert_chart_threshold_label, formatMetricValue(locale, thresholdValue, unit)),
                         fontFamily = RobotoFamily,
                         fontWeight = FontWeight.Medium,
                         fontSize = 10.sp,

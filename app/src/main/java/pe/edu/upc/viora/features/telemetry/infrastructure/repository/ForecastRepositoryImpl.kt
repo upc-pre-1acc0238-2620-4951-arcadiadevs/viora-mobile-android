@@ -32,8 +32,10 @@ class ForecastRepositoryImpl @Inject constructor(
         val dto = (remote as AppResult.Success).value
         // The sync time is the weather service's, so "updated 6:40 a.m." is when the forecast was
         // produced; if the server sends something unreadable the download time stands in for it.
-        val syncedAt = runCatching { Instant.parse(dto.syncedAt) }.getOrNull()?.toEpochMilli() ?: clock.millis()
-        val entities = dto.days.mapNotNull { it.toEntity(plotId, syncedAt) }
+        val syncedAt = dto.dailyForecasts
+            .mapNotNull { day -> day.syncedAt?.let { runCatching { Instant.parse(it) }.getOrNull() } }
+            .maxOrNull()?.toEpochMilli() ?: clock.millis()
+        val entities = dto.dailyForecasts.mapNotNull { it.toEntity(plotId, syncedAt) }
         // An empty answer must not wipe a good cached forecast.
         if (entities.isEmpty()) {
             return AppResult.Failure(AppError.Unknown(IllegalStateException("Server returned an empty forecast")))

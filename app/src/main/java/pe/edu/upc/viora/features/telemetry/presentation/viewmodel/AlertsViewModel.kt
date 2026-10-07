@@ -9,11 +9,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsLastRefreshUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.RefreshIncidentsUseCase
 import pe.edu.upc.viora.features.telemetry.domain.entity.AlertsSummary
@@ -31,6 +33,7 @@ class AlertsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     observeIncidents: ObserveIncidentsUseCase,
     private val refreshIncidents: RefreshIncidentsUseCase,
+    observeLastRefresh: ObserveIncidentsLastRefreshUseCase? = null,
 ) : ViewModel() {
 
     val plotId: String? = savedStateHandle.get<String>("plotId")
@@ -50,7 +53,8 @@ class AlertsViewModel @Inject constructor(
         currentFilter,
         summaryState,
         refreshState,
-    ) { allIncidents, filter, summary, refresh ->
+        observeLastRefresh?.invoke(plotId) ?: flowOf(null),
+    ) { allIncidents, filter, summary, refresh, lastRefresh ->
         val resolvedSummary = if (summary.activeCount > 0 || summary.criticalCount > 0 || summary.warningCount > 0 || summary.normalizedCount > 0) {
             summary
         } else {
@@ -93,8 +97,9 @@ class AlertsViewModel @Inject constructor(
                 affectedPlotNames = affectedPlotNames,
                 latestTriggeredAt = latestTrigger,
             )
-            refresh.isRefreshing || !refresh.hasFinishedOnce -> AlertsUiState.Loading
-            refresh.error != null -> AlertsUiState.Error(refresh.error)
+            // Incidents downloaded before and none cached: the plot has no alerts, say so at once.
+            lastRefresh == null && (refresh.isRefreshing || !refresh.hasFinishedOnce) -> AlertsUiState.Loading
+            refresh.error != null && lastRefresh == null -> AlertsUiState.Error(refresh.error)
             else -> AlertsUiState.Empty(summary = resolvedSummary, activeFilter = filter)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), AlertsUiState.Loading)

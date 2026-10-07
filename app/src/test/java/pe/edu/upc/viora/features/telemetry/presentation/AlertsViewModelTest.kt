@@ -1,6 +1,8 @@
 package pe.edu.upc.viora.features.telemetry.presentation
 
 import androidx.lifecycle.SavedStateHandle
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -18,6 +20,7 @@ import org.junit.Before
 import org.junit.Test
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsLastRefreshUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.RefreshIncidentsUseCase
 import pe.edu.upc.viora.features.telemetry.domain.entity.AgroclimaticIncident
@@ -34,6 +37,12 @@ private class FakeIncidentRepo : IncidentRepository {
     val incidentsFlow = MutableStateFlow<List<AgroclimaticIncident>>(emptyList())
     val observedPlotIds = mutableListOf<String?>()
     val refreshedPlotIds = mutableListOf<String?>()
+    val lastRefresh = MutableStateFlow<Long?>(null)
+
+    /** When set, [refresh] suspends until it completes. */
+    var gate: CompletableDeferred<Unit>? = null
+
+    override fun observeLastRefresh(plotId: String?): Flow<Long?> = lastRefresh
 
     override fun observeIncidents(plotId: String?): Flow<List<AgroclimaticIncident>> {
         observedPlotIds += plotId
@@ -50,6 +59,7 @@ private class FakeIncidentRepo : IncidentRepository {
         severity: String?,
     ): AppResult<AlertsSummary> {
         refreshedPlotIds += plotId
+        gate?.await()
         return AppResult.Success(AlertsSummary(0, 0, 0, 0))
     }
 
@@ -103,6 +113,41 @@ class AlertsViewModelTest {
         triggeredAt = "2026-10-06T10:00:00Z",
         stressDurationMinutes = 45,
     )
+
+    private fun collecting(vm: AlertsViewModel) = CoroutineScope(dispatcher).launch { vm.uiState.collect {} }
+
+    @Test
+    fun `a plot without cached alerts that was synced before is empty at once, not loading`() = runTest {
+        fakeRepo.lastRefresh.value = 1_000L
+        fakeRepo.gate = CompletableDeferred()
+        val vm = AlertsViewModel(
+            savedStateHandle = SavedStateHandle(mapOf("plotId" to "plot-1")),
+            observeIncidents = ObserveIncidentsUseCase(fakeRepo),
+            refreshIncidents = RefreshIncidentsUseCase(fakeRepo),
+            observeLastRefresh = ObserveIncidentsLastRefreshUseCase(fakeRepo),
+        )
+        val job = collecting(vm)
+
+        assertTrue(vm.uiState.value is AlertsUiState.Empty)
+        job.cancel()
+    }
+
+    @Test
+    fun `a plot never synced keeps loading until the first refresh answers`() = runTest {
+        fakeRepo.gate = CompletableDeferred()
+        val vm = AlertsViewModel(
+            savedStateHandle = SavedStateHandle(mapOf("plotId" to "plot-1")),
+            observeIncidents = ObserveIncidentsUseCase(fakeRepo),
+            refreshIncidents = RefreshIncidentsUseCase(fakeRepo),
+            observeLastRefresh = ObserveIncidentsLastRefreshUseCase(fakeRepo),
+        )
+        val job = collecting(vm)
+
+        assertEquals(AlertsUiState.Loading, vm.uiState.value)
+        fakeRepo.gate?.complete(Unit)
+        assertTrue(vm.uiState.value is AlertsUiState.Empty)
+        job.cancel()
+    }
 
     @Test
     fun `when plotId is provided, observes and refreshes incidents for that plot only`() = runTest {
