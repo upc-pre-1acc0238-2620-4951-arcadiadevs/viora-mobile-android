@@ -119,5 +119,18 @@ object AppMigrations {
         connection.execSQL(MIGRATION_6_7_SQL)
     }
 
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+    internal const val MIGRATION_7_8_SQL =
+        "CREATE TABLE IF NOT EXISTS `chill_trackers` (`plot_id` TEXT NOT NULL, " +
+            "`accumulated_portions` REAL NOT NULL, `threshold_portions` REAL NOT NULL, " +
+            "`days_above_24_celsius` INTEGER NOT NULL, `season_state` TEXT NOT NULL, " +
+            "`projected_completion_date` TEXT, `previous_winter_completion_date` TEXT, " +
+            "`enso_risk` TEXT NOT NULL, `curve_points_json` TEXT NOT NULL, " +
+            "`synced_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`plot_id`))"
+
+    /** Adds the cache of the winter chilling accumulation (Erez model, US22). */
+    val MIGRATION_7_8 = Migration(7, 8) { connection ->
+        connection.execSQL(MIGRATION_7_8_SQL)
+    }
+
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
 }
