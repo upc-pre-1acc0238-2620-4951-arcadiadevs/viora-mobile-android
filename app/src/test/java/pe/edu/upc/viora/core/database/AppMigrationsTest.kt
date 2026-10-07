@@ -25,6 +25,7 @@ class AppMigrationsTest {
     }
 
     private val v5 = createSqlByTable(5)
+    private val v6 = createSqlByTable(6)
 
     @Test
     fun `new tables are created exactly as the exported v5 schema`() {
@@ -55,9 +56,21 @@ class AppMigrationsTest {
     }
 
     @Test
-    fun `migrations 3 to 4 and 4 to 5 are registered`() {
+    fun `new draft_tree_samples table in v6 matches migration`() {
+        assertEquals(v6.getValue("draft_tree_samples"), AppMigrations.MIGRATION_5_6_SQL)
+    }
+
+    @Test
+    fun `every other v6 table is untouched since v5`() {
+        val changed = setOf("draft_tree_samples")
+        (v6.keys - changed).forEach { assertEquals(v5[it], v6[it]) }
+    }
+
+    @Test
+    fun `migrations 3 to 4, 4 to 5 and 5 to 6 are registered`() {
         assertTrue(AppMigrations.ALL.any { it.startVersion == 3 && it.endVersion == 4 })
         assertTrue(AppMigrations.ALL.any { it.startVersion == 4 && it.endVersion == 5 })
+        assertTrue(AppMigrations.ALL.any { it.startVersion == 5 && it.endVersion == 6 })
     }
 
     private fun tableOf(createSql: String) = createSql.substringAfter("EXISTS `").substringBefore("`")

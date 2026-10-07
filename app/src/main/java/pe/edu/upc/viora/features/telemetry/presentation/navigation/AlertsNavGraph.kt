@@ -9,7 +9,7 @@ import pe.edu.upc.viora.features.telemetry.presentation.ui.AlertsCenterScreen
 
 /** Route to the central alerts inbox screen. */
 @Serializable
-data object AlertsCenterRoute
+data class AlertsCenterRoute(val plotId: String? = null)
 
 /**
  * Route to the deep detail of an alert.

@@ -562,6 +562,7 @@
 
     <string name="logbook_headline_lead">Tu</string>
     <string name="logbook_headline_emphasis">bitácora.</string>
+    <string name="logbook_saved_on_phone_badge">%1$d en el teléfono</string>
     <string name="logbook_filter_all">Todo</string>
     <string name="logbook_filter_samplings">Muestreos</string>
     <string name="logbook_filter_thinnings">Aclareos</string>
@@ -601,6 +602,87 @@
     <string name="sensors_unlink_count_label">nodos en el lote</string>
     <string name="sensors_unlink_title_emphasis">%1$s?</string>
     <string name="sensors_unlink_title_lead">¿Desvincular</string>
+
+    <!-- US24 / US25: Thinning Sampling and Bitacora Timeline -->
+    <string name="sampling_select_plot_title">Nuevo muestreo</string>
+    <string name="sampling_select_plot_subtitle">Campaña %1$d · cuajado</string>
+    <string name="sampling_select_plot_headline_lead">¿Dónde vas a</string>
+    <string name="sampling_select_plot_headline_emphasis">muestrear?</string>
+    <string name="sampling_select_plot_voice">Elige 5 árboles repartidos en el lote, no solo los del borde.</string>
+    <string name="sampling_status_in_progress">Ronda en curso · %1$d de %2$d</string>
+    <string name="sampling_status_completed">Ronda completa · %1$d de %2$d</string>
+    <string name="sampling_status_not_started">Sin muestreo esta campaña</string>
+    <string name="sampling_action_start">Empezar ronda</string>
+    <string name="sampling_action_continue">Continuar ronda</string>
+    <string name="sampling_action_view_summary">Ver resumen</string>
+
+    <string name="sampling_round_subtitle">Ronda de cuajado · %1$d</string>
+    <string name="sampling_representativeness_title">REPRESENTATIVIDAD</string>
+    <string name="sampling_trees_count_suffix">de %1$d árboles</string>
+    <string name="sampling_trees_missing_notice">Faltan %1$d árboles para una muestra suficiente.</string>
+    <string name="sampling_trees_sufficient_notice">Muestra suficiente: ya puedo calcular tu carga.</string>
+    <string name="sampling_stat_mean_fruits">frutos por brote · media</string>
+    <string name="sampling_stat_saved_locally">guardados en el teléfono</string>
+    <string name="sampling_evaluated_trees_title">Árboles evaluados</string>
+    <string name="sampling_evaluated_trees_title_with_count">Árboles evaluados · %1$d</string>
+    <string name="sampling_evaluated_trees_empty">Aún no se ha evaluado ningún árbol</string>
+    <string name="sampling_tree_details">%1$d brotes · %2$d frutos</string>
+    <string name="sampling_tree_ratio">%1$s frutos por brote</string>
+    <string name="sampling_saved_on_phone_badge">En el teléfono</string>
+    <string name="sampling_action_continue_later">Continuar después</string>
+    <string name="sampling_action_add_tree">Agregar árbol %1$d</string>
+    <string name="sampling_action_another_tree">Otro árbol</string>
+    <string name="sampling_action_finish">Finalizar</string>
+    <string name="sampling_action_finalize_round">Finalizar ronda</string>
+    <string name="sampling_action_view_all_trees">Ver los %1$d árboles</string>
+    <string name="sampling_action_view_less_trees">Ver menos</string>
+
+    <string name="sampling_register_tree_title">Árbol %1$d de %2$d</string>
+    <string name="sampling_register_tree_subtitle">%1$s · se guarda en el teléfono</string>
+    <string name="sampling_register_tree_headline_lead">Árbol</string>
+    <string name="sampling_tree_tag_label">Etiqueta del árbol</string>
+    <string name="sampling_trunk_circumference_label">Contorno del tronco · opcional</string>
+    <string name="sampling_trunk_circumference_hint">p. ej. 92 cm · a un palmo del suelo</string>
+    <string name="sampling_trunk_circumference_suffix"> cm · a un palmo del suelo</string>
+    <string name="sampling_shoots_observed_title">Brotes observados</string>
+    <string name="sampling_shoots_observed_subtitle">En la rama marcada del árbol</string>
+    <string name="sampling_fruit_set_title">Frutos cuajados</string>
+    <string name="sampling_fruit_set_subtitle">Frutitos ya formados en esos brotes</string>
+    <string name="sampling_live_calculated_suffix">frutos por brote en este árbol</string>
+    <string name="sampling_action_save_tree">Guardar árbol</string>
+
+    <string name="sampling_complete_synced">Sincronizado · %1$s</string>
+    <string name="sampling_complete_headline_lead">Ronda</string>
+    <string name="sampling_complete_headline_emphasis">completa.</string>
+    <string name="sampling_complete_voice">Con esta muestra ya calculo la carga de %1$s.</string>
+    <string name="sampling_complete_trees_label">árboles evaluados</string>
+    <string name="sampling_complete_shoots_label">brotes observados</string>
+    <string name="sampling_complete_fruits_label">frutos cuajados</string>
+    <string name="sampling_complete_mean_label">frutos por brote · media</string>
+    <string name="sampling_complete_action_view_plan">Ver plan del lote</string>
+    <string name="sampling_complete_action_back_logbook">Volver a Bitácora</string>
+
+    <string name="sampling_offline_banner">Sin conexión: tus registros se guardan en el teléfono.</string>
+    <string name="sampling_synced_banner">Volvió la señal · %1$d árboles sincronizados</string>
+    <string name="sampling_badge_pending_sync">Por sincronizar</string>
+    <string name="sampling_badge_synced">Sincronizado</string>
+    <string name="sampling_stat_synced">sincronizados</string>
+    <string name="sampling_error_fruits_out_of_range">Con %1$d brotes, el máximo admitido es %2$d frutos (4 por brote).</string>
+    <string name="sampling_live_calculated_invalid">revisa los frutos para calcular</string>
+    <string name="sampling_saved_offline_badge">En el teléfono</string>
+    <string name="sampling_saved_offline_headline_emphasis">guardada.</string>
+    <string name="sampling_saved_offline_voice">Cuando vuelva la señal, completo la ronda y calculo tu carga.</string>
+    <string name="sampling_saved_offline_plan_notice">El plan se habilita cuando la ronda se sincronice.</string>
+
+    <string name="logbook_sampling_completed_title">Muestreo completado</string>
+    <string name="logbook_sampling_completed_desc">%1$s · %2$d árboles · %3$s frutos/brote</string>
+    <string name="logbook_thinning_executed_title">Aclareo registrado</string>
+    <string name="logbook_thinning_executed_desc">%1$s · %2$s %% · %3$s</string>
+    <string name="logbook_in_progress_badge">EN CURSO · %1$s</string>
+    <string name="logbook_in_progress_title">Muestreo de cuajado</string>
+    <string name="logbook_in_progress_counter">%1$d de %2$d árboles · faltan %3$d para una muestra suficiente</string>
+    <string name="logbook_in_progress_continue">Continuar ronda</string>
+
     <!-- Clima del lote (P90) y detalle de la métrica (P91): US17 y US19 -->
     <string name="climate_air_humidity">Humedad del aire</string>
     <string name="climate_chip_air">%1$s aire</string>
