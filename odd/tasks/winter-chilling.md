@@ -49,6 +49,7 @@ In olive farming, uniform spring budbreak and flowering require a critical amoun
 - `8aa63`: docs(odd): update winter chilling specification with review fixes
 - T5 done in `0cca0` (~1240 authored lines across 7 files). Complete Figma pixel-perfect redesign of P80 & P81.
 - `e892f`: fix(phenology): refine background and card colors to match figma palette exactly.
+- `1efbf`: fix(phenology): localize date formatting and fallbacks to eliminate hardcoded texts.
 - Verification passed: `./gradlew testDebugUnitTest assembleDebug` (100% tests passing, clean debug APK build).
 
 ## Next step
