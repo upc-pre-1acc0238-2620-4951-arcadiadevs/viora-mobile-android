@@ -133,7 +133,7 @@ fun WinterChillScreen(
             plotName = content.plotName,
             summary = stringResource(
                 R.string.plot_options_subtitle,
-                content.varietyName.ifBlank { "Sevillana" },
+                content.varietyName.ifBlank { stringResource(R.string.variety_sevillana) },
                 "—",
                 "—",
             ),
@@ -185,7 +185,7 @@ private fun TopBar(
                 maxLines = 1,
             )
             Text(
-                text = stringResource(R.string.winter_chill_subtitle, varietyName.ifBlank { "Sevillana" }),
+                text = stringResource(R.string.winter_chill_subtitle, varietyName.ifBlank { stringResource(R.string.variety_sevillana) }),
                 style = MaterialTheme.typography.labelSmall,
                 color = Neutral600,
                 maxLines = 1,
@@ -268,7 +268,7 @@ private fun ContentBody(
             seasonState = state.seasonState,
             daysAbove24Celsius = state.daysAbove24Celsius,
             projectedCompletionDate = state.projectedCompletionDate,
-            varietyName = state.varietyName.ifBlank { "Sevillana" },
+            varietyName = state.varietyName.ifBlank { stringResource(R.string.variety_sevillana) },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -300,7 +300,9 @@ private fun HeroSection(
             R.string.winter_chill_hero_sub_completed,
         )
         WinterSeasonState.OFF_SEASON -> {
-            val dateStr = state.projectedCompletionDate?.let { formatDateWithMonth(it) } ?: "18 de agosto"
+            val datePattern = stringResource(R.string.winter_chill_pattern_day)
+            val date = state.projectedCompletionDate ?: LocalDate.of(LocalDate.now().year, 8, 18)
+            val dateStr = DateTimeFormatter.ofPattern(datePattern, Locale.getDefault()).format(date)
             stringResource(R.string.winter_chill_hero_sub_off_season, dateStr)
         }
     }
@@ -533,8 +535,12 @@ private fun AsymmetricMetricsRow(
     val bottomChipText = if (state.seasonState == WinterSeasonState.OFF_SEASON) {
         stringResource(R.string.winter_chill_card_total_portions, state.accumulatedPortions)
     } else {
-        val prevDateStr = state.previousWinterCompletionDate?.let { formatDateShort(it) }
-            ?: if (state.seasonState == WinterSeasonState.CHILL_HALTED) "4 ago" else "18 ago"
+        val fallbackPrevDate = if (state.seasonState == WinterSeasonState.CHILL_HALTED) {
+            LocalDate.of(LocalDate.now().year - 1, 8, 4)
+        } else {
+            LocalDate.of(LocalDate.now().year - 1, 8, 18)
+        }
+        val prevDateStr = formatDateShort(state.previousWinterCompletionDate ?: fallbackPrevDate)
         stringResource(R.string.winter_chill_card_past_winter_date, prevDateStr)
     }
 
@@ -821,6 +827,3 @@ private fun formatDateShort(date: LocalDate, locale: Locale = Locale.getDefault(
 
 private fun formatMonthShort(date: LocalDate, locale: Locale = Locale.getDefault()): String =
     DateTimeFormatter.ofPattern("MMM", locale).format(date).replace(".", "")
-
-private fun formatDateWithMonth(date: LocalDate, locale: Locale = Locale.getDefault()): String =
-    DateTimeFormatter.ofPattern("d 'de' MMMM", locale).format(date)

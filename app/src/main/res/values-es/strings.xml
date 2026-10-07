@@ -956,4 +956,5 @@
     <string name="winter_chill_why_key3_title">Brotación · 31 ago</string>
     <string name="winter_chill_why_key3_desc">ahí se cierra el conteo del invierno</string>
     <string name="winter_chill_why_button_understood">Entendido</string>
+    <string name="winter_chill_pattern_day">d \'de\' MMMM</string>
 </resources>

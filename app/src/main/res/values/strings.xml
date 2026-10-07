@@ -954,4 +954,5 @@
     <string name="winter_chill_why_key3_title">Budbreak · 31 Aug</string>
     <string name="winter_chill_why_key3_desc">that is when winter count closes</string>
     <string name="winter_chill_why_button_understood">Got it</string>
+    <string name="winter_chill_pattern_day">MMMM d</string>
 </resources>

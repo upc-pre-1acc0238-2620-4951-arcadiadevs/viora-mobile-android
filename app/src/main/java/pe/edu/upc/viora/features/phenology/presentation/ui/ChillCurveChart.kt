@@ -66,7 +66,7 @@ fun ChillCurveChart(
     seasonState: WinterSeasonState = WinterSeasonState.ACCUMULATING,
     daysAbove24Celsius: Int = 0,
     projectedCompletionDate: LocalDate? = null,
-    varietyName: String = "Sevillana",
+    varietyName: String = "",
     modifier: Modifier = Modifier,
 ) {
     val textMeasurer = rememberTextMeasurer()
@@ -100,16 +100,18 @@ fun ChillCurveChart(
     val augLabel = stringResource(R.string.winter_chill_month_aug)
     val augEndLabel = stringResource(R.string.winter_chill_month_aug_end)
     val todayCalloutText = stringResource(R.string.winter_chill_chart_today_callout, currentPortions.toInt())
-    val thresholdVarietyText = stringResource(R.string.winter_chill_chart_threshold_variety, threshold.toInt(), varietyName.ifBlank { "Sevillana" })
+    val resolvedVariety = varietyName.ifBlank { stringResource(R.string.variety_sevillana) }
+    val thresholdVarietyText = stringResource(R.string.winter_chill_chart_threshold_variety, threshold.toInt(), resolvedVariety)
 
-    val projDateLabel = projectedCompletionDate?.let {
-        DateTimeFormatter.ofPattern("d MMM", Locale.getDefault()).format(it).replace(".", "")
-    } ?: "4 ago"
+    val fallbackProjDate = LocalDate.of(LocalDate.now().year, 8, 4)
+    val projDateLabel = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
+        .format(projectedCompletionDate ?: fallbackProjDate)
+        .replace(".", "")
 
     val noteText = when (seasonState) {
         WinterSeasonState.ACCUMULATING -> stringResource(R.string.winter_chill_chart_note_accumulating)
         WinterSeasonState.CHILL_HALTED -> stringResource(R.string.winter_chill_chart_note_halted, daysAbove24Celsius)
-        WinterSeasonState.COMPLETED -> stringResource(R.string.winter_chill_chart_note_completed, varietyName.ifBlank { "Sevillana" }, projDateLabel)
+        WinterSeasonState.COMPLETED -> stringResource(R.string.winter_chill_chart_note_completed, resolvedVariety, projDateLabel)
         WinterSeasonState.OFF_SEASON -> stringResource(R.string.winter_chill_chart_note_off_season)
     }
 

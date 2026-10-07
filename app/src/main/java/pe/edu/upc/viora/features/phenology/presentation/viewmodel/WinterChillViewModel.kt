@@ -53,8 +53,8 @@ class WinterChillViewModel @Inject constructor(
         observePlot(PlotId(plotId)),
         refreshState,
     ) { tracker, lastSync, plot, refresh ->
-        val plotName = plot?.name ?: initialPlotName.ifEmpty { "Cuartel" }
-        val varietyName = plot?.variety?.displayName() ?: "Sevillana"
+        val plotName = plot?.name ?: initialPlotName
+        val varietyName = plot?.variety?.displayName().orEmpty()
 
         val hasCache = tracker != null || lastSync != null
         if (!hasCache) {
