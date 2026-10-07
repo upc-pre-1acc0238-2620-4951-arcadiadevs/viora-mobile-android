@@ -61,7 +61,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                             restoreState = true
                         }
                     },
-                    onOpenAlerts = { navController.navigate(AlertsCenterRoute) },
+                    onOpenAlerts = { plotId -> navController.navigate(AlertsCenterRoute(plotId = plotId)) },
                 )
             }
         }

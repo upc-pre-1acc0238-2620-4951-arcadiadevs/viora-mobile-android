@@ -89,8 +89,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private val activeAlertsCount: Flow<Long> = observeIncidents(null).map { incidents ->
-        incidents.count { it.status != IncidentStatus.NORMALIZED }.toLong()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val activeAlertsCount: Flow<Long> = focusedPlot.flatMapLatest { plot ->
+        observeIncidents(plot?.id?.value).map { incidents ->
+            incidents.count { it.status != IncidentStatus.NORMALIZED }.toLong()
+        }
     }
 
     private val focusAndAlternation: Flow<Pair<Plot?, HomeAlternation?>> =
@@ -127,10 +130,13 @@ class HomeViewModel @Inject constructor(
 
     init {
         refresh()
-        // Whenever the plot in focus changes, bring its harvests up to date (best effort).
+        // Whenever the plot in focus changes, bring its harvests and incidents up to date (best effort).
         viewModelScope.launch {
             focusedPlot.map { it?.id?.value }.distinctUntilChanged().collect { id ->
-                if (id != null) refreshHarvests(id)
+                if (id != null) {
+                    refreshHarvests(id)
+                    refreshIncidents(id)
+                }
             }
         }
     }

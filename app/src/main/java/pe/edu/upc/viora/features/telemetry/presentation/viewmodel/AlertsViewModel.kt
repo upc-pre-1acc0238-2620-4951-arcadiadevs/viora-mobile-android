@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.telemetry.presentation.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,9 +28,12 @@ import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsUiState
  */
 @HiltViewModel
 class AlertsViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     observeIncidents: ObserveIncidentsUseCase,
     private val refreshIncidents: RefreshIncidentsUseCase,
 ) : ViewModel() {
+
+    val plotId: String? = savedStateHandle.get<String>("plotId")
 
     private data class RefreshState(
         val isRefreshing: Boolean = false,
@@ -42,7 +46,7 @@ class AlertsViewModel @Inject constructor(
     private val refreshState = MutableStateFlow(RefreshState())
 
     val uiState: StateFlow<AlertsUiState> = combine(
-        observeIncidents(null),
+        observeIncidents(plotId),
         currentFilter,
         summaryState,
         refreshState,
@@ -109,7 +113,7 @@ class AlertsViewModel @Inject constructor(
         if (refreshState.value.isRefreshing) return
         refreshState.update { it.copy(isRefreshing = true) }
         viewModelScope.launch {
-            val result = refreshIncidents()
+            val result = refreshIncidents(plotId = plotId)
             when (result) {
                 is AppResult.Success -> {
                     summaryState.value = result.value

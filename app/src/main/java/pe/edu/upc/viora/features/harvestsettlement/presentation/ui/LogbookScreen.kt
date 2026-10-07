@@ -57,6 +57,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.core.domain.AppError
@@ -307,13 +308,13 @@ private fun SettledHarvestRow(entry: SettledHarvestEntry, modifier: Modifier = M
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.size(48.dp).clip(CircleShape).background(Green200),
+            modifier = Modifier.size(48.dp).clip(CircleShape).background(Harvest100),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_nutrition),
+                painter = painterResource(R.drawable.ic_inventory),
                 contentDescription = null,
-                tint = Green900,
+                tint = Harvest800,
                 modifier = Modifier.size(24.dp),
             )
         }
@@ -360,7 +361,7 @@ private fun SamplingEventRow(entry: SettledHarvestEntry, modifier: Modifier = Mo
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.size(48.dp).clip(CircleShape).background(Harvest300),
+            modifier = Modifier.size(48.dp).clip(CircleShape).background(Green200),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -413,13 +414,13 @@ private fun ThinningEventRow(entry: SettledHarvestEntry, modifier: Modifier = Mo
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.size(48.dp).clip(CircleShape).background(Green200),
+            modifier = Modifier.size(48.dp).clip(CircleShape).background(Terracotta100),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_content_cut),
                 contentDescription = null,
-                tint = Green900,
+                tint = Terracotta600,
                 modifier = Modifier.size(24.dp),
             )
         }

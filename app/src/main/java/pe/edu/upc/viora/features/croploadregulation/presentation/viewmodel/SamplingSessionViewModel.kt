@@ -19,6 +19,7 @@ import pe.edu.upc.viora.core.domain.fold
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.SubmitSamplingBatchUseCase
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingSummary
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
+import pe.edu.upc.viora.features.croploadregulation.domain.repository.ThinningRepository
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toDomain
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toEntity
@@ -27,6 +28,7 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.SamplingS
 @HiltViewModel
 class SamplingSessionViewModel @Inject constructor(
     private val submitSamplingBatch: SubmitSamplingBatchUseCase,
+    private val thinningRepository: ThinningRepository,
     private val draftDao: DraftTreeSampleDao,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
@@ -47,76 +49,127 @@ class SamplingSessionViewModel @Inject constructor(
 
     fun initSession(plotId: String, plotName: String, campaignYear: Int = java.time.Year.now().value) {
         val currentlyOffline = isDeviceOffline()
-        if (_uiState.value.plotId != plotId) {
+        val isNewPlot = _uiState.value.plotId != plotId
+        val wasOffline = if (isNewPlot) currentlyOffline else (_uiState.value.isOffline || currentlyOffline)
+
+        if (!isNewPlot && _uiState.value.samples.isNotEmpty() && _uiState.value.submissionSummary != null && !wasOffline) {
+            // Already active in this session and online with samples and summary loaded; avoid redundant fetch
+            return
+        }
+
+        if (isNewPlot) {
             _uiState.value = SamplingSessionUiState(
                 plotId = plotId,
                 plotName = plotName,
                 campaignYear = campaignYear,
                 samples = emptyList(),
                 targetTreesCount = 5,
+                isLoading = !currentlyOffline,
                 isOffline = currentlyOffline,
+                hasRecoveredConnection = false,
             )
-        } else if (currentlyOffline) {
-            _uiState.update { it.copy(isOffline = true) }
+        } else {
+            _uiState.update {
+                it.copy(
+                    isLoading = if (!currentlyOffline && it.submissionSummary == null) true else it.isLoading,
+                    isOffline = currentlyOffline,
+                    hasRecoveredConnection = false,
+                )
+            }
         }
 
-        viewModelScope.launch {
-            val drafts = draftDao.getSamples(plotId, campaignYear)
-            if (drafts.isNotEmpty()) {
-                val domainSamples = drafts.map { it.toDomain() }
-                _uiState.update { it.copy(samples = domainSamples) }
+        if (isNewPlot || wasOffline || _uiState.value.submissionSummary == null) {
+            viewModelScope.launch {
+                val drafts = draftDao.getSamples(plotId, campaignYear)
+                if (drafts.isNotEmpty()) {
+                    val domainSamples = drafts.map { it.toDomain() }
+                    _uiState.update { it.copy(samples = domainSamples) }
 
-                val unsynced = drafts.filter { !it.isSynced }
-                if (unsynced.isNotEmpty()) {
-                    if (isDeviceOffline()) {
-                        _uiState.update {
-                            it.copy(
-                                isOffline = true,
-                                hasRecoveredConnection = false,
-                            )
-                        }
-                        return@launch
-                    }
-
-                    val batchId = "batch-${LocalDate.now()}-${UUID.randomUUID().toString().take(6)}"
-                    submitSamplingBatch(
-                        plotId = plotId,
-                        campaignYear = campaignYear,
-                        batchId = batchId,
-                        samples = unsynced.map { it.toDomain() },
-                    ).fold(
-                        onSuccess = { summary ->
-                            unsynced.forEach { draftDao.markSampleAsSynced(it.id) }
-                            _uiState.update { current ->
-                                val updated = current.samples.map { sample ->
-                                    if (unsynced.any { it.treeIdentifier == sample.treeIdentifier }) {
-                                        sample.copy(isSynced = true)
-                                    } else {
-                                        sample
-                                    }
-                                }
-                                current.copy(
-                                    samples = updated,
-                                    submissionSummary = summary,
-                                    isOffline = false,
-                                    hasRecoveredConnection = true,
-                                    syncedOnResumeCount = unsynced.size,
+                    val unsynced = drafts.filter { !it.isSynced }
+                    if (unsynced.isNotEmpty()) {
+                        if (isDeviceOffline()) {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    isOffline = true,
+                                    hasRecoveredConnection = false,
                                 )
                             }
-                        },
-                        onFailure = { error ->
-                            val isOffline = error is pe.edu.upc.viora.core.domain.AppError.Offline ||
-                                error is pe.edu.upc.viora.core.domain.AppError.Timeout
-                            if (isOffline) {
+                            return@launch
+                        }
+
+                        val batchId = UUID.randomUUID().toString()
+                        submitSamplingBatch(
+                            plotId = plotId,
+                            campaignYear = campaignYear,
+                            batchId = batchId,
+                            samples = unsynced.map { it.toDomain() },
+                        ).fold(
+                            onSuccess = { summary ->
+                                unsynced.forEach { draftDao.markSampleAsSynced(it.id) }
+                                _uiState.update { current ->
+                                    val updated = current.samples.map { sample ->
+                                        if (unsynced.any { it.treeIdentifier == sample.treeIdentifier }) {
+                                            sample.copy(isSynced = true)
+                                        } else {
+                                            sample
+                                        }
+                                    }
+                                    current.copy(
+                                        isLoading = false,
+                                        samples = updated,
+                                        submissionSummary = summary,
+                                        isOffline = false,
+                                        hasRecoveredConnection = wasOffline || unsynced.isNotEmpty(),
+                                        syncedOnResumeCount = if (wasOffline || unsynced.isNotEmpty()) unsynced.size else 0,
+                                    )
+                                }
+                            },
+                            onFailure = { error ->
+                                val isOffline = error is pe.edu.upc.viora.core.domain.AppError.Offline ||
+                                    error is pe.edu.upc.viora.core.domain.AppError.Timeout
                                 _uiState.update {
                                     it.copy(
-                                        isOffline = true,
+                                        isLoading = false,
+                                        isOffline = isOffline || it.isOffline,
                                         hasRecoveredConnection = false,
                                     )
                                 }
+                            },
+                        )
+                    } else {
+                        if (!isDeviceOffline() && _uiState.value.submissionSummary == null) {
+                            thinningRepository.getSamplingSummary(plotId, campaignYear).fold(
+                                onSuccess = { summary ->
+                                    _uiState.update { it.copy(isLoading = false, submissionSummary = summary) }
+                                },
+                                onFailure = {
+                                    _uiState.update { it.copy(isLoading = false) }
+                                },
+                            )
+                        } else {
+                            _uiState.update { it.copy(isLoading = false) }
+                        }
+                    }
+                } else if (!isDeviceOffline()) {
+                    thinningRepository.getSamplingDetailed(plotId, campaignYear).fold(
+                        onSuccess = { report ->
+                            _uiState.update { current ->
+                                current.copy(
+                                    isLoading = false,
+                                    samples = report.trees,
+                                    submissionSummary = report.summary,
+                                    targetTreesCount = (report.summary.evaluatedTreesCount + report.summary.treesNeeded).coerceAtLeast(5),
+                                    isOffline = false,
+                                )
                             }
                         },
+                        onFailure = {
+                            _uiState.update { it.copy(isLoading = false) }
+                        },
                     )
+                } else {
+                    _uiState.update { it.copy(isLoading = false) }
                 }
             }
         }
@@ -152,7 +205,7 @@ class SamplingSessionViewModel @Inject constructor(
                 return@launch
             }
 
-            val batchId = "batch-${LocalDate.now()}-${UUID.randomUUID().toString().take(6)}"
+            val batchId = UUID.randomUUID().toString()
             submitSamplingBatch(
                 plotId = currentState.plotId,
                 campaignYear = currentState.campaignYear,
@@ -192,7 +245,7 @@ class SamplingSessionViewModel @Inject constructor(
         if (state.samples.isEmpty() || state.plotId.isBlank()) return
 
         _uiState.update { it.copy(isSubmitting = true, error = null) }
-        val batchId = "batch-${LocalDate.now()}-${UUID.randomUUID().toString().take(6)}"
+        val batchId = UUID.randomUUID().toString()
 
         viewModelScope.launch {
             val unsyncedSamples = state.samples.filter { !it.isSynced }
