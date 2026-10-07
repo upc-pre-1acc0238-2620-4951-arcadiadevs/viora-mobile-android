@@ -36,6 +36,7 @@ In olive farming, uniform spring budbreak and flowering require a critical amoun
 - [x] T2 — Domain + Data layer: `ChillTracker`, `WinterSeasonState`, `EnsoRiskLevel`, `ChillCurvePoint`, `ChillRepository`, use cases, Retrofit service, DTOs, mappers, Hilt modules; unit tests. (Commit `0c477`)
 - [x] T3 — Presentation: `WinterChillScreen` (P80 with 4 states, 30 snowflake grid, cumulative chart), `WhyCountChillSheet` (P81), `WinterChillViewModel`, `WinterChillNavGraph`, strings (en/es); unit tests. (Commit `8c30f`)
 - [x] T4 — Review fixes & integration: localized all hardcoded UI strings, wired winter chill navigation across `PlotDetailScreen`, `HarvestHistoryScreen`, `SensorsScreen`, and `PlotClimateScreen`. (Commit `8a6c7`)
+- [x] T5 — Figma pixel-perfect alignment: aligned P80 & P81 screens 100% with Figma nodes `389:80486` & `389:81359`: `EditorialHeadline`, hero card (`Color(0xFF727272)`, 32dp), 3x10 snowflake grid, season timeline track, `VioraVoice`, asymmetric metric cards (tall projection card 252dp + stacked warm days & ENSO), curve chart callout badge ("Hoy · 24", "4 ago · 30"), and P81 equation pills with accent keys. (Commit `0cca0`)
 
 ## Progress
 - Branch `feature/winter-chilling` created from `develop`.
@@ -45,8 +46,11 @@ In olive farming, uniform spring budbreak and flowering require a critical amoun
 - T3 done in `8c30f` (~1200 authored lines, 5 new tests). Full Compose UI for P80 (4 states) and P81 (Why count chill sheet), ViewModel with StateFlow, navigation route and localized resources.
 - `6b7ca`: docs(odd): complete winter chilling tasks
 - T4 done in `8a6c7` (~86 authored lines). Localized all hardcoded UI strings, wired winter chill navigation from PlotDetail card and LotSectionsSheet across phenology and telemetry screens.
+- `8aa63`: docs(odd): update winter chilling specification with review fixes
+- T5 done in `0cca0` (~1240 authored lines across 7 files). Complete Figma pixel-perfect redesign of P80 & P81.
 - Verification passed: `./gradlew testDebugUnitTest assembleDebug` (100% tests passing, clean debug APK build).
 
 ## Next step
 Device check and PR review for merge into `develop`.
+
 
