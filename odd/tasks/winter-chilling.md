@@ -32,9 +32,14 @@ In olive farming, uniform spring budbreak and flowering require a critical amoun
 - Verification command: `./gradlew testDebugUnitTest assembleDebug`.
 
 ## Tasks
-- [ ] T1 — Database & Room 3 migration: `chill_trackers` table entity, DAO, Room schema v8 migration `MIGRATION_7_8`, exported `8.json`, migration unit tests.
-- [ ] T2 — Domain + Data layer: `ChillTracker`, `WinterSeasonState`, `EnsoRiskLevel`, `ChillCurvePoint`, `ChillRepository`, use cases, Retrofit service, DTOs, mappers, Hilt modules; unit tests.
-- [ ] T3 — Presentation: `WinterChillScreen` (P80 with 4 states, 30 snowflake grid, cumulative chart), `WhyCountChillSheet` (P81), `WinterChillViewModel`, `WinterChillNavGraph`, strings (en/es); unit tests.
+- [x] T1 — Database & Room 3 migration: `chill_trackers` table entity, DAO, Room schema v8 migration `MIGRATION_7_8`, exported `8.json`, migration unit tests. (Commit `591f5`)
+- [x] T2 — Domain + Data layer: `ChillTracker`, `WinterSeasonState`, `EnsoRiskLevel`, `ChillCurvePoint`, `ChillRepository`, use cases, Retrofit service, DTOs, mappers, Hilt modules; unit tests. (Commit `0c477`)
+- [x] T3 — Presentation: `WinterChillScreen` (P80 with 4 states, 30 snowflake grid, cumulative chart), `WhyCountChillSheet` (P81), `WinterChillViewModel`, `WinterChillNavGraph`, strings (en/es); unit tests. (Commit `8c30f`)
 
 ## Progress
 - Branch `feature/winter-chilling` created from `develop`.
+- `922fd`: docs(odd): add winter chilling tracking specification
+- `591f5`: feat(database): add chilling tracker table schema v8 migration
+- `0c477`: feat(phenology): add winter chilling domain and data layer
+- `8c30f`: feat(phenology): add winter chilling screen and viewmodel
+- Verification passed: `./gradlew testDebugUnitTest assembleDebug` (100% tests passing, clean debug APK build).
