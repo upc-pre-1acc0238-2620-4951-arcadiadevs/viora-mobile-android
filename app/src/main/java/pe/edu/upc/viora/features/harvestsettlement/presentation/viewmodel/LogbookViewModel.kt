@@ -94,7 +94,12 @@ class LogbookViewModel @Inject constructor(
         draftSamplingFlow,
     ) { refresh, selectedFilter, activeServer, events, draftInfo ->
         val (activeDraft, pendingCount) = draftInfo
-        val active = activeDraft?.let {
+        val completedPlotIds = events
+            .filter { it.eventType == ThinningEventType.SAMPLING_COMPLETED }
+            .map { it.plotId }
+            .toSet()
+
+        val candidate = activeDraft?.let {
             val total = if (it.treesNeeded > 0) it.sampledTreesCount + it.treesNeeded else it.sampledTreesCount
             ActiveSamplingUiModel(
                 plotId = it.plotId,
@@ -103,6 +108,15 @@ class LogbookViewModel @Inject constructor(
                 targetTrees = total.coerceAtLeast(1),
             )
         } ?: activeServer
+
+        val active = if (candidate != null &&
+            !completedPlotIds.contains(candidate.plotId) &&
+            candidate.completedTrees < candidate.targetTrees
+        ) {
+            candidate
+        } else {
+            null
+        }
 
         LocalState(refresh, selectedFilter, active, events, pendingCount)
     }
@@ -165,7 +179,11 @@ class LogbookViewModel @Inject constructor(
         getPlotSamplingOverview?.let { useCase ->
             useCase(campaignYear = null).fold(
                 onSuccess = { overviews ->
-                    val inProgress = overviews.firstOrNull { it.samplingStatus == SamplingStatus.IN_PROGRESS }
+                    val inProgress = overviews.firstOrNull {
+                        it.samplingStatus == SamplingStatus.IN_PROGRESS &&
+                            it.treesNeeded > 0 &&
+                            it.sampledTreesCount < 5
+                    }
                     val active = inProgress?.let {
                         val total = if (it.treesNeeded > 0) it.sampledTreesCount + it.treesNeeded else it.sampledTreesCount
                         ActiveSamplingUiModel(

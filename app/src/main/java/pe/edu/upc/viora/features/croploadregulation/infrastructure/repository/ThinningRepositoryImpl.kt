@@ -15,6 +15,7 @@ import pe.edu.upc.viora.features.croploadregulation.domain.repository.ThinningRe
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toDomain
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toRequestDto
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.SamplingStatus
+import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.ThinningEventType
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.SamplingBatchRequestDto
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.ThinningService
@@ -36,7 +37,10 @@ class ThinningRepositoryImpl @Inject constructor(
                     val draftsByPlot = drafts.groupBy { it.plotId }
                     backendList.map { overview ->
                         val plotDrafts = draftsByPlot[overview.plotId]
-                        if (!plotDrafts.isNullOrEmpty() && overview.samplingStatus != SamplingStatus.COMPLETED) {
+                        if (!plotDrafts.isNullOrEmpty() &&
+                            overview.samplingStatus != SamplingStatus.COMPLETED &&
+                            plotDrafts.size < 5
+                        ) {
                             val draftCount = plotDrafts.size
                             overview.copy(
                                 samplingStatus = SamplingStatus.IN_PROGRESS,
@@ -78,7 +82,14 @@ class ThinningRepositoryImpl @Inject constructor(
         plotId: String?,
     ): AppResult<List<ThinningEvent>> =
         apiCaller.call { service.getThinningEvents(campaignYear, plotId) }
-            .map { envelope -> envelope.events.map { it.toDomain() } }
+            .map { envelope ->
+                val events = envelope.events.map { it.toDomain() }
+                events.filter { it.eventType == ThinningEventType.SAMPLING_COMPLETED }
+                    .forEach { completed ->
+                        draftDao.clearSamples(completed.plotId, completed.campaignYear)
+                    }
+                events
+            }
 
     override fun observeActiveSampling(): Flow<PlotSamplingOverview?> =
         draftDao.observeAllSamples().flowMap { drafts ->
@@ -89,17 +100,21 @@ class ThinningRepositoryImpl @Inject constructor(
                 val first = firstPlotDrafts.first()
                 val draftCount = firstPlotDrafts.size
                 val targetTrees = 5
-                PlotSamplingOverview(
-                    plotId = first.plotId,
-                    plotName = first.plotName,
-                    variety = "",
-                    areaHectares = 0.0,
-                    campaignYear = first.campaignYear,
-                    samplingStatus = SamplingStatus.IN_PROGRESS,
-                    sampledTreesCount = draftCount,
-                    treesNeeded = (targetTrees - draftCount).coerceAtLeast(0),
-                    isRepresentative = draftCount >= 5,
-                )
+                if (draftCount >= targetTrees) {
+                    null
+                } else {
+                    PlotSamplingOverview(
+                        plotId = first.plotId,
+                        plotName = first.plotName,
+                        variety = "",
+                        areaHectares = 0.0,
+                        campaignYear = first.campaignYear,
+                        samplingStatus = SamplingStatus.IN_PROGRESS,
+                        sampledTreesCount = draftCount,
+                        treesNeeded = (targetTrees - draftCount).coerceAtLeast(0),
+                        isRepresentative = false,
+                    )
+                }
             }
         }
 
