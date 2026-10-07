@@ -16,9 +16,12 @@ val localProperties = Properties().apply {
     if (file.exists()) file.inputStream().use { load(it) }
 }
 
-// Public Mapbox token (pk.…). It is not a secret, but keep it out of git: set it in local.properties.
+// Public Mapbox token (pk.…). It is not a secret, but keep it out of git: set it in local.properties,
+// or in the VIORA_MAPBOX_PUBLIC_TOKEN variable (CI).
 val defaultMapboxToken = "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3cifQ.rJcFIG2TW4iGNnFiOecFGQ"
-val mapboxPublicToken: String = localProperties.getProperty("viora.mapboxPublicToken", defaultMapboxToken)
+val mapboxPublicToken: String = localProperties.getProperty("viora.mapboxPublicToken")
+    ?: System.getenv("VIORA_MAPBOX_PUBLIC_TOKEN")
+    ?: defaultMapboxToken
 
 // Release signing. On a developer machine it comes from keystore.properties (never committed, next to
 // local.properties); in CI from the ANDROID_KEYSTORE_PATH, ANDROID_STORE_PASSWORD, ANDROID_KEY_ALIAS and
