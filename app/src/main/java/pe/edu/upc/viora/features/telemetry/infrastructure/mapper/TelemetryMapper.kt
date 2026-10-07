@@ -7,15 +7,15 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.remote.HourlyReadingDt
 
 /** Null when the timestamp is not a valid ISO-8601 instant: the reading is useless without it. */
 fun HourlyReadingDto.toEntity(plotId: String): TelemetryReadingEntity? {
-    val at = runCatching { Instant.parse(observedAt) }.getOrNull() ?: return null
+    val at = runCatching { Instant.parse(recordedAt) }.getOrNull() ?: return null
     return TelemetryReadingEntity(
         id = readingId(plotId, at.toEpochMilli()),
         plotId = plotId,
         observedAtEpochMs = at.toEpochMilli(),
-        airTemperatureCelsius = airTemperature,
-        relativeHumidityPercent = relativeHumidity,
-        soilMoisture30cmPercent = soilMoisture30cm,
-        soilMoisture60cmPercent = soilMoisture60cm,
+        airTemperatureCelsius = temperature,
+        relativeHumidityPercent = humidity,
+        soilMoisture30cmPercent = soilMoisture,
+        soilMoisture60cmPercent = null,
     )
 }
 

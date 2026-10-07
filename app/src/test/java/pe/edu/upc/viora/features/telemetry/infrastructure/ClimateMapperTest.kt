@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.telemetry.infrastructure
 
 import java.time.Instant
 import java.time.LocalDate
+import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -10,16 +11,36 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toDomain
 import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toForecastOrNull
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.ForecastDayDto
+import pe.edu.upc.viora.features.telemetry.infrastructure.remote.ForecastDto
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.HourlyReadingDto
 
 class ClimateMapperTest {
 
     @Test
     fun `a reading dto becomes an entity keyed by plot and instant`() {
-        val entity = HourlyReadingDto("2026-10-06T15:00:00Z", 27.4, 38.0, 34.0, 40.0).toEntity("p1")!!
+        val entity = HourlyReadingDto("2026-10-06T15:00:00Z", 27.4, 38.0, 34.0).toEntity("p1")!!
         assertEquals("p1|1791298800000", entity.id)
         assertEquals(34.0, entity.soilMoisture30cmPercent!!, 0.0)
+        assertEquals(27.4, entity.airTemperatureCelsius!!, 0.0)
+        assertNull(entity.soilMoisture60cmPercent)
         assertEquals(Instant.parse("2026-10-06T15:00:00Z"), entity.toDomain().observedAt)
+    }
+
+    @Test
+    fun `the real backend payloads are read`() {
+        val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
+        val readings = json.decodeFromString<List<HourlyReadingDto>>(
+            """[{"id":"r1","plotId":"p1","temperature":34.0,"humidity":45.0,"soilMoisture":22.0,""" +
+                """"solarRadiation":750.0,"stemWaterPotential":null,"recordedAt":"2026-09-30T23:56:55.776445Z"}]""",
+        )
+        val forecast = json.decodeFromString<ForecastDto>(
+            """{"plotId":"p1","dailyForecasts":[{"forecastDate":"2026-10-07","maxTemperature":24.6,""" +
+                """"minTemperature":15.1,"precipitationProbability":0.0,"windSpeedKmh":15.3,"isFrostRisk":false,""" +
+                """"syncedAt":"2026-10-07T05:13:12.414496470Z"}]}""",
+        )
+
+        assertEquals(22.0, readings.single().toEntity("p1")!!.soilMoisture30cmPercent!!, 0.0)
+        assertEquals("2026-10-07", forecast.dailyForecasts.single().toEntity("p1", 1L)!!.forecastDate)
     }
 
     @Test
