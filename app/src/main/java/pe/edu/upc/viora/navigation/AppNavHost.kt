@@ -1,8 +1,10 @@
 package pe.edu.upc.viora.navigation
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -17,6 +19,8 @@ import pe.edu.upc.viora.core.navigation.PlaceholderScreen
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRoundRoute
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.CampaignClosedRoute
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.SettleHarvestRoute
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.campaignClosedComposable
@@ -29,16 +33,13 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDeta
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotScreens
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNavGraph
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
-import pe.edu.upc.viora.features.telemetry.presentation.navigation.climateNavGraph
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.TelemetryDetailRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.alertsNavGraph
-
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.unit.dp
-import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRoundRoute
-import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.climateNavGraph
 
 /**
  * Composition root of navigation. It lives outside `core/` on purpose: this is the one place
@@ -71,6 +72,11 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     onOpenAlerts = { plotId -> navController.navigate(AlertsCenterRoute(plotId = plotId)) },
                     onOpenWeatherForecast = { id, name ->
                         navController.navigate(PlotClimateRoute(plotId = id.value, plotName = name))
+                    },
+                    onOpenSoilMoisture = { id, name ->
+                        navController.navigate(
+                            TelemetryDetailRoute(plotId = id.value, plotName = name, metric = TelemetryMetric.SOIL_MOISTURE.name),
+                        )
                     },
                     sections = {
                         HarvestEntrySection(
@@ -109,7 +115,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         samplingNavGraph(
             navController = navController,
             plotSilhouetteSlot = { plotId, slotModifier ->
-                PlotSilhouetteById(plotId = plotId, modifier = slotModifier)
+                PlotSilhouetteById(plotId = plotId, modifier = slotModifier, showTreeGrid = true)
             },
         )
         navigation<PlanGraph>(startDestination = PlanRoute) {
@@ -119,6 +125,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             composable<LogbookRoute> {
                 LogbookScreen(
                     onOpenSettlement = { plotId, year -> navController.openCampaignReceipt(plotId, year, popForm = false) },
+                    onOpenAlerts = { navController.navigate(AlertsCenterRoute()) },
                     onContinueSampling = { plotId, plotName ->
                         navController.navigate(
                             SamplingRoundRoute(
