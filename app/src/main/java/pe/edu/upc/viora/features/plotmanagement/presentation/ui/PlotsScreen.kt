@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
@@ -277,7 +278,11 @@ private fun LastRefreshLabel(lastRefresh: Instant) {
     val text = if (now - lastRefresh.toEpochMilli() < DateUtils.MINUTE_IN_MILLIS) {
         stringResource(R.string.plots_updated_just_now)
     } else {
+        // Android writes "Hace 4 días"; it goes mid-sentence ("Actualizado hace 4 días").
+        val locale = LocalConfiguration.current.locales[0]
         val relative = DateUtils.getRelativeTimeSpanString(lastRefresh.toEpochMilli(), now, DateUtils.MINUTE_IN_MILLIS)
+            .toString()
+            .replaceFirstChar { it.lowercase(locale) }
         stringResource(R.string.plots_updated, relative)
     }
     Text(text = text, style = MaterialTheme.typography.bodySmall, color = Neutral600)

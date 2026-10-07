@@ -72,6 +72,7 @@ fun HomeScreen(
     onOpenAlternation: (plotId: PlotId, plotName: String) -> Unit,
     modifier: Modifier = Modifier,
     onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
+    onOpenSoilMoisture: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     viewModel: HomeViewModel = hiltViewModel(),
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
@@ -85,6 +86,7 @@ fun HomeScreen(
         onOpenAlerts = onOpenAlerts,
         onOpenAlternation = onOpenAlternation,
         onOpenWeatherForecast = onOpenWeatherForecast,
+        onOpenSoilMoisture = onOpenSoilMoisture,
         onFocusPlot = viewModel::focusPlot,
         modifier = modifier,
         sections = sections,
@@ -103,6 +105,7 @@ fun HomeScreenContent(
     onOpenAlerts: (plotId: String?) -> Unit = {},
     onOpenAlternation: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
+    onOpenSoilMoisture: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onFocusPlot: (PlotId) -> Unit = {},
     today: LocalDate = LocalDate.now(),
     sections: @Composable ColumnScope.() -> Unit = {},
@@ -174,10 +177,14 @@ fun HomeScreenContent(
                 is HomeUiState.Content -> {
                     sections()
                     HomeTodayInFieldSection(
+                        plotId = state.focusedPlot?.id?.value,
                         activeAlertsCount = state.activeAlertsCount,
                         onOpenAlerts = { onOpenAlerts(state.focusedPlot?.id?.value) },
                         onOpenWeatherForecast = {
                             state.focusedPlot?.let { onOpenWeatherForecast(it.id, it.name) }
+                        },
+                        onOpenSoilMoisture = {
+                            state.focusedPlot?.let { onOpenSoilMoisture(it.id, it.name) }
                         },
                         modifier = Modifier
                             .padding(top = 28.dp)

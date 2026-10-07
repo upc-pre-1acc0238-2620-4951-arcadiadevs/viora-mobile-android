@@ -1,9 +1,10 @@
 package pe.edu.upc.viora.features.telemetry.presentation.ui
 
+import android.os.Build
+import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -25,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,25 +36,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.DialogWindowProvider
-import androidx.compose.runtime.SideEffect
-import android.os.Build
-import android.view.WindowManager
-import java.time.Duration
-import java.time.Instant
-import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.time.Duration
+import java.time.Instant
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
@@ -64,12 +65,14 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderItalic
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorNode
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorType
 import pe.edu.upc.viora.features.telemetry.presentation.state.ConfigureNodeUiState
+import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatPercent
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.ConfigureNodeViewModel
 
 @Composable
@@ -156,15 +159,9 @@ private fun ConfigureNodeScreenContent(
                 .padding(horizontal = 16.dp),
         ) {
             Spacer(Modifier.height(18.dp))
-            Text(
-                text = stringResource(R.string.sensors_config_title_lead),
-                style = MaterialTheme.typography.displaySmall.copy(fontSize = 36.sp, lineHeight = 40.sp),
-                color = Neutral900,
-            )
-            Text(
-                text = stringResource(R.string.sensors_config_title_emphasis),
-                style = MaterialTheme.typography.displaySmall.copy(fontSize = 36.sp, lineHeight = 40.sp).merge(NewsreaderItalic),
-                color = Neutral900,
+            EditorialHeadline(
+                lead = stringResource(R.string.sensors_config_title_lead),
+                emphasis = stringResource(R.string.sensors_config_title_emphasis),
             )
 
             Spacer(Modifier.height(22.dp))
@@ -250,7 +247,7 @@ private fun ReadingCard(node: SensorNode) {
             Column {
                 Text(stringResource(R.string.sensors_config_last_reading), style = MaterialTheme.typography.labelSmall, color = Neutral600)
                 Text(
-                    text = node.lastHumidityPercent?.let { String.format("%.0f %%", it) } ?: "—",
+                    text = node.lastHumidityPercent?.let { formatPercent(LocalConfiguration.current.locales[0], it) } ?: "—",
                     style = MaterialTheme.typography.displaySmall.copy(fontSize = 48.sp, lineHeight = 52.sp),
                     color = Neutral900,
                 )

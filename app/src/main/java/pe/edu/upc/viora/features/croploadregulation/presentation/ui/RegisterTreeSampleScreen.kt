@@ -45,7 +45,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -59,6 +58,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.formatDecimal
 
 private val ScreenPadding = 24.dp
 
@@ -89,7 +89,7 @@ fun RegisterTreeSampleScreen(
     val isOutOfRange = fruitSetCount > maxAllowedFruits
 
     val liveRatio = if (shootsCount > 0) fruitSetCount.toDouble() / shootsCount else 0.0
-    val formattedRatio = String.format(Locale.ROOT, "%.2f", liveRatio).replace('.', ',')
+    val formattedRatio = formatDecimal(liveRatio, 2)
 
     val subtitleText = if (isOffline) {
         stringResource(R.string.sampling_register_tree_subtitle, plotName)

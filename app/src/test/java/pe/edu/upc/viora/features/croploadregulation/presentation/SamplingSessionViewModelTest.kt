@@ -112,6 +112,9 @@ private class FakeThinningRepo : ThinningRepository {
     override suspend fun getThinningEvents(campaignYear: Int?, plotId: String?): AppResult<List<ThinningEvent>> =
         AppResult.Success(emptyList())
 
+    override fun observeThinningEvents(): Flow<List<ThinningEvent>?> =
+        MutableStateFlow(null)
+
     override fun observeActiveSampling(): Flow<PlotSamplingOverview?> =
         MutableStateFlow(null)
 

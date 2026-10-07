@@ -27,6 +27,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
+import pe.edu.upc.viora.core.designsystem.theme.Neutral100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral200
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
@@ -58,7 +59,8 @@ fun PrimaryPillButton(
         Text(text = text, style = MaterialTheme.typography.titleMedium, color = content)
         if (trailingIcon != null) {
             Box(
-                modifier = Modifier.size(44.dp).clip(CircleShape).background(if (enabled) Harvest300 else Color.Transparent),
+                // Disabled, the icon keeps its circle in a lighter tone (Figma P71 "Kilos no válidos").
+                modifier = Modifier.size(44.dp).clip(CircleShape).background(if (enabled) Harvest300 else Neutral100),
                 contentAlignment = Alignment.Center,
             ) {
                 if (isLoading) {

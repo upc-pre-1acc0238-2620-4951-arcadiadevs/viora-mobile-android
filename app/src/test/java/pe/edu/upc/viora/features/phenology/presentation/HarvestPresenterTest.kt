@@ -50,10 +50,33 @@ class HarvestPresenterTest {
     }
 
     @Test
-    fun `an even last campaign is steady even when the alternation is severe`() {
+    fun `an even last campaign that fell reads as a coming ON when the alternation is severe`() {
+        // 2024 22 000 ON, 2025 15 000 labelled even: the harvest went down, so the next one rises.
         val records = figmaRecords().dropLast(1) + harvest(2025, 15_000.0, BearingYear.BALANCED)
 
-        assertEquals(Outlook.STEADY, HarvestPresenter.summarize(records, BbiClass.SEVERE, 2026).outlook)
+        assertEquals(Outlook.ON_LIKELY, HarvestPresenter.summarize(records, BbiClass.SEVERE, 2026).outlook)
+    }
+
+    @Test
+    fun `an even last campaign that rose reads as a coming OFF when the alternation is severe`() {
+        // Cuartel San Jerónimo on Render: 2 500 ON, 500 OFF, 2 000 labelled even, BBI 0,63.
+        val records = listOf(
+            harvest(2023, 2_500.0, BearingYear.ON),
+            harvest(2024, 500.0, BearingYear.OFF),
+            harvest(2025, 2_000.0, BearingYear.BALANCED),
+        )
+
+        val summary = HarvestPresenter.summarize(records, BbiClass.SEVERE, 2026)
+
+        assertEquals(Outlook.OFF_LIKELY, summary.outlook)
+        assertEquals(Voice.BreakCycle(2026), summary.voice)
+    }
+
+    @Test
+    fun `an even last campaign stays steady when the index is low`() {
+        val records = figmaRecords().dropLast(1) + harvest(2025, 15_000.0, BearingYear.BALANCED)
+
+        assertEquals(Outlook.STEADY, HarvestPresenter.summarize(records, BbiClass.LOW, 2026).outlook)
     }
 
     @Test

@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green700
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -66,7 +67,6 @@ import pe.edu.upc.viora.features.phenology.presentation.ui.formatTonnesPerHectar
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.VoiceLine
 
 /**
  * P73: the receipt of a campaign. "Campaña cerrada" when the server stored the settlement, "Cosecha
@@ -189,7 +189,7 @@ private fun ReceiptScreen(
                 color = Neutral900,
             )
         }
-        VoiceLine(
+        VioraVoice(
             text = if (pending) {
                 stringResource(R.string.settle_receipt_voice_pending)
             } else {

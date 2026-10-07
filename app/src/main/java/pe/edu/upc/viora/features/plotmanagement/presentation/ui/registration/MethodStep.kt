@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -114,7 +115,7 @@ fun MethodStep(
                 Text(text = stringResource(R.string.method_title_lead), style = titleStyle)
                 Text(text = stringResource(R.string.method_title_emphasis), style = titleStyle, fontStyle = FontStyle.Italic)
             }
-            VoiceLine(text = stringResource(R.string.method_voice))
+            VioraVoice(text = stringResource(R.string.method_voice))
             Spacer(Modifier.size(2.dp))
             val locked = !permission.isGranted
             MethodCard(

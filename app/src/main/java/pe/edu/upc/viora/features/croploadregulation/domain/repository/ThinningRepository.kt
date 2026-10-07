@@ -43,6 +43,11 @@ interface ThinningRepository {
     ): AppResult<List<ThinningEvent>>
 
     /**
+     * Observes the cached Bitácora timeline, newest first; null until the feed was downloaded once.
+     */
+    fun observeThinningEvents(): kotlinx.coroutines.flow.Flow<List<ThinningEvent>?>
+
+    /**
      * Observes the current in-progress sampling overview if one exists.
      */
     fun observeActiveSampling(): kotlinx.coroutines.flow.Flow<PlotSamplingOverview?>

@@ -8,6 +8,9 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import pe.edu.upc.viora.core.domain.AppError
@@ -227,9 +230,10 @@ class HarvestSettlementRepositoryImpl @Inject constructor(
         AppResult.Failure(AppError.Unknown(throwable))
     }
 
-    override suspend fun refreshAll(plotIds: List<String>): AppResult<Unit> {
-        val results = plotIds.map { refresh(it) }
-        return results.firstOrNull { it is AppResult.Failure } ?: AppResult.Success(Unit)
+    /** One request per plot, all at the same time; the first failure (if any) is reported. */
+    override suspend fun refreshAll(plotIds: List<String>): AppResult<Unit> = coroutineScope {
+        val results = plotIds.map { async { refresh(it) } }.awaitAll()
+        results.firstOrNull { it is AppResult.Failure } ?: AppResult.Success(Unit)
     }
 
     private companion object {

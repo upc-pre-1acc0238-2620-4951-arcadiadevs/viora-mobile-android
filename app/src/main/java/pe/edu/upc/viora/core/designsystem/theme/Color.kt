@@ -53,7 +53,8 @@ val errorLight = Color(0xFFBA1A1A)
 val onErrorLight = Color(0xFFFFFFFF)
 val errorContainerLight = Color(0xFFFFDAD6)
 val onErrorContainerLight = Color(0xFF93000A)
-val backgroundLight = Neutral50
+// Figma screens use the semantic surfaceContainerLow (#F3F0EA); Neutral50 is reserved for cards and pills.
+val backgroundLight = Neutral100
 val onBackgroundLight = Neutral900
 val surfaceLight = Neutral50
 val onSurfaceLight = Neutral900

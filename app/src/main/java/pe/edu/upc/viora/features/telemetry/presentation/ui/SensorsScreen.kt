@@ -47,7 +47,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,7 +59,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.util.Locale
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
+import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green100
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -87,6 +92,8 @@ import pe.edu.upc.viora.features.telemetry.domain.entity.SensorStatus
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorType
 import pe.edu.upc.viora.features.telemetry.presentation.state.LinkNodeUiState
 import pe.edu.upc.viora.features.telemetry.presentation.state.SensorsUiState
+import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatDegrees
+import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatPercent
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.LinkNodeViewModel
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.SensorsViewModel
 
@@ -96,6 +103,7 @@ fun SensorsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onHarvestHistory: () -> Unit = {},
+    onClimate: () -> Unit = {},
     onNodeClick: (SensorNode) -> Unit = {},
     viewModel: SensorsViewModel = hiltViewModel(),
     linkViewModel: LinkNodeViewModel = hiltViewModel(),
@@ -144,7 +152,11 @@ fun SensorsScreen(
             current = LotSection.SENSORS,
             onSelect = { section ->
                 showMore = false
-                if (section == LotSection.HARVEST) onHarvestHistory()
+                when (section) {
+                    LotSection.HARVEST -> onHarvestHistory()
+                    LotSection.CLIMATE -> onClimate()
+                    else -> Unit
+                }
             },
             onDismiss = { showMore = false },
         )
@@ -243,43 +255,14 @@ fun SensorsScreenContent(
         ) {
             Spacer(Modifier.height(16.dp))
 
-            // Main Display Title: "Tus" \n "sensores."
-            Text(
-                text = stringResource(R.string.sensors_title_lead),
-                style = MaterialTheme.typography.displaySmall.copy(fontSize = 36.sp, lineHeight = 40.sp),
-                color = Neutral900,
-            )
-            Text(
-                text = stringResource(R.string.sensors_title_emphasis),
-                style = MaterialTheme.typography.displaySmall
-                    .copy(fontSize = 36.sp, lineHeight = 40.sp)
-                    .merge(NewsreaderItalic),
-                color = Neutral900,
+            EditorialHeadline(
+                lead = stringResource(R.string.sensors_title_lead),
+                emphasis = stringResource(R.string.sensors_title_emphasis),
             )
 
             Spacer(Modifier.height(16.dp))
 
-            // Virtual nodes explanation notice
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.Top,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_virtual_node),
-                    contentDescription = null,
-                    tint = Neutral700,
-                    modifier = Modifier.size(20.dp).padding(top = 2.dp),
-                )
-                Text(
-                    text = stringResource(R.string.sensors_virtual_notice),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontStyle = FontStyle.Italic,
-                        lineHeight = 20.sp,
-                    ),
-                    color = Neutral700,
-                )
-            }
+            VioraVoice(text = stringResource(R.string.sensors_virtual_notice))
 
             Spacer(Modifier.height(20.dp))
 
@@ -309,14 +292,7 @@ fun SensorsScreenContent(
                         )
                     }
                 }
-                is SensorsUiState.Empty -> {
-                    Text(
-                        text = stringResource(R.string.sensors_empty),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Neutral600,
-                        modifier = Modifier.padding(vertical = 24.dp),
-                    )
-                }
+                is SensorsUiState.Empty -> NoSensorsCard()
                 is SensorsUiState.Content -> {
                     // Summary status chips
                     val activeCount = state.nodes.count { it.status == SensorStatus.ACTIVE }
@@ -367,7 +343,8 @@ fun SensorsScreenContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = stringResource(R.string.sensors_link_action),
+                    // Figma: "Vincular el primero" while the plot has no node yet.
+                    text = stringResource(if (state is SensorsUiState.Empty) R.string.sensors_link_first else R.string.sensors_link_action),
                     style = MaterialTheme.typography.titleMedium,
                     color = Neutral50,
                 )
@@ -387,19 +364,52 @@ fun SensorsScreenContent(
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
-
-            // Footnote
-            Text(
-                text = stringResource(R.string.sensors_pause_footnote),
-                style = MaterialTheme.typography.bodySmall,
-                color = Neutral600,
-                modifier = Modifier.padding(horizontal = 4.dp),
-            )
+            // The pause footnote only makes sense once there are nodes (Figma's empty state has none).
+            if (state is SensorsUiState.Content) {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = stringResource(R.string.sensors_pause_footnote),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Neutral600,
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                )
+            }
 
             // Padding to ensure content is visible above floating tab bar
             Spacer(Modifier.height(VioraTabBarDefaults.ContentBottomPadding + 24.dp))
         }
+    }
+}
+
+/** Figma P85 "Sin sensores" (474:228526): icon, serif title with an italic word and the explanation. */
+@Composable
+private fun NoSensorsCard() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(28.dp))
+            .background(Neutral0)
+            .padding(24.dp),
+    ) {
+        Box(Modifier.size(64.dp).clip(CircleShape).background(Green200), contentAlignment = Alignment.Center) {
+            Icon(painterResource(R.drawable.ic_sensors), contentDescription = null, tint = Green900, modifier = Modifier.size(30.dp))
+        }
+        Text(
+            text = buildAnnotatedString {
+                append(stringResource(R.string.sensors_empty_title_lead))
+                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(stringResource(R.string.sensors_empty_title_emphasis)) }
+                append(".")
+            },
+            style = MaterialTheme.typography.displaySmall.copy(fontSize = 28.sp, lineHeight = 32.sp),
+            color = Neutral900,
+            modifier = Modifier.padding(top = 20.dp),
+        )
+        Text(
+            text = stringResource(R.string.sensors_empty),
+            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp, lineHeight = 20.sp),
+            color = Neutral600,
+            modifier = Modifier.padding(top = 10.dp),
+        )
     }
 }
 
@@ -504,10 +514,10 @@ private fun SensorCard(node: SensorNode, onClick: () -> Unit = {}, modifier: Mod
                 val locale = LocalConfiguration.current.locales[0]
                 val readingText = when {
                     temp != null && hum != null -> {
-                        String.format(locale, "%.1f° · %.0f %%", temp, hum)
+                        "${formatDegrees(locale, temp, decimals = 1)} · ${formatPercent(locale, hum)}"
                     }
                     hum != null -> {
-                        String.format(locale, "%.0f %%", hum)
+                        formatPercent(locale, hum)
                     }
                     else -> null
                 }

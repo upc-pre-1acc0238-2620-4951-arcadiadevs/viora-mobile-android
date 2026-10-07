@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma P10 · Inicio, "Carrusel de fases · Ahora": the organic blob behind the phase illustration.
+     Drawn at 240 x 210 dp by PhaseCardArtwork; the intrinsic size is halved to stay under lint's 200 dp limit. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="105dp"
+    android:viewportWidth="240"
+    android:viewportHeight="210">
+    <path
+        android:pathData="M126 8C184 -2 238 40 234 104C230 166 176 212 112 204C48 196 2 152 6 94C10 38 68 18 126 8Z"
+        android:fillColor="#2E4A3A" />
+</vector>

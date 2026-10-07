@@ -8,17 +8,32 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
 import java.util.Locale
+import pe.edu.upc.viora.core.presentation.formatDecimal
+import pe.edu.upc.viora.core.presentation.formatWhole
 
 // Formatting of the plot climate screens. Pure functions of (value, locale) so they can be tested.
 
-/** "27°" or, with [decimals] = 1, "27,4°" (the decimal separator follows the locale). */
+/** "27°" or, with [decimals] = 1, "27,4°" (the app's decimal comma in Spanish). */
 internal fun formatDegrees(locale: Locale, value: Double, decimals: Int = 0): String =
-    String.format(locale, "%.${decimals}f°", value)
+    formatDecimal(value, decimals, locale) + "°"
 
 /** "34 %": the percent sign is separated by a space, as in the design. */
-internal fun formatPercent(locale: Locale, value: Double): String = String.format(locale, "%.0f %%", value)
+internal fun formatPercent(locale: Locale, value: Double): String = formatWhole(value, locale) + "\u00A0%"
 
-internal fun formatWholeNumber(locale: Locale, value: Double): String = String.format(locale, "%.0f", value)
+/**
+ * A reading with the unit the backend sends, written as the design does: "34°" for "°C",
+ * "16 %" for "%", otherwise "2,5 kPa". Whole values drop their decimals.
+ */
+internal fun formatMetricValue(locale: Locale, value: Double, unit: String): String {
+    val decimals = if (value % 1.0 == 0.0) 0 else 1
+    return when (unit.trim()) {
+        "°C", "°" -> formatDegrees(locale, value, decimals)
+        "%" -> formatDecimal(value, decimals, locale) + "\u00A0%"
+        else -> formatDecimal(value, decimals, locale) + "\u00A0" + unit.trim()
+    }
+}
+
+internal fun formatWholeNumber(locale: Locale, value: Double): String = formatWhole(value, locale)
 
 /** "10 min", "3 h" or "2 d" between [from] and [now] (never negative, at least one minute). */
 internal fun formatElapsed(from: Instant, now: Instant): String {

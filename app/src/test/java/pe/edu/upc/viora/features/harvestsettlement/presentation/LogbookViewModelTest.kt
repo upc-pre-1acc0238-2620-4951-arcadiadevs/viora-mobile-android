@@ -23,6 +23,15 @@ import org.junit.Before
 import org.junit.Test
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.croploadregulation.application.usecase.GetThinningEventsUseCase
+import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObserveThinningEventsUseCase
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.PlotSamplingOverview
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingDetailedReport
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingSummary
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningEvent
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
+import pe.edu.upc.viora.features.croploadregulation.domain.repository.ThinningRepository
+import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.ThinningEventType
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObserveSettledHarvestsUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.RefreshSettledHarvestsUseCase
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.HarvestSettlement
@@ -68,13 +77,15 @@ class LogbookViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = LogbookViewModel(
+    private fun viewModel(timeline: FakeTimeline? = null) = LogbookViewModel(
         observeSettlements = ObserveSettledHarvestsUseCase(settlements),
         observePlots = ObservePlotsUseCase(plots),
         observePlotsLastRefresh = ObservePlotsLastRefreshUseCase(plots),
         refreshPlots = RefreshPlotsUseCase(plots),
         refreshSettlements = RefreshSettledHarvestsUseCase(settlements),
         clock = clock,
+        getThinningEvents = timeline?.let { GetThinningEventsUseCase(it) },
+        observeThinningEvents = timeline?.let { ObserveThinningEventsUseCase(it) },
     )
 
     /** The state with an active collector, as the screen has it. */
@@ -119,6 +130,32 @@ class LogbookViewModelTest {
 
         gate.complete(Unit)
         assertTrue(vm.uiState.value is LogbookUiState.Content)
+        job.cancel()
+    }
+
+    @Test
+    fun `a timeline downloaded before is drawn while the refresh is still running`() = runTest {
+        plots.cached.value = listOf(plot("p1", "La Yarada 02"))
+        settlements.gate = CompletableDeferred()
+        val timeline = FakeTimeline(cached = listOf(samplingEvent("e1", "p1", "2026-10-13T10:00:00Z")))
+        val vm = viewModel(timeline)
+        val job = vm.uiState.launchIn(CoroutineScope(Dispatchers.Main))
+
+        val state = vm.uiState.value as LogbookUiState.Content
+        assertTrue(state.isRefreshing)
+        assertEquals(listOf("e1"), state.groups.flatMap { it.entries }.map { it.id })
+        assertEquals(1, timeline.downloads)
+        job.cancel()
+    }
+
+    @Test
+    fun `an empty timeline downloaded before is not a loading screen`() = runTest {
+        plots.cached.value = listOf(plot("p1", "La Yarada 02"))
+        settlements.gate = CompletableDeferred()
+        val vm = viewModel(FakeTimeline(cached = emptyList()))
+        val job = vm.uiState.launchIn(CoroutineScope(Dispatchers.Main))
+
+        assertTrue((vm.uiState.value as LogbookUiState.Content).isEmpty)
         job.cancel()
     }
 
@@ -266,6 +303,41 @@ class LogbookViewModelTest {
         thinningBalance = ThinningBalance(ThinningStatus.NOT_RECORDED, null, null, null, null),
         stabilization = StabilizationCurve(StabilizationStatus.INSUFFICIENT_SETTLEMENTS, 0, 0, null, null, null, null, null, null, null, 3),
     )
+}
+
+private fun samplingEvent(id: String, plotId: String, occurredAt: String) = ThinningEvent(
+    id = id,
+    eventType = ThinningEventType.SAMPLING_COMPLETED,
+    prescriptionId = "rx-$id",
+    plotId = plotId,
+    plotName = "La Yarada 02",
+    campaignYear = 2026,
+    occurredAt = Instant.parse(occurredAt),
+    evaluatedTreesCount = 5,
+    meanFruitsPerShoot = 0.57,
+)
+
+/** The Room cache of the timeline ([cached] null = never downloaded) and its download. */
+private class FakeTimeline(cached: List<ThinningEvent>?) : ThinningRepository {
+    val events = MutableStateFlow(cached)
+    var downloads = 0
+
+    override fun observeThinningEvents(): Flow<List<ThinningEvent>?> = events
+    override suspend fun getThinningEvents(campaignYear: Int?, plotId: String?): AppResult<List<ThinningEvent>> {
+        downloads++
+        return AppResult.Success(events.value.orEmpty())
+    }
+    override suspend fun getPlotSamplingOverview(campaignYear: Int?): AppResult<List<PlotSamplingOverview>> = error("not used")
+    override suspend fun getSamplingSummary(plotId: String, campaignYear: Int?): AppResult<SamplingSummary> = error("not used")
+    override suspend fun getSamplingDetailed(plotId: String, campaignYear: Int?): AppResult<SamplingDetailedReport> = error("not used")
+    override suspend fun submitSamplingBatch(
+        plotId: String,
+        campaignYear: Int,
+        batchId: String,
+        samples: List<TreeSample>,
+    ): AppResult<SamplingSummary> = error("not used")
+    override fun observeActiveSampling(): Flow<PlotSamplingOverview?> = error("not used")
+    override fun observePendingDraftSamplesCount(): Flow<Int> = error("not used")
 }
 
 private class FakeSettlements : HarvestSettlementRepository {

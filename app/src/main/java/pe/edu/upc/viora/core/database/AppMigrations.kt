@@ -105,5 +105,19 @@ object AppMigrations {
         connection.execSQL(MIGRATION_5_6_SQL)
     }
 
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+    internal const val MIGRATION_6_7_SQL =
+        "CREATE TABLE IF NOT EXISTS `thinning_events` (`id` TEXT NOT NULL, `event_type` TEXT NOT NULL, " +
+            "`prescription_id` TEXT NOT NULL, `confirmation_id` TEXT, `plot_id` TEXT NOT NULL, " +
+            "`plot_name` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, `occurred_at` TEXT NOT NULL, " +
+            "`evaluated_trees_count` INTEGER, `total_shoots_count` INTEGER, `total_fruits_count` INTEGER, " +
+            "`mean_fruits_per_shoot` REAL, `is_representative` INTEGER, `removal_percentage` REAL, " +
+            "`removed_kg` REAL, `executed_date` TEXT, `labor_crew_size` INTEGER, `timeliness` TEXT, " +
+            "PRIMARY KEY(`id`))"
+
+    /** Adds the cache of the logbook timeline (sampling milestones and executed thinnings). */
+    val MIGRATION_6_7 = Migration(6, 7) { connection ->
+        connection.execSQL(MIGRATION_6_7_SQL)
+    }
+
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
 }
