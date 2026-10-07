@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.features.phenology.presentation.ui.HarvestHistoryScreen
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 
 /**
@@ -21,6 +22,7 @@ fun NavGraphBuilder.harvestHistoryComposable(navController: NavController) {
         HarvestHistoryScreen(
             onBack = { navController.popBackStack() },
             onSensors = { navController.navigate(SensorsRoute(plotId = route.plotId, plotName = route.plotName)) },
+            onClimate = { navController.navigate(PlotClimateRoute(plotId = route.plotId, plotName = route.plotName)) },
         )
     }
 }
