@@ -3,7 +3,6 @@ package pe.edu.upc.viora.features.croploadregulation.presentation.ui
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,9 +40,9 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -61,6 +60,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.presentation.formatDecimal
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.SamplingSessionUiState
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.component.SamplingSegmentedBar
@@ -320,7 +320,7 @@ fun SamplingRoundScreen(
                         .background(Harvest100)
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                 ) {
-                    val formattedMean = String.format(Locale.ROOT, "%.2f", state.meanFruitsPerShoot).replace('.', ',')
+                    val formattedMean = formatDecimal(state.meanFruitsPerShoot, 2)
                     Text(
                         text = formattedMean,
                         style = MaterialTheme.typography.headlineMedium.copy(
@@ -630,7 +630,7 @@ private fun EvaluatedTreeItem(
                 maxLines = 1,
             )
 
-            val ratioStr = String.format(Locale.ROOT, "%.2f", sample.fruitsPerShoot).replace('.', ',')
+            val ratioStr = formatDecimal(sample.fruitsPerShoot, 2)
             Text(
                 text = stringResource(R.string.sampling_tree_ratio, ratioStr),
                 style = MaterialTheme.typography.bodySmall.copy(
