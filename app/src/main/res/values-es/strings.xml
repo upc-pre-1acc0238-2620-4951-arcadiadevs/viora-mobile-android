@@ -320,7 +320,7 @@
     <string name="alerts_hero_affected_plots_with_time">En %1$s · actualizado %2$s</string>
     <string name="alerts_hero_affected_plots">En %1$s</string>
     <string name="alerts_hero_no_affected_plots">Tus parcelas están en condiciones óptimas</string>
-    <string name="alerts_plots_conjunction"> y </string>
+    <string name="alerts_plots_conjunction">" y "</string>
     <string name="alerts_updated_at">actualizado %1$s</string>
     <string name="alert_detail_date_pattern">EEEE d \'de\' MMMM</string>
     <string name="alerts_filter_critical">Críticas</string>
@@ -334,6 +334,29 @@
     <string name="alerts_action_retry">Reintentar</string>
     <string name="alerts_nav_back">Regresar</string>
     <string name="alerts_nav_settings">Configuración de alertas</string>
+    <string name="alerts_plot_filter_open">Filtrar por lote</string>
+    <string name="alerts_plot_filter_title_lead">Filtrar</string>
+    <string name="alerts_plot_filter_title_emphasis">por lote.</string>
+    <string name="alerts_plot_filter_hint">Elige el lote cuyas alertas quieres ver</string>
+    <string name="alerts_plot_filter_all">Todos los lotes</string>
+    <string name="alerts_plot_filter_no_active">Sin alertas activas</string>
+    <string name="alerts_plot_filter_note">Las alertas sin lote solo se ven en «Todos los lotes».</string>
+    <string name="alerts_plot_filter_close">Cerrar</string>
+    <plurals name="alerts_plot_filter_active">
+        <item quantity="one">%1$d alerta activa</item>
+        <item quantity="many">%1$d alertas activas</item>
+        <item quantity="other">%1$d alertas activas</item>
+    </plurals>
+    <plurals name="alerts_plot_filter_critical">
+        <item quantity="one">%1$d crítica</item>
+        <item quantity="many">%1$d críticas</item>
+        <item quantity="other">%1$d críticas</item>
+    </plurals>
+    <plurals name="alerts_plot_filter_warning">
+        <item quantity="one">%1$d de atención</item>
+        <item quantity="many">%1$d de atención</item>
+        <item quantity="other">%1$d de atención</item>
+    </plurals>
     <string name="alert_severity_critical">Crítica</string>
     <string name="alert_severity_warning">Atención</string>
     <string name="alert_time_today">Hoy</string>

@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -606,6 +607,9 @@ private fun SoilCard(
                 text = formatPercent(locale, latest.value),
                 style = TextStyle(fontFamily = NewsreaderFamily, fontSize = 44.sp, lineHeight = 48.sp),
                 color = Neutral900,
+                // Narrow phones (360 dp) cannot fit "22 %" at 44 sp next to the gauge: shrink, never wrap.
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(minFontSize = 28.sp, maxFontSize = 44.sp),
                 modifier = Modifier.padding(top = 4.dp),
             )
             Text(

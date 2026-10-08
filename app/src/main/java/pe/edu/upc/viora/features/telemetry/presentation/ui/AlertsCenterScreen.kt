@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,12 +24,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,8 +54,10 @@ import pe.edu.upc.viora.features.telemetry.domain.entity.AlertsSummary
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsFilter
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsUiState
+import pe.edu.upc.viora.features.telemetry.presentation.state.PlotFilterOption
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.AlertCard
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.AlertFilterCapsules
+import pe.edu.upc.viora.features.telemetry.presentation.ui.components.AlertsPlotFilterSheet
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.NormalizedAlertRow
 import java.time.Instant
 import java.time.ZoneId
@@ -141,6 +148,7 @@ fun AlertsCenterScreen(
             }
 
             is AlertsUiState.Content -> {
+                var showPlotFilter by rememberSaveable { mutableStateOf(false) }
                 AlertsCenterContent(
                     summary = state.summary,
                     activeFilter = state.activeFilter,
@@ -151,7 +159,21 @@ fun AlertsCenterScreen(
                     onBack = onBack,
                     onOpenDetail = onOpenDetail,
                     onFilterSelected = { viewModel.setFilter(it) },
+                    plotFilter = if (state.canFilterByPlot) {
+                        PlotFilterButtonState(isActive = state.selectedPlotId != null, onClick = { showPlotFilter = true })
+                    } else {
+                        null
+                    },
                 )
+                if (showPlotFilter) {
+                    AlertsPlotFilterSheet(
+                        options = state.plotOptions,
+                        selectedPlotId = state.selectedPlotId,
+                        totalActive = state.plotOptions.sumOf(PlotFilterOption::activeCount),
+                        onApply = viewModel::selectPlot,
+                        onDismiss = { showPlotFilter = false },
+                    )
+                }
             }
         }
     }
@@ -169,6 +191,7 @@ private fun AlertsCenterContent(
     onOpenDetail: (String) -> Unit,
     onFilterSelected: (AlertsFilter) -> Unit,
     modifier: Modifier = Modifier,
+    plotFilter: PlotFilterButtonState? = null,
 ) {
     val scrollState = rememberScrollState()
 
@@ -236,65 +259,73 @@ private fun AlertsCenterContent(
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        // Hero Section
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = summary.activeCount.toString(),
-                fontFamily = NewsreaderFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = 112.sp,
-                color = Neutral900,
-                lineHeight = 104.sp,
-                textAlign = TextAlign.Center,
-            )
+        // Hero Section, with the plot filter button 12 dp under the settings button (Figma T14 · Filtro por lote)
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = summary.activeCount.toString(),
+                    fontFamily = NewsreaderFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 112.sp,
+                    color = Neutral900,
+                    lineHeight = 104.sp,
+                    textAlign = TextAlign.Center,
+                )
 
-            Text(
-                text = stringResource(R.string.alerts_hero_active_label),
-                fontFamily = NewsreaderFamily,
-                fontStyle = FontStyle.Italic,
-                fontWeight = FontWeight.Normal,
-                fontSize = 26.sp,
-                color = Neutral900,
-                lineHeight = 30.sp,
-                textAlign = TextAlign.Center,
-            )
+                Text(
+                    text = stringResource(R.string.alerts_hero_active_label),
+                    fontFamily = NewsreaderFamily,
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 26.sp,
+                    color = Neutral900,
+                    lineHeight = 30.sp,
+                    textAlign = TextAlign.Center,
+                )
 
-            Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
-            val conjunction = stringResource(R.string.alerts_plots_conjunction)
-            val affectedPlotsText = when {
-                affectedPlotNames.size > 1 -> affectedPlotNames.dropLast(1).joinToString(", ") + conjunction + affectedPlotNames.last()
-                affectedPlotNames.size == 1 -> affectedPlotNames.first()
-                affectedPlotsSummary.isNotBlank() -> affectedPlotsSummary
-                else -> ""
+                val conjunction = stringResource(R.string.alerts_plots_conjunction)
+                val affectedPlotsText = when {
+                    affectedPlotNames.size > 1 -> affectedPlotNames.dropLast(1).joinToString(", ") + conjunction + affectedPlotNames.last()
+                    affectedPlotNames.size == 1 -> affectedPlotNames.first()
+                    affectedPlotsSummary.isNotBlank() -> affectedPlotsSummary
+                    else -> ""
+                }
+
+                val locale = LocalConfiguration.current.locales[0]
+                val formattedTime = latestTriggeredAt?.let { formatAlertTriggerTime(it, locale) }
+
+                val contextualSubtitle = when {
+                    affectedPlotsText.isNotBlank() && !formattedTime.isNullOrBlank() -> {
+                        stringResource(R.string.alerts_hero_affected_plots_with_time, affectedPlotsText, formattedTime)
+                    }
+                    affectedPlotsText.isNotBlank() -> {
+                        stringResource(R.string.alerts_hero_affected_plots, affectedPlotsText)
+                    }
+                    else -> {
+                        stringResource(R.string.alerts_hero_no_affected_plots)
+                    }
+                }
+
+                Text(
+                    text = contextualSubtitle,
+                    fontFamily = RobotoFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 13.sp,
+                    color = Neutral600,
+                    textAlign = TextAlign.Center,
+                )
             }
-
-            val locale = LocalConfiguration.current.locales[0]
-            val formattedTime = latestTriggeredAt?.let { formatAlertTriggerTime(it, locale) }
-
-            val contextualSubtitle = when {
-                affectedPlotsText.isNotBlank() && !formattedTime.isNullOrBlank() -> {
-                    stringResource(R.string.alerts_hero_affected_plots_with_time, affectedPlotsText, formattedTime)
-                }
-                affectedPlotsText.isNotBlank() -> {
-                    stringResource(R.string.alerts_hero_affected_plots, affectedPlotsText)
-                }
-                else -> {
-                    stringResource(R.string.alerts_hero_no_affected_plots)
-                }
+            if (plotFilter != null) {
+                PlotFilterButton(
+                    state = plotFilter,
+                    modifier = Modifier.align(Alignment.TopEnd).offset(y = (-16).dp),
+                )
             }
-
-            Text(
-                text = contextualSubtitle,
-                fontFamily = RobotoFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = 13.sp,
-                color = Neutral600,
-                textAlign = TextAlign.Center,
-            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -385,6 +416,28 @@ private fun AlertsCenterContent(
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
+}
+
+/** The plot filter button: shown only when there is a choice; dark while a plot is chosen. */
+private data class PlotFilterButtonState(val isActive: Boolean, val onClick: () -> Unit)
+
+@Composable
+private fun PlotFilterButton(state: PlotFilterButtonState, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(if (state.isActive) Green900 else Neutral0)
+            .clickable(role = Role.Button, onClick = state.onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_grass),
+            contentDescription = stringResource(R.string.alerts_plot_filter_open),
+            tint = if (state.isActive) Neutral0 else Neutral900,
+            modifier = Modifier.size(24.dp),
+        )
     }
 }
 
