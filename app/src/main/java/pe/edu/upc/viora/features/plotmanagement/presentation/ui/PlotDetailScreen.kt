@@ -340,7 +340,13 @@ private fun DetailSheet(
     ) {
         Grabber(exploring = exploring, onExploringChange = onExploringChange)
         Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
+            // The padding sits inside the scroll so the last card can be lifted clear of the floating tab bar.
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(
+                    bottom = VioraTabBarDefaults.ContentBottomPadding +
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
