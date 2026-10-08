@@ -11,7 +11,7 @@ In olive farming, uniform spring budbreak and flowering require a critical amoun
   - `P80 · Frío invernal` (`389:80486`) with 4 variants: Accumulating, Halted (`389:81492`), Completed (`389:81950`), Off-Season (`389:82409`).
   - `P81 · ¿Por qué cuento frío?` (`389:81359`) bottom sheet explaining the Erez model, daily cycles, and variety threshold.
 - Backend `viora-platform` phenology context (`docs_otros/26-tactical-ddd.md`):
-  - `GET /api/v1/plots/{plotId}/metrics?name=CHILLING` → `MetricResource { metricName: "CHILLING", value: Double, qualitativeCategory: String, details: Map<String, Object>, evaluatedAt: Instant }`.
+  - `GET /api/v1/plots/{plotId}/metrics?name=CHILLING` → `MetricResource { metricName: "EREZ_CHILLING_PORTIONS", value, qualitativeCategory, details, evaluatedAt }`. The real `details` keys (thresholdTarget, seasonYear, evaluatedThrough, completionDate, seasonState IN_PROGRESS|HALTED|COMPLETED|OFF_SEASON, daysAbove24Celsius, currentWarmStreakDays, longestWarmStreakDays, thermalAnomaly, projectionStatus, projectedCompletionDate, previousSeason, dailyCurve) are documented in `MetricResource` of viora-platform (branch `feature/phenology-real-chill-accumulation`); the app never invents a value when one is missing.
 
 ## Decisions
 - **Figma is the source of truth.** The UI presents the 4 distinct states according to dormancy progress:
@@ -21,11 +21,11 @@ In olive farming, uniform spring budbreak and flowering require a critical amoun
   4. *Fuera de temporada*: Outside winter; displays dormancy paused and last winter's summary.
 - **Offline-First:** Room 3 table `chill_trackers` caches the latest metrics, curve points, and season status. When offline or server fails, the screen displays cached data with a timestamp banner.
 - **Variety Threshold:** 30 portions default for Sevillana/Criolla olive trees.
-- **Scope limitation:** Thermal anomaly incident alerts (US23) will link to P80, but the standalone incident notification/sheet contract belongs to Fabrizio's delivery.
+- **Scope limitation:** the warm winter signal (US23) is a local thermal rule from the plot's temperatures (more than 3 days in a row above 24 °C), not the official El Niño index. The alert in the Alerts Center is not built yet: the backend has no incident type for it.
 
 ## Scope
 - In: Phenology chill domain, data layer (Retrofit, Room 3 entity/DAO, mapper, repository, Hilt DI), Room 3 migration (v7 → v8), P80 screen with 4 states, P81 bottom sheet, cumulative curve canvas chart, route and navigation wiring, en/es strings, and unit tests.
-- Out: Backend calculations (Erez differential equations are evaluated on the server).
+- Out: Backend calculations (the Dynamic Model is evaluated on the server from the hourly temperatures at the plot).
 
 ## Checks
 - Runner: `./gradlew testDebugUnitTest`.
@@ -37,6 +37,7 @@ In olive farming, uniform spring budbreak and flowering require a critical amoun
 - [x] T3 — Presentation: `WinterChillScreen` (P80 with 4 states, 30 snowflake grid, cumulative chart), `WhyCountChillSheet` (P81), `WinterChillViewModel`, `WinterChillNavGraph`, strings (en/es); unit tests. (Commit `8c30f`)
 - [x] T4 — Review fixes & integration: localized all hardcoded UI strings, wired winter chill navigation across `PlotDetailScreen`, `HarvestHistoryScreen`, `SensorsScreen`, and `PlotClimateScreen`. (Commit `8a6c7`)
 - [x] T5 — Figma pixel-perfect alignment: aligned P80 & P81 screens 100% with Figma nodes `389:80486` & `389:81359`: `EditorialHeadline`, hero card (`Color(0xFF727272)`, 32dp), 3x10 snowflake grid, season timeline track, `VioraVoice`, asymmetric metric cards (tall projection card 252dp + stacked warm days & ENSO), curve chart callout badge ("Hoy · 24", "4 ago · 30"), and P81 equation pills with accent keys. (Commit `0cca0`)
+- [x] T6 — Real contract: DTO, Room entity (v8 edited in place, never released), mapper and repository read the real backend keys; no invented dates, curves or comparisons (missing data shows "—" or "no disponible"); empty state instead of "0 de 30"; warm winter card replaces the El Niño card; `NonObservableLocale` lint errors fixed; tests use the real backend JSON.
 
 ## Progress
 - Branch `feature/winter-chilling` created from `develop`.
@@ -54,6 +55,6 @@ In olive farming, uniform spring budbreak and flowering require a critical amoun
 - Verification passed: `./gradlew testDebugUnitTest assembleDebug` (100% tests passing, clean debug APK build).
 
 ## Next step
-Device check and PR review for merge into `develop`.
+Merge the backend branch first (release and redeploy Render), then this one into `develop`. Pending: the warm winter alert (US23) in the Alerts Center.
 
 
