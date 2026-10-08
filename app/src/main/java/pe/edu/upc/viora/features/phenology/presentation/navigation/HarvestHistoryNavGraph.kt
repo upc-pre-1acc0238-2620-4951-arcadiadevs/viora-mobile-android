@@ -23,6 +23,7 @@ fun NavGraphBuilder.harvestHistoryComposable(navController: NavController) {
             onBack = { navController.popBackStack() },
             onSensors = { navController.navigate(SensorsRoute(plotId = route.plotId, plotName = route.plotName)) },
             onClimate = { navController.navigate(PlotClimateRoute(plotId = route.plotId, plotName = route.plotName)) },
+            onWinterChill = { navController.navigate(WinterChillRoute(plotId = route.plotId, plotName = route.plotName)) },
         )
     }
 }

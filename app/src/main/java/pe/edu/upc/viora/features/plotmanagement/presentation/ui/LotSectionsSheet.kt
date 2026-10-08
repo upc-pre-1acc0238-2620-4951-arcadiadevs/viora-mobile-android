@@ -37,6 +37,7 @@ enum class LotSection(
     @StringRes val hint: Int,
 ) {
     HARVEST(R.drawable.ic_history, R.string.lot_section_harvest, R.string.lot_section_harvest_hint),
+    WINTER_CHILL(R.drawable.ic_ac_unit, R.string.winter_chill_title, R.string.winter_chill_timeline),
     THINNING(R.drawable.ic_calendar_month, R.string.lot_section_thinning, R.string.lot_section_thinning_hint),
     CLIMATE(R.drawable.ic_cloud, R.string.lot_section_climate, R.string.lot_section_climate_hint),
     SENSORS(R.drawable.ic_sensors, R.string.lot_section_sensors, R.string.lot_section_sensors_hint),
@@ -45,7 +46,7 @@ enum class LotSection(
 
     companion object {
         /** The sections whose screens exist in the app; the others are listed as "coming soon". */
-        val BUILT: Set<LotSection> = setOf(HARVEST, CLIMATE, SENSORS)
+        val BUILT: Set<LotSection> = setOf(HARVEST, WINTER_CHILL, CLIMATE, SENSORS)
     }
 }
 

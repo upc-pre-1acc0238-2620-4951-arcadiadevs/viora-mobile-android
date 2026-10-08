@@ -104,6 +104,7 @@ fun SensorsScreen(
     modifier: Modifier = Modifier,
     onHarvestHistory: () -> Unit = {},
     onClimate: () -> Unit = {},
+    onWinterChill: () -> Unit = {},
     onNodeClick: (SensorNode) -> Unit = {},
     viewModel: SensorsViewModel = hiltViewModel(),
     linkViewModel: LinkNodeViewModel = hiltViewModel(),
@@ -155,6 +156,7 @@ fun SensorsScreen(
                 when (section) {
                     LotSection.HARVEST -> onHarvestHistory()
                     LotSection.CLIMATE -> onClimate()
+                    LotSection.WINTER_CHILL -> onWinterChill()
                     else -> Unit
                 }
             },
