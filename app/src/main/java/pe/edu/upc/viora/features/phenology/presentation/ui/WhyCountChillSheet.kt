@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,7 +58,7 @@ import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
  * and why 30 portions are critical for Sevillana / Criolla in southern coastal Peru.
  * Aligned 100% with Figma node 389:81359.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun WhyCountChillSheet(
     onDismiss: () -> Unit,
@@ -150,10 +152,11 @@ fun WhyCountChillSheet(
                     color = Neutral900,
                 )
 
-                // Equation row
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                // Equation row: wraps instead of cutting the result on narrow screens
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    itemVerticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(
                         modifier = Modifier
