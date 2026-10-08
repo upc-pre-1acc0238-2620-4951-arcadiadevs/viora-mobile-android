@@ -1,0 +1,1072 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 8,
+    "identityHash": "1020c57ba31797b4f3f7112f4ba6f2fa",
+    "entities": [
+      {
+        "tableName": "cache_metadata",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`resource_key` TEXT NOT NULL, `fetched_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`resource_key`))",
+        "fields": [
+          {
+            "fieldPath": "resourceKey",
+            "columnName": "resource_key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fetchedAtEpochMs",
+            "columnName": "fetched_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "resource_key"
+          ]
+        }
+      },
+      {
+        "tableName": "plots",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `variety` TEXT NOT NULL, `area_ha` REAL NOT NULL, `tree_density` INTEGER NOT NULL, `row_spacing_m` REAL NOT NULL, `tree_spacing_m` REAL NOT NULL, `polygon_geojson` TEXT NOT NULL, `last_pruning_date` TEXT, `status` TEXT NOT NULL, `revision` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "variety",
+            "columnName": "variety",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "areaHa",
+            "columnName": "area_ha",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "treeDensity",
+            "columnName": "tree_density",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rowSpacingM",
+            "columnName": "row_spacing_m",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "treeSpacingM",
+            "columnName": "tree_spacing_m",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "polygonGeoJson",
+            "columnName": "polygon_geojson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastPruningDate",
+            "columnName": "last_pruning_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revision",
+            "columnName": "revision",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "sensor_nodes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `depth_cm` INTEGER, `status` TEXT NOT NULL, `last_reading_at` TEXT, `last_temperature_celsius` REAL, `last_humidity_percent` REAL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plotId",
+            "columnName": "plot_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "depthCm",
+            "columnName": "depth_cm",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastReadingAt",
+            "columnName": "last_reading_at",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastTemperatureCelsius",
+            "columnName": "last_temperature_celsius",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "lastHumidityPercent",
+            "columnName": "last_humidity_percent",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "agroclimatic_incidents",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, `plot_name` TEXT NOT NULL, `plot_variety` TEXT NOT NULL, `type` TEXT NOT NULL, `severity` TEXT NOT NULL, `status` TEXT NOT NULL, `headline_key` TEXT NOT NULL, `metric_name` TEXT NOT NULL, `current_value` REAL NOT NULL, `threshold_value` REAL NOT NULL, `unit` TEXT NOT NULL, `triggered_at` TEXT NOT NULL, `stress_duration_minutes` INTEGER NOT NULL, `snoozed_until` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plotId",
+            "columnName": "plot_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plotName",
+            "columnName": "plot_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plotVariety",
+            "columnName": "plot_variety",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "severity",
+            "columnName": "severity",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "headlineKey",
+            "columnName": "headline_key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "metricName",
+            "columnName": "metric_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentValue",
+            "columnName": "current_value",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thresholdValue",
+            "columnName": "threshold_value",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unit",
+            "columnName": "unit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "triggeredAt",
+            "columnName": "triggered_at",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stressDurationMinutes",
+            "columnName": "stress_duration_minutes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "snoozedUntil",
+            "columnName": "snoozed_until",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "harvest_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, `total_yield_kg` REAL NOT NULL, `green_kg` REAL, `black_kg` REAL, `bearing` TEXT NOT NULL, `recorded_at` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plotId",
+            "columnName": "plot_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "campaignYear",
+            "columnName": "campaign_year",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalYieldKg",
+            "columnName": "total_yield_kg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "greenKg",
+            "columnName": "green_kg",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "blackKg",
+            "columnName": "black_kg",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "bearing",
+            "columnName": "bearing",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recordedAt",
+            "columnName": "recorded_at",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "bearing_indexes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`plot_id` TEXT NOT NULL, `value` REAL, `evaluated_years` INTEGER NOT NULL, `evaluated_at` TEXT, PRIMARY KEY(`plot_id`))",
+        "fields": [
+          {
+            "fieldPath": "plotId",
+            "columnName": "plot_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "evaluatedYears",
+            "columnName": "evaluated_years",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "evaluatedAt",
+            "columnName": "evaluated_at",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "plot_id"
+          ]
+        }
+      },
+      {
+        "tableName": "harvest_settlements",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `report_id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, `green_kg` REAL NOT NULL, `black_kg` REAL NOT NULL, `total_yield_kg` REAL NOT NULL, `commercial_fruits_per_kg` REAL, `notes` TEXT, `status` TEXT NOT NULL, `settled_at` TEXT, `thinning_status` TEXT NOT NULL, `thinning_executed_date` TEXT, `thinning_prescribed_pct` REAL, `thinning_actual_pct` REAL, `thinning_deviation_pp` REAL, `stabilization_status` TEXT NOT NULL, `baseline_campaigns` INTEGER NOT NULL, `settled_campaigns` INTEGER NOT NULL, `baseline_yield_kg` REAL, `baseline_alternation_index` REAL, `managed_alternation_index` REAL, `amplitude_reduction_rate` REAL, `target_achieved` INTEGER, `interannual_variance_kg2` REAL, `coefficient_of_variation` REAL, `required_consecutive_pairs` INTEGER NOT NULL, `receipt_number` TEXT, `weighed_on` TEXT, `mill_ticket_number` TEXT, `commercial_size_grade` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportId",
+            "columnName": "report_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plotId",
+            "columnName": "plot_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "campaignYear",
+            "columnName": "campaign_year",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "greenKg",
+            "columnName": "green_kg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "blackKg",
+            "columnName": "black_kg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalYieldKg",
+            "columnName": "total_yield_kg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commercialFruitsPerKg",
+            "columnName": "commercial_fruits_per_kg",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "settledAt",
+            "columnName": "settled_at",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "thinningStatus",
+            "columnName": "thinning_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thinningExecutedDate",
+            "columnName": "thinning_executed_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "thinningPrescribedPct",
+            "columnName": "thinning_prescribed_pct",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "thinningActualPct",
+            "columnName": "thinning_actual_pct",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "thinningDeviationPp",
+            "columnName": "thinning_deviation_pp",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "stabilizationStatus",
+            "columnName": "stabilization_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "baselineCampaigns",
+            "columnName": "baseline_campaigns",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "settledCampaigns",
+            "columnName": "settled_campaigns",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "baselineYieldKg",
+            "columnName": "baseline_yield_kg",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "baselineAlternationIndex",
+            "columnName": "baseline_alternation_index",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "managedAlternationIndex",
+            "columnName": "managed_alternation_index",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "amplitudeReductionRate",
+            "columnName": "amplitude_reduction_rate",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "targetAchieved",
+            "columnName": "target_achieved",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "interannualVarianceKg2",
+            "columnName": "interannual_variance_kg2",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "coefficientOfVariation",
+            "columnName": "coefficient_of_variation",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "requiredConsecutivePairs",
+            "columnName": "required_consecutive_pairs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "receiptNumber",
+            "columnName": "receipt_number",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "weighedOn",
+            "columnName": "weighed_on",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "millTicketNumber",
+            "columnName": "mill_ticket_number",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "commercialSizeGrade",
+            "columnName": "commercial_size_grade",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "telemetry_readings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, `observed_at_epoch_ms` INTEGER NOT NULL, `air_temperature_celsius` REAL, `relative_humidity_percent` REAL, `soil_moisture_30cm_percent` REAL, `soil_moisture_60cm_percent` REAL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plotId",
+            "columnName": "plot_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observedAtEpochMs",
+            "columnName": "observed_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "airTemperatureCelsius",
+            "columnName": "air_temperature_celsius",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "relativeHumidityPercent",
+            "columnName": "relative_humidity_percent",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "soilMoisture30cmPercent",
+            "columnName": "soil_moisture_30cm_percent",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "soilMoisture60cmPercent",
+            "columnName": "soil_moisture_60cm_percent",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "forecast_days",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, `forecast_date` TEXT NOT NULL, `max_temperature_celsius` REAL NOT NULL, `min_temperature_celsius` REAL NOT NULL, `precipitation_probability_percent` REAL NOT NULL, `wind_speed_kmh` REAL NOT NULL, `synced_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plotId",
+            "columnName": "plot_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "forecastDate",
+            "columnName": "forecast_date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxTemperatureCelsius",
+            "columnName": "max_temperature_celsius",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "minTemperatureCelsius",
+            "columnName": "min_temperature_celsius",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "precipitationProbabilityPercent",
+            "columnName": "precipitation_probability_percent",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "windSpeedKmh",
+            "columnName": "wind_speed_kmh",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncedAtEpochMs",
+            "columnName": "synced_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "pending_settlements",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`plot_id` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, `green_olives_kg` REAL NOT NULL, `black_olives_kg` REAL NOT NULL, `weighed_on` TEXT NOT NULL, `mill_ticket_number` TEXT, `commercial_fruits_per_kg` REAL, `notes` TEXT, `idempotency_key` TEXT NOT NULL, `status` TEXT NOT NULL, `last_error_code` TEXT, `attempt_count` INTEGER NOT NULL, `existing_total_yield_kg` REAL, `existing_receipt_number` TEXT, `existing_weighed_on` TEXT, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`plot_id`, `campaign_year`))",
+        "fields": [
+          {
+            "fieldPath": "plotId",
+            "columnName": "plot_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "campaignYear",
+            "columnName": "campaign_year",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "greenOlivesKg",
+            "columnName": "green_olives_kg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "blackOlivesKg",
+            "columnName": "black_olives_kg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weighedOn",
+            "columnName": "weighed_on",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "millTicketNumber",
+            "columnName": "mill_ticket_number",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "commercialFruitsPerKg",
+            "columnName": "commercial_fruits_per_kg",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "idempotencyKey",
+            "columnName": "idempotency_key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastErrorCode",
+            "columnName": "last_error_code",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "attemptCount",
+            "columnName": "attempt_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "existingTotalYieldKg",
+            "columnName": "existing_total_yield_kg",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "existingReceiptNumber",
+            "columnName": "existing_receipt_number",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "existingWeighedOn",
+            "columnName": "existing_weighed_on",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "plot_id",
+            "campaign_year"
+          ]
+        }
+      },
+      {
+        "tableName": "draft_tree_samples",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, `plot_name` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, `tree_identifier` TEXT NOT NULL, `shoots_count` INTEGER NOT NULL, `fruit_set_count` INTEGER NOT NULL, `trunk_circumference_cm` REAL, `trunk_diameter_mm` REAL, `observed_on` TEXT NOT NULL, `is_synced` INTEGER NOT NULL DEFAULT 0, `created_at` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plotId",
+            "columnName": "plot_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plotName",
+            "columnName": "plot_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "campaignYear",
+            "columnName": "campaign_year",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "treeIdentifier",
+            "columnName": "tree_identifier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shootsCount",
+            "columnName": "shoots_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fruitSetCount",
+            "columnName": "fruit_set_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "trunkCircumferenceCm",
+            "columnName": "trunk_circumference_cm",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "trunkDiameterMm",
+            "columnName": "trunk_diameter_mm",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "observedOn",
+            "columnName": "observed_on",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSynced",
+            "columnName": "is_synced",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "thinning_events",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `event_type` TEXT NOT NULL, `prescription_id` TEXT NOT NULL, `confirmation_id` TEXT, `plot_id` TEXT NOT NULL, `plot_name` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, `occurred_at` TEXT NOT NULL, `evaluated_trees_count` INTEGER, `total_shoots_count` INTEGER, `total_fruits_count` INTEGER, `mean_fruits_per_shoot` REAL, `is_representative` INTEGER, `removal_percentage` REAL, `removed_kg` REAL, `executed_date` TEXT, `labor_crew_size` INTEGER, `timeliness` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventType",
+            "columnName": "event_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prescriptionId",
+            "columnName": "prescription_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "confirmationId",
+            "columnName": "confirmation_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "plotId",
+            "columnName": "plot_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plotName",
+            "columnName": "plot_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "campaignYear",
+            "columnName": "campaign_year",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "occurredAt",
+            "columnName": "occurred_at",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "evaluatedTreesCount",
+            "columnName": "evaluated_trees_count",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "totalShootsCount",
+            "columnName": "total_shoots_count",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "totalFruitsCount",
+            "columnName": "total_fruits_count",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "meanFruitsPerShoot",
+            "columnName": "mean_fruits_per_shoot",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "isRepresentative",
+            "columnName": "is_representative",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "removalPercentage",
+            "columnName": "removal_percentage",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "removedKg",
+            "columnName": "removed_kg",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "executedDate",
+            "columnName": "executed_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "laborCrewSize",
+            "columnName": "labor_crew_size",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "timeliness",
+            "columnName": "timeliness",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "chill_trackers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`plot_id` TEXT NOT NULL, `season_year` INTEGER NOT NULL, `accumulated_portions` REAL NOT NULL, `threshold_portions` REAL NOT NULL, `season_state` TEXT NOT NULL, `evaluated_through` TEXT, `completion_date` TEXT, `projection_status` TEXT NOT NULL, `projected_completion_date` TEXT, `days_above_24_celsius` INTEGER NOT NULL, `current_warm_streak_days` INTEGER NOT NULL, `longest_warm_streak_days` INTEGER NOT NULL, `thermal_anomaly` TEXT NOT NULL, `previous_season_year` INTEGER, `previous_season_portions` REAL, `previous_season_completion_date` TEXT, `curve_points_json` TEXT NOT NULL, `synced_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`plot_id`))",
+        "fields": [
+          {
+            "fieldPath": "plotId",
+            "columnName": "plot_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seasonYear",
+            "columnName": "season_year",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accumulatedPortions",
+            "columnName": "accumulated_portions",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thresholdPortions",
+            "columnName": "threshold_portions",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seasonState",
+            "columnName": "season_state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "evaluatedThrough",
+            "columnName": "evaluated_through",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "completionDate",
+            "columnName": "completion_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "projectionStatus",
+            "columnName": "projection_status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "projectedCompletionDate",
+            "columnName": "projected_completion_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "daysAbove24Celsius",
+            "columnName": "days_above_24_celsius",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentWarmStreakDays",
+            "columnName": "current_warm_streak_days",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longestWarmStreakDays",
+            "columnName": "longest_warm_streak_days",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thermalAnomaly",
+            "columnName": "thermal_anomaly",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "previousSeasonYear",
+            "columnName": "previous_season_year",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "previousSeasonPortions",
+            "columnName": "previous_season_portions",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "previousSeasonCompletionDate",
+            "columnName": "previous_season_completion_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "curvePointsJson",
+            "columnName": "curve_points_json",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncedAtEpochMs",
+            "columnName": "synced_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "plot_id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1020c57ba31797b4f3f7112f4ba6f2fa')"
+    ]
+  }
+}

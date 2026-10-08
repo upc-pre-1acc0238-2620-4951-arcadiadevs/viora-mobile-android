@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
+import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
 import pe.edu.upc.viora.features.telemetry.presentation.ui.PlotClimateScreen
 import pe.edu.upc.viora.features.telemetry.presentation.ui.TelemetryDetailScreen
@@ -40,6 +41,9 @@ fun NavGraphBuilder.climateNavGraph(navController: NavController) {
             },
             onOpenHarvestHistory = { plotId, plotName ->
                 navController.navigate(HarvestHistoryRoute(plotId = plotId, plotName = plotName))
+            },
+            onOpenWinterChill = { plotId, plotName ->
+                navController.navigate(WinterChillRoute(plotId = plotId, plotName = plotName))
             },
         )
     }

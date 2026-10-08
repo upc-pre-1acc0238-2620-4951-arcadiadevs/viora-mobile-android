@@ -15,7 +15,9 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.Adj
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.EditPlotScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.RegisterPlotScreen
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
+import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.harvestHistoryComposable
+import pe.edu.upc.viora.features.phenology.presentation.navigation.winterChillComposable
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.configureNodeComposable
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.sensorsComposable
@@ -87,6 +89,9 @@ fun NavGraphBuilder.plotScreens(navController: NavController) {
             onHarvestHistory = { plotName ->
                 navController.navigate(HarvestHistoryRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
             },
+            onWinterChill = { plotName ->
+                navController.navigate(WinterChillRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
+            },
         )
     }
     composable<EditPlotRoute> {
@@ -98,4 +103,5 @@ fun NavGraphBuilder.plotScreens(navController: NavController) {
     sensorsComposable(navController)
     configureNodeComposable(navController)
     harvestHistoryComposable(navController)
+    winterChillComposable(navController)
 }

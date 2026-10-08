@@ -126,6 +126,7 @@ fun PlotClimateScreen(
     onOpenMetric: (plotId: String, plotName: String, metric: TelemetryMetric) -> Unit,
     onOpenSensors: (plotId: String, plotName: String) -> Unit,
     onOpenHarvestHistory: (plotId: String, plotName: String) -> Unit,
+    onOpenWinterChill: (plotId: String, plotName: String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
     viewModel: PlotClimateViewModel = hiltViewModel(),
 ) {
@@ -153,6 +154,7 @@ fun PlotClimateScreen(
                 when (section) {
                     LotSection.HARVEST -> onOpenHarvestHistory(content.selectedPlotId, content.plotName)
                     LotSection.SENSORS -> onOpenSensors(content.selectedPlotId, content.plotName)
+                    LotSection.WINTER_CHILL -> onOpenWinterChill(content.selectedPlotId, content.plotName)
                     else -> Unit
                 }
             },

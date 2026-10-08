@@ -98,6 +98,7 @@ fun HarvestHistoryScreen(
     modifier: Modifier = Modifier,
     onSensors: () -> Unit = {},
     onClimate: () -> Unit = {},
+    onWinterChill: () -> Unit = {},
     viewModel: HarvestHistoryViewModel = hiltViewModel(),
     editor: CampaignEditorViewModel = hiltViewModel(),
 ) {
@@ -164,6 +165,7 @@ fun HarvestHistoryScreen(
                 when (section) {
                     LotSection.SENSORS -> onSensors()
                     LotSection.CLIMATE -> onClimate()
+                    LotSection.WINTER_CHILL -> onWinterChill()
                     else -> Unit
                 }
             },

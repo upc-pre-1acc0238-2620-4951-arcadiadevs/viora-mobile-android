@@ -8,6 +8,8 @@ import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.PendingS
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.PendingSettlementEntity
 import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexDao
 import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexEntity
+import pe.edu.upc.viora.features.phenology.infrastructure.local.ChillTrackerDao
+import pe.edu.upc.viora.features.phenology.infrastructure.local.ChillTrackerEntity
 import pe.edu.upc.viora.features.phenology.infrastructure.local.HarvestRecordDao
 import pe.edu.upc.viora.features.phenology.infrastructure.local.HarvestRecordEntity
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
@@ -51,8 +53,9 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
         PendingSettlementEntity::class,
         DraftTreeSampleEntity::class,
         ThinningEventEntity::class,
+        ChillTrackerEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -68,4 +71,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun pendingSettlementDao(): PendingSettlementDao
     abstract fun draftTreeSampleDao(): DraftTreeSampleDao
     abstract fun thinningEventDao(): ThinningEventDao
+    abstract fun chillTrackerDao(): ChillTrackerDao
 }
