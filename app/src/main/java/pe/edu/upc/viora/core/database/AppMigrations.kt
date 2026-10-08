@@ -120,14 +120,17 @@ object AppMigrations {
     }
 
     internal const val MIGRATION_7_8_SQL =
-        "CREATE TABLE IF NOT EXISTS `chill_trackers` (`plot_id` TEXT NOT NULL, " +
+        "CREATE TABLE IF NOT EXISTS `chill_trackers` (`plot_id` TEXT NOT NULL, `season_year` INTEGER NOT NULL, " +
             "`accumulated_portions` REAL NOT NULL, `threshold_portions` REAL NOT NULL, " +
-            "`days_above_24_celsius` INTEGER NOT NULL, `season_state` TEXT NOT NULL, " +
-            "`projected_completion_date` TEXT, `previous_winter_completion_date` TEXT, " +
-            "`enso_risk` TEXT NOT NULL, `curve_points_json` TEXT NOT NULL, " +
+            "`season_state` TEXT NOT NULL, `evaluated_through` TEXT, `completion_date` TEXT, " +
+            "`projection_status` TEXT NOT NULL, `projected_completion_date` TEXT, " +
+            "`days_above_24_celsius` INTEGER NOT NULL, `current_warm_streak_days` INTEGER NOT NULL, " +
+            "`longest_warm_streak_days` INTEGER NOT NULL, `thermal_anomaly` TEXT NOT NULL, " +
+            "`previous_season_year` INTEGER, `previous_season_portions` REAL, " +
+            "`previous_season_completion_date` TEXT, `curve_points_json` TEXT NOT NULL, " +
             "`synced_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`plot_id`))"
 
-    /** Adds the cache of the winter chilling accumulation (Erez model, US22). */
+    /** Adds the cache of the winter chill computed by the backend (Dynamic Model, US22/US23). */
     val MIGRATION_7_8 = Migration(7, 8) { connection ->
         connection.execSQL(MIGRATION_7_8_SQL)
     }

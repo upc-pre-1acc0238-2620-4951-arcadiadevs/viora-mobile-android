@@ -1,107 +1,93 @@
 package pe.edu.upc.viora.features.phenology.infrastructure
 
-import java.time.Instant
 import java.time.LocalDate
+import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Test
-import pe.edu.upc.viora.features.phenology.domain.entity.EnsoRiskLevel
+import pe.edu.upc.viora.features.phenology.REAL_CHILL_METRIC_JSON
+import pe.edu.upc.viora.features.phenology.domain.entity.ChillProjection
+import pe.edu.upc.viora.features.phenology.domain.entity.ThermalAnomaly
 import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
 import pe.edu.upc.viora.features.phenology.infrastructure.mapper.toChillEntity
+import pe.edu.upc.viora.features.phenology.infrastructure.mapper.toChillProjection
 import pe.edu.upc.viora.features.phenology.infrastructure.mapper.toDomain
-import pe.edu.upc.viora.features.phenology.infrastructure.mapper.toEnsoRiskLevel
+import pe.edu.upc.viora.features.phenology.infrastructure.mapper.toThermalAnomaly
 import pe.edu.upc.viora.features.phenology.infrastructure.mapper.toWinterSeasonState
-import pe.edu.upc.viora.features.phenology.infrastructure.remote.ChillCurvePointDto
 import pe.edu.upc.viora.features.phenology.infrastructure.remote.MetricDetailsDto
 import pe.edu.upc.viora.features.phenology.infrastructure.remote.MetricDto
 
 class ChillMapperTest {
 
+    private val json = Json { ignoreUnknownKeys = true }
+
     @Test
-    fun mapsMetricDtoToEntityAndDomain() {
-        val nowEpochMs = 1728302400000L // 2024-10-07
-        val dto = MetricDto(
-            metricName = "CHILLING",
-            value = 24.0,
-            qualitativeCategory = "ACCUMULATING",
-            details = MetricDetailsDto(
-                portionsAccumulated = 24.0,
-                thresholdPortions = 30.0,
-                daysAbove24Celsius = 4,
-                seasonState = "ACCUMULATING",
-                projectedCompletionDate = "2026-08-14",
-                previousWinterCompletionDate = "2025-08-05",
-                ensoRisk = "NEUTRAL",
-                curvePoints = listOf(
-                    ChillCurvePointDto("2026-06-01", 1.0, 0.8),
-                    ChillCurvePointDto("2026-06-15", 5.0, 4.5),
-                ),
-            ),
-        )
+    fun mapsTheRealBackendAnswerToTheDomain() {
+        val dto = json.decodeFromString<List<MetricDto>>(REAL_CHILL_METRIC_JSON).single()
 
-        val entity = dto.toChillEntity("plot-abc", nowEpochMs)
-        assertEquals("plot-abc", entity.plotId)
-        assertEquals(24.0, entity.accumulatedPortions, 0.001)
-        assertEquals(30.0, entity.thresholdPortions, 0.001)
-        assertEquals(4, entity.daysAbove24Celsius)
-        assertEquals("ACCUMULATING", entity.seasonState)
-        assertEquals("2026-08-14", entity.projectedCompletionDate)
-        assertEquals("NEUTRAL", entity.ensoRisk)
+        val entity = dto.toChillEntity("plot-1", nowEpochMs = 1000L)
+        assertNotNull(entity)
+        val tracker = entity!!.toDomain()
 
-        val domain = entity.toDomain()
-        assertEquals("plot-abc", domain.plotId)
-        assertEquals(24.0, domain.accumulatedPortions, 0.001)
-        assertEquals(30.0, domain.thresholdPortions, 0.001)
-        assertEquals(4, domain.daysAbove24Celsius)
-        assertEquals(WinterSeasonState.ACCUMULATING, domain.seasonState)
-        assertEquals(LocalDate.of(2026, 8, 14), domain.projectedCompletionDate)
-        assertEquals(LocalDate.of(2025, 8, 5), domain.previousWinterCompletionDate)
-        assertEquals(EnsoRiskLevel.NEUTRAL, domain.ensoRisk)
-        assertEquals(2, domain.curvePoints.size)
-        assertEquals(LocalDate.of(2026, 6, 1), domain.curvePoints[0].date)
-        assertEquals(1.0, domain.curvePoints[0].accumulatedThisYear, 0.001)
-        assertEquals(0.8, domain.curvePoints[0].accumulatedPreviousYear!!, 0.001)
-        assertEquals(Instant.ofEpochMilli(nowEpochMs), domain.syncedAt)
+        assertEquals(2026, tracker.seasonYear)
+        assertEquals(3.03, tracker.accumulatedPortions, 0.001)
+        assertEquals(30.0, tracker.thresholdPortions, 0.001)
+        assertEquals(WinterSeasonState.OFF_SEASON, tracker.seasonState)
+        assertEquals(LocalDate.of(2026, 8, 31), tracker.evaluatedThrough)
+        assertNull(tracker.completionDate)
+        assertEquals(ChillProjection.NOT_APPLICABLE, tracker.projection)
+        assertNull(tracker.projectedCompletionDate)
+        assertEquals(1, tracker.daysAbove24Celsius)
+        assertEquals(1, tracker.longestWarmStreakDays)
+        assertEquals(ThermalAnomaly.NONE, tracker.thermalAnomaly)
+        assertEquals(2025, tracker.previousSeason!!.seasonYear)
+        assertEquals(27.21, tracker.previousSeason!!.accumulatedPortions, 0.001)
+        assertNull(tracker.previousSeason!!.completionDate)
+
+        assertEquals(3, tracker.curvePoints.size)
+        assertEquals(LocalDate.of(2026, 7, 16), tracker.curvePoints[1].date)
+        assertEquals(2.02, tracker.curvePoints[1].accumulatedThisYear!!, 0.001)
+        assertEquals(10.1, tracker.curvePoints[1].accumulatedPreviousYear!!, 0.001)
     }
 
     @Test
-    fun mapsSeasonStateVariations() {
-        assertEquals(WinterSeasonState.ACCUMULATING, "ACCUMULATING".toWinterSeasonState())
-        assertEquals(WinterSeasonState.CHILL_HALTED, "CHILL_HALTED".toWinterSeasonState())
+    fun keepsTheDaysWithoutDataAsNull() {
+        val dto = json.decodeFromString<List<MetricDto>>(
+            REAL_CHILL_METRIC_JSON.replace(
+                """{"date":"2026-08-31","portions":3.03,"previousSeasonPortions":27.21}""",
+                """{"date":"2026-08-31","portions":null,"previousSeasonPortions":null}""",
+            ),
+        ).single()
+
+        val last = dto.toChillEntity("plot-1", 1000L)!!.toDomain().curvePoints.last()
+
+        assertNull(last.accumulatedThisYear)
+        assertNull(last.accumulatedPreviousYear)
+    }
+
+    @Test
+    fun rejectsAMetricWithoutTheSeasonFields() {
+        val dto = MetricDto(
+            metricName = "EREZ_CHILLING_PORTIONS",
+            value = 28.5,
+            details = MetricDetailsDto(seasonState = "COMPLETED"),
+        )
+
+        assertNull(dto.toChillEntity("plot-1", 1000L))
+    }
+
+    @Test
+    fun mapsTheBackendEnums() {
+        assertEquals(WinterSeasonState.ACCUMULATING, "IN_PROGRESS".toWinterSeasonState())
         assertEquals(WinterSeasonState.CHILL_HALTED, "HALTED".toWinterSeasonState())
         assertEquals(WinterSeasonState.COMPLETED, "COMPLETED".toWinterSeasonState())
-        assertEquals(WinterSeasonState.COMPLETED, "ESTIMULO_COMPLETADO".toWinterSeasonState())
         assertEquals(WinterSeasonState.OFF_SEASON, "OFF_SEASON".toWinterSeasonState())
-        assertEquals(WinterSeasonState.OFF_SEASON, "FUERA_DE_TEMPORADA".toWinterSeasonState())
-        assertEquals(WinterSeasonState.ACCUMULATING, "UNKNOWN_OTHER".toWinterSeasonState())
-    }
-
-    @Test
-    fun mapsEnsoRiskLevels() {
-        assertEquals(EnsoRiskLevel.NEUTRAL, "NEUTRAL".toEnsoRiskLevel())
-        assertEquals(EnsoRiskLevel.ACTIVE, "ACTIVE".toEnsoRiskLevel())
-        assertEquals(EnsoRiskLevel.ACTIVE, "ACTIVO".toEnsoRiskLevel())
-        assertEquals(EnsoRiskLevel.HIGH, "HIGH".toEnsoRiskLevel())
-        assertEquals(EnsoRiskLevel.HIGH, "ALTO".toEnsoRiskLevel())
-        assertEquals(EnsoRiskLevel.NEUTRAL, "UNKNOWN".toEnsoRiskLevel())
-    }
-
-    @Test
-    fun handlesNullDetailsGracefully() {
-        val dto = MetricDto(
-            metricName = "CHILLING",
-            value = 18.5,
-            qualitativeCategory = "COMPLETED",
-            details = null,
-        )
-        val entity = dto.toChillEntity("plot-null", 1000L)
-        val domain = entity.toDomain()
-
-        assertEquals(18.5, domain.accumulatedPortions, 0.001)
-        assertEquals(30.0, domain.thresholdPortions, 0.001)
-        assertEquals(0, domain.daysAbove24Celsius)
-        assertEquals(WinterSeasonState.COMPLETED, domain.seasonState)
-        assertEquals(EnsoRiskLevel.NEUTRAL, domain.ensoRisk)
-        assertEquals(0, domain.curvePoints.size)
+        assertEquals(ThermalAnomaly.ACTIVE, "ACTIVE".toThermalAnomaly())
+        assertEquals(ThermalAnomaly.RECORDED, "RECORDED".toThermalAnomaly())
+        assertEquals(ThermalAnomaly.NONE, "NONE".toThermalAnomaly())
+        assertEquals(ChillProjection.PROJECTED, "PROJECTED".toChillProjection())
+        assertEquals(ChillProjection.NOT_REACHABLE_IN_SEASON, "NOT_REACHABLE_IN_SEASON".toChillProjection())
+        assertEquals(ChillProjection.INSUFFICIENT_DATA, "INSUFFICIENT_DATA".toChillProjection())
     }
 }

@@ -4,44 +4,50 @@ import java.time.Instant
 import java.time.LocalDate
 
 /**
- * Domain entity representing winter chilling accumulation (US22) based on Erez dynamic model.
- * Sevillana / Criolla olives require 30 portions between June 1 and August 31.
+ * Winter chill of a plot (US22) computed by the backend with the Dynamic Model (Fishman & Erez) from the hourly
+ * temperatures at the plot, plus its warm winter signal (US23). The season runs from June 1 to August 31; outside
+ * it the tracker describes the last finished winter.
  */
 data class ChillTracker(
     val plotId: String,
+    val seasonYear: Int,
     val accumulatedPortions: Double,
     val thresholdPortions: Double,
-    val daysAbove24Celsius: Int,
     val seasonState: WinterSeasonState,
+    /** Last day with temperatures, or null when no day of the season has been evaluated yet. */
+    val evaluatedThrough: LocalDate?,
+    /** First day the threshold was reached, or null. */
+    val completionDate: LocalDate?,
+    val projection: ChillProjection,
+    /** Day the threshold would be reached at the pace of the last 14 days; only when [projection] is PROJECTED. */
     val projectedCompletionDate: LocalDate?,
-    val previousWinterCompletionDate: LocalDate?,
-    val ensoRisk: EnsoRiskLevel,
+    /** Days of the season whose maximum was above 24 °C. */
+    val daysAbove24Celsius: Int,
+    /** Consecutive days above 24 °C up to [evaluatedThrough]. */
+    val currentWarmStreakDays: Int,
+    /** Longest run of consecutive days above 24 °C in the season. */
+    val longestWarmStreakDays: Int,
+    val thermalAnomaly: ThermalAnomaly,
+    /** The winter before, or null when its temperatures could not be read. */
+    val previousSeason: PreviousChillSeason?,
+    /** One point per day of the season (92), oldest first. */
     val curvePoints: List<ChillCurvePoint>,
     val syncedAt: Instant,
 ) {
-    /** Portions still required to reach threshold. 0 when completed. */
+    /** Portions still required to reach the threshold. 0 when completed. */
     val portionsRemaining: Double
         get() = (thresholdPortions - accumulatedPortions).coerceAtLeast(0.0)
 
-    /** Progress ratio between 0.0 and 1.0. */
-    val progressFraction: Float
-        get() = if (thresholdPortions > 0.0) {
-            (accumulatedPortions / thresholdPortions).toFloat().coerceIn(0f, 1f)
-        } else {
-            0f
-        }
-
-    /** True if 30 portions have been accumulated or marked completed. */
     val isCompleted: Boolean
-        get() = seasonState == WinterSeasonState.COMPLETED || accumulatedPortions >= thresholdPortions
+        get() = completionDate != null
 }
 
 /**
- * 4 operational states for the winter season in coastal Peru (Tacna/Arequipa/Moquegua):
- * - ACCUMULATING: Chilling accumulation ongoing normally.
- * - CHILL_HALTED: High temperatures (>24 °C) or El Niño preventing portion fixation.
- * - COMPLETED: 30 portions reached, floral stimulus assured.
- * - OFF_SEASON: Outside winter season (Sep - May).
+ * Operational states of the winter season:
+ * - ACCUMULATING: within June 1 - August 31, threshold not reached yet.
+ * - CHILL_HALTED: same, but more than 3 days in a row above 24 °C are going on right now.
+ * - COMPLETED: within the season, threshold already reached.
+ * - OFF_SEASON: outside the season; the data is the last finished winter.
  */
 enum class WinterSeasonState {
     ACCUMULATING,
@@ -50,14 +56,36 @@ enum class WinterSeasonState {
     OFF_SEASON,
 }
 
-enum class EnsoRiskLevel {
-    NEUTRAL,
+/**
+ * Warm winter signal: a run of more than 3 consecutive days above 24 °C in the season. It is a local thermal
+ * rule computed from the plot's temperatures, not the official El Niño index.
+ */
+enum class ThermalAnomaly {
+    NONE,
     ACTIVE,
-    HIGH,
+    RECORDED,
 }
 
+/** Whether the backend could project when the threshold will be reached. */
+enum class ChillProjection {
+    PROJECTED,
+    NOT_REACHABLE_IN_SEASON,
+    INSUFFICIENT_DATA,
+    NOT_APPLICABLE,
+}
+
+data class PreviousChillSeason(
+    val seasonYear: Int,
+    val accumulatedPortions: Double,
+    val completionDate: LocalDate?,
+)
+
+/**
+ * One day of the season. [accumulatedThisYear] is null for the days not evaluated yet and
+ * [accumulatedPreviousYear] is null when the previous winter has no data for that day.
+ */
 data class ChillCurvePoint(
     val date: LocalDate,
-    val accumulatedThisYear: Double,
+    val accumulatedThisYear: Double?,
     val accumulatedPreviousYear: Double?,
 )

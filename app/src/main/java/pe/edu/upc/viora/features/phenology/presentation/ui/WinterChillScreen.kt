@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -45,6 +46,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
+import kotlin.math.floor
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
@@ -66,7 +68,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.phenology.domain.entity.EnsoRiskLevel
+import pe.edu.upc.viora.features.phenology.domain.entity.ChillProjection
+import pe.edu.upc.viora.features.phenology.domain.entity.ThermalAnomaly
 import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
 import pe.edu.upc.viora.features.phenology.presentation.state.WinterChillUiState
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.WinterChillViewModel
@@ -99,12 +102,16 @@ fun WinterChillScreen(
             .background(Neutral100)
             .statusBarsPadding(),
     ) {
-        val content = state as? WinterChillUiState.Content
+        val (plotName, varietyName) = when (val s = state) {
+            is WinterChillUiState.Content -> s.plotName to s.varietyName
+            is WinterChillUiState.Empty -> s.plotName to s.varietyName
+            else -> "" to ""
+        }
 
         // Top Bar
         TopBar(
-            plotName = content?.plotName.orEmpty(),
-            varietyName = content?.varietyName.orEmpty(),
+            plotName = plotName,
+            varietyName = varietyName,
             onBack = onBack,
             onMore = { showMore = true },
         )
@@ -116,7 +123,18 @@ fun WinterChillScreen(
                 }
             }
             is WinterChillUiState.Error -> {
-                ErrorBody(error = s, onRetry = viewModel::refresh, modifier = Modifier.weight(1f))
+                MessageBody(
+                    message = stringResource(s.error.messageRes()),
+                    onRetry = viewModel::refresh,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            is WinterChillUiState.Empty -> {
+                MessageBody(
+                    message = stringResource(R.string.winter_chill_empty_state),
+                    onRetry = viewModel::refresh,
+                    modifier = Modifier.weight(1f),
+                )
             }
             is WinterChillUiState.Content -> {
                 ContentBody(
@@ -135,15 +153,19 @@ fun WinterChillScreen(
         )
     }
 
-    val content = state as? WinterChillUiState.Content
-    if (showMore && content != null) {
+    val sheetPlot = when (val s = state) {
+        is WinterChillUiState.Content -> s.plotName to s.varietyName
+        is WinterChillUiState.Empty -> s.plotName to s.varietyName
+        else -> null
+    }
+    if (showMore && sheetPlot != null) {
         LotSectionsSheet(
-            plotName = content.plotName,
+            plotName = sheetPlot.first,
             summary = stringResource(
                 R.string.plot_options_subtitle,
-                content.varietyName.ifBlank { stringResource(R.string.variety_sevillana) },
-                "—",
-                "—",
+                sheetPlot.second.ifBlank { stringResource(R.string.winter_chill_no_value) },
+                stringResource(R.string.winter_chill_no_value),
+                stringResource(R.string.winter_chill_no_value),
             ),
             current = LotSection.WINTER_CHILL,
             onSelect = { section ->
@@ -193,7 +215,11 @@ private fun TopBar(
                 maxLines = 1,
             )
             Text(
-                text = stringResource(R.string.winter_chill_subtitle, varietyName.ifBlank { stringResource(R.string.variety_sevillana) }),
+                text = if (varietyName.isBlank()) {
+                    stringResource(R.string.winter_chill_title)
+                } else {
+                    stringResource(R.string.winter_chill_subtitle, varietyName)
+                },
                 style = MaterialTheme.typography.labelSmall,
                 color = Neutral600,
                 maxLines = 1,
@@ -234,11 +260,21 @@ private fun ContentBody(
         )
     }
 
+    // Every sentence is backed by the data: the comparison with last winter only appears when both exist.
+    val difference = state.differenceWithPreviousWinter
     val voiceText = when (state.seasonState) {
-        WinterSeasonState.ACCUMULATING -> stringResource(R.string.winter_chill_voice_accumulating)
+        WinterSeasonState.ACCUMULATING -> when {
+            difference == null -> stringResource(R.string.winter_chill_voice_accumulating)
+            difference >= 0.0 -> stringResource(R.string.winter_chill_voice_accumulating_ahead)
+            else -> stringResource(R.string.winter_chill_voice_accumulating_behind)
+        }
         WinterSeasonState.CHILL_HALTED -> stringResource(R.string.winter_chill_voice_halted)
         WinterSeasonState.COMPLETED -> stringResource(R.string.winter_chill_voice_completed)
-        WinterSeasonState.OFF_SEASON -> stringResource(R.string.winter_chill_voice_off_season)
+        WinterSeasonState.OFF_SEASON -> if (state.tracker.isCompleted) {
+            stringResource(R.string.winter_chill_voice_off_season)
+        } else {
+            stringResource(R.string.winter_chill_voice_off_season_incomplete)
+        }
     }
 
     Column(
@@ -270,13 +306,13 @@ private fun ContentBody(
 
         // Cumulative Curve Chart (Canvas with today badge and projected point)
         ChillCurveChart(
-            curvePoints = state.curvePoints,
-            threshold = state.thresholdPortions.toDouble(),
-            currentPortions = state.accumulatedPortions.toDouble(),
+            curvePoints = state.tracker.curvePoints,
+            threshold = state.tracker.thresholdPortions,
             seasonState = state.seasonState,
-            daysAbove24Celsius = state.daysAbove24Celsius,
-            projectedCompletionDate = state.projectedCompletionDate,
-            varietyName = state.varietyName.ifBlank { stringResource(R.string.variety_sevillana) },
+            currentWarmStreakDays = state.tracker.currentWarmStreakDays,
+            completionDate = state.tracker.completionDate,
+            projectedCompletionDate = state.tracker.projectedCompletionDate,
+            varietyName = state.varietyName,
         )
 
         Spacer(modifier = Modifier.height(VioraTabBarDefaults.ContentBottomPadding + 8.dp))
@@ -302,24 +338,25 @@ private fun HeroSection(
         )
         WinterSeasonState.CHILL_HALTED -> stringResource(
             R.string.winter_chill_hero_sub_halted,
-            state.daysAbove24Celsius,
+            state.tracker.currentWarmStreakDays,
         )
         WinterSeasonState.COMPLETED -> stringResource(
             R.string.winter_chill_hero_sub_completed,
         )
         WinterSeasonState.OFF_SEASON -> {
-            val datePattern = stringResource(R.string.winter_chill_pattern_day)
-            val date = state.projectedCompletionDate ?: LocalDate.of(LocalDate.now().year, 8, 18)
-            val dateStr = DateTimeFormatter.ofPattern(datePattern, Locale.getDefault()).format(date)
-            stringResource(R.string.winter_chill_hero_sub_off_season, dateStr)
+            val completion = state.tracker.completionDate
+            if (completion != null) {
+                val locale = LocalConfiguration.current.locales[0]
+                val datePattern = stringResource(R.string.winter_chill_pattern_day)
+                val dateStr = DateTimeFormatter.ofPattern(datePattern, locale).format(completion)
+                stringResource(R.string.winter_chill_hero_sub_off_season, dateStr)
+            } else {
+                stringResource(R.string.winter_chill_hero_sub_off_season_incomplete, state.thresholdPortions)
+            }
         }
     }
 
-    val timelineProgress = when (state.seasonState) {
-        WinterSeasonState.COMPLETED, WinterSeasonState.OFF_SEASON -> 1f
-        WinterSeasonState.CHILL_HALTED -> 0.65f
-        WinterSeasonState.ACCUMULATING -> 0.65f
-    }
+    val timelineProgress = state.seasonProgress
 
     Column(
         modifier = modifier
@@ -514,42 +551,55 @@ private fun AsymmetricMetricsRow(
     onEnsoClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val projDate = state.projectedCompletionDate ?: LocalDate.of(LocalDate.now().year, 8, 4)
-    val dayStr = projDate.dayOfMonth.toString()
-    val monthStr = formatMonthShort(projDate)
+    val tracker = state.tracker
+    val locale = LocalConfiguration.current.locales[0]
+    val completion = tracker.completionDate
+    val projected = tracker.projectedCompletionDate.takeIf { tracker.projection == ChillProjection.PROJECTED }
 
-    val projHeader = if (state.isCompleted || state.seasonState == WinterSeasonState.OFF_SEASON) {
-        stringResource(R.string.winter_chill_card_completed_header)
-    } else {
-        stringResource(R.string.winter_chill_card_proj_header)
+    // The big date is the real completion day, or the projected one; never a placeholder date.
+    val cardDate = completion ?: projected
+    val dayStr = cardDate?.dayOfMonth?.toString() ?: stringResource(R.string.winter_chill_no_value)
+    val monthStr = cardDate?.let { formatMonthShort(it, locale) }.orEmpty()
+
+    val projHeader = when {
+        completion != null -> stringResource(R.string.winter_chill_card_completed_header)
+        state.seasonState == WinterSeasonState.OFF_SEASON -> stringResource(R.string.winter_chill_card_closed_header)
+        else -> stringResource(R.string.winter_chill_card_proj_header)
     }
 
-    val daysBeforeBudbreak = ChronoUnit.DAYS.between(
-        projDate,
-        LocalDate.of(projDate.year, 8, 31),
-    ).coerceAtLeast(0).toInt()
-
-    val projSub = when (state.seasonState) {
-        WinterSeasonState.COMPLETED -> stringResource(R.string.winter_chill_card_completed_sub, 14)
-        WinterSeasonState.OFF_SEASON -> stringResource(R.string.winter_chill_card_off_season_sub, daysBeforeBudbreak)
-        WinterSeasonState.CHILL_HALTED -> stringResource(R.string.winter_chill_card_risk_sub)
-        WinterSeasonState.ACCUMULATING -> stringResource(
+    val projSub = when {
+        completion != null -> {
+            val daysAhead = state.daysAheadOfPreviousWinter
+            when {
+                daysAhead != null && daysAhead > 0 -> stringResource(R.string.winter_chill_card_completed_sub, daysAhead.toInt())
+                daysAhead != null && daysAhead < 0 -> stringResource(R.string.winter_chill_card_completed_sub_later, -daysAhead.toInt())
+                daysAhead != null -> stringResource(R.string.winter_chill_card_completed_sub_same)
+                tracker.previousSeason != null -> stringResource(R.string.winter_chill_card_completed_sub_first)
+                else -> stringResource(R.string.winter_chill_card_off_season_sub, daysBeforeBudbreak(completion))
+            }
+        }
+        state.seasonState == WinterSeasonState.OFF_SEASON ->
+            stringResource(R.string.winter_chill_card_closed_sub, state.thresholdPortions)
+        projected != null -> stringResource(
             R.string.winter_chill_card_proj_sub,
             state.thresholdPortions,
-            daysBeforeBudbreak,
+            daysBeforeBudbreak(projected),
         )
+        tracker.projection == ChillProjection.NOT_REACHABLE_IN_SEASON ->
+            stringResource(R.string.winter_chill_card_not_reachable_sub, state.thresholdPortions)
+        else -> stringResource(R.string.winter_chill_card_insufficient_sub)
     }
 
-    val bottomChipText = if (state.seasonState == WinterSeasonState.OFF_SEASON) {
-        stringResource(R.string.winter_chill_card_total_portions, state.accumulatedPortions)
-    } else {
-        val fallbackPrevDate = if (state.seasonState == WinterSeasonState.CHILL_HALTED) {
-            LocalDate.of(LocalDate.now().year - 1, 8, 4)
-        } else {
-            LocalDate.of(LocalDate.now().year - 1, 8, 18)
-        }
-        val prevDateStr = formatDateShort(state.previousWinterCompletionDate ?: fallbackPrevDate)
-        stringResource(R.string.winter_chill_card_past_winter_date, prevDateStr)
+    val previous = tracker.previousSeason
+    val previousCompletion = previous?.completionDate
+    val bottomChipText = when {
+        state.seasonState == WinterSeasonState.OFF_SEASON ->
+            stringResource(R.string.winter_chill_card_total_portions, state.accumulatedPortions)
+        previousCompletion != null ->
+            stringResource(R.string.winter_chill_card_past_winter_date, formatDateShort(previousCompletion, locale))
+        previous != null ->
+            stringResource(R.string.winter_chill_card_past_winter_portions, floor(previous.accumulatedPortions).toInt())
+        else -> null
     }
 
     Row(
@@ -557,7 +607,7 @@ private fun AsymmetricMetricsRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         // Left Column: Tall projection card (252dp)
-        val leftCardBg = if (state.isCompleted) Green100 else Green200
+        val leftCardBg = if (tracker.isCompleted) Green100 else Green200
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -630,8 +680,8 @@ private fun AsymmetricMetricsRow(
                 )
             }
 
-            // Bottom chip
-            Box(
+            // Bottom chip (hidden when the previous winter could not be read)
+            if (bottomChipText != null) Box(
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(Neutral0)
@@ -668,6 +718,12 @@ private fun AsymmetricMetricsRow(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             // Card 1: Warm days (> 24 °C)
+            // While halted the card counts the current run of warm days; otherwise all the warm days of the season.
+            val warmValue = if (state.seasonState == WinterSeasonState.CHILL_HALTED) {
+                tracker.currentWarmStreakDays
+            } else {
+                tracker.daysAbove24Celsius
+            }
             val warmSub = when (state.seasonState) {
                 WinterSeasonState.OFF_SEASON -> stringResource(R.string.winter_chill_card_warm_sub_off_season)
                 WinterSeasonState.CHILL_HALTED -> stringResource(R.string.winter_chill_card_warm_sub_halted)
@@ -689,7 +745,7 @@ private fun AsymmetricMetricsRow(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = state.daysAbove24Celsius.toString(),
+                        text = warmValue.toString(),
                         style = MaterialTheme.typography.displaySmall.copy(
                             fontFamily = NewsreaderFamily,
                             fontSize = 48.sp,
@@ -726,17 +782,19 @@ private fun AsymmetricMetricsRow(
                 }
             }
 
-            // Card 2: El Niño Costero
-            val isEnsoActive = state.ensoRisk != EnsoRiskLevel.NEUTRAL
-            val ensoTitle = if (isEnsoActive) {
-                stringResource(R.string.winter_chill_card_enso_active)
-            } else {
-                stringResource(R.string.winter_chill_card_enso_neutral)
+            // Card 2: warm winter (US23). A local thermal rule from the plot's temperatures, not the El Niño index.
+            val ensoTitle = when (tracker.thermalAnomaly) {
+                ThermalAnomaly.ACTIVE -> stringResource(R.string.winter_chill_card_warm_spell_active)
+                ThermalAnomaly.RECORDED -> stringResource(R.string.winter_chill_card_warm_spell_recorded)
+                ThermalAnomaly.NONE -> stringResource(R.string.winter_chill_card_warm_spell_none)
             }
-            val ensoSub = when {
-                state.seasonState == WinterSeasonState.OFF_SEASON -> stringResource(R.string.winter_chill_card_enso_sub_off_season)
-                isEnsoActive -> stringResource(R.string.winter_chill_card_enso_sub_active)
-                else -> stringResource(R.string.winter_chill_card_enso_sub_neutral)
+            val ensoSub = when (tracker.thermalAnomaly) {
+                ThermalAnomaly.ACTIVE -> stringResource(R.string.winter_chill_card_warm_spell_sub_active)
+                ThermalAnomaly.RECORDED -> stringResource(
+                    R.string.winter_chill_card_warm_spell_sub_recorded,
+                    tracker.longestWarmStreakDays,
+                )
+                ThermalAnomaly.NONE -> stringResource(R.string.winter_chill_card_warm_spell_sub_none)
             }
 
             Column(
@@ -781,7 +839,7 @@ private fun AsymmetricMetricsRow(
 
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
-                        text = stringResource(R.string.winter_chill_card_enso_title),
+                        text = stringResource(R.string.winter_chill_card_warm_spell_title),
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontFamily = RobotoFamily,
                             fontWeight = FontWeight.SemiBold,
@@ -804,8 +862,8 @@ private fun AsymmetricMetricsRow(
 }
 
 @Composable
-private fun ErrorBody(
-    error: WinterChillUiState.Error,
+private fun MessageBody(
+    message: String,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -817,7 +875,7 @@ private fun ErrorBody(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = stringResource(error.error.messageRes()),
+            text = message,
             style = MaterialTheme.typography.bodyLarge,
             color = Neutral700,
             textAlign = TextAlign.Center,
@@ -830,8 +888,12 @@ private fun ErrorBody(
     }
 }
 
-private fun formatDateShort(date: LocalDate, locale: Locale = Locale.getDefault()): String =
+/** Days from [date] to August 31, the budbreak that closes the count. */
+private fun daysBeforeBudbreak(date: LocalDate): Int =
+    ChronoUnit.DAYS.between(date, LocalDate.of(date.year, 8, 31)).coerceAtLeast(0).toInt()
+
+private fun formatDateShort(date: LocalDate, locale: Locale): String =
     DateTimeFormatter.ofPattern("d MMM", locale).format(date).replace(".", "")
 
-private fun formatMonthShort(date: LocalDate, locale: Locale = Locale.getDefault()): String =
+private fun formatMonthShort(date: LocalDate, locale: Locale): String =
     DateTimeFormatter.ofPattern("MMM", locale).format(date).replace(".", "")

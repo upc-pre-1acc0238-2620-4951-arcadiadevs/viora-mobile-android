@@ -25,6 +25,8 @@ import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.core.network.ApiErrorMapper
+import pe.edu.upc.viora.features.phenology.REAL_CHILL_METRIC_JSON
+import pe.edu.upc.viora.features.phenology.chillEntity
 import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
 import pe.edu.upc.viora.features.phenology.infrastructure.local.ChillTrackerDao
 import pe.edu.upc.viora.features.phenology.infrastructure.local.ChillTrackerEntity
@@ -101,7 +103,8 @@ class ChillRepositoryImplTest {
     private val fakeService = FakeChillPhenologyService()
     private val testClock = Clock.fixed(Instant.parse("2026-10-07T12:00:00Z"), ZoneOffset.UTC)
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val apiCaller = ApiCaller(ApiErrorMapper(Json { ignoreUnknownKeys = true }), testDispatcher)
+    private val json = Json { ignoreUnknownKeys = true }
+    private val apiCaller = ApiCaller(ApiErrorMapper(json), testDispatcher)
 
     private val repository = ChillRepositoryImpl(
         service = fakeService,
@@ -115,46 +118,17 @@ class ChillRepositoryImplTest {
     fun observeChillTrackerEmitsMappedDomain() = runTest {
         assertNull(repository.observeChillTracker("plot-1").first())
 
-        fakeDao.upsert(
-            ChillTrackerEntity(
-                plotId = "plot-1",
-                accumulatedPortions = 24.0,
-                thresholdPortions = 30.0,
-                daysAbove24Celsius = 4,
-                seasonState = "ACCUMULATING",
-                projectedCompletionDate = "2026-08-14",
-                previousWinterCompletionDate = "2025-08-05",
-                ensoRisk = "NEUTRAL",
-                curvePointsJson = "[]",
-                syncedAtEpochMs = testClock.millis(),
-            )
-        )
+        fakeDao.upsert(chillEntity(accumulated = 24.43))
 
         val tracker = repository.observeChillTracker("plot-1").first()
         assertNotNull(tracker)
-        assertEquals(24.0, tracker!!.accumulatedPortions, 0.001)
+        assertEquals(24.43, tracker!!.accumulatedPortions, 0.001)
         assertEquals(WinterSeasonState.ACCUMULATING, tracker.seasonState)
     }
 
     @Test
-    fun refreshSuccessCachesEntityAndUpdatesMetadata() = runTest {
-        fakeService.metricsResponse = {
-            Response.success(
-                listOf(
-                    MetricDto(
-                        metricName = "CHILLING",
-                        value = 24.0,
-                        details = MetricDetailsDto(
-                            portionsAccumulated = 24.0,
-                            thresholdPortions = 30.0,
-                            daysAbove24Celsius = 4,
-                            seasonState = "ACCUMULATING",
-                            ensoRisk = "NEUTRAL",
-                        ),
-                    )
-                )
-            )
-        }
+    fun refreshSuccessCachesTheRealBackendAnswer() = runTest {
+        fakeService.metricsResponse = { Response.success(json.decodeFromString<List<MetricDto>>(REAL_CHILL_METRIC_JSON)) }
 
         val result = repository.refresh("plot-1")
         assertTrue(result is AppResult.Success)
@@ -162,27 +136,27 @@ class ChillRepositoryImplTest {
         val cached = fakeDao.row.value
         assertNotNull(cached)
         assertEquals("plot-1", cached!!.plotId)
-        assertEquals(24.0, cached.accumulatedPortions, 0.001)
+        assertEquals(3.03, cached.accumulatedPortions, 0.001)
+        assertEquals("OFF_SEASON", cached.seasonState)
         assertEquals(testClock.millis(), fakeCacheDao.values.value["chill:plot-1"])
     }
 
     @Test
-    fun refreshNotFoundClearsDao() = runTest {
-        fakeDao.upsert(
-            ChillTrackerEntity(
-                plotId = "plot-1",
-                accumulatedPortions = 10.0,
-                thresholdPortions = 30.0,
-                daysAbove24Celsius = 0,
-                seasonState = "OFF_SEASON",
-                projectedCompletionDate = null,
-                previousWinterCompletionDate = null,
-                ensoRisk = "NEUTRAL",
-                curvePointsJson = "[]",
-                syncedAtEpochMs = 1000L,
-            )
-        )
+    fun refreshIgnoresOtherMetricsOfTheList() = runTest {
+        fakeService.metricsResponse = {
+            Response.success(listOf(MetricDto(metricName = "BIENNIAL_BEARING_INDEX", value = 0.3)))
+        }
+        fakeDao.upsert(chillEntity())
 
+        val result = repository.refresh("plot-1")
+
+        assertTrue(result is AppResult.Success)
+        assertNull(fakeDao.row.value)
+    }
+
+    @Test
+    fun refreshNotFoundClearsDao() = runTest {
+        fakeDao.upsert(chillEntity())
         val notFoundBody = "{\"type\":\"about:blank\",\"status\":404}".toResponseBody("application/json".toMediaType())
         fakeService.metricsResponse = { Response.error(404, notFoundBody) }
 
@@ -192,19 +166,22 @@ class ChillRepositoryImplTest {
     }
 
     @Test
+    fun refreshWithAMalformedMetricKeepsTheCache() = runTest {
+        val initialEntity = chillEntity()
+        fakeDao.upsert(initialEntity)
+        fakeService.metricsResponse = {
+            Response.success(listOf(MetricDto(metricName = "EREZ_CHILLING_PORTIONS", value = 28.5, details = MetricDetailsDto())))
+        }
+
+        val result = repository.refresh("plot-1")
+
+        assertTrue(result is AppResult.Failure)
+        assertEquals(initialEntity, fakeDao.row.value)
+    }
+
+    @Test
     fun refreshNetworkFailurePreservesCache() = runTest {
-        val initialEntity = ChillTrackerEntity(
-            plotId = "plot-1",
-            accumulatedPortions = 18.0,
-            thresholdPortions = 30.0,
-            daysAbove24Celsius = 2,
-            seasonState = "ACCUMULATING",
-            projectedCompletionDate = null,
-            previousWinterCompletionDate = null,
-            ensoRisk = "NEUTRAL",
-            curvePointsJson = "[]",
-            syncedAtEpochMs = 1000L,
-        )
+        val initialEntity = chillEntity()
         fakeDao.upsert(initialEntity)
 
         fakeService.metricsResponse = { throw IOException("Failed to connect to server") }

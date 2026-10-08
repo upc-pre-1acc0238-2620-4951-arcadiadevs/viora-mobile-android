@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "7dc3ef076699d905cb4bb357c1385f27",
+    "identityHash": "1020c57ba31797b4f3f7112f4ba6f2fa",
     "entities": [
       {
         "tableName": "cache_metadata",
@@ -951,12 +951,18 @@
       },
       {
         "tableName": "chill_trackers",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`plot_id` TEXT NOT NULL, `accumulated_portions` REAL NOT NULL, `threshold_portions` REAL NOT NULL, `days_above_24_celsius` INTEGER NOT NULL, `season_state` TEXT NOT NULL, `projected_completion_date` TEXT, `previous_winter_completion_date` TEXT, `enso_risk` TEXT NOT NULL, `curve_points_json` TEXT NOT NULL, `synced_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`plot_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`plot_id` TEXT NOT NULL, `season_year` INTEGER NOT NULL, `accumulated_portions` REAL NOT NULL, `threshold_portions` REAL NOT NULL, `season_state` TEXT NOT NULL, `evaluated_through` TEXT, `completion_date` TEXT, `projection_status` TEXT NOT NULL, `projected_completion_date` TEXT, `days_above_24_celsius` INTEGER NOT NULL, `current_warm_streak_days` INTEGER NOT NULL, `longest_warm_streak_days` INTEGER NOT NULL, `thermal_anomaly` TEXT NOT NULL, `previous_season_year` INTEGER, `previous_season_portions` REAL, `previous_season_completion_date` TEXT, `curve_points_json` TEXT NOT NULL, `synced_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`plot_id`))",
         "fields": [
           {
             "fieldPath": "plotId",
             "columnName": "plot_id",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seasonYear",
+            "columnName": "season_year",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -972,14 +978,24 @@
             "notNull": true
           },
           {
-            "fieldPath": "daysAbove24Celsius",
-            "columnName": "days_above_24_celsius",
-            "affinity": "INTEGER",
+            "fieldPath": "seasonState",
+            "columnName": "season_state",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "seasonState",
-            "columnName": "season_state",
+            "fieldPath": "evaluatedThrough",
+            "columnName": "evaluated_through",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "completionDate",
+            "columnName": "completion_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "projectionStatus",
+            "columnName": "projection_status",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -989,15 +1005,43 @@
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "previousWinterCompletionDate",
-            "columnName": "previous_winter_completion_date",
-            "affinity": "TEXT"
+            "fieldPath": "daysAbove24Celsius",
+            "columnName": "days_above_24_celsius",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
-            "fieldPath": "ensoRisk",
-            "columnName": "enso_risk",
+            "fieldPath": "currentWarmStreakDays",
+            "columnName": "current_warm_streak_days",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longestWarmStreakDays",
+            "columnName": "longest_warm_streak_days",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thermalAnomaly",
+            "columnName": "thermal_anomaly",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "previousSeasonYear",
+            "columnName": "previous_season_year",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "previousSeasonPortions",
+            "columnName": "previous_season_portions",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "previousSeasonCompletionDate",
+            "columnName": "previous_season_completion_date",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "curvePointsJson",
@@ -1022,7 +1066,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7dc3ef076699d905cb4bb357c1385f27')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1020c57ba31797b4f3f7112f4ba6f2fa')"
     ]
   }
 }

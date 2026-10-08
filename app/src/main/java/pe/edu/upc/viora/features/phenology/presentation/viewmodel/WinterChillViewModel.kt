@@ -4,9 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Clock
 import javax.inject.Inject
-import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,8 +16,6 @@ import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveChillTrackerUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RefreshChillTrackerUseCase
-import pe.edu.upc.viora.features.phenology.domain.entity.EnsoRiskLevel
-import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
 import pe.edu.upc.viora.features.phenology.domain.repository.ChillRepository
 import pe.edu.upc.viora.features.phenology.presentation.state.WinterChillUiState
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
@@ -33,7 +29,6 @@ class WinterChillViewModel @Inject constructor(
     observePlot: ObservePlotUseCase,
     private val refreshChillTracker: RefreshChillTrackerUseCase,
     private val chillRepository: ChillRepository,
-    private val clock: Clock,
 ) : ViewModel() {
 
     val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "WinterChillRoute requires plotId" }
@@ -56,59 +51,18 @@ class WinterChillViewModel @Inject constructor(
         val plotName = plot?.name ?: initialPlotName
         val varietyName = plot?.variety?.displayName().orEmpty()
 
-        val hasCache = tracker != null || lastSync != null
-        if (!hasCache) {
-            when {
-                refresh.error != null && !refresh.isRefreshing -> WinterChillUiState.Error(refresh.error)
-                refresh.hasFinishedOnce && !refresh.isRefreshing -> WinterChillUiState.Content(
-                    plotName = plotName,
-                    varietyName = varietyName,
-                    accumulatedPortions = 0,
-                    thresholdPortions = 30,
-                    daysAbove24Celsius = 0,
-                    seasonState = WinterSeasonState.ACCUMULATING,
-                    ensoRisk = EnsoRiskLevel.NEUTRAL,
-                    projectedCompletionDate = null,
-                    previousWinterCompletionDate = null,
-                    curvePoints = emptyList(),
-                    lastSync = lastSync,
-                    isRefreshing = refresh.isRefreshing,
-                    offline = refresh.error is AppError.Offline,
-                )
-                else -> WinterChillUiState.Loading
-            }
-        } else if (tracker == null) {
-            WinterChillUiState.Content(
+        when {
+            tracker != null -> WinterChillUiState.Content(
                 plotName = plotName,
                 varietyName = varietyName,
-                accumulatedPortions = 0,
-                thresholdPortions = 30,
-                daysAbove24Celsius = 0,
-                seasonState = WinterSeasonState.ACCUMULATING,
-                ensoRisk = EnsoRiskLevel.NEUTRAL,
-                projectedCompletionDate = null,
-                previousWinterCompletionDate = null,
-                curvePoints = emptyList(),
-                lastSync = lastSync,
-                isRefreshing = refresh.isRefreshing,
-                offline = refresh.error is AppError.Offline,
-            )
-        } else {
-            WinterChillUiState.Content(
-                plotName = plotName,
-                varietyName = varietyName,
-                accumulatedPortions = tracker.accumulatedPortions.roundToInt(),
-                thresholdPortions = tracker.thresholdPortions.roundToInt().coerceAtLeast(30),
-                daysAbove24Celsius = tracker.daysAbove24Celsius,
-                seasonState = tracker.seasonState,
-                ensoRisk = tracker.ensoRisk,
-                projectedCompletionDate = tracker.projectedCompletionDate,
-                previousWinterCompletionDate = tracker.previousWinterCompletionDate,
-                curvePoints = tracker.curvePoints,
+                tracker = tracker,
                 lastSync = lastSync ?: tracker.syncedAt,
                 isRefreshing = refresh.isRefreshing,
                 offline = refresh.error is AppError.Offline,
             )
+            refresh.isRefreshing || !refresh.hasFinishedOnce -> WinterChillUiState.Loading
+            refresh.error != null -> WinterChillUiState.Error(refresh.error)
+            else -> WinterChillUiState.Empty(plotName = plotName, varietyName = varietyName)
         }
     }.stateIn(
         scope = viewModelScope,

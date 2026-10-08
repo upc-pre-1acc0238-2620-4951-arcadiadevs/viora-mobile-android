@@ -33,18 +33,21 @@ class ChillRepositoryImpl @Inject constructor(
         cacheMetadataDao.observeFetchedAt(cacheKey(plotId)).map { epochMs -> epochMs?.let(Instant::ofEpochMilli) }
 
     override suspend fun refresh(plotId: String): AppResult<Unit> {
-        val remoteMetrics = apiCaller.call { service.getMetrics(plotId, CHILLING_METRIC) }
-        val metric = when {
-            remoteMetrics is AppResult.Success ->
-                remoteMetrics.value.firstOrNull { it.metricName == CHILLING_METRIC }
-                    ?: remoteMetrics.value.firstOrNull()
-            (remoteMetrics as AppResult.Failure).error is AppError.NotFound -> null
-            else -> return remoteMetrics
+        val remoteMetrics = apiCaller.call { service.getMetrics(plotId, CHILLING_QUERY) }
+        val metric = when (remoteMetrics) {
+            is AppResult.Success -> remoteMetrics.value.firstOrNull { it.metricName == CHILLING_METRIC }
+            is AppResult.Failure -> if (remoteMetrics.error is AppError.NotFound) null else return remoteMetrics
+        }
+
+        // No metric means the backend has no chill for this plot: the cache is cleared so no stale winter shows.
+        // A metric that cannot be read keeps the cache and reports the failure.
+        val entity = metric?.let {
+            it.toChillEntity(plotId, clock.millis())
+                ?: return AppResult.Failure(AppError.Unknown(IllegalStateException("Malformed chill metric")))
         }
 
         return guarded {
-            if (metric != null) {
-                val entity = metric.toChillEntity(plotId, clock.millis())
+            if (entity != null) {
                 chillTrackerDao.upsert(entity)
                 cacheMetadataDao.upsert(CacheMetadataEntity(cacheKey(plotId), clock.millis()))
             } else {
@@ -65,6 +68,7 @@ class ChillRepositoryImpl @Inject constructor(
     private fun cacheKey(plotId: String): String = "chill:$plotId"
 
     private companion object {
-        const val CHILLING_METRIC = "CHILLING"
+        const val CHILLING_QUERY = "CHILLING"
+        const val CHILLING_METRIC = "EREZ_CHILLING_PORTIONS"
     }
 }

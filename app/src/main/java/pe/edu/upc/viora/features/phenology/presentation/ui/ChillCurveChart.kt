@@ -2,7 +2,6 @@ package pe.edu.upc.viora.features.phenology.presentation.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,6 +26,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -37,13 +36,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
+import kotlin.math.floor
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral200
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
-import pe.edu.upc.viora.core.designsystem.theme.Neutral500
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
@@ -55,34 +55,27 @@ import pe.edu.upc.viora.features.phenology.domain.entity.ChillCurvePoint
 import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
 
 /**
- * Cumulative chill portions line chart (Erez dynamic model) matching Figma P80.
- * Includes editorial header, top legend, Canvas with "Hoy · 24" callout and projected point,
- * and bottom physiological caption.
+ * Cumulative chill portions chart (Dynamic Model) matching Figma P80: this winter (solid), the previous winter
+ * (dashed), the varietal threshold and, while the season is open, the projection to the threshold. Only the days
+ * the backend evaluated are drawn, each at its own date; with no data the chart says so instead of drawing a curve.
  */
 @Composable
 fun ChillCurveChart(
     curvePoints: List<ChillCurvePoint>,
-    threshold: Double = 30.0,
-    currentPortions: Double = 24.0,
-    seasonState: WinterSeasonState = WinterSeasonState.ACCUMULATING,
-    daysAbove24Celsius: Int = 0,
-    projectedCompletionDate: LocalDate? = null,
-    varietyName: String = "",
+    threshold: Double,
+    seasonState: WinterSeasonState,
+    currentWarmStreakDays: Int,
+    completionDate: LocalDate?,
+    projectedCompletionDate: LocalDate?,
+    varietyName: String,
     modifier: Modifier = Modifier,
 ) {
     val textMeasurer = rememberTextMeasurer()
+    val locale = LocalConfiguration.current.locales[0]
     val axisTextStyle = remember {
         TextStyle(
             fontFamily = RobotoFamily,
             fontSize = 11.sp,
-            fontWeight = FontWeight.Normal,
-            color = Neutral600,
-        )
-    }
-    val smallLabelStyle = remember {
-        TextStyle(
-            fontFamily = RobotoFamily,
-            fontSize = 10.sp,
             fontWeight = FontWeight.Normal,
             color = Neutral600,
         )
@@ -112,23 +105,35 @@ fun ChillCurveChart(
         )
     }
 
+    val seasonStart = curvePoints.firstOrNull()?.date
+    val current = curvePoints.mapNotNull { point -> point.accumulatedThisYear?.let { point.date to it } }
+    val previous = curvePoints.mapNotNull { point -> point.accumulatedPreviousYear?.let { point.date to it } }
+    val lastCurrent = current.lastOrNull()
+    val seasonOpen = seasonState != WinterSeasonState.OFF_SEASON
+
     val junLabel = stringResource(R.string.winter_chill_month_jun)
     val julLabel = stringResource(R.string.winter_chill_month_jul)
     val augLabel = stringResource(R.string.winter_chill_month_aug)
     val augEndLabel = stringResource(R.string.winter_chill_month_aug_end)
-    val todayCalloutText = stringResource(R.string.winter_chill_chart_today_callout, currentPortions.toInt())
-    val resolvedVariety = varietyName.ifBlank { stringResource(R.string.variety_sevillana) }
-    val thresholdVarietyText = stringResource(R.string.winter_chill_chart_threshold_variety, threshold.toInt(), resolvedVariety)
-
-    val fallbackProjDate = LocalDate.of(LocalDate.now().year, 8, 4)
-    val projDateLabel = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
-        .format(projectedCompletionDate ?: fallbackProjDate)
-        .replace(".", "")
+    val todayCalloutText = stringResource(
+        R.string.winter_chill_chart_today_callout,
+        floor(lastCurrent?.second ?: 0.0).toInt(),
+    )
+    val thresholdText = if (varietyName.isBlank()) {
+        stringResource(R.string.winter_chill_chart_legend_threshold, threshold.toInt())
+    } else {
+        stringResource(R.string.winter_chill_chart_threshold_variety, threshold.toInt(), varietyName)
+    }
+    val projDateLabel = projectedCompletionDate?.let { formatChartDate(it, locale) }
 
     val noteText = when (seasonState) {
         WinterSeasonState.ACCUMULATING -> stringResource(R.string.winter_chill_chart_note_accumulating)
-        WinterSeasonState.CHILL_HALTED -> stringResource(R.string.winter_chill_chart_note_halted, daysAbove24Celsius)
-        WinterSeasonState.COMPLETED -> stringResource(R.string.winter_chill_chart_note_completed, resolvedVariety, projDateLabel)
+        WinterSeasonState.CHILL_HALTED -> stringResource(R.string.winter_chill_chart_note_halted, currentWarmStreakDays)
+        WinterSeasonState.COMPLETED -> if (completionDate != null && varietyName.isNotBlank()) {
+            stringResource(R.string.winter_chill_chart_note_completed, varietyName, formatChartDate(completionDate, locale))
+        } else {
+            stringResource(R.string.winter_chill_chart_note_accumulating)
+        }
         WinterSeasonState.OFF_SEASON -> stringResource(R.string.winter_chill_chart_note_off_season)
     }
 
@@ -163,240 +168,184 @@ fun ChillCurveChart(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                ChartLegendItem(
-                    color = Green800,
-                    text = stringResource(R.string.winter_chill_chart_legend_current),
-                    isDashed = false,
-                )
-                ChartLegendItem(
-                    color = Neutral300,
-                    text = stringResource(R.string.winter_chill_chart_legend_past),
-                    isDashed = true,
-                )
+                ChartLegendItem(color = Green800, text = stringResource(R.string.winter_chill_chart_legend_current))
+                ChartLegendItem(color = Neutral300, text = stringResource(R.string.winter_chill_chart_legend_past))
                 ChartLegendItem(
                     color = Terracotta500,
                     text = stringResource(R.string.winter_chill_chart_legend_threshold, threshold.toInt()),
-                    isDashed = true,
                 )
             }
 
-            // Canvas Chart
-            Canvas(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-            ) {
-                val paddingLeft = 32.dp.toPx()
-                val paddingBottom = 26.dp.toPx()
-                val paddingTop = 16.dp.toPx()
-                val paddingRight = 16.dp.toPx()
+            if (seasonStart == null || (current.isEmpty() && previous.isEmpty())) {
+                Text(
+                    text = stringResource(R.string.winter_chill_chart_no_data),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Neutral600,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                )
+            } else {
+                val totalDays = (curvePoints.size - 1).coerceAtLeast(1).toFloat()
+                val highest = (current.map { it.second } + previous.map { it.second }).maxOrNull() ?: 0.0
+                val maxY = (maxOf(threshold, highest) * 1.15).toFloat()
 
-                val chartWidth = size.width - paddingLeft - paddingRight
-                val chartHeight = size.height - paddingTop - paddingBottom
-                if (chartWidth <= 0 || chartHeight <= 0) return@Canvas
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                ) {
+                    val paddingLeft = 32.dp.toPx()
+                    val paddingBottom = 26.dp.toPx()
+                    val paddingTop = 16.dp.toPx()
+                    val paddingRight = 16.dp.toPx()
 
-                val maxY = 35f // headroom above 30
-                fun yToPx(value: Float): Float =
-                    paddingTop + chartHeight * (1f - (value / maxY).coerceIn(0f, 1f))
+                    val chartWidth = size.width - paddingLeft - paddingRight
+                    val chartHeight = size.height - paddingTop - paddingBottom
+                    if (chartWidth <= 0 || chartHeight <= 0) return@Canvas
 
-                fun xToPx(dayIndex: Float, totalDays: Float = 92f): Float =
-                    paddingLeft + chartWidth * (dayIndex / totalDays).coerceIn(0f, 1f)
+                    fun yToPx(value: Double): Float =
+                        paddingTop + chartHeight * (1f - (value.toFloat() / maxY).coerceIn(0f, 1f))
 
-                // Guides at y=10 and y=20
-                listOf(10f, 20f).forEach { step ->
-                    val y = yToPx(step)
+                    fun xToPx(date: LocalDate): Float {
+                        val day = ChronoUnit.DAYS.between(seasonStart, date).toFloat()
+                        return paddingLeft + chartWidth * (day / totalDays).coerceIn(0f, 1f)
+                    }
+
+                    // Guides at one and two thirds of the threshold
+                    listOf(threshold / 3.0, threshold * 2.0 / 3.0).forEach { step ->
+                        val y = yToPx(step)
+                        drawLine(
+                            color = Neutral200,
+                            start = Offset(paddingLeft, y),
+                            end = Offset(size.width - paddingRight, y),
+                            strokeWidth = 1.dp.toPx(),
+                        )
+                    }
+
+                    // Threshold line (dashed)
+                    val thresholdY = yToPx(threshold)
                     drawLine(
-                        color = Neutral200,
-                        start = Offset(paddingLeft, y),
-                        end = Offset(size.width - paddingRight, y),
-                        strokeWidth = 1.dp.toPx(),
+                        color = Terracotta500,
+                        start = Offset(paddingLeft, thresholdY),
+                        end = Offset(size.width - paddingRight, thresholdY),
+                        strokeWidth = 1.5.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 8f), 0f),
                     )
-                }
-
-                // Threshold line at y=30 (dashed)
-                val thresholdY = yToPx(threshold.toFloat())
-                drawLine(
-                    color = Terracotta500,
-                    start = Offset(paddingLeft, thresholdY),
-                    end = Offset(size.width - paddingRight, thresholdY),
-                    strokeWidth = 1.5.dp.toPx(),
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 8f), 0f),
-                )
-                drawText(
-                    textMeasurer = textMeasurer,
-                    text = thresholdVarietyText,
-                    style = thresholdLabelStyle,
-                    topLeft = Offset(paddingLeft, thresholdY - 14.dp.toPx()),
-                )
-
-                // Previous Winter Curve points
-                val prevCurve = if (curvePoints.isNotEmpty() && curvePoints.any { it.accumulatedPreviousYear != null }) {
-                    curvePoints.mapIndexed { idx, pt ->
-                        Pair(idx.toFloat() * (92f / curvePoints.size), pt.accumulatedPreviousYear?.toFloat() ?: 0f)
-                    }
-                } else {
-                    listOf(
-                        Pair(0f, 0f),
-                        Pair(15f, 4f),
-                        Pair(30f, 10f),
-                        Pair(45f, 18f),
-                        Pair(66f, 30f),
-                        Pair(92f, 32f),
-                    )
-                }
-
-                // Draw Previous Winter Curve (dashed Neutral300)
-                if (prevCurve.size >= 2) {
-                    val prevPath = Path().apply {
-                        moveTo(xToPx(prevCurve[0].first), yToPx(prevCurve[0].second))
-                        for (i in 1 until prevCurve.size) {
-                            lineTo(xToPx(prevCurve[i].first), yToPx(prevCurve[i].second))
-                        }
-                    }
-                    drawPath(
-                        path = prevPath,
-                        color = Neutral300,
-                        style = Stroke(
-                            width = 2.5.dp.toPx(),
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f),
-                        ),
-                    )
-                }
-
-                // Current Winter Curve points
-                val thisCurve = if (curvePoints.isNotEmpty()) {
-                    curvePoints.mapIndexed { idx, pt ->
-                        Pair(idx.toFloat() * (92f / curvePoints.size), pt.accumulatedThisYear.toFloat())
-                    }
-                } else {
-                    val currentDay = when (seasonState) {
-                        WinterSeasonState.OFF_SEASON -> 92f
-                        WinterSeasonState.COMPLETED -> 65f
-                        else -> 55f
-                    }
-                    listOf(
-                        Pair(0f, 0f),
-                        Pair(15f, 3f),
-                        Pair(30f, 8f),
-                        Pair(45f, 16f),
-                        Pair(currentDay, currentPortions.toFloat()),
-                    )
-                }
-
-                // Draw Shaded Area under this curve
-                if (thisCurve.size >= 2) {
-                    val areaPath = Path().apply {
-                        moveTo(xToPx(thisCurve[0].first), yToPx(0f))
-                        for (pt in thisCurve) {
-                            lineTo(xToPx(pt.first), yToPx(pt.second))
-                        }
-                        lineTo(xToPx(thisCurve.last().first), yToPx(0f))
-                        close()
-                    }
-                    drawPath(
-                        path = areaPath,
-                        color = Green800.copy(alpha = 0.12f),
-                        style = Fill,
-                    )
-
-                    // Draw Solid This Winter Path
-                    val thisPath = Path().apply {
-                        moveTo(xToPx(thisCurve[0].first), yToPx(thisCurve[0].second))
-                        for (i in 1 until thisCurve.size) {
-                            lineTo(xToPx(thisCurve[i].first), yToPx(thisCurve[i].second))
-                        }
-                    }
-                    drawPath(
-                        path = thisPath,
-                        color = Green800,
-                        style = Stroke(width = 2.5.dp.toPx()),
-                    )
-                }
-
-                // Projection curve from last point to threshold
-                val lastPt = thisCurve.lastOrNull() ?: Pair(55f, currentPortions.toFloat())
-                val projDay = 65f // ~August 4
-                if (seasonState != WinterSeasonState.OFF_SEASON && lastPt.second < threshold.toFloat()) {
-                    val projPath = Path().apply {
-                        moveTo(xToPx(lastPt.first), yToPx(lastPt.second))
-                        lineTo(xToPx(projDay), thresholdY)
-                    }
-                    drawPath(
-                        path = projPath,
-                        color = Green800,
-                        style = Stroke(
-                            width = 2.dp.toPx(),
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f),
-                        ),
-                    )
-
-                    // Projected finish point dot (white with Green800 border)
-                    val projX = xToPx(projDay)
-                    drawCircle(color = Green800, radius = 5.dp.toPx(), center = Offset(projX, thresholdY))
-                    drawCircle(color = Neutral0, radius = 3.dp.toPx(), center = Offset(projX, thresholdY))
-
-                    // Projected date label above
-                    val projTextLayout = textMeasurer.measure(projDateLabel, projLabelStyle)
                     drawText(
                         textMeasurer = textMeasurer,
-                        text = projDateLabel,
-                        style = projLabelStyle,
-                        topLeft = Offset(projX - projTextLayout.size.width / 2f, thresholdY - 14.dp.toPx()),
+                        text = thresholdText,
+                        style = thresholdLabelStyle,
+                        topLeft = Offset(paddingLeft, thresholdY - 14.dp.toPx()),
                     )
-                }
 
-                // Today marker (vertical line + dot + floating badge)
-                val todayX = xToPx(lastPt.first)
-                val todayY = yToPx(lastPt.second)
+                    // Previous winter (dashed), aligned by day of the season
+                    if (previous.size >= 2) {
+                        val prevPath = Path().apply {
+                            moveTo(xToPx(previous.first().first), yToPx(previous.first().second))
+                            previous.drop(1).forEach { (date, value) -> lineTo(xToPx(date), yToPx(value)) }
+                        }
+                        drawPath(
+                            path = prevPath,
+                            color = Neutral300,
+                            style = Stroke(
+                                width = 2.5.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f),
+                            ),
+                        )
+                    }
 
-                // Vertical line
-                drawLine(
-                    color = Green800.copy(alpha = 0.35f),
-                    start = Offset(todayX, todayY),
-                    end = Offset(todayX, yToPx(0f)),
-                    strokeWidth = 1.dp.toPx(),
-                )
+                    // This winter: shaded area and solid line
+                    if (current.size >= 2) {
+                        val areaPath = Path().apply {
+                            moveTo(xToPx(current.first().first), yToPx(0.0))
+                            current.forEach { (date, value) -> lineTo(xToPx(date), yToPx(value)) }
+                            lineTo(xToPx(current.last().first), yToPx(0.0))
+                            close()
+                        }
+                        drawPath(path = areaPath, color = Green800.copy(alpha = 0.12f), style = Fill)
 
-                // Outer and inner circle for today
-                drawCircle(color = Neutral0, radius = 6.dp.toPx(), center = Offset(todayX, todayY))
-                drawCircle(color = Green800, radius = 4.dp.toPx(), center = Offset(todayX, todayY))
+                        val thisPath = Path().apply {
+                            moveTo(xToPx(current.first().first), yToPx(current.first().second))
+                            current.drop(1).forEach { (date, value) -> lineTo(xToPx(date), yToPx(value)) }
+                        }
+                        drawPath(path = thisPath, color = Green800, style = Stroke(width = 2.5.dp.toPx()))
+                    }
 
-                // Floating badge: "Hoy · 24"
-                val badgeLayout = textMeasurer.measure(todayCalloutText, badgeTextStyle)
-                val badgeWidth = badgeLayout.size.width + 16.dp.toPx()
-                val badgeHeight = badgeLayout.size.height + 6.dp.toPx()
-                val badgeLeft = (todayX - badgeWidth - 8.dp.toPx()).coerceAtLeast(paddingLeft)
-                val badgeTop = todayY - badgeHeight / 2f
+                    if (lastCurrent != null) {
+                        val lastX = xToPx(lastCurrent.first)
+                        val lastY = yToPx(lastCurrent.second)
 
-                drawRoundRect(
-                    color = Green800,
-                    topLeft = Offset(badgeLeft, badgeTop),
-                    size = Size(badgeWidth, badgeHeight),
-                    cornerRadius = CornerRadius(100f, 100f),
-                )
-                drawText(
-                    textMeasurer = textMeasurer,
-                    text = todayCalloutText,
-                    style = badgeTextStyle,
-                    topLeft = Offset(badgeLeft + 8.dp.toPx(), badgeTop + 3.dp.toPx()),
-                )
+                        // Projection from the last evaluated day to the projected date on the threshold
+                        if (seasonOpen && projectedCompletionDate != null && projDateLabel != null) {
+                            val projX = xToPx(projectedCompletionDate)
+                            drawLine(
+                                color = Green800,
+                                start = Offset(lastX, lastY),
+                                end = Offset(projX, thresholdY),
+                                strokeWidth = 2.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f),
+                            )
+                            drawCircle(color = Green800, radius = 5.dp.toPx(), center = Offset(projX, thresholdY))
+                            drawCircle(color = Neutral0, radius = 3.dp.toPx(), center = Offset(projX, thresholdY))
+                            val projTextLayout = textMeasurer.measure(projDateLabel, projLabelStyle)
+                            drawText(
+                                textMeasurer = textMeasurer,
+                                text = projDateLabel,
+                                style = projLabelStyle,
+                                topLeft = Offset(projX - projTextLayout.size.width / 2f, thresholdY - 14.dp.toPx()),
+                            )
+                        }
 
-                // X-axis month labels (Jun, Jul, Ago, 31 ago)
-                val months = listOf(
-                    Pair(0f, junLabel),
-                    Pair(30f, julLabel),
-                    Pair(61f, augLabel),
-                    Pair(92f, augEndLabel),
-                )
-                months.forEach { (day, label) ->
-                    val x = xToPx(day)
-                    val textLayout = textMeasurer.measure(label, axisTextStyle)
-                    drawText(
-                        textMeasurer = textMeasurer,
-                        text = label,
-                        style = axisTextStyle,
-                        topLeft = Offset(x - textLayout.size.width / 2f, size.height - paddingBottom + 6.dp.toPx()),
-                    )
+                        // Last evaluated day: vertical line and dot
+                        drawLine(
+                            color = Green800.copy(alpha = 0.35f),
+                            start = Offset(lastX, lastY),
+                            end = Offset(lastX, yToPx(0.0)),
+                            strokeWidth = 1.dp.toPx(),
+                        )
+                        drawCircle(color = Neutral0, radius = 6.dp.toPx(), center = Offset(lastX, lastY))
+                        drawCircle(color = Green800, radius = 4.dp.toPx(), center = Offset(lastX, lastY))
+
+                        // "Hoy · N" badge only while the season is open
+                        if (seasonOpen) {
+                            val badgeLayout = textMeasurer.measure(todayCalloutText, badgeTextStyle)
+                            val badgeWidth = badgeLayout.size.width + 16.dp.toPx()
+                            val badgeHeight = badgeLayout.size.height + 6.dp.toPx()
+                            val badgeLeft = (lastX - badgeWidth - 8.dp.toPx()).coerceAtLeast(paddingLeft)
+                            val badgeTop = lastY - badgeHeight / 2f
+                            drawRoundRect(
+                                color = Green800,
+                                topLeft = Offset(badgeLeft, badgeTop),
+                                size = Size(badgeWidth, badgeHeight),
+                                cornerRadius = CornerRadius(100f, 100f),
+                            )
+                            drawText(
+                                textMeasurer = textMeasurer,
+                                text = todayCalloutText,
+                                style = badgeTextStyle,
+                                topLeft = Offset(badgeLeft + 8.dp.toPx(), badgeTop + 3.dp.toPx()),
+                            )
+                        }
+                    }
+
+                    // X-axis month labels (Jun, Jul, Ago, 31 ago) at their real dates
+                    val year = seasonStart.year
+                    listOf(
+                        LocalDate.of(year, 6, 1) to junLabel,
+                        LocalDate.of(year, 7, 1) to julLabel,
+                        LocalDate.of(year, 8, 1) to augLabel,
+                        LocalDate.of(year, 8, 31) to augEndLabel,
+                    ).forEach { (date, label) ->
+                        val textLayout = textMeasurer.measure(label, axisTextStyle)
+                        // Centered on its date, but kept inside the canvas so "31 ago" never wraps at the edge
+                        val left = (xToPx(date) - textLayout.size.width / 2f)
+                            .coerceIn(0f, size.width - textLayout.size.width)
+                        drawText(
+                            textLayoutResult = textLayout,
+                            topLeft = Offset(left, size.height - paddingBottom + 6.dp.toPx()),
+                        )
+                    }
                 }
             }
 
@@ -417,25 +366,16 @@ fun ChillCurveChart(
 private fun ChartLegendItem(
     color: Color,
     text: String,
-    isDashed: Boolean,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        if (isDashed) {
-            Box(
-                modifier = Modifier
-                    .size(width = 14.dp, height = 2.5.dp)
-                    .background(color, RoundedCornerShape(1.dp)),
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .size(width = 14.dp, height = 2.5.dp)
-                    .background(color, RoundedCornerShape(1.dp)),
-            )
-        }
+        Box(
+            modifier = Modifier
+                .size(width = 14.dp, height = 2.5.dp)
+                .background(color, RoundedCornerShape(1.dp)),
+        )
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
@@ -446,3 +386,5 @@ private fun ChartLegendItem(
     }
 }
 
+private fun formatChartDate(date: LocalDate, locale: Locale): String =
+    DateTimeFormatter.ofPattern("d MMM", locale).format(date).replace(".", "")

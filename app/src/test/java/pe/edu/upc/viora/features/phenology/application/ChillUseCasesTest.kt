@@ -10,11 +10,10 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.phenology.chillTracker
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveChillTrackerUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RefreshChillTrackerUseCase
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillTracker
-import pe.edu.upc.viora.features.phenology.domain.entity.EnsoRiskLevel
-import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
 import pe.edu.upc.viora.features.phenology.domain.repository.ChillRepository
 
 private class FakeChillRepository : ChillRepository {
@@ -39,18 +38,7 @@ class ChillUseCasesTest {
 
     @Test
     fun observeUseCaseDelegatesToRepository() = runTest {
-        val tracker = ChillTracker(
-            plotId = "p-1",
-            accumulatedPortions = 20.0,
-            thresholdPortions = 30.0,
-            daysAbove24Celsius = 1,
-            seasonState = WinterSeasonState.ACCUMULATING,
-            projectedCompletionDate = null,
-            previousWinterCompletionDate = null,
-            ensoRisk = EnsoRiskLevel.NEUTRAL,
-            curvePoints = emptyList(),
-            syncedAt = Instant.EPOCH,
-        )
+        val tracker = chillTracker(accumulated = 20.0)
         fakeRepo.trackerFlow.value = tracker
 
         val emitted = observeUseCase("p-1").first()
