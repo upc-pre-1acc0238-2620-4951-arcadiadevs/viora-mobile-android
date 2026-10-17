@@ -11,6 +11,9 @@ interface ThinningPrescriptionDao {
     @Query("SELECT * FROM thinning_prescriptions WHERE plot_id = :plotId AND campaign_year = :campaignYear")
     fun observe(plotId: String, campaignYear: Int): Flow<ThinningPrescriptionEntity?>
 
+    @Query("SELECT * FROM thinning_prescriptions WHERE campaign_year = :campaignYear")
+    fun observeCampaign(campaignYear: Int): Flow<List<ThinningPrescriptionEntity>>
+
     @Query("SELECT * FROM thinning_prescriptions WHERE plot_id = :plotId AND campaign_year = :campaignYear")
     suspend fun find(plotId: String, campaignYear: Int): ThinningPrescriptionEntity?
 

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CachedPrescription
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.CampaignPlan
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningExecution
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningPrescription
 import pe.edu.upc.viora.features.croploadregulation.domain.repository.ThinningPrescriptionRepository
@@ -40,6 +41,12 @@ internal class FakePlanRepository : ThinningPrescriptionRepository {
         if (result is AppResult.Success) cached.value = CachedPrescription(result.value, Instant.EPOCH)
         return result
     }
+
+    val campaign = MutableStateFlow<List<CampaignPlan>>(emptyList())
+
+    override fun observeCampaign(campaignYear: Int): Flow<List<CampaignPlan>> = campaign
+
+    override suspend fun refreshCampaign(campaignYear: Int): AppResult<Unit> = refreshResult
 
     override fun observeExecution(plotId: String, campaignYear: Int): Flow<ThinningExecution?> = execution
 

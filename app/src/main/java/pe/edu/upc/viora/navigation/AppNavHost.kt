@@ -3,23 +3,21 @@ package pe.edu.upc.viora.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.navigation.HomeGraph
 import pe.edu.upc.viora.core.navigation.HomeRoute
 import pe.edu.upc.viora.core.navigation.LogbookGraph
 import pe.edu.upc.viora.core.navigation.LogbookRoute
-import pe.edu.upc.viora.core.navigation.PlaceholderScreen
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRoundRoute
+import pe.edu.upc.viora.features.croploadregulation.presentation.ui.CampaignPlanScreen
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.thinningPlanComposable
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
@@ -136,7 +134,15 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             onOpenAlternation = { plotId, plotName -> navController.navigate(HarvestHistoryRoute(plotId = plotId, plotName = plotName)) },
         )
         navigation<PlanGraph>(startDestination = PlanRoute) {
-            composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
+            composable<PlanRoute> {
+                CampaignPlanScreen(
+                    onOpenPlan = { plotId, plotName, year ->
+                        navController.navigate(ThinningPlanRoute(plotId = plotId, plotName = plotName, campaignYear = year))
+                    },
+                    onOpenAlerts = { navController.navigate(AlertsCenterRoute()) },
+                    onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
+                )
+            }
         }
         navigation<LogbookGraph>(startDestination = LogbookRoute) {
             composable<LogbookRoute> {

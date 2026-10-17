@@ -10,11 +10,13 @@ import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CachedPrescription
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.CampaignPlan
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningExecution
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningPrescription
 import pe.edu.upc.viora.features.croploadregulation.domain.repository.ThinningPrescriptionRepository
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningPrescriptionDao
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toCached
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toCampaignPlan
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toDomain
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toEntity
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toExecution
@@ -34,6 +36,22 @@ class ThinningPrescriptionRepositoryImpl @Inject constructor(
 
     override fun observePrescription(plotId: String, campaignYear: Int): Flow<CachedPrescription?> =
         dao.observe(plotId, campaignYear).map { it?.toCached() }
+
+    override fun observeCampaign(campaignYear: Int): Flow<List<CampaignPlan>> =
+        dao.observeCampaign(campaignYear).map { rows -> rows.map { it.toCampaignPlan() } }
+
+    override suspend fun refreshCampaign(campaignYear: Int): AppResult<Unit> {
+        val plans = when (val result = apiCaller.call { service.getPrescriptions(campaignYear) }) {
+            is AppResult.Success -> result.value
+            is AppResult.Failure -> return result
+        }
+        val saved = guarded { plans.forEach { save(it, it.plotId, campaignYear) } }
+        if (saved is AppResult.Failure) return saved
+        // Thinnings recorded elsewhere are fetched too, so the list shows the real share. Best effort.
+        plans.filter { it.status == EXECUTED && dao.find(it.plotId, campaignYear)?.executionJson == null }
+            .forEach { refreshExecution(it.plotId, campaignYear, it.id) }
+        return saved
+    }
 
     override suspend fun refreshPrescription(plotId: String, campaignYear: Int): AppResult<Unit> {
         // 404 is an answer, not a failure: nothing was sampled yet, so the plot has no plan for the campaign.

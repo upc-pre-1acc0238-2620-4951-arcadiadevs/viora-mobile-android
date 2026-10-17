@@ -4,6 +4,7 @@ import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CachedPrescription
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.CampaignPlan
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningExecution
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningPrescription
 
@@ -18,6 +19,12 @@ interface ThinningPrescriptionRepository {
      * [CachedPrescription] without prescription when the plot has none for that campaign (nothing sampled yet).
      */
     fun observePrescription(plotId: String, campaignYear: Int): Flow<CachedPrescription?>
+
+    /** The cached plans of every plot for [campaignYear] (P60); a plot without a row was never sampled. */
+    fun observeCampaign(campaignYear: Int): Flow<List<CampaignPlan>>
+
+    /** Downloads the plans of every active plot for [campaignYear] in one call (P60). */
+    suspend fun refreshCampaign(campaignYear: Int): AppResult<Unit>
 
     /** Downloads the plan again; the backend re-evaluates it first, so a new profile or bloom shows up. */
     suspend fun refreshPrescription(plotId: String, campaignYear: Int): AppResult<Unit>

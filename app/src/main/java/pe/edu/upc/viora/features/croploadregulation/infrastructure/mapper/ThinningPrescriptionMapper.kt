@@ -4,6 +4,7 @@ import java.time.Instant
 import java.time.LocalDate
 import kotlinx.serialization.json.Json
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CachedPrescription
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.CampaignPlan
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CaliberProjection
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CurrentLoad
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.LoadBalance
@@ -122,6 +123,10 @@ private fun CaliberProjectionDto.toDomain(): CaliberProjection = CaliberProjecti
 
 fun ExecutionConfirmationResponseDto.toJson(): String =
     prescriptionJson.encodeToString(ExecutionConfirmationResponseDto.serializer(), this)
+
+/** A row whose plan no longer parses is shown as never sampled until the next download replaces it. */
+fun ThinningPrescriptionEntity.toCampaignPlan(): CampaignPlan =
+    CampaignPlan(plotId = plotId, prescription = toCached()?.prescription, execution = toExecution())
 
 /** A cached thinning that no longer parses is read as missing, so P63 asks the backend again. */
 fun ThinningPrescriptionEntity.toExecution(): ThinningExecution? = executionJson?.let { json ->

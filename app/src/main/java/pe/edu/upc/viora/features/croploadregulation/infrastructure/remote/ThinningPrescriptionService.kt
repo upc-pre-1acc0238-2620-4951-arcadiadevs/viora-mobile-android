@@ -17,6 +17,10 @@ interface ThinningPrescriptionService {
         @Query("campaignYear") campaignYear: Int,
     ): Response<PrescriptionResponseDto>
 
+    /** The plans of every active plot of the producer for a campaign; plots never sampled are not listed (P60). */
+    @GET("thinning-prescriptions")
+    suspend fun getPrescriptions(@Query("campaignYear") campaignYear: Int): Response<List<PrescriptionResponseDto>>
+
     /** Records or corrects the observed full bloom; issues the prescription when it was the last input (P64). */
     @PUT("plots/{plotId}/thinning-prescriptions/full-bloom")
     suspend fun recordFullBloom(

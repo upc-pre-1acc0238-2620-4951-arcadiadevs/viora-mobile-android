@@ -47,6 +47,9 @@ private class FakePrescriptionDao : ThinningPrescriptionDao {
     override fun observe(plotId: String, campaignYear: Int): Flow<ThinningPrescriptionEntity?> =
         rows.map { it[plotId to campaignYear] }
 
+    override fun observeCampaign(campaignYear: Int): Flow<List<ThinningPrescriptionEntity>> =
+        rows.map { all -> all.values.filter { it.campaignYear == campaignYear } }
+
     override suspend fun find(plotId: String, campaignYear: Int): ThinningPrescriptionEntity? = rows.value[plotId to campaignYear]
 
     override suspend fun upsert(entity: ThinningPrescriptionEntity) {
@@ -65,6 +68,10 @@ private class FakePrescriptionService : ThinningPrescriptionService {
     var lastBloomRequest: RecordFullBloomRequestDto? = null
 
     override suspend fun getPrescription(plotId: String, campaignYear: Int) = getResponse()
+
+    var listResponse: () -> Response<List<PrescriptionResponseDto>> = { error("not stubbed") }
+
+    override suspend fun getPrescriptions(campaignYear: Int) = listResponse()
 
     override suspend fun recordFullBloom(plotId: String, request: RecordFullBloomRequestDto): Response<PrescriptionResponseDto> {
         lastBloomRequest = request
@@ -238,5 +245,20 @@ class ThinningPrescriptionRepositoryImplTest {
         repository.refreshPrescription(plotId, 2026)
 
         assertEquals(30.0, repository.observeExecution(plotId, 2026).first()!!.removalPercentage, 0.0)
+    }
+
+    @Test
+    fun `the campaign list caches each plan and keeps their recorded thinnings`() = runTest {
+        service.executionResponse = { Response.success(realExecution) }
+        repository.refreshExecution(plotId, 2026, "p-1")
+        val other = realPlan.copy(id = "p-2", plotId = "plot-2")
+        service.listResponse = { Response.success(listOf(realPlan, other)) }
+
+        assertEquals(AppResult.Success(Unit), repository.refreshCampaign(2026))
+
+        val plans = repository.observeCampaign(2026).first().associateBy { it.plotId }
+        assertEquals(setOf(plotId, "plot-2"), plans.keys)
+        assertNotNull(plans.getValue(plotId).execution)
+        assertNull(plans.getValue("plot-2").execution)
     }
 }

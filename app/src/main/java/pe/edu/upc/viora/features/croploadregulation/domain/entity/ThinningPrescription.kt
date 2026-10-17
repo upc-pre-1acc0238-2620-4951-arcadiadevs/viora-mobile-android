@@ -96,5 +96,8 @@ sealed interface WindowPhase {
     data class Closed(val daysSinceClose: Int) : WindowPhase
 }
 
+/** One plot's line of the Plan tab (P60): its plan and recorded thinning as cached, both null when never sampled. */
+data class CampaignPlan(val plotId: String, val prescription: ThinningPrescription?, val execution: ThinningExecution?)
+
 /** A prescription read from the cache, with the moment it was downloaded. */
 data class CachedPrescription(val prescription: ThinningPrescription?, val syncedAt: Instant)
