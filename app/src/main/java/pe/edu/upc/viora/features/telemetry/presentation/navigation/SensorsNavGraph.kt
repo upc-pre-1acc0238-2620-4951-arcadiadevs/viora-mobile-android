@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
 import pe.edu.upc.viora.features.telemetry.presentation.ui.SensorsScreen
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 
 /**
  * Route to the sensor nodes screen for a given plot.
@@ -24,6 +25,7 @@ fun NavGraphBuilder.sensorsComposable(navController: NavController) {
             onHarvestHistory = { navController.navigate(HarvestHistoryRoute(plotId = route.plotId, plotName = route.plotName)) },
             onClimate = { navController.navigate(PlotClimateRoute(plotId = route.plotId, plotName = route.plotName)) },
             onWinterChill = { navController.navigate(WinterChillRoute(plotId = route.plotId, plotName = route.plotName)) },
+            onThinning = { navController.navigate(ThinningPlanRoute(plotId = route.plotId, plotName = route.plotName)) },
             onNodeClick = { node ->
                 navController.navigate(ConfigureNodeRoute(plotId = route.plotId, nodeId = node.id, plotName = route.plotName))
             },

@@ -9,6 +9,7 @@ import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRo
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
 import pe.edu.upc.viora.features.telemetry.presentation.ui.PlotClimateScreen
 import pe.edu.upc.viora.features.telemetry.presentation.ui.TelemetryDetailScreen
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 
 /** Route to "El clima de tu lote" (Figma P90). [plotName] lets the top bar show it at once. */
 @Serializable
@@ -44,6 +45,9 @@ fun NavGraphBuilder.climateNavGraph(navController: NavController) {
             },
             onOpenWinterChill = { plotId, plotName ->
                 navController.navigate(WinterChillRoute(plotId = plotId, plotName = plotName))
+            },
+            onOpenThinning = { plotId, plotName ->
+                navController.navigate(ThinningPlanRoute(plotId = plotId, plotName = plotName))
             },
         )
     }

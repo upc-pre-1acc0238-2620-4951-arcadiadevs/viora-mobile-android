@@ -20,6 +20,8 @@ import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRoundRoute
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.thinningPlanComposable
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.CampaignClosedRoute
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.SettleHarvestRoute
@@ -29,14 +31,17 @@ import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestEntryS
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
+import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotScreens
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNavGraph
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.TelemetryDetailRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.alertsNavGraph
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.climateNavGraph
@@ -118,6 +123,18 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 PlotSilhouetteById(plotId = plotId, modifier = slotModifier, showTreeGrid = true)
             },
         )
+        thinningPlanComposable(
+            navController = navController,
+            onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
+            onOpenLogbook = {
+                navController.navigate(LogbookGraph) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            onOpenAlternation = { plotId, plotName -> navController.navigate(HarvestHistoryRoute(plotId = plotId, plotName = plotName)) },
+        )
         navigation<PlanGraph>(startDestination = PlanRoute) {
             composable<PlanRoute> { PlaceholderScreen(title = stringResource(R.string.nav_plan)) }
         }
@@ -137,6 +154,18 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 )
             }
         }
+    }
+}
+
+/** Opens another section of a plot from its "Más opciones" sheet. */
+private fun NavHostController.openLotSection(section: LotSection, plotId: String, plotName: String) {
+    when (section) {
+        LotSection.HARVEST -> navigate(HarvestHistoryRoute(plotId = plotId, plotName = plotName))
+        LotSection.WINTER_CHILL -> navigate(WinterChillRoute(plotId = plotId, plotName = plotName))
+        LotSection.THINNING -> navigate(ThinningPlanRoute(plotId = plotId, plotName = plotName))
+        LotSection.CLIMATE -> navigate(PlotClimateRoute(plotId = plotId, plotName = plotName))
+        LotSection.SENSORS -> navigate(SensorsRoute(plotId = plotId, plotName = plotName))
+        LotSection.DOSSIER -> Unit
     }
 }
 

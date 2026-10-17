@@ -8,6 +8,8 @@ import javax.inject.Singleton
 import pe.edu.upc.viora.core.database.AppDatabase
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningPrescriptionDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.ThinningPrescriptionService
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.ThinningService
 import retrofit2.Retrofit
 
@@ -21,10 +23,19 @@ object ThinningModule {
         retrofit.create(ThinningService::class.java)
 
     @Provides
+    @Singleton
+    fun provideThinningPrescriptionService(retrofit: Retrofit): ThinningPrescriptionService =
+        retrofit.create(ThinningPrescriptionService::class.java)
+
+    @Provides
     fun provideDraftTreeSampleDao(database: AppDatabase): DraftTreeSampleDao =
         database.draftTreeSampleDao()
 
     @Provides
     fun provideThinningEventDao(database: AppDatabase): ThinningEventDao =
         database.thinningEventDao()
+
+    @Provides
+    fun provideThinningPrescriptionDao(database: AppDatabase): ThinningPrescriptionDao =
+        database.thinningPrescriptionDao()
 }

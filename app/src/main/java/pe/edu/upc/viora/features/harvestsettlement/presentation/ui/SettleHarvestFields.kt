@@ -67,9 +67,18 @@ import pe.edu.upc.viora.features.phenology.presentation.ui.formatKg
 import pe.edu.upc.viora.features.phenology.presentation.ui.formatPercent
 import pe.edu.upc.viora.features.phenology.presentation.ui.formatTonnesPerHectare
 
-/** "Fecha de pesaje" (Figma P71): the chosen day with the calendar button that opens the picker. */
+/**
+ * "Fecha de pesaje" (Figma P71): the chosen day with the calendar button that opens the picker. P62 reuses it with
+ * its own [label] ("Fecha del aclareo").
+ */
 @Composable
-internal fun WeighingDateField(dateText: String, enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun WeighingDateField(
+    dateText: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = stringResource(R.string.settle_date_label),
+) {
     val description = stringResource(R.string.settle_date_pick)
     Row(
         modifier = modifier
@@ -82,7 +91,7 @@ internal fun WeighingDateField(dateText: String, enabled: Boolean, onClick: () -
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.settle_date_label), style = MaterialTheme.typography.labelMedium, color = Green800)
+            Text(label, style = MaterialTheme.typography.labelMedium, color = Green800)
             Text(dateText, style = MaterialTheme.typography.bodyLarge, color = Neutral900)
         }
         Box(Modifier.size(44.dp).clip(CircleShape).background(Neutral100), contentAlignment = Alignment.Center) {
