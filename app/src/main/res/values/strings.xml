@@ -696,6 +696,8 @@
     <string name="logbook_sampling_completed_desc">%1$s · %2$d trees · %3$s fruits/shoot</string>
     <string name="logbook_thinning_executed_title">Thinning recorded</string>
     <string name="logbook_thinning_executed_desc">%1$s · %2$s %% · %3$s</string>
+    <string name="logbook_thinning_on_time">on time</string>
+    <string name="logbook_thinning_late">late</string>
     <string name="logbook_in_progress_badge">IN PROGRESS · %1$s</string>
     <string name="logbook_in_progress_title">Fruit-set sampling</string>
     <string name="logbook_in_progress_counter">%1$d of %2$d trees · %3$d left for a sufficient sample</string>

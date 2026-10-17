@@ -701,6 +701,8 @@
     <string name="logbook_sampling_completed_desc">%1$s · %2$d árboles · %3$s frutos/brote</string>
     <string name="logbook_thinning_executed_title">Aclareo registrado</string>
     <string name="logbook_thinning_executed_desc">%1$s · %2$s %% · %3$s</string>
+    <string name="logbook_thinning_on_time">a tiempo</string>
+    <string name="logbook_thinning_late">tardío</string>
     <string name="logbook_in_progress_badge">EN CURSO · %1$s</string>
     <string name="logbook_in_progress_title">Muestreo de cuajado</string>
     <string name="logbook_in_progress_counter">%1$d de %2$d árboles · faltan %3$d para una muestra suficiente</string>
