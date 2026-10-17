@@ -97,9 +97,17 @@ class AppMigrationsTest {
     }
 
     @Test
+    fun `the altered plots table ends up as the exported v9 schema`() {
+        val added = AppMigrations.MIGRATION_8_9_PLOTS_SQL.substringAfter("ADD COLUMN ")
+        val migrated = v8.getValue("plots").replace(", PRIMARY KEY(`id`))", ", $added, PRIMARY KEY(`id`))")
+
+        assertEquals(v9.getValue("plots"), migrated)
+    }
+
+    @Test
     fun `every other v9 table is untouched since v8`() {
         assertEquals(v8.keys + "thinning_prescriptions", v9.keys)
-        v8.keys.forEach { assertEquals(v8[it], v9[it]) }
+        (v8.keys - "plots").forEach { assertEquals(v8[it], v9[it]) }
     }
 
     @Test

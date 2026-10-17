@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "704a62586c2e4d39d7343e9e98847a6b",
+    "identityHash": "56ac5245059b849e758d14b8a4f9c016",
     "entities": [
       {
         "tableName": "cache_metadata",
@@ -30,7 +30,7 @@
       },
       {
         "tableName": "plots",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `variety` TEXT NOT NULL, `area_ha` REAL NOT NULL, `tree_density` INTEGER NOT NULL, `row_spacing_m` REAL NOT NULL, `tree_spacing_m` REAL NOT NULL, `polygon_geojson` TEXT NOT NULL, `last_pruning_date` TEXT, `status` TEXT NOT NULL, `revision` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `variety` TEXT NOT NULL, `area_ha` REAL NOT NULL, `tree_density` INTEGER NOT NULL, `row_spacing_m` REAL NOT NULL, `tree_spacing_m` REAL NOT NULL, `polygon_geojson` TEXT NOT NULL, `last_pruning_date` TEXT, `status` TEXT NOT NULL, `revision` INTEGER NOT NULL, `registered_at` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -96,6 +96,11 @@
             "columnName": "revision",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "registeredAt",
+            "columnName": "registered_at",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -1107,7 +1112,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '704a62586c2e4d39d7343e9e98847a6b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '56ac5245059b849e758d14b8a4f9c016')"
     ]
   }
 }

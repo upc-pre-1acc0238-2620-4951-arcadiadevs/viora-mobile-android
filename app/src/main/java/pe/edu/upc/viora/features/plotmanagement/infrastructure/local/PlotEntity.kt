@@ -25,4 +25,6 @@ data class PlotEntity(
     val lastPruningDate: String?,
     val status: String,
     val revision: Long,
+    @ColumnInfo(name = "registered_at")
+    val registeredAt: String? = null,
 )
