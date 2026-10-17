@@ -377,7 +377,8 @@ internal fun CalibreCard(
 @Composable
 internal fun CloseNotice(year: Int, modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier.clip(CircleShape).background(Green200).padding(start = 8.dp, end = 14.dp, top = 6.dp, bottom = 6.dp),
+        // Full width like the cards above it, the same notice shape as P62's window notice.
+        modifier = modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Green200).padding(horizontal = 12.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
