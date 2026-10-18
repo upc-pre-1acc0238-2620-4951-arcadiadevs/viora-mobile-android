@@ -5,20 +5,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.phenology.application.usecase.ObserveChillTrackerUseCase
+import pe.edu.upc.viora.features.phenology.application.usecase.RefreshChillTrackerUseCase
+import pe.edu.upc.viora.features.phenology.domain.entity.ChillTracker
 import pe.edu.upc.viora.features.telemetry.application.usecase.CompleteMitigationStepUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.GetIncidentDetailUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.PostponeIncidentUseCase
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertDetailUiState
 
 /**
  * ViewModel for the Alert Detail screen.
- * Coordinates incident detail retrieval, task completion, and postponement (snooze).
+ * Coordinates incident detail retrieval, task completion, and postponement (snooze). A warm winter alert also follows
+ * the winter chill of its plot, which says how far the count got (T15 · Invierno cálido).
  */
 @HiltViewModel
 class AlertDetailViewModel @Inject constructor(
@@ -26,6 +32,8 @@ class AlertDetailViewModel @Inject constructor(
     private val getIncidentDetail: GetIncidentDetailUseCase,
     private val postponeIncidentUseCase: PostponeIncidentUseCase,
     private val completeMitigationStepUseCase: CompleteMitigationStepUseCase,
+    private val observeChillTracker: ObserveChillTrackerUseCase,
+    private val refreshChillTracker: RefreshChillTrackerUseCase,
 ) : ViewModel() {
 
     val incidentId: String = checkNotNull(savedStateHandle.get<String>("incidentId")) {
@@ -34,6 +42,9 @@ class AlertDetailViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<AlertDetailUiState>(AlertDetailUiState.Loading)
     val uiState: StateFlow<AlertDetailUiState> = _uiState.asStateFlow()
+
+    private var chillJob: Job? = null
+    private var chill: ChillTracker? = null
 
     init {
         loadDetail()
@@ -44,7 +55,8 @@ class AlertDetailViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = getIncidentDetail(incidentId)) {
                 is AppResult.Success -> {
-                    _uiState.value = AlertDetailUiState.Content(detail = result.value)
+                    _uiState.value = AlertDetailUiState.Content(detail = result.value, chill = chill)
+                    if (result.value.type == IncidentType.WARM_WINTER) followChill(result.value.plotId)
                 }
                 is AppResult.Failure -> {
                     _uiState.value = AlertDetailUiState.Error(error = result.error)
@@ -95,6 +107,19 @@ class AlertDetailViewModel @Inject constructor(
                         userFeedbackMessage = "snooze_error",
                     )
                 }
+            }
+        }
+    }
+
+    /** The cached chill shows at once; the download (best effort) refreshes it, and without signal it stays as is. */
+    private fun followChill(plotId: String) {
+        if (chillJob != null) return
+        chillJob = viewModelScope.launch {
+            launch { refreshChillTracker(plotId) }
+            observeChillTracker(plotId).collect { tracker ->
+                chill = tracker
+                val current = _uiState.value as? AlertDetailUiState.Content ?: return@collect
+                _uiState.value = current.copy(chill = tracker)
             }
         }
     }

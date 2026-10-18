@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -73,6 +74,8 @@ import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertDetailUiState
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.MitigationChecklistCard
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.SnoozeBottomSheet
+import pe.edu.upc.viora.features.telemetry.presentation.ui.components.WarmWinterChangesCard
+import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatWholeNumber
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.WeeklyTrendChart
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.AlertDetailViewModel
 
@@ -81,6 +84,7 @@ fun AlertDetailScreen(
     onBack: () -> Unit,
     onOpenPlot: (String) -> Unit,
     modifier: Modifier = Modifier,
+    onOpenWinterChill: (plotId: String, plotName: String) -> Unit = { _, _ -> },
     viewModel: AlertDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -171,10 +175,14 @@ fun AlertDetailScreen(
                 val isCritical = detail.severity == IncidentSeverity.CRITICAL
                 val timeRangeColor = if (isCritical) Terracotta600 else Harvest800
 
+                // T15 · Invierno cálido (section 15) is this screen with a run of days instead of hours, "Qué cambia"
+                // instead of the checklist and "Ver mi frío" instead of the plot.
+                val isWarmWinter = detail.type == IncidentType.WARM_WINTER
                 val titleText = when (detail.type) {
                     IncidentType.HEAT_WAVE -> stringResource(R.string.alert_detail_title_heat_wave)
                     IncidentType.HYDRIC_STRESS -> stringResource(R.string.alert_detail_title_hydric_stress)
                     IncidentType.FROST_WARNING -> stringResource(R.string.alert_detail_title_frost_warning)
+                    IncidentType.WARM_WINTER -> stringResource(R.string.alert_detail_title_warm_winter)
                     IncidentType.UNKNOWN -> stringResource(R.string.alert_detail_title_generic)
                 }
 
@@ -239,13 +247,21 @@ fun AlertDetailScreen(
 
                     val locale = LocalConfiguration.current.locales[0]
                     val datePattern = stringResource(R.string.alert_detail_date_pattern)
+                    val streakText = if (isWarmWinter && state.warmStreakDays > 0) {
+                        pluralStringResource(R.plurals.alert_detail_warm_streak, state.warmStreakDays, state.warmStreakDays)
+                    } else {
+                        null
+                    }
+                    // A warm winter is dated by the last warm day of the run, the bold day of the chart (Figma T15).
+                    val lastTrendDay = detail.weeklyTrend.maxByOrNull { it.timestamp }?.timestamp
                     val timeWindowText = formatAlertDetailDateTime(
-                        dateFormatted = detail.dateFormatted,
-                        triggeredAt = detail.triggeredAt,
+                        dateFormatted = if (isWarmWinter && lastTrendDay != null) "" else detail.dateFormatted,
+                        triggeredAt = if (isWarmWinter && lastTrendDay != null) lastTrendDay else detail.triggeredAt,
                         timeWindow = detail.timeWindow,
                         weeklyTrend = detail.weeklyTrend,
                         datePattern = datePattern,
                         locale = locale,
+                        windowOverride = if (isWarmWinter) streakText.orEmpty() else null,
                     )
 
                     // Header centered (Figma T15)
@@ -329,7 +345,11 @@ fun AlertDetailScreen(
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
-                                    text = stringResource(R.string.alert_detail_rule_chip),
+                                    text = if (isWarmWinter) {
+                                        stringResource(R.string.alert_detail_warm_chip, formatWholeNumber(locale, detail.thresholdValue))
+                                    } else {
+                                        stringResource(R.string.alert_detail_rule_chip)
+                                    },
                                     fontFamily = RobotoFamily,
                                     fontWeight = FontWeight.Medium,
                                     fontSize = 12.sp,
@@ -352,7 +372,11 @@ fun AlertDetailScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    if (detail.mitigationSteps.isNotEmpty()) {
+                    if (isWarmWinter) {
+                        WarmWinterChangesCard(chillFact = state.chillFact, warmThreshold = formatWholeNumber(locale, detail.thresholdValue))
+
+                        Spacer(modifier = Modifier.height(20.dp))
+                    } else if (detail.mitigationSteps.isNotEmpty()) {
                         MitigationChecklistCard(
                             steps = detail.mitigationSteps,
                             onToggleStep = { stepId -> viewModel.completeStep(stepId) },
@@ -406,7 +430,9 @@ fun AlertDetailScreen(
 
                         Spacer(modifier = Modifier.width(14.dp))
 
-                        val buttonText = if (detail.plotName.isNotBlank()) {
+                        val buttonText = if (isWarmWinter) {
+                            stringResource(R.string.alert_detail_view_chill)
+                        } else if (detail.plotName.isNotBlank()) {
                             stringResource(R.string.alert_detail_view_plot, detail.plotName)
                         } else {
                             stringResource(R.string.alert_detail_view_plot_generic)
@@ -418,7 +444,9 @@ fun AlertDetailScreen(
                                 .height(56.dp)
                                 .clip(PillShape)
                                 .background(Green900)
-                                .clickable { onOpenPlot(detail.plotId) },
+                                .clickable {
+                                    if (isWarmWinter) onOpenWinterChill(detail.plotId, detail.plotName) else onOpenPlot(detail.plotId)
+                                },
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
@@ -457,6 +485,7 @@ private fun formatAlertDetailDateTime(
     weeklyTrend: List<pe.edu.upc.viora.features.telemetry.domain.entity.WeeklyTrendPoint>,
     datePattern: String,
     locale: Locale = Locale.getDefault(),
+    windowOverride: String? = null,
 ): String {
     val rawDateCandidate = dateFormatted.ifBlank { triggeredAt }.ifBlank {
         weeklyTrend.lastOrNull()?.timestamp.orEmpty()
@@ -478,7 +507,8 @@ private fun formatAlertDetailDateTime(
         .format(resolvedDate)
         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
 
-    val formattedTimeWindow = formatDetailTimeWindow(timeWindow, triggeredAt, locale)
+    // A warm winter is a run of days, not hours: its line says how many in a row instead of a time window.
+    val formattedTimeWindow = windowOverride ?: formatDetailTimeWindow(timeWindow, triggeredAt, locale)
 
     return if (formattedTimeWindow.isNotBlank()) {
         "$formattedDateText · $formattedTimeWindow"

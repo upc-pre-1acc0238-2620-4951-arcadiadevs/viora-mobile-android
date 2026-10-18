@@ -120,6 +120,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         alertsNavGraph(
             navController = navController,
             onOpenPlot = { plotId -> navController.navigate(PlotDetailRoute(plotId = plotId)) },
+            onOpenWinterChill = { plotId, plotName -> navController.navigate(WinterChillRoute(plotId = plotId, plotName = plotName)) },
         )
         samplingNavGraph(
             navController = navController,

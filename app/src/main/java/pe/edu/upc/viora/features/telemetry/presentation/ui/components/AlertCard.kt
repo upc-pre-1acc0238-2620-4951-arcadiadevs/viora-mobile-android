@@ -57,6 +57,7 @@ fun AlertCard(
         IncidentType.HEAT_WAVE -> R.drawable.ic_thermometer_gain
         IncidentType.HYDRIC_STRESS -> R.drawable.ic_potencial_hidrico
         IncidentType.FROST_WARNING -> R.drawable.ic_thermostat
+        IncidentType.WARM_WINTER -> R.drawable.ic_ac_unit
         else -> R.drawable.ic_sensors
     }
 
@@ -64,6 +65,7 @@ fun AlertCard(
         IncidentType.HEAT_WAVE -> stringResource(R.string.alert_title_heat_wave, incident.plotName)
         IncidentType.HYDRIC_STRESS -> stringResource(R.string.alert_title_hydric_stress, incident.plotName)
         IncidentType.FROST_WARNING -> stringResource(R.string.alert_title_frost_warning, incident.plotName)
+        IncidentType.WARM_WINTER -> stringResource(R.string.alert_title_warm_winter, incident.plotName)
         IncidentType.UNKNOWN -> stringResource(R.string.alert_title_generic, incident.plotName)
     }
 
@@ -71,6 +73,7 @@ fun AlertCard(
         IncidentType.HEAT_WAVE -> stringResource(R.string.alert_desc_heat_wave)
         IncidentType.HYDRIC_STRESS -> stringResource(R.string.alert_desc_hydric_stress)
         IncidentType.FROST_WARNING -> stringResource(R.string.alert_desc_frost_warning)
+        IncidentType.WARM_WINTER -> stringResource(R.string.alert_desc_warm_winter)
         else -> stringResource(R.string.alert_desc_generic)
     }
 
