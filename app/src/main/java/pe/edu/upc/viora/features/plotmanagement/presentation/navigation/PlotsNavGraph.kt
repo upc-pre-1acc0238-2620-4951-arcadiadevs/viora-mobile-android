@@ -15,6 +15,7 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.Adj
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.EditPlotScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.RegisterPlotScreen
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.harvestHistoryComposable
 import pe.edu.upc.viora.features.phenology.presentation.navigation.winterChillComposable
@@ -91,6 +92,9 @@ fun NavGraphBuilder.plotScreens(navController: NavController) {
             },
             onWinterChill = { plotName ->
                 navController.navigate(WinterChillRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
+            },
+            onThinningPlan = { plotName ->
+                navController.navigate(ThinningPlanRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
             },
         )
     }

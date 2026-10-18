@@ -205,7 +205,7 @@ private fun YearCard(state: CampaignEditorUiState, onYearStep: (Int) -> Unit) {
 }
 
 @Composable
-private fun StepButton(icon: Int?, symbol: String?, description: String, dark: Boolean, onClick: () -> Unit) {
+internal fun StepButton(icon: Int?, symbol: String?, description: String, dark: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(48.dp)
@@ -374,7 +374,7 @@ private fun yearErrorText(error: YearError, state: CampaignEditorUiState): Strin
 }
 
 @Composable
-private fun FieldLabel(text: String) {
+internal fun FieldLabel(text: String) {
     Text(text, style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.88.sp), color = Neutral600)
 }
 

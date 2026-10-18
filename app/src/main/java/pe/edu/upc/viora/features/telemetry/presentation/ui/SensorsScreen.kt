@@ -105,6 +105,7 @@ fun SensorsScreen(
     onHarvestHistory: () -> Unit = {},
     onClimate: () -> Unit = {},
     onWinterChill: () -> Unit = {},
+    onThinning: () -> Unit = {},
     onNodeClick: (SensorNode) -> Unit = {},
     viewModel: SensorsViewModel = hiltViewModel(),
     linkViewModel: LinkNodeViewModel = hiltViewModel(),
@@ -157,6 +158,7 @@ fun SensorsScreen(
                     LotSection.HARVEST -> onHarvestHistory()
                     LotSection.CLIMATE -> onClimate()
                     LotSection.WINTER_CHILL -> onWinterChill()
+                    LotSection.THINNING -> onThinning()
                     else -> Unit
                 }
             },

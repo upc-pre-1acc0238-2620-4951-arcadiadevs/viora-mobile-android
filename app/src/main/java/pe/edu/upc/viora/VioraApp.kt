@@ -42,6 +42,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Spacing
 import pe.edu.upc.viora.core.navigation.HomeRoute
 import pe.edu.upc.viora.core.navigation.TopLevelDestination
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SelectPlotSamplingRoute
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourOverlay
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTargets
@@ -84,7 +85,8 @@ fun VioraApp(modifier: Modifier = Modifier) {
         currentDestination?.hasRoute<PlotClimateRoute>() == true ||
         currentDestination?.hasRoute<TelemetryDetailRoute>() == true ||
         currentDestination?.hasRoute<HarvestHistoryRoute>() == true ||
-        currentDestination?.hasRoute<WinterChillRoute>() == true
+        currentDestination?.hasRoute<WinterChillRoute>() == true ||
+        currentDestination?.hasRoute<ThinningPlanRoute>() == true
 
     val items = tabs.map { TabBarItem(icon = it.icon, label = stringResource(it.label)) }
     val actionLabel = stringResource(R.string.nav_action_add)

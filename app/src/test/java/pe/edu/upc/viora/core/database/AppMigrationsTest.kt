@@ -28,6 +28,7 @@ class AppMigrationsTest {
     private val v6 = createSqlByTable(6)
     private val v7 = createSqlByTable(7)
     private val v8 = createSqlByTable(8)
+    private val v9 = createSqlByTable(9)
 
     @Test
     fun `new tables are created exactly as the exported v5 schema`() {
@@ -91,8 +92,27 @@ class AppMigrationsTest {
     }
 
     @Test
+    fun `new thinning_prescriptions table in v9 matches migration`() {
+        assertEquals(v9.getValue("thinning_prescriptions"), AppMigrations.MIGRATION_8_9_SQL)
+    }
+
+    @Test
+    fun `the altered plots table ends up as the exported v9 schema`() {
+        val added = AppMigrations.MIGRATION_8_9_PLOTS_SQL.substringAfter("ADD COLUMN ")
+        val migrated = v8.getValue("plots").replace(", PRIMARY KEY(`id`))", ", $added, PRIMARY KEY(`id`))")
+
+        assertEquals(v9.getValue("plots"), migrated)
+    }
+
+    @Test
+    fun `every other v9 table is untouched since v8`() {
+        assertEquals(v8.keys + "thinning_prescriptions", v9.keys)
+        (v8.keys - "plots").forEach { assertEquals(v8[it], v9[it]) }
+    }
+
+    @Test
     fun `every version from 1 to the current one has a migration`() {
-        (1 until 8).forEach { from ->
+        (1 until 9).forEach { from ->
             assertTrue("missing $from -> ${from + 1}", AppMigrations.ALL.any { it.startVersion == from && it.endVersion == from + 1 })
         }
     }

@@ -18,4 +18,6 @@ data class PlotDto(
     val lastPruningDate: String? = null,
     val status: String,
     val revision: Long,
+    /** When the plot was registered (ISO instant); null from backends older than 0.40.0. */
+    val registeredAt: String? = null,
 )

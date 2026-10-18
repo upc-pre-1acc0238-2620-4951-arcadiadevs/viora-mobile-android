@@ -135,5 +135,20 @@ object AppMigrations {
         connection.execSQL(MIGRATION_7_8_SQL)
     }
 
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+    internal const val MIGRATION_8_9_SQL =
+        "CREATE TABLE IF NOT EXISTS `thinning_prescriptions` (`plot_id` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, " +
+            "`payload_json` TEXT, `synced_at_epoch_ms` INTEGER NOT NULL, `execution_json` TEXT, PRIMARY KEY(`plot_id`, `campaign_year`))"
+
+    internal const val MIGRATION_8_9_PLOTS_SQL = "ALTER TABLE `plots` ADD COLUMN `registered_at` TEXT"
+
+    /**
+     * Adds the cache of the thinning plan of each plot and campaign and of its recorded thinning (P61-P63), and the
+     * registration date of the plots (P60).
+     */
+    val MIGRATION_8_9 = Migration(8, 9) { connection ->
+        connection.execSQL(MIGRATION_8_9_SQL)
+        connection.execSQL(MIGRATION_8_9_PLOTS_SQL)
+    }
+
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
 }
