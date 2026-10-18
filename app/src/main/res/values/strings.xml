@@ -1247,6 +1247,7 @@
         <item quantity="other">%d days in a row</item>
     </plurals>
     <string name="alert_detail_warm_chip">Above %1$s °C</string>
+    <string name="alert_share_text">%1$s in %2$s · %3$s\n%4$s\nValue %5$s · threshold %6$s\nViora alert</string>
     <string name="alert_detail_view_chill">See my chill</string>
     <string name="warm_winter_changes_title">What changes</string>
     <string name="warm_winter_change_chill_halted_lead">Chill halted:</string>

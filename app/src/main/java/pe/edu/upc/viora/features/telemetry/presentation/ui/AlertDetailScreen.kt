@@ -1,6 +1,5 @@
 package pe.edu.upc.viora.features.telemetry.presentation.ui
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,10 +39,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -75,6 +79,7 @@ import pe.edu.upc.viora.features.telemetry.presentation.state.AlertDetailUiState
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.MitigationChecklistCard
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.SnoozeBottomSheet
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.WarmWinterChangesCard
+import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatMetricValue
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatWholeNumber
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.WeeklyTrendChart
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.AlertDetailViewModel
@@ -90,6 +95,7 @@ fun AlertDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var showSnoozeSheet by remember { mutableStateOf(false) }
 
     val feedbackRollback = stringResource(R.string.alert_feedback_rollback)
@@ -186,16 +192,48 @@ fun AlertDetailScreen(
                     IncidentType.UNKNOWN -> stringResource(R.string.alert_detail_title_generic)
                 }
 
+                // The panel (header, chart, card and source) is recorded as it is drawn, so the share button can send it as
+                // an image together with the text.
+                val panelLayer = rememberGraphicsLayer()
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(horizontal = 20.dp),
+                        .verticalScroll(scrollState),
                 ) {
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    val locale = LocalConfiguration.current.locales[0]
+                    val datePattern = stringResource(R.string.alert_detail_date_pattern)
+                    val streakText = if (isWarmWinter && state.warmStreakDays > 0) {
+                        pluralStringResource(R.plurals.alert_detail_warm_streak, state.warmStreakDays, state.warmStreakDays)
+                    } else {
+                        null
+                    }
+                    // A warm winter is dated by the last warm day of the run, the bold day of the chart (Figma T15).
+                    val lastTrendDay = detail.weeklyTrend.maxByOrNull { it.timestamp }?.timestamp
+                    val timeWindowText = formatAlertDetailDateTime(
+                        dateFormatted = if (isWarmWinter && lastTrendDay != null) "" else detail.dateFormatted,
+                        triggeredAt = if (isWarmWinter && lastTrendDay != null) lastTrendDay else detail.triggeredAt,
+                        timeWindow = detail.timeWindow,
+                        weeklyTrend = detail.weeklyTrend,
+                        datePattern = datePattern,
+                        locale = locale,
+                        windowOverride = if (isWarmWinter) streakText.orEmpty() else null,
+                    )
+
+                    val shareText = stringResource(
+                        R.string.alert_share_text,
+                        titleText,
+                        detail.plotName,
+                        if (isCritical) stringResource(R.string.alert_severity_critical) else stringResource(R.string.alert_severity_warning),
+                        timeWindowText,
+                        formatMetricValue(locale, detail.currentValue, detail.unit),
+                        formatMetricValue(locale, detail.thresholdValue, detail.unit),
+                    )
+
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -221,16 +259,11 @@ fun AlertDetailScreen(
                                 .clip(CircleShape)
                                 .background(Neutral0)
                                 .clickable {
-                                    val sendIntent = Intent().apply {
-                                        action = Intent.ACTION_SEND
-                                        putExtra(
-                                            Intent.EXTRA_TEXT,
-                                            "Alerta Viora: $titleText en ${detail.plotName}. Valor: ${detail.currentValue} ${detail.unit}.",
-                                        )
-                                        type = "text/plain"
+                                    scope.launch {
+                                        // Without the image (not drawn yet) the text still goes out.
+                                        val panel = runCatching { panelLayer.toImageBitmap() }.getOrNull()
+                                        AlertShare.share(context, panel, shareText, detail.id)
                                     }
-                                    val shareIntent = Intent.createChooser(sendIntent, null)
-                                    context.startActivity(shareIntent)
                                 },
                             contentAlignment = Alignment.Center,
                         ) {
@@ -243,81 +276,91 @@ fun AlertDetailScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    val locale = LocalConfiguration.current.locales[0]
-                    val datePattern = stringResource(R.string.alert_detail_date_pattern)
-                    val streakText = if (isWarmWinter && state.warmStreakDays > 0) {
-                        pluralStringResource(R.plurals.alert_detail_warm_streak, state.warmStreakDays, state.warmStreakDays)
-                    } else {
-                        null
-                    }
-                    // A warm winter is dated by the last warm day of the run, the bold day of the chart (Figma T15).
-                    val lastTrendDay = detail.weeklyTrend.maxByOrNull { it.timestamp }?.timestamp
-                    val timeWindowText = formatAlertDetailDateTime(
-                        dateFormatted = if (isWarmWinter && lastTrendDay != null) "" else detail.dateFormatted,
-                        triggeredAt = if (isWarmWinter && lastTrendDay != null) lastTrendDay else detail.triggeredAt,
-                        timeWindow = detail.timeWindow,
-                        weeklyTrend = detail.weeklyTrend,
-                        datePattern = datePattern,
-                        locale = locale,
-                        windowOverride = if (isWarmWinter) streakText.orEmpty() else null,
-                    )
-
-                    // Header centered (Figma T15)
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .drawWithContent {
+                                panelLayer.record { this@drawWithContent.drawContent() }
+                                drawLayer(panelLayer)
+                            }
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(horizontal = 20.dp, vertical = 12.dp),
                     ) {
-                        if (timeWindowText.isNotBlank()) {
+                        // Header centered (Figma T15)
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            if (timeWindowText.isNotBlank()) {
+                                Text(
+                                    text = timeWindowText,
+                                    fontFamily = RobotoFamily,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 13.sp,
+                                    color = timeRangeColor,
+                                    textAlign = TextAlign.Center,
+                                )
+
+                                Spacer(modifier = Modifier.height(6.dp))
+                            }
+
                             Text(
-                                text = timeWindowText,
-                                fontFamily = RobotoFamily,
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 13.sp,
-                                color = timeRangeColor,
+                                text = titleText,
+                                fontFamily = NewsreaderFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 40.sp,
+                                lineHeight = 44.sp,
+                                color = Neutral900,
                                 textAlign = TextAlign.Center,
                             )
 
-                            Spacer(modifier = Modifier.height(6.dp))
-                        }
+                            Spacer(modifier = Modifier.height(14.dp))
 
-                        Text(
-                            text = titleText,
-                            fontFamily = NewsreaderFamily,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 40.sp,
-                            lineHeight = 44.sp,
-                            color = Neutral900,
-                            textAlign = TextAlign.Center,
-                        )
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        Row(
-                            modifier = Modifier.wrapContentWidth(Alignment.CenterHorizontally),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(PillShape)
-                                    .background(if (isCritical) Terracotta500 else Harvest300)
-                                    .padding(horizontal = 14.dp, vertical = 7.dp),
-                                contentAlignment = Alignment.Center,
+                            Row(
+                                modifier = Modifier.wrapContentWidth(Alignment.CenterHorizontally),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Text(
-                                    text = if (isCritical) stringResource(R.string.alert_severity_critical) else stringResource(R.string.alert_severity_warning),
-                                    fontFamily = RobotoFamily,
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 12.sp,
-                                    color = if (isCritical) Neutral50 else Neutral900,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.wrapContentSize(Alignment.Center),
-                                )
-                            }
+                                Box(
+                                    modifier = Modifier
+                                        .clip(PillShape)
+                                        .background(if (isCritical) Terracotta500 else Harvest300)
+                                        .padding(horizontal = 14.dp, vertical = 7.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = if (isCritical) stringResource(R.string.alert_severity_critical) else stringResource(R.string.alert_severity_warning),
+                                        fontFamily = RobotoFamily,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 12.sp,
+                                        color = if (isCritical) Neutral50 else Neutral900,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.wrapContentSize(Alignment.Center),
+                                    )
+                                }
 
-                            if (detail.plotName.isNotBlank()) {
+                                if (detail.plotName.isNotBlank()) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(PillShape)
+                                            .background(Neutral0)
+                                            .padding(horizontal = 14.dp, vertical = 7.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = detail.plotName,
+                                            fontFamily = RobotoFamily,
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 12.sp,
+                                            color = Neutral900,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.wrapContentSize(Alignment.Center),
+                                        )
+                                    }
+                                }
+
                                 Box(
                                     modifier = Modifier
                                         .clip(PillShape)
@@ -326,7 +369,11 @@ fun AlertDetailScreen(
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
-                                        text = detail.plotName,
+                                        text = if (isWarmWinter) {
+                                            stringResource(R.string.alert_detail_warm_chip, formatWholeNumber(locale, detail.thresholdValue))
+                                        } else {
+                                            stringResource(R.string.alert_detail_rule_chip)
+                                        },
                                         fontFamily = RobotoFamily,
                                         fontWeight = FontWeight.Medium,
                                         fontSize = 12.sp,
@@ -336,80 +383,58 @@ fun AlertDetailScreen(
                                     )
                                 }
                             }
-
-                            Box(
-                                modifier = Modifier
-                                    .clip(PillShape)
-                                    .background(Neutral0)
-                                    .padding(horizontal = 14.dp, vertical = 7.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    text = if (isWarmWinter) {
-                                        stringResource(R.string.alert_detail_warm_chip, formatWholeNumber(locale, detail.thresholdValue))
-                                    } else {
-                                        stringResource(R.string.alert_detail_rule_chip)
-                                    },
-                                    fontFamily = RobotoFamily,
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 12.sp,
-                                    color = Neutral900,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.wrapContentSize(Alignment.Center),
-                                )
-                            }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
 
-                    WeeklyTrendChart(
-                        weeklyTrend = detail.weeklyTrend,
-                        thresholdValue = detail.thresholdValue,
-                        unit = detail.unit,
-                        severity = detail.severity,
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    if (isWarmWinter) {
-                        WarmWinterChangesCard(chillFact = state.chillFact, warmThreshold = formatWholeNumber(locale, detail.thresholdValue))
-
-                        Spacer(modifier = Modifier.height(20.dp))
-                    } else if (detail.mitigationSteps.isNotEmpty()) {
-                        MitigationChecklistCard(
-                            steps = detail.mitigationSteps,
-                            onToggleStep = { stepId -> viewModel.completeStep(stepId) },
+                        WeeklyTrendChart(
+                            weeklyTrend = detail.weeklyTrend,
+                            thresholdValue = detail.thresholdValue,
+                            unit = detail.unit,
+                            severity = detail.severity,
                         )
 
                         Spacer(modifier = Modifier.height(20.dp))
-                    }
 
-                    val traceabilityNote = detail.dataSource?.takeIf { it.isNotBlank() }
-                        ?: if (detail.plotName.isNotBlank()) {
-                            stringResource(R.string.alert_detail_traceability_note_plot, detail.plotName)
-                        } else {
-                            stringResource(R.string.alert_detail_traceability_note)
+                        if (isWarmWinter) {
+                            WarmWinterChangesCard(chillFact = state.chillFact, warmThreshold = formatWholeNumber(locale, detail.thresholdValue))
+
+                            Spacer(modifier = Modifier.height(20.dp))
+                        } else if (detail.mitigationSteps.isNotEmpty()) {
+                            MitigationChecklistCard(
+                                steps = detail.mitigationSteps,
+                                onToggleStep = { stepId -> viewModel.completeStep(stepId) },
+                            )
+
+                            Spacer(modifier = Modifier.height(20.dp))
                         }
 
-                    Text(
-                        text = traceabilityNote,
-                        fontFamily = RobotoFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 12.sp,
-                        color = Neutral600,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                    )
+                        val traceabilityNote = detail.dataSource?.takeIf { it.isNotBlank() }
+                            ?: if (detail.plotName.isNotBlank()) {
+                                stringResource(R.string.alert_detail_traceability_note_plot, detail.plotName)
+                            } else {
+                                stringResource(R.string.alert_detail_traceability_note)
+                            }
 
-                    Spacer(modifier = Modifier.height(28.dp))
+                        Text(
+                            text = traceabilityNote,
+                            fontFamily = RobotoFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 12.sp,
+                            color = Neutral600,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp),
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 20.dp),
+                            .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Box(
