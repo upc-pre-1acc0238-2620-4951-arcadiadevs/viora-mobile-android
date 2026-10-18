@@ -51,7 +51,7 @@ fun NormalizedAlertRow(
     val title = when {
         incident.type == IncidentType.HYDRIC_STRESS && incident.plotName.isNotBlank() ->
             stringResource(R.string.alert_normalized_title_hydric, incident.plotName)
-        incident.type == IncidentType.HEAT_WAVE && incident.plotName.isNotBlank() ->
+        (incident.type == IncidentType.HEAT_WAVE || incident.type == IncidentType.WARM_WINTER) && incident.plotName.isNotBlank() ->
             stringResource(R.string.alert_normalized_title_thermal, incident.plotName)
         incident.plotName.isNotBlank() ->
             stringResource(R.string.alert_normalized_title_with_plot, incident.plotName)

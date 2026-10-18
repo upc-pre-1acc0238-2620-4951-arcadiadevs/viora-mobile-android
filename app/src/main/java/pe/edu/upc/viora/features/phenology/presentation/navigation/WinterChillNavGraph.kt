@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.features.phenology.presentation.ui.WinterChillScreen
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertDetailRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
@@ -30,6 +31,7 @@ fun NavGraphBuilder.winterChillComposable(navController: NavController) {
             onThinning = {
                 navController.navigate(ThinningPlanRoute(plotId = route.plotId, plotName = route.plotName))
             },
+            onWarmWinterAlert = { incidentId -> navController.navigate(AlertDetailRoute(incidentId = incidentId)) },
         )
     }
 }

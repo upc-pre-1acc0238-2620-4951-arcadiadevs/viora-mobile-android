@@ -1242,4 +1242,36 @@
     <string name="dossier_verify_copy">Copiar código</string>
     <string name="dossier_verify_copied">Código copiado</string>
     <string name="dossier_verify_done">Entendido</string>
+
+    <!-- T15 · Invierno cálido (US23) -->
+    <string name="alert_title_warm_winter">Invierno cálido en %1$s</string>
+    <string name="alert_desc_warm_winter">Varios días seguidos de calor frenan el frío que tu olivo necesita para florecer.</string>
+    <string name="alert_detail_title_warm_winter">Invierno cálido</string>
+    <plurals name="alert_detail_warm_streak">
+        <item quantity="one">%d día seguido</item>
+        <item quantity="other">%d días seguidos</item>
+    </plurals>
+    <string name="alert_detail_warm_chip">Más de %1$s °C</string>
+    <string name="alert_share_text">%1$s en %2$s · %3$s\n%4$s\nValor %5$s · umbral %6$s\nAlerta de Viora</string>
+    <string name="alert_detail_view_chill">Ver mi frío</string>
+    <string name="warm_winter_changes_title">Qué cambia</string>
+    <string name="warm_winter_change_chill_halted_lead">Frío frenado:</string>
+    <plurals name="warm_winter_change_chill_halted">
+        <item quantity="one">%1$d día sin sumar porciones (%2$d de %3$d).</item>
+        <item quantity="other">%1$d días sin sumar porciones (%2$d de %3$d).</item>
+    </plurals>
+    <string name="warm_winter_change_chill_risk_lead">Frío en riesgo:</string>
+    <plurals name="warm_winter_change_chill_risk">
+        <item quantity="one">%1$d día seguido sobre %2$s °C (%3$d de %4$d porciones).</item>
+        <item quantity="other">%1$d días seguidos sobre %2$s °C (%3$d de %4$d porciones).</item>
+    </plurals>
+    <plurals name="warm_winter_change_chill_unknown">
+        <item quantity="one">%1$d día seguido sobre %2$s °C.</item>
+        <item quantity="other">%1$d días seguidos sobre %2$s °C.</item>
+    </plurals>
+    <string name="warm_winter_change_chill_generic">el calor frena el conteo de porciones.</string>
+    <string name="warm_winter_change_bloom_lead">Floración en riesgo:</string>
+    <string name="warm_winter_change_bloom">más brotes de hojas que de flores.</string>
+    <string name="warm_winter_change_thinning_lead">Plan de aclareo:</string>
+    <string name="warm_winter_change_thinning">tu muestreo de cuajado dirá cuánto quitar; con menos flor puede no hacer falta.</string>
 </resources>

@@ -91,6 +91,7 @@ fun WinterChillScreen(
     onClimate: () -> Unit = {},
     onThinning: () -> Unit = {},
     modifier: Modifier = Modifier,
+    onWarmWinterAlert: (incidentId: String) -> Unit = {},
     viewModel: WinterChillViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -141,7 +142,8 @@ fun WinterChillScreen(
                 ContentBody(
                     state = s,
                     onOpenWhy = { showWhySheet = true },
-                    onClimate = onClimate,
+                    // An open warm winter alert takes the card to it (T15, prototype "Frío frenado"); otherwise the climate.
+                    onWarmWinterCard = { s.warmWinterAlertId?.let(onWarmWinterAlert) ?: onClimate() },
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -240,7 +242,7 @@ private fun TopBar(
 private fun ContentBody(
     state: WinterChillUiState.Content,
     onOpenWhy: () -> Unit,
-    onClimate: () -> Unit,
+    onWarmWinterCard: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val (lead, emphasis) = when (state.seasonState) {
@@ -303,7 +305,7 @@ private fun ContentBody(
         // Asymmetric Metric Cards (Projection tall card + Warm days & ENSO stacked cards)
         AsymmetricMetricsRow(
             state = state,
-            onEnsoClick = onClimate,
+            onEnsoClick = onWarmWinterCard,
         )
 
         // Cumulative Curve Chart (Canvas with today badge and projected point)

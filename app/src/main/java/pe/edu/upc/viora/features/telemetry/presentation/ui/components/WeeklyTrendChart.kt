@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.telemetry.presentation.ui.components
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -93,13 +93,40 @@ fun WeeklyTrendChart(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = stringResource(R.string.alert_chart_title),
-                    fontFamily = RobotoFamily,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 13.sp,
-                    color = peakValueColor,
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = stringResource(R.string.alert_chart_title),
+                        fontFamily = RobotoFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 13.sp,
+                        color = peakValueColor,
+                    )
+                    // The threshold is named here, as a legend, instead of on the line: over a bar that passes it the
+                    // label had the bar's own colour and could not be read.
+                    if (weeklyTrend.isNotEmpty()) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Canvas(Modifier.width(18.dp).height(2.dp)) {
+                                drawLine(
+                                    color = thresholdLineColor,
+                                    start = Offset(0f, size.height / 2),
+                                    end = Offset(size.width, size.height / 2),
+                                    strokeWidth = 1.2.dp.toPx(),
+                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()), 0f),
+                                )
+                            }
+                            Text(
+                                text = stringResource(R.string.alert_chart_threshold_label, formatMetricValue(locale, thresholdValue, unit)),
+                                fontFamily = RobotoFamily,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 11.sp,
+                                color = thresholdTextColor,
+                            )
+                        }
+                    }
+                }
 
                 Text(
                     text = peakDisplay,
@@ -170,11 +197,8 @@ fun WeeklyTrendChart(
                                     .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
                             }.getOrDefault("")
 
-                            val valueFormatted = if (point.value % 1.0 == 0.0) {
-                                "${point.value.toInt()}°"
-                            } else {
-                                "${point.value}°"
-                            }
+                            // "17,4°" in Spanish: the app's decimal comma, whole values without decimals.
+                            val valueFormatted = formatDegrees(locale, point.value, if (point.value % 1.0 == 0.0) 0 else 1)
 
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -227,21 +251,6 @@ fun WeeklyTrendChart(
                             }
                         }
                     }
-
-                    // "umbral 32°" label placed just above the dashed line on the left, rendered in front of test-tubes
-                    Text(
-                        text = stringResource(R.string.alert_chart_threshold_label, formatMetricValue(locale, thresholdValue, unit)),
-                        fontFamily = RobotoFamily,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 10.sp,
-                        color = thresholdTextColor,
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .offset(
-                                x = 0.dp,
-                                y = tubeHeight - thresholdHeightFromBottom - 16.dp,
-                            ),
-                    )
                 }
             }
         }

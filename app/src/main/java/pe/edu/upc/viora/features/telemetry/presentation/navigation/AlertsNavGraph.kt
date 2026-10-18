@@ -18,10 +18,14 @@ data class AlertsCenterRoute(val plotId: String? = null)
 @Serializable
 data class AlertDetailRoute(val incidentId: String)
 
-/** Alerts navigation subgraph: Alerts Center and Alert Detail. */
+/**
+ * Alerts navigation subgraph: Alerts Center and Alert Detail. [onOpenWinterChill] is "Ver mi frío" of a warm winter
+ * alert (P80 of its plot).
+ */
 fun NavGraphBuilder.alertsNavGraph(
     navController: NavController,
     onOpenPlot: (plotId: String) -> Unit = {},
+    onOpenWinterChill: (plotId: String, plotName: String) -> Unit = { _, _ -> },
 ) {
     composable<AlertsCenterRoute> {
         AlertsCenterScreen(
@@ -36,6 +40,7 @@ fun NavGraphBuilder.alertsNavGraph(
         AlertDetailScreen(
             onBack = { navController.popBackStack() },
             onOpenPlot = { plotId -> onOpenPlot(plotId) },
+            onOpenWinterChill = onOpenWinterChill,
         )
     }
 }

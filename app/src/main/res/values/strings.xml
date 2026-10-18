@@ -1237,4 +1237,36 @@
     <string name="dossier_verify_copy">Copy code</string>
     <string name="dossier_verify_copied">Code copied</string>
     <string name="dossier_verify_done">Got it</string>
+
+    <!-- T15 · Warm winter (US23) -->
+    <string name="alert_title_warm_winter">Warm winter in %1$s</string>
+    <string name="alert_desc_warm_winter">Several warm days in a row slow down the chill your olive trees need to bloom.</string>
+    <string name="alert_detail_title_warm_winter">Warm winter</string>
+    <plurals name="alert_detail_warm_streak">
+        <item quantity="one">%d day in a row</item>
+        <item quantity="other">%d days in a row</item>
+    </plurals>
+    <string name="alert_detail_warm_chip">Above %1$s °C</string>
+    <string name="alert_share_text">%1$s in %2$s · %3$s\n%4$s\nValue %5$s · threshold %6$s\nViora alert</string>
+    <string name="alert_detail_view_chill">See my chill</string>
+    <string name="warm_winter_changes_title">What changes</string>
+    <string name="warm_winter_change_chill_halted_lead">Chill halted:</string>
+    <plurals name="warm_winter_change_chill_halted">
+        <item quantity="one">%1$d day without adding portions (%2$d of %3$d).</item>
+        <item quantity="other">%1$d days without adding portions (%2$d of %3$d).</item>
+    </plurals>
+    <string name="warm_winter_change_chill_risk_lead">Chill at risk:</string>
+    <plurals name="warm_winter_change_chill_risk">
+        <item quantity="one">%1$d day in a row above %2$s °C (%3$d of %4$d portions).</item>
+        <item quantity="other">%1$d days in a row above %2$s °C (%3$d of %4$d portions).</item>
+    </plurals>
+    <plurals name="warm_winter_change_chill_unknown">
+        <item quantity="one">%1$d day in a row above %2$s °C.</item>
+        <item quantity="other">%1$d days in a row above %2$s °C.</item>
+    </plurals>
+    <string name="warm_winter_change_chill_generic">the heat slows down the portion count.</string>
+    <string name="warm_winter_change_bloom_lead">Bloom at risk:</string>
+    <string name="warm_winter_change_bloom">more leaf buds than flower buds.</string>
+    <string name="warm_winter_change_thinning_lead">Thinning plan:</string>
+    <string name="warm_winter_change_thinning">your fruit set sampling will say how much to remove; with less bloom it may not be needed.</string>
 </resources>
