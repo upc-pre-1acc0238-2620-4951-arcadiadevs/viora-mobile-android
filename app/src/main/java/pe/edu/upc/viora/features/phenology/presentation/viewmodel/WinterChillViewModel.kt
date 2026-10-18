@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,6 +22,9 @@ import pe.edu.upc.viora.features.phenology.presentation.state.WinterChillUiState
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
 
 @HiltViewModel
 class WinterChillViewModel @Inject constructor(
@@ -29,6 +33,7 @@ class WinterChillViewModel @Inject constructor(
     observePlot: ObservePlotUseCase,
     private val refreshChillTracker: RefreshChillTrackerUseCase,
     private val chillRepository: ChillRepository,
+    observeIncidents: ObserveIncidentsUseCase,
 ) : ViewModel() {
 
     val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "WinterChillRoute requires plotId" }
@@ -47,7 +52,10 @@ class WinterChillViewModel @Inject constructor(
         chillRepository.observeLastSync(plotId),
         observePlot(PlotId(plotId)),
         refreshState,
-    ) { tracker, lastSync, plot, refresh ->
+        observeIncidents(plotId).map { incidents ->
+            incidents.firstOrNull { it.type == IncidentType.WARM_WINTER && it.status != IncidentStatus.NORMALIZED }?.id
+        },
+    ) { tracker, lastSync, plot, refresh, warmWinterAlertId ->
         val plotName = plot?.name ?: initialPlotName
         val varietyName = plot?.variety?.displayName().orEmpty()
 
@@ -59,6 +67,7 @@ class WinterChillViewModel @Inject constructor(
                 lastSync = lastSync ?: tracker.syncedAt,
                 isRefreshing = refresh.isRefreshing,
                 offline = refresh.error is AppError.Offline,
+                warmWinterAlertId = warmWinterAlertId,
             )
             refresh.isRefreshing || !refresh.hasFinishedOnce -> WinterChillUiState.Loading
             refresh.error != null -> WinterChillUiState.Error(refresh.error)

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Files other apps may read through the FileProvider: only the sealed dossier PDFs (P77). -->
+<!-- Files other apps may read through the FileProvider: the sealed dossier PDFs (P77) and the shared alert panels (T15). -->
 <paths>
     <files-path name="dossiers" path="dossiers/" />
+    <cache-path name="shared" path="shared/" />
 </paths>

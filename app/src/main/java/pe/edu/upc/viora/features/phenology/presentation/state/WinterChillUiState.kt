@@ -24,6 +24,8 @@ sealed interface WinterChillUiState {
         val lastSync: Instant?,
         val isRefreshing: Boolean,
         val offline: Boolean,
+        /** The open warm winter alert of the plot (T15), null when there is none in the alerts cache. */
+        val warmWinterAlertId: String? = null,
     ) : WinterChillUiState {
 
         val seasonState: WinterSeasonState

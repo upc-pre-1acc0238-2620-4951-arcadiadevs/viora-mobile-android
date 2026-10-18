@@ -34,6 +34,11 @@ import pe.edu.upc.viora.features.phenology.domain.repository.ChillRepository
 import pe.edu.upc.viora.features.phenology.presentation.state.WinterChillUiState
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.WinterChillViewModel
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
+import pe.edu.upc.viora.features.telemetry.FakeWarmWinterIncidents
+import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
+import pe.edu.upc.viora.features.telemetry.warmWinterIncident
 
 private class FakeChillViewModelRepo : ChillRepository {
     val tracker = MutableStateFlow<ChillTracker?>(null)
@@ -53,6 +58,7 @@ private class FakeChillViewModelRepo : ChillRepository {
 class WinterChillViewModelTest {
 
     private val repository = FakeChillViewModelRepo()
+    private val incidents = FakeWarmWinterIncidents()
 
     @Before
     fun setUp() {
@@ -70,6 +76,7 @@ class WinterChillViewModelTest {
         observePlot = ObservePlotUseCase(FakePlots()),
         refreshChillTracker = RefreshChillTrackerUseCase(repository),
         chillRepository = repository,
+        observeIncidents = ObserveIncidentsUseCase(incidents),
     )
 
     private fun WinterChillViewModel.lastState(): WinterChillUiState {
@@ -98,6 +105,27 @@ class WinterChillViewModelTest {
         assertEquals(6, content.portionsRemaining)
         assertEquals(WinterSeasonState.ACCUMULATING, content.seasonState)
         assertFalse(content.offline)
+    }
+
+    @Test
+    fun anOpenWarmWinterAlertOfThePlotIsLinkedFromTheCard() = runTest {
+        repository.tracker.value = chillTracker()
+        incidents.incidents.value = listOf(
+            warmWinterIncident(id = "old", status = IncidentStatus.NORMALIZED),
+            warmWinterIncident(id = "heat", type = IncidentType.HEAT_WAVE),
+            warmWinterIncident(id = "other-plot", plotId = "plot-2"),
+            warmWinterIncident(id = "open"),
+        )
+
+        assertEquals("open", viewModel().content().warmWinterAlertId)
+    }
+
+    @Test
+    fun withoutAnOpenWarmWinterAlertTheCardHasNoLink() = runTest {
+        repository.tracker.value = chillTracker()
+        incidents.incidents.value = listOf(warmWinterIncident(status = IncidentStatus.NORMALIZED))
+
+        assertNull(viewModel().content().warmWinterAlertId)
     }
 
     @Test
