@@ -33,6 +33,17 @@
             </intent-filter>
         </activity>
 
+        <!-- Shares the sealed dossier PDFs (P77) with the viewer, WhatsApp or the file picker, read-only. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <!-- WorkManager is initialized by VioraApplication so workers can be built by Hilt. -->
         <provider
             android:name="androidx.startup.InitializationProvider"

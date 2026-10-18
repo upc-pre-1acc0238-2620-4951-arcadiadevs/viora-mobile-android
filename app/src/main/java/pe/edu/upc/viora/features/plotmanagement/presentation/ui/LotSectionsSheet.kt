@@ -46,7 +46,7 @@ enum class LotSection(
 
     companion object {
         /** The sections whose screens exist in the app; the others are listed as "coming soon". */
-        val BUILT: Set<LotSection> = setOf(HARVEST, WINTER_CHILL, THINNING, CLIMATE, SENSORS)
+        val BUILT: Set<LotSection> = entries.toSet()
     }
 }
 
