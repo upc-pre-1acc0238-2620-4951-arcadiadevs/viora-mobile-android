@@ -73,14 +73,14 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.Pri
  * guardada" while it waits on the phone (with its conflict and failed variants).
  *
  * @param onDone "Listo" and the close button: back to where the producer came from.
- * @param onOpenPlot "Ver expediente del lote".
+ * @param onOpenDossier "Ver expediente del lote" (P76 of this campaign).
  * @param onOpenAlternation the "año más estable" tile.
  * @param onCorrect "Corregir los kilos": opens the form prefilled from the pending settlement.
  */
 @Composable
 fun CampaignClosedScreen(
     onDone: () -> Unit,
-    onOpenPlot: (plotId: String) -> Unit,
+    onOpenDossier: (plotId: String, plotName: String, year: Int) -> Unit,
     onOpenAlternation: (plotId: String, plotName: String) -> Unit,
     onCorrect: (plotId: String, year: Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -90,7 +90,7 @@ fun CampaignClosedScreen(
     CampaignClosedContent(
         state = state,
         onDone = onDone,
-        onOpenPlot = onOpenPlot,
+        onOpenDossier = onOpenDossier,
         onOpenAlternation = onOpenAlternation,
         onCorrect = onCorrect,
         onConflictViewReceipt = viewModel::showExistingReceipt,
@@ -103,7 +103,7 @@ fun CampaignClosedScreen(
 internal fun CampaignClosedContent(
     state: CampaignClosedUiState,
     onDone: () -> Unit,
-    onOpenPlot: (plotId: String) -> Unit,
+    onOpenDossier: (plotId: String, plotName: String, year: Int) -> Unit,
     onOpenAlternation: (plotId: String, plotName: String) -> Unit,
     onCorrect: (plotId: String, year: Int) -> Unit,
     onConflictViewReceipt: () -> Unit,
@@ -121,7 +121,7 @@ internal fun CampaignClosedContent(
                 pending = false,
                 failed = false,
                 onDone = onDone,
-                onOpenPlot = onOpenPlot,
+                onOpenDossier = onOpenDossier,
                 onOpenAlternation = onOpenAlternation,
                 onCorrect = onCorrect,
             )
@@ -130,7 +130,7 @@ internal fun CampaignClosedContent(
                 pending = true,
                 failed = state.failed,
                 onDone = onDone,
-                onOpenPlot = onOpenPlot,
+                onOpenDossier = onOpenDossier,
                 onOpenAlternation = onOpenAlternation,
                 onCorrect = onCorrect,
             )
@@ -154,7 +154,7 @@ private fun ReceiptScreen(
     pending: Boolean,
     failed: Boolean,
     onDone: () -> Unit,
-    onOpenPlot: (String) -> Unit,
+    onOpenDossier: (String, String, Int) -> Unit,
     onOpenAlternation: (String, String) -> Unit,
     onCorrect: (String, Int) -> Unit,
 ) {
@@ -224,7 +224,7 @@ private fun ReceiptScreen(
                 .padding(top = 8.dp)
                 .clip(CircleShape)
                 .clickable(role = Role.Button) {
-                    if (pending) onCorrect(receipt.plotId, receipt.campaignYear) else onOpenPlot(receipt.plotId)
+                    if (pending) onCorrect(receipt.plotId, receipt.campaignYear) else onOpenDossier(receipt.plotId, receipt.plotName, receipt.campaignYear)
                 }
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         )

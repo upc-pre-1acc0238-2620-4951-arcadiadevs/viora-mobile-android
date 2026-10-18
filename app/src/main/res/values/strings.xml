@@ -1166,4 +1166,75 @@
     <string name="full_bloom_what_body">When most of the flowers of the plot are already open.</string>
     <string name="full_bloom_preview">This is how your thinning window would look, by the technical profile of %1$s.</string>
     <string name="full_bloom_save">Save bloom</string>
+
+    <!-- P76-P78 · Plot dossier (US30) -->
+    <string name="dossier_title">Plot dossier</string>
+    <string name="dossier_subtitle">%1$s · %2$d season</string>
+    <string name="dossier_eyebrow">AGRONOMIC DOSSIER · PDF</string>
+    <string name="dossier_row_campaign">Season</string>
+    <string name="dossier_campaign_closed">%1$d · closed</string>
+    <string name="dossier_row_variety">Variety and area</string>
+    <string name="dossier_row_load">Crop load</string>
+    <string name="dossier_load_value">%1$s fruits per shoot</string>
+    <string name="dossier_row_prescription">Prescription</string>
+    <string name="dossier_prescription_value">Thin %1$s</string>
+    <string name="dossier_row_thinning">Thinning recorded</string>
+    <string name="dossier_row_harvest">Settled harvest</string>
+    <string name="dossier_harvest_kg">%1$s kg</string>
+    <string name="dossier_harvest_receipt">No. %1$s</string>
+    <string name="dossier_row_climate">Climate and telemetry</string>
+    <plurals name="dossier_climate_nodes">
+        <item quantity="one">%d node</item>
+        <item quantity="other">%d nodes</item>
+    </plurals>
+    <plurals name="dossier_climate_days">
+        <item quantity="one">%d day of data</item>
+        <item quantity="other">%d days of data</item>
+    </plurals>
+    <string name="dossier_no_record">Not recorded</string>
+    <string name="dossier_code_eyebrow">VERIFICATION CODE · SHA-256</string>
+    <string name="dossier_code_intact">Intact</string>
+    <string name="dossier_code_body">Anyone can check this PDF with the code. If the file changes, the code no longer matches.</string>
+    <string name="dossier_download">Download PDF</string>
+    <string name="dossier_share">Share</string>
+    <string name="dossier_offline">Offline · the sealed PDF needs internet</string>
+    <string name="dossier_open_last">Open the last version · %1$s</string>
+    <string name="dossier_download_failed">The PDF could not be downloaded. Try again.</string>
+    <string name="dossier_retry">Retry</string>
+    <string name="dossier_empty_lead">No dossier</string>
+    <string name="dossier_empty_emphasis">yet.</string>
+    <string name="dossier_empty_body">The dossier of %1$s is sealed when you settle the harvest of a season. Settle it and come back here.</string>
+    <string name="dossier_pattern_sealed">MMM d, yyyy, h:mm a</string>
+    <string name="dossier_pdf_title_lead">Your PDF</string>
+    <string name="dossier_pdf_title_emphasis">is ready.</string>
+    <string name="dossier_pdf_sealed_on">Sealed on %1$s</string>
+    <plurals name="dossier_pages">
+        <item quantity="one">%d page</item>
+        <item quantity="other">%d pages</item>
+    </plurals>
+    <string name="dossier_pdf_seal">SHA-256 sealed</string>
+    <string name="dossier_pdf_open">Open PDF</string>
+    <string name="dossier_pdf_whatsapp">Share on WhatsApp</string>
+    <string name="dossier_pdf_save">Save to phone</string>
+    <string name="dossier_pdf_saved">PDF saved to your phone</string>
+    <string name="dossier_pdf_no_app">There is no app to open PDFs on this phone.</string>
+    <string name="dossier_share_text">Agronomic dossier of %1$s, %2$d season. SHA-256 verification code: %3$s</string>
+    <string name="dossier_verify_title_lead">This dossier</string>
+    <string name="dossier_verify_title_emphasis">is authentic.</string>
+    <string name="dossier_verify_pending_lead">Your verification</string>
+    <string name="dossier_verify_pending_emphasis">code.</string>
+    <string name="dossier_verify_unknown_lead">This code</string>
+    <string name="dossier_verify_unknown_emphasis">does not match.</string>
+    <string name="dossier_verify_body">The code is computed from the whole PDF. If anyone changes a value, the code no longer matches.</string>
+    <string name="dossier_verify_row_plot">Plot</string>
+    <string name="dossier_verify_row_holder">Holder</string>
+    <string name="dossier_verify_row_issued">Issued</string>
+    <string name="dossier_verify_row_content">Content</string>
+    <string name="dossier_verify_matches">Matches the Viora record</string>
+    <string name="dossier_verify_checking">Checking the Viora record…</string>
+    <string name="dossier_verify_offline">Offline: the Viora record could not be checked</string>
+    <string name="dossier_verify_no_match">Matches no Viora dossier</string>
+    <string name="dossier_verify_copy">Copy code</string>
+    <string name="dossier_verify_copied">Code copied</string>
+    <string name="dossier_verify_done">Got it</string>
 </resources>
