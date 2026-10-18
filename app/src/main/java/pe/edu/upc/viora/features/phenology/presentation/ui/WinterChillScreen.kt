@@ -89,6 +89,7 @@ fun WinterChillScreen(
     onHarvestHistory: () -> Unit = {},
     onSensors: () -> Unit = {},
     onClimate: () -> Unit = {},
+    onThinning: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: WinterChillViewModel = hiltViewModel(),
 ) {
@@ -174,6 +175,7 @@ fun WinterChillScreen(
                     LotSection.HARVEST -> onHarvestHistory()
                     LotSection.SENSORS -> onSensors()
                     LotSection.CLIMATE -> onClimate()
+                    LotSection.THINNING -> onThinning()
                     else -> Unit
                 }
             },

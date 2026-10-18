@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.plotmanagement.domain.entity
 
+import java.time.Instant
 import java.time.LocalDate
 import kotlin.math.roundToInt
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
@@ -12,6 +13,7 @@ import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
  *
  * [outline] is the polygon ring without the repeated closing vertex. [revision] is the
  * optimistic-locking version that must be echoed back (If-Match) when updating the plot.
+ * [registeredAt] is when the producer registered it (P60 "Registrado el …"); null while unknown.
  */
 data class Plot(
     val id: PlotId,
@@ -25,6 +27,7 @@ data class Plot(
     val lastPruningDate: LocalDate?,
     val isActive: Boolean,
     val revision: Long,
+    val registeredAt: Instant? = null,
 ) {
     /** Approximate tree count of the whole plot, as shown on the plot card. */
     val estimatedTrees: Int

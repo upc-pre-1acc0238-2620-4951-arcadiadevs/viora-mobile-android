@@ -417,7 +417,12 @@ private fun SamplingEventRow(entry: SettledHarvestEntry, modifier: Modifier = Mo
 private fun ThinningEventRow(entry: SettledHarvestEntry, modifier: Modifier = Modifier) {
     val plot = entry.plotName ?: stringResource(R.string.logbook_unknown_plot)
     val percent = formatWhole(entry.removalPercentage ?: 0.0)
-    val timeliness = entry.timeliness ?: ""
+    // The backend sends OPTIMAL or LATE; the producer reads words, never the code.
+    val timeliness = when (entry.timeliness) {
+        "OPTIMAL" -> stringResource(R.string.logbook_thinning_on_time)
+        "LATE" -> stringResource(R.string.logbook_thinning_late)
+        else -> entry.timeliness.orEmpty()
+    }
     val details = stringResource(R.string.logbook_thinning_executed_desc, plot, percent, timeliness)
 
     Row(

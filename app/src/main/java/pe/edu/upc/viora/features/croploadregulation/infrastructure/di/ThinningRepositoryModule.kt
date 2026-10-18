@@ -4,7 +4,9 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import pe.edu.upc.viora.features.croploadregulation.domain.repository.ThinningPrescriptionRepository
 import pe.edu.upc.viora.features.croploadregulation.domain.repository.ThinningRepository
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.repository.ThinningPrescriptionRepositoryImpl
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.repository.ThinningRepositoryImpl
 
 @Module
@@ -13,4 +15,7 @@ interface ThinningRepositoryModule {
 
     @Binds
     fun bindThinningRepository(impl: ThinningRepositoryImpl): ThinningRepository
+
+    @Binds
+    fun bindThinningPrescriptionRepository(impl: ThinningPrescriptionRepositoryImpl): ThinningPrescriptionRepository
 }

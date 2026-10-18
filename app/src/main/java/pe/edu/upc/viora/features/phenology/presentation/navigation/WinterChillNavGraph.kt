@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.features.phenology.presentation.ui.WinterChillScreen
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 
 @Serializable
 data class WinterChillRoute(val plotId: String, val plotName: String = "")
@@ -25,6 +26,9 @@ fun NavGraphBuilder.winterChillComposable(navController: NavController) {
             },
             onClimate = {
                 navController.navigate(PlotClimateRoute(plotId = route.plotId, plotName = route.plotName))
+            },
+            onThinning = {
+                navController.navigate(ThinningPlanRoute(plotId = route.plotId, plotName = route.plotName))
             },
         )
     }
