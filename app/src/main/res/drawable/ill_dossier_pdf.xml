@@ -1,0 +1,21 @@
+<!-- Figma P77 "Miniatura PDF": the first page of the sealed dossier with its green cover band. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="58dp"
+    android:height="76dp"
+    android:viewportWidth="58"
+    android:viewportHeight="76">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:strokeColor="#FFD7D4CE"
+        android:strokeWidth="1"
+        android:pathData="M6,0.5H52A5.5,5.5 0,0 1,57.5 6V70A5.5,5.5 0,0 1,52 75.5H6A5.5,5.5 0,0 1,0.5 70V6A5.5,5.5 0,0 1,6 0.5Z" />
+    <path
+        android:fillColor="#FF1F2C26"
+        android:pathData="M6,0H52A6,6 0,0 1,58 6V18H0V6A6,6 0,0 1,6 0Z" />
+    <path android:fillColor="#FFF3F0EA" android:pathData="M10,26H48A2,2 0,0 1,48 30H10A2,2 0,0 1,10 26Z" />
+    <path android:fillColor="#FFF3F0EA" android:pathData="M10,35H36A2,2 0,0 1,36 39H10A2,2 0,0 1,10 35Z" />
+    <path android:fillColor="#FFF3F0EA" android:pathData="M10,44H48A2,2 0,0 1,48 48H10A2,2 0,0 1,10 44Z" />
+    <path android:fillColor="#FFF3F0EA" android:pathData="M10,53H36A2,2 0,0 1,36 57H10A2,2 0,0 1,10 53Z" />
+    <path android:fillColor="#FFF3F0EA" android:pathData="M10,62H48A2,2 0,0 1,48 66H10A2,2 0,0 1,10 62Z" />
+    <path android:fillColor="#FFE8B923" android:pathData="M45,60A5,5 0,1 1,45 70A5,5 0,1 1,45 60Z" />
+</vector>

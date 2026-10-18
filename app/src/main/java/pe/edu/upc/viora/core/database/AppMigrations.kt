@@ -150,5 +150,17 @@ object AppMigrations {
         connection.execSQL(MIGRATION_8_9_PLOTS_SQL)
     }
 
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
+    internal const val MIGRATION_9_10_SQL =
+        "CREATE TABLE IF NOT EXISTS `agronomic_dossiers` (`plot_id` TEXT NOT NULL, `campaign_year` INTEGER NOT NULL, " +
+            "`payload_json` TEXT NOT NULL, `pdf_path` TEXT, `pdf_saved_at_epoch_ms` INTEGER, PRIMARY KEY(`plot_id`, `campaign_year`))"
+
+    /** Adds the cache of the sealed agronomic dossiers and of their downloaded PDF (P76-P78). */
+    val MIGRATION_9_10 = Migration(9, 10) { connection ->
+        connection.execSQL(MIGRATION_9_10_SQL)
+    }
+
+    val ALL = arrayOf(
+        MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
+        MIGRATION_9_10,
+    )
 }

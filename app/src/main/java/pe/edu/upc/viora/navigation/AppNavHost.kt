@@ -21,7 +21,9 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.ui.CampaignPlan
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.thinningPlanComposable
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
+import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.AgronomicDossierRoute
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.CampaignClosedRoute
+import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.agronomicDossierComposable
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.SettleHarvestRoute
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.campaignClosedComposable
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.settleHarvestComposable
@@ -98,8 +100,11 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         )
         campaignClosedComposable(
             navController = navController,
-            onOpenPlot = { plotId ->
-                navController.navigate(PlotDetailRoute(plotId = plotId)) { popUpTo<CampaignClosedRoute> { inclusive = true } }
+            // Back from P76 returns where "Listo" of P73 would (Figma prototype: P76 Atrás -> P50 Bitácora).
+            onOpenDossier = { plotId, plotName, year ->
+                navController.navigate(AgronomicDossierRoute(plotId = plotId, plotName = plotName, campaignYear = year)) {
+                    popUpTo<CampaignClosedRoute> { inclusive = true }
+                }
             },
             onOpenAlternation = { plotId, plotName ->
                 navController.navigate(HarvestHistoryRoute(plotId = plotId, plotName = plotName))
@@ -108,6 +113,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 navController.navigate(SettleHarvestRoute(plotId = plotId, campaignYear = year)) { popUpTo<CampaignClosedRoute> { inclusive = true } }
             },
         )
+        agronomicDossierComposable(navController)
         plotsNavGraph(navController)
         plotScreens(navController)
         climateNavGraph(navController)
@@ -171,7 +177,7 @@ private fun NavHostController.openLotSection(section: LotSection, plotId: String
         LotSection.THINNING -> navigate(ThinningPlanRoute(plotId = plotId, plotName = plotName))
         LotSection.CLIMATE -> navigate(PlotClimateRoute(plotId = plotId, plotName = plotName))
         LotSection.SENSORS -> navigate(SensorsRoute(plotId = plotId, plotName = plotName))
-        LotSection.DOSSIER -> Unit
+        LotSection.DOSSIER -> navigate(AgronomicDossierRoute(plotId = plotId, plotName = plotName))
     }
 }
 

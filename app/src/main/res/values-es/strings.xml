@@ -1171,4 +1171,75 @@
     <string name="full_bloom_what_body">Cuando la mayoría de las flores del lote ya están abiertas.</string>
     <string name="full_bloom_preview">Así quedaría tu ventana de aclareo, según el perfil técnico de %1$s.</string>
     <string name="full_bloom_save">Guardar floración</string>
+
+    <!-- P76-P78 · Expediente del lote (US30) -->
+    <string name="dossier_title">Expediente del lote</string>
+    <string name="dossier_subtitle">%1$s · Campaña %2$d</string>
+    <string name="dossier_eyebrow">EXPEDIENTE AGRONÓMICO · PDF</string>
+    <string name="dossier_row_campaign">Campaña</string>
+    <string name="dossier_campaign_closed">%1$d · cerrada</string>
+    <string name="dossier_row_variety">Variedad y superficie</string>
+    <string name="dossier_row_load">Carga frutal</string>
+    <string name="dossier_load_value">%1$s frutos por brote</string>
+    <string name="dossier_row_prescription">Prescripción</string>
+    <string name="dossier_prescription_value">Aclareo %1$s</string>
+    <string name="dossier_row_thinning">Aclareo registrado</string>
+    <string name="dossier_row_harvest">Cosecha asentada</string>
+    <string name="dossier_harvest_kg">%1$s kg</string>
+    <string name="dossier_harvest_receipt">N.º %1$s</string>
+    <string name="dossier_row_climate">Clima y telemetría</string>
+    <plurals name="dossier_climate_nodes">
+        <item quantity="one">%d nodo</item>
+        <item quantity="other">%d nodos</item>
+    </plurals>
+    <plurals name="dossier_climate_days">
+        <item quantity="one">%d día de datos</item>
+        <item quantity="other">%d días de datos</item>
+    </plurals>
+    <string name="dossier_no_record">Sin registro</string>
+    <string name="dossier_code_eyebrow">CÓDIGO DE VERIFICACIÓN · SHA-256</string>
+    <string name="dossier_code_intact">Íntegro</string>
+    <string name="dossier_code_body">Cualquiera puede comprobar este PDF con el código. Si el archivo cambia, el código deja de coincidir.</string>
+    <string name="dossier_download">Descargar PDF</string>
+    <string name="dossier_share">Compartir</string>
+    <string name="dossier_offline">Sin conexión · el PDF sellado necesita internet</string>
+    <string name="dossier_open_last">Abrir la última versión · %1$s</string>
+    <string name="dossier_download_failed">No se pudo descargar el PDF. Inténtalo de nuevo.</string>
+    <string name="dossier_retry">Reintentar</string>
+    <string name="dossier_empty_lead">Aún no hay</string>
+    <string name="dossier_empty_emphasis">expediente.</string>
+    <string name="dossier_empty_body">El expediente de %1$s se sella cuando asientas la cosecha de una campaña. Asiéntala y vuelve aquí.</string>
+    <string name="dossier_pattern_sealed">d MMM yyyy, HH:mm</string>
+    <string name="dossier_pdf_title_lead">Tu PDF</string>
+    <string name="dossier_pdf_title_emphasis">está listo.</string>
+    <string name="dossier_pdf_sealed_on">Sellado el %1$s</string>
+    <plurals name="dossier_pages">
+        <item quantity="one">%d página</item>
+        <item quantity="other">%d páginas</item>
+    </plurals>
+    <string name="dossier_pdf_seal">con sello SHA-256</string>
+    <string name="dossier_pdf_open">Abrir PDF</string>
+    <string name="dossier_pdf_whatsapp">Compartir por WhatsApp</string>
+    <string name="dossier_pdf_save">Guardar en el teléfono</string>
+    <string name="dossier_pdf_saved">PDF guardado en tu teléfono</string>
+    <string name="dossier_pdf_no_app">No hay una app para abrir PDF en este teléfono.</string>
+    <string name="dossier_share_text">Expediente agronómico de %1$s, campaña %2$d. Código de verificación SHA-256: %3$s</string>
+    <string name="dossier_verify_title_lead">Este expediente</string>
+    <string name="dossier_verify_title_emphasis">es auténtico.</string>
+    <string name="dossier_verify_pending_lead">Tu código</string>
+    <string name="dossier_verify_pending_emphasis">de verificación.</string>
+    <string name="dossier_verify_unknown_lead">Este código</string>
+    <string name="dossier_verify_unknown_emphasis">no coincide.</string>
+    <string name="dossier_verify_body">El código se calcula con todo el contenido del PDF. Si alguien cambia un dato, el código deja de coincidir.</string>
+    <string name="dossier_verify_row_plot">Predio</string>
+    <string name="dossier_verify_row_holder">Titular</string>
+    <string name="dossier_verify_row_issued">Emitido</string>
+    <string name="dossier_verify_row_content">Contenido</string>
+    <string name="dossier_verify_matches">Coincide con el registro de Viora</string>
+    <string name="dossier_verify_checking">Consultando el registro de Viora…</string>
+    <string name="dossier_verify_offline">Sin conexión: no se pudo consultar el registro de Viora</string>
+    <string name="dossier_verify_no_match">No coincide con ningún expediente de Viora</string>
+    <string name="dossier_verify_copy">Copiar código</string>
+    <string name="dossier_verify_copied">Código copiado</string>
+    <string name="dossier_verify_done">Entendido</string>
 </resources>

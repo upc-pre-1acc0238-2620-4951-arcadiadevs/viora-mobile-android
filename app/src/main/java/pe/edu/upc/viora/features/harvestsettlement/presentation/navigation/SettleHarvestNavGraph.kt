@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.AgronomicDossierScreen
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.CampaignClosedScreen
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.SettleHarvestScreen
 
@@ -37,21 +38,32 @@ fun NavGraphBuilder.settleHarvestComposable(
 
 /**
  * Registers the P73 receipt. The host decides where its actions lead: [onDone] closes it,
- * [onOpenPlot] is "Ver expediente del lote", [onOpenAlternation] the "año más estable" tile and
+ * [onOpenDossier] is "Ver expediente del lote", [onOpenAlternation] the "año más estable" tile and
  * [onCorrect] "Corregir los kilos" (back to the form, prefilled from the pending settlement).
  */
 fun NavGraphBuilder.campaignClosedComposable(
     navController: NavController,
-    onOpenPlot: (plotId: String) -> Unit,
+    onOpenDossier: (plotId: String, plotName: String, year: Int) -> Unit,
     onOpenAlternation: (plotId: String, plotName: String) -> Unit,
     onCorrect: (plotId: String, year: Int) -> Unit,
 ) {
     composable<CampaignClosedRoute> {
         CampaignClosedScreen(
             onDone = { navController.popBackStack() },
-            onOpenPlot = onOpenPlot,
+            onOpenDossier = onOpenDossier,
             onOpenAlternation = onOpenAlternation,
             onCorrect = onCorrect,
         )
+    }
+}
+
+/** P76 · Expediente del lote. [campaignYear] 0 means the newest settled campaign of the plot ("Más opciones"). */
+@Serializable
+data class AgronomicDossierRoute(val plotId: String, val plotName: String = "", val campaignYear: Int = 0)
+
+/** Registers P76 with its P77 and P78 sheets. */
+fun NavGraphBuilder.agronomicDossierComposable(navController: NavController) {
+    composable<AgronomicDossierRoute> {
+        AgronomicDossierScreen(onBack = { navController.popBackStack() })
     }
 }

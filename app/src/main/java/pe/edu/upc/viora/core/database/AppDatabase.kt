@@ -2,6 +2,8 @@ package pe.edu.upc.viora.core.database
 
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
+import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.AgronomicDossierDao
+import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.AgronomicDossierEntity
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementDao
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementEntity
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.PendingSettlementDao
@@ -57,8 +59,9 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
         ThinningEventEntity::class,
         ChillTrackerEntity::class,
         ThinningPrescriptionEntity::class,
+        AgronomicDossierEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -76,4 +79,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun thinningEventDao(): ThinningEventDao
     abstract fun chillTrackerDao(): ChillTrackerDao
     abstract fun thinningPrescriptionDao(): ThinningPrescriptionDao
+    abstract fun agronomicDossierDao(): AgronomicDossierDao
 }
