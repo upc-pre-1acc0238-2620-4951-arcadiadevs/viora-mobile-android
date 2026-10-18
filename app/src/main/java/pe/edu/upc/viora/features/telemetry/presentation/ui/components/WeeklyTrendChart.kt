@@ -170,11 +170,8 @@ fun WeeklyTrendChart(
                                     .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
                             }.getOrDefault("")
 
-                            val valueFormatted = if (point.value % 1.0 == 0.0) {
-                                "${point.value.toInt()}°"
-                            } else {
-                                "${point.value}°"
-                            }
+                            // "17,4°" in Spanish: the app's decimal comma, whole values without decimals.
+                            val valueFormatted = formatDegrees(locale, point.value, if (point.value % 1.0 == 0.0) 0 else 1)
 
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
