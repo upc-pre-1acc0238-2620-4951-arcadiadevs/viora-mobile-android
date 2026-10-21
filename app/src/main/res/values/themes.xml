@@ -5,4 +5,10 @@
     <style name="Theme.Viora" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/viora_background</item>
     </style>
+
+    <!-- Launch window: the brand green of the splash (T01), so opening the app goes straight
+         into the Compose splash. MainActivity switches to Theme.Viora before drawing. -->
+    <style name="Theme.Viora.Launch">
+        <item name="android:windowBackground">@color/viora_forest</item>
+    </style>
 </resources>

@@ -4,12 +4,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import pe.edu.upc.viora.BuildConfig
+import androidx.navigation.navDeepLink
+import pe.edu.upc.viora.core.navigation.AuthRoute
+import pe.edu.upc.viora.core.navigation.OnboardingRoute
+import pe.edu.upc.viora.core.navigation.SplashRoute
+import pe.edu.upc.viora.core.navigation.WelcomeRoute
+import pe.edu.upc.viora.core.navigation.PASSWORD_RESET_LINK_BASE
+import pe.edu.upc.viora.core.navigation.ResetPasswordRoute
 import pe.edu.upc.viora.core.navigation.HomeGraph
 import pe.edu.upc.viora.core.navigation.HomeRoute
 import pe.edu.upc.viora.core.navigation.LogbookGraph
@@ -31,6 +37,11 @@ import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.settl
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestEntrySection
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
+import pe.edu.upc.viora.features.iam.presentation.ui.IamScreen
+import pe.edu.upc.viora.features.iam.presentation.ui.OnboardingScreen
+import pe.edu.upc.viora.features.iam.presentation.ui.SplashScreen
+import pe.edu.upc.viora.features.iam.presentation.ui.WelcomeScreen
+import pe.edu.upc.viora.features.iam.presentation.viewmodel.SplashDestination
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
@@ -61,9 +72,47 @@ import pe.edu.upc.viora.features.telemetry.presentation.navigation.climateNavGra
 fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = debugStartDestination() ?: HomeGraph,
+        startDestination = debugStartDestination() ?: SplashRoute,
         modifier = modifier,
     ) {
+        composable<SplashRoute> {
+            SplashScreen(
+                onFinished = { destination ->
+                    val next: Any = if (destination == SplashDestination.HOME) HomeGraph else WelcomeRoute
+                    navController.navigate(next) { popUpTo<SplashRoute> { inclusive = true } }
+                },
+            )
+        }
+        composable<WelcomeRoute> {
+            WelcomeScreen(
+                onStartOnboarding = { navController.navigate(OnboardingRoute) },
+                onSignIn = { navController.navigate(AuthRoute()) },
+            )
+        }
+        composable<OnboardingRoute> {
+            OnboardingScreen(
+                onCreateAccount = { navController.navigate(AuthRoute(createAccount = true)) },
+                onExit = { navController.popBackStack() },
+            )
+        }
+        composable<AuthRoute> {
+            IamScreen(
+                onAuthenticated = navController::openHome,
+                onExit = { navController.popBackStack() },
+                onStartOnboarding = { navController.navigate(OnboardingRoute) { launchSingleTop = true } },
+            )
+        }
+        // The recovery link opens the app here. After saving the new password the producer signs in
+        // again; leaving the flow goes to the welcome, since nothing is below it.
+        composable<ResetPasswordRoute>(
+            deepLinks = listOf(navDeepLink<ResetPasswordRoute>(basePath = PASSWORD_RESET_LINK_BASE)),
+        ) {
+            IamScreen(
+                onAuthenticated = navController::openHome,
+                onExit = { navController.navigate(WelcomeRoute) { popUpTo(navController.graph.id) { inclusive = true } } },
+                onStartOnboarding = { navController.navigate(OnboardingRoute) { launchSingleTop = true } },
+            )
+        }
         navigation<HomeGraph>(startDestination = HomeRoute) {
             composable<HomeRoute> {
                 HomeScreen(
@@ -72,7 +121,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id.value, plotName = name)) },
                     onOpenPlots = {
                         navController.navigate(PlotsGraph) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            popUpTo<HomeGraph> { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -120,9 +169,9 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         plotsNavGraph(navController)
         cooperativeCodeNavGraph(
             navController = navController,
-            onLeave = { navController.leaveForHome() },
+            onLeave = { navController.openHome() },
             onRegisterPlot = {
-                navController.leaveForHome()
+                navController.openHome()
                 navController.navigate(RegisterPlotRoute)
             },
         )
@@ -144,7 +193,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
             onOpenLogbook = {
                 navController.navigate(LogbookGraph) {
-                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    popUpTo<HomeGraph> { saveState = true }
                     launchSingleTop = true
                     restoreState = true
                 }
@@ -200,18 +249,16 @@ private fun NavHostController.openCampaignReceipt(plotId: String, year: Int, pop
     }
 }
 
-/** Clears the back stack and opens the Home, as a flow that stands outside the tabs ends. */
-private fun NavHostController.leaveForHome() {
-    navigate(HomeGraph) {
-        popUpTo(graph.findStartDestination().id) { inclusive = true }
-    }
-}
-
 /**
  * Debug builds may start on a screen no other screen opens yet, to try it on a phone:
- * `viora.debugStartScreen=cooperative-code` in `local.properties`. Release builds always start on the Home.
+ * `viora.debugStartScreen=cooperative-code` in `local.properties`. Release builds always start on the splash.
  */
 private fun debugStartDestination(): Any? = when (BuildConfig.DEBUG_START_SCREEN) {
     "cooperative-code" -> CooperativeCodeGraph
     else -> null
+}
+
+/** Opens the Home as the only screen: nothing of the splash or the IAM flow stays below it. */
+private fun NavHostController.openHome() {
+    navigate(HomeGraph) { popUpTo(graph.id) { inclusive = true } }
 }

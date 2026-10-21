@@ -53,8 +53,8 @@ android {
         applicationId = "pe.edu.upc.viora"
         minSdk = 26
         targetSdk = 37
-        versionCode = 16
-        versionName = "1.4.0"
+        versionCode = 17
+        versionName = "1.5.0"
 
         // The Maps SDK reads this string resource at startup.
         resValue("string", "mapbox_access_token", mapboxPublicToken)
@@ -112,6 +112,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.graphics.shapes)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
@@ -158,6 +159,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.libphonenumber)
 
     // Unit tests
     testImplementation(libs.junit)
