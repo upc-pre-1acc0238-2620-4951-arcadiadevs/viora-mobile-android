@@ -9,6 +9,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
+import pe.edu.upc.viora.core.navigation.AuthRoute
+import pe.edu.upc.viora.core.navigation.PASSWORD_RESET_LINK_BASE
+import pe.edu.upc.viora.core.navigation.ResetPasswordRoute
 import pe.edu.upc.viora.core.navigation.HomeGraph
 import pe.edu.upc.viora.core.navigation.HomeRoute
 import pe.edu.upc.viora.core.navigation.LogbookGraph
@@ -30,6 +35,7 @@ import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.settl
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestEntrySection
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
+import pe.edu.upc.viora.features.iam.presentation.ui.IamScreen
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
@@ -58,9 +64,34 @@ import pe.edu.upc.viora.features.telemetry.presentation.navigation.climateNavGra
 fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = HomeGraph,
+        startDestination = AuthRoute,
         modifier = modifier,
     ) {
+        composable<AuthRoute> {
+            IamScreen(
+                onAuthenticated = {
+                    navController.navigate(HomeGraph) {
+                        popUpTo<AuthRoute> { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+        // The recovery link opens the app here. After saving the new password the producer signs in
+        // again, so the stack never keeps the flow once authenticated.
+        composable<ResetPasswordRoute>(
+            deepLinks = listOf(navDeepLink<ResetPasswordRoute>(basePath = PASSWORD_RESET_LINK_BASE)),
+        ) { entry ->
+            IamScreen(
+                resetToken = entry.toRoute<ResetPasswordRoute>().token,
+                onAuthenticated = {
+                    navController.navigate(HomeGraph) {
+                        popUpTo<AuthRoute> { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
         navigation<HomeGraph>(startDestination = HomeRoute) {
             composable<HomeRoute> {
                 HomeScreen(
