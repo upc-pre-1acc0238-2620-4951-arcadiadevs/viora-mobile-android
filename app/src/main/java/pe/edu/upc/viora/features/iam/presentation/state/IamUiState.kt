@@ -5,7 +5,6 @@ import pe.edu.upc.viora.R
 
 /** The screens of the IAM flow, in Figma order (frames 03 and 05). */
 enum class IamStep {
-    ONBOARDING,
     SIGN_IN,
     CREATE_ACCOUNT,
     VERIFY,
@@ -49,7 +48,7 @@ sealed interface CodeError {
 }
 
 data class IamUiState(
-    val step: IamStep = IamStep.ONBOARDING,
+    val step: IamStep = IamStep.SIGN_IN,
     val loading: Boolean = false,
     val authenticated: Boolean = false,
 

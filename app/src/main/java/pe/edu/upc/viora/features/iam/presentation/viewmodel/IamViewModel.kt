@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.iam.presentation.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -68,14 +69,26 @@ private class Failure(val status: Int?, val problem: IamProblem?, val retryAfter
 class IamViewModel @Inject constructor(
     private val service: IamService,
     private val sessionStore: SessionStore,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(IamUiState())
+    // The route arguments: `AuthRoute.createAccount` picks the first screen and
+    // `ResetPasswordRoute.token` comes from the recovery link of the email.
+    private val startsAtCreateAccount: Boolean = savedStateHandle["createAccount"] ?: false
+    private val linkToken: String? = savedStateHandle["token"]
+
+    private val _uiState = MutableStateFlow(
+        IamUiState(step = if (startsAtCreateAccount) IamStep.CREATE_ACCOUNT else IamStep.SIGN_IN),
+    )
     val uiState: StateFlow<IamUiState> = _uiState.asStateFlow()
 
     private val lenientJson = Json { ignoreUnknownKeys = true }
     private var countdownJob: Job? = null
     private var resetToken: String? = null
+
+    init {
+        linkToken?.let(::openResetLink)
+    }
 
     // ---- Navigation between steps ---------------------------------------------------------
 
@@ -83,16 +96,14 @@ class IamViewModel @Inject constructor(
         it.copy(step = step, error = null, notice = null, credentialsError = false, codeError = null)
     }
 
-    /** Back arrow and system back. Returns false at the first screen so the app can close. */
+    /** Back arrow and system back. Returns false at the first screen so the screen can be left. */
     fun back(): Boolean {
         val target = when (_uiState.value.step) {
-            IamStep.SIGN_IN -> IamStep.ONBOARDING
-            IamStep.CREATE_ACCOUNT -> IamStep.ONBOARDING
+            IamStep.SIGN_IN, IamStep.CREATE_ACCOUNT -> return false
             IamStep.VERIFY -> IamStep.CREATE_ACCOUNT
             IamStep.FORGOT -> IamStep.SIGN_IN
             IamStep.LINK_SENT -> IamStep.FORGOT
             IamStep.NEW_PASSWORD, IamStep.CHECKING_LINK, IamStep.LINK_EXPIRED, IamStep.RESET_DONE -> IamStep.SIGN_IN
-            IamStep.ONBOARDING -> return false
         }
         goTo(target)
         return true
@@ -198,7 +209,7 @@ class IamViewModel @Inject constructor(
                 when {
                     failure.status == 409 -> _uiState.update { it.copy(emailTaken = true) }
                     failure.status == 400 && failure.mentions("profile.") ->
-                        _uiState.update { it.copy(step = IamStep.ONBOARDING, phoneRejectedByServer = true) }
+                        _uiState.update { it.copy(phoneRejectedByServer = true, error = IamError.GENERIC) }
                     failure.status == 400 -> _uiState.update { it.copy(passwordWeak = true) }
                     failure.status == 429 -> {
                         // The pending account already got a code less than 45 s ago: wait for it.
@@ -280,7 +291,7 @@ class IamViewModel @Inject constructor(
     }
 
     /** Opens the app from `https://<domain>/password-resets/<token>`: checks the link before showing T08. */
-    fun openResetLink(token: String) {
+    private fun openResetLink(token: String) {
         resetToken = token
         _uiState.update {
             it.copy(step = IamStep.CHECKING_LINK, password = "", confirmPassword = "", error = null, passwordReused = false, passwordWeak = false)

@@ -73,7 +73,6 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
-import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
 
 /**
  * Frame shared by every IAM step (Figma frames 03 and 05): back arrow on top, scrollable content
@@ -388,29 +387,3 @@ internal fun IsotypeBadge(modifier: Modifier = Modifier) {
         }
     }
 }
-
-/** Pill chips to choose the country of the operation. */
-@Composable
-internal fun CountryChips(selected: IamCountry, onSelect: (IamCountry) -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        IamCountry.entries.forEach { country ->
-            val isSelected = country == selected
-            Box(
-                Modifier
-                    .height(40.dp)
-                    .clip(CircleShape)
-                    .background(if (isSelected) Green900 else Neutral50)
-                    .clickable(role = Role.RadioButton) { onSelect(country) }
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(country.nameRes),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (isSelected) Neutral50 else Neutral900,
-                )
-            }
-        }
-    }
-}
-

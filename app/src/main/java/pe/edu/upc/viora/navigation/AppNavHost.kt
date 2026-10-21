@@ -4,14 +4,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navDeepLink
-import androidx.navigation.toRoute
 import pe.edu.upc.viora.core.navigation.AuthRoute
+import pe.edu.upc.viora.core.navigation.SplashRoute
+import pe.edu.upc.viora.core.navigation.WelcomeRoute
 import pe.edu.upc.viora.core.navigation.PASSWORD_RESET_LINK_BASE
 import pe.edu.upc.viora.core.navigation.ResetPasswordRoute
 import pe.edu.upc.viora.core.navigation.HomeGraph
@@ -36,6 +36,9 @@ import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestEntryS
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
 import pe.edu.upc.viora.features.iam.presentation.ui.IamScreen
+import pe.edu.upc.viora.features.iam.presentation.ui.SplashScreen
+import pe.edu.upc.viora.features.iam.presentation.ui.WelcomeScreen
+import pe.edu.upc.viora.features.iam.presentation.viewmodel.SplashDestination
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
@@ -64,32 +67,41 @@ import pe.edu.upc.viora.features.telemetry.presentation.navigation.climateNavGra
 fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = AuthRoute,
+        startDestination = SplashRoute,
         modifier = modifier,
     ) {
-        composable<AuthRoute> {
-            IamScreen(
-                onAuthenticated = {
-                    navController.navigate(HomeGraph) {
-                        popUpTo<AuthRoute> { inclusive = true }
-                        launchSingleTop = true
-                    }
+        composable<SplashRoute> {
+            SplashScreen(
+                onFinished = { destination ->
+                    val next: Any = if (destination == SplashDestination.HOME) HomeGraph else WelcomeRoute
+                    navController.navigate(next) { popUpTo<SplashRoute> { inclusive = true } }
                 },
             )
         }
+        // The onboarding questions (T02b-T02f) come before "Crea tu cuenta"; until they exist,
+        // starting the onboarding opens "Crea tu cuenta" directly.
+        composable<WelcomeRoute> {
+            WelcomeScreen(
+                onStartOnboarding = { navController.navigate(AuthRoute(createAccount = true)) },
+                onSignIn = { navController.navigate(AuthRoute()) },
+            )
+        }
+        composable<AuthRoute> {
+            IamScreen(
+                onAuthenticated = navController::openHome,
+                onExit = { navController.popBackStack() },
+                onStartOnboarding = { navController.navigate(AuthRoute(createAccount = true)) },
+            )
+        }
         // The recovery link opens the app here. After saving the new password the producer signs in
-        // again, so the stack never keeps the flow once authenticated.
+        // again; leaving the flow goes to the welcome, since nothing is below it.
         composable<ResetPasswordRoute>(
             deepLinks = listOf(navDeepLink<ResetPasswordRoute>(basePath = PASSWORD_RESET_LINK_BASE)),
-        ) { entry ->
+        ) {
             IamScreen(
-                resetToken = entry.toRoute<ResetPasswordRoute>().token,
-                onAuthenticated = {
-                    navController.navigate(HomeGraph) {
-                        popUpTo<AuthRoute> { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
+                onAuthenticated = navController::openHome,
+                onExit = { navController.navigate(WelcomeRoute) { popUpTo(navController.graph.id) { inclusive = true } } },
+                onStartOnboarding = { navController.navigate(AuthRoute(createAccount = true)) },
             )
         }
         navigation<HomeGraph>(startDestination = HomeRoute) {
@@ -100,7 +112,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id.value, plotName = name)) },
                     onOpenPlots = {
                         navController.navigate(PlotsGraph) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            popUpTo<HomeGraph> { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -164,7 +176,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
             onOpenLogbook = {
                 navController.navigate(LogbookGraph) {
-                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    popUpTo<HomeGraph> { saveState = true }
                     launchSingleTop = true
                     restoreState = true
                 }
@@ -218,4 +230,9 @@ private fun NavHostController.openCampaignReceipt(plotId: String, year: Int, pop
     navigate(CampaignClosedRoute(plotId = plotId, campaignYear = year)) {
         if (popForm) popUpTo<SettleHarvestRoute> { inclusive = true }
     }
+}
+
+/** Opens the Home as the only screen: nothing of the splash or the IAM flow stays below it. */
+private fun NavHostController.openHome() {
+    navigate(HomeGraph) { popUpTo(graph.id) { inclusive = true } }
 }

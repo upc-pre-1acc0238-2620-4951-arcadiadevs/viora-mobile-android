@@ -1289,20 +1289,10 @@
     <string name="welcome_producer_description">Registra floración, cuaje y cosecha. Viora te avisa antes de que llegue un año bajo.</string>
     <string name="welcome_skip">Omitir</string>
 
-    <!-- IAM (onboarding, sign-in, verification, password recovery) -->
-    <string name="iam_onb_lead">Empecemos</string>
-    <string name="iam_onb_emphasis">por conocerte.</string>
-    <string name="iam_onb_voice">Cuéntame de ti para personalizar Viora a tu campo.</string>
-    <string name="iam_field_name">Nombre completo</string>
-    <string name="iam_field_name_hint">Escribe tu nombre</string>
-    <string name="iam_field_country">País</string>
+    <!-- IAM (sign-in, verification, password recovery) -->
     <string name="iam_country_pe">Perú</string>
     <string name="iam_country_es">España</string>
     <string name="iam_country_cl">Chile</string>
-    <string name="iam_field_phone">Celular · %1$s %2$s</string>
-    <string name="iam_phone_hint">Formato internacional %1$s</string>
-    <string name="iam_phone_invalid">Debe tener %1$d dígitos y empezar con %2$s.</string>
-    <string name="iam_phone_invalid_server">Ese celular no es válido para el país elegido.</string>
     <string name="iam_continue">Continuar</string>
     <string name="iam_have_account">Ya tengo una cuenta</string>
     <string name="iam_sign_in_lead">Hola de</string>
