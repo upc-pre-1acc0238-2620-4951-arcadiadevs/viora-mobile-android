@@ -182,21 +182,6 @@ private fun Eyebrow(text: String) {
     }
 }
 
-/** Figma "Editorial/Botón" (Texto): a 56 dp tall text-only pill for skip and secondary links. */
-@Composable
-private fun TextPillButton(text: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .clip(CircleShape)
-            .clickable(role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text, style = MaterialTheme.typography.titleMedium, color = Neutral900)
-    }
-}
-
 private const val INTRO_PLATE = 0
 private const val PRODUCER_PLATE = 1
 private const val PAGE_MILLIS = 420

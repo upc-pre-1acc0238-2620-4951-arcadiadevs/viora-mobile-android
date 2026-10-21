@@ -18,6 +18,10 @@ data object SplashRoute
 @Serializable
 data object WelcomeRoute
 
+/** T02b-T02f · the onboarding questions and their summary, before "Crea tu cuenta". */
+@Serializable
+data object OnboardingRoute
+
 /** The IAM screens; [createAccount] opens them at "Crea tu cuenta" instead of "Hola de nuevo". */
 @Serializable
 data class AuthRoute(val createAccount: Boolean = false)

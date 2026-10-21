@@ -1,0 +1,65 @@
+package pe.edu.upc.viora.features.iam.infrastructure.local
+
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.flow.first
+import pe.edu.upc.viora.features.iam.domain.valueobject.OnboardingAnswers
+
+/**
+ * Keeps the onboarding answers on the phone, so closing the app in the middle does not lose them
+ * (guide 02, section 3.1). Cleared once the email is verified.
+ */
+@Singleton
+class OnboardingStore @Inject constructor(private val dataStore: DataStore<Preferences>) {
+
+    suspend fun answers(): OnboardingAnswers {
+        val prefs = dataStore.data.first()
+        return OnboardingAnswers(
+            fullName = prefs[FULL_NAME].orEmpty(),
+            countryIso = prefs[COUNTRY] ?: OnboardingAnswers.DEFAULT_COUNTRY,
+            nationalPhone = prefs[PHONE].orEmpty(),
+            cooperativeCode = prefs[COOPERATIVE_CODE],
+            hectares = prefs[HECTARES],
+            alertsEnabled = prefs[ALERTS],
+            locationGranted = prefs[LOCATION],
+        )
+    }
+
+    suspend fun save(answers: OnboardingAnswers) {
+        dataStore.edit {
+            it[FULL_NAME] = answers.fullName
+            it[COUNTRY] = answers.countryIso
+            it[PHONE] = answers.nationalPhone
+            it.setOrRemove(COOPERATIVE_CODE, answers.cooperativeCode)
+            it.setOrRemove(HECTARES, answers.hectares)
+            it.setOrRemove(ALERTS, answers.alertsEnabled)
+            it.setOrRemove(LOCATION, answers.locationGranted)
+        }
+    }
+
+    suspend fun clear() {
+        dataStore.edit { prefs -> ALL_KEYS.forEach { prefs.remove(it) } }
+    }
+
+    private fun <T> MutablePreferences.setOrRemove(key: Preferences.Key<T>, value: T?) {
+        if (value == null) remove(key) else this[key] = value
+    }
+
+    private companion object {
+        val FULL_NAME = stringPreferencesKey("onboarding_full_name")
+        val COUNTRY = stringPreferencesKey("onboarding_country")
+        val PHONE = stringPreferencesKey("onboarding_phone")
+        val COOPERATIVE_CODE = stringPreferencesKey("onboarding_cooperative_code")
+        val HECTARES = intPreferencesKey("onboarding_hectares")
+        val ALERTS = booleanPreferencesKey("onboarding_alerts")
+        val LOCATION = booleanPreferencesKey("onboarding_location")
+        val ALL_KEYS = listOf(FULL_NAME, COUNTRY, PHONE, COOPERATIVE_CODE, HECTARES, ALERTS, LOCATION)
+    }
+}

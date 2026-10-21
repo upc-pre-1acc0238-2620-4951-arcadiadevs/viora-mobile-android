@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navDeepLink
 import pe.edu.upc.viora.core.navigation.AuthRoute
+import pe.edu.upc.viora.core.navigation.OnboardingRoute
 import pe.edu.upc.viora.core.navigation.SplashRoute
 import pe.edu.upc.viora.core.navigation.WelcomeRoute
 import pe.edu.upc.viora.core.navigation.PASSWORD_RESET_LINK_BASE
@@ -36,6 +37,7 @@ import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestEntryS
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
 import pe.edu.upc.viora.features.iam.presentation.ui.IamScreen
+import pe.edu.upc.viora.features.iam.presentation.ui.OnboardingScreen
 import pe.edu.upc.viora.features.iam.presentation.ui.SplashScreen
 import pe.edu.upc.viora.features.iam.presentation.ui.WelcomeScreen
 import pe.edu.upc.viora.features.iam.presentation.viewmodel.SplashDestination
@@ -78,19 +80,23 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 },
             )
         }
-        // The onboarding questions (T02b-T02f) come before "Crea tu cuenta"; until they exist,
-        // starting the onboarding opens "Crea tu cuenta" directly.
         composable<WelcomeRoute> {
             WelcomeScreen(
-                onStartOnboarding = { navController.navigate(AuthRoute(createAccount = true)) },
+                onStartOnboarding = { navController.navigate(OnboardingRoute) },
                 onSignIn = { navController.navigate(AuthRoute()) },
+            )
+        }
+        composable<OnboardingRoute> {
+            OnboardingScreen(
+                onCreateAccount = { navController.navigate(AuthRoute(createAccount = true)) },
+                onExit = { navController.popBackStack() },
             )
         }
         composable<AuthRoute> {
             IamScreen(
                 onAuthenticated = navController::openHome,
                 onExit = { navController.popBackStack() },
-                onStartOnboarding = { navController.navigate(AuthRoute(createAccount = true)) },
+                onStartOnboarding = { navController.navigate(OnboardingRoute) { launchSingleTop = true } },
             )
         }
         // The recovery link opens the app here. After saving the new password the producer signs in
@@ -101,7 +107,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             IamScreen(
                 onAuthenticated = navController::openHome,
                 onExit = { navController.navigate(WelcomeRoute) { popUpTo(navController.graph.id) { inclusive = true } } },
-                onStartOnboarding = { navController.navigate(AuthRoute(createAccount = true)) },
+                onStartOnboarding = { navController.navigate(OnboardingRoute) { launchSingleTop = true } },
             )
         }
         navigation<HomeGraph>(startDestination = HomeRoute) {
