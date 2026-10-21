@@ -1270,20 +1270,24 @@
     <string name="warm_winter_change_thinning_lead">Thinning plan:</string>
     <string name="warm_winter_change_thinning">your fruit set sampling will say how much to remove; with less bloom it may not be needed.</string>
 
-    <!-- IAM (onboarding, sign-in, verification, password recovery) -->
-    <string name="iam_onb_lead">Let\'s start</string>
-    <string name="iam_onb_emphasis">by getting to know you.</string>
-    <string name="iam_onb_voice">Tell me about you so I can tailor Viora to your farm.</string>
-    <string name="iam_field_name">Full name</string>
-    <string name="iam_field_name_hint">Type your name</string>
-    <string name="iam_field_country">Country</string>
+    <!-- Welcome (T01 splash and T02 welcome plates) -->
+    <string name="welcome_intro_eyebrow">WELCOME TO VIORA</string>
+    <string name="welcome_intro_title_lead">Your olive grove</string>
+    <string name="welcome_intro_title_second">has its own</string>
+    <string name="welcome_intro_title_emphasis">rhythm.</string>
+    <string name="welcome_intro_description">Viora helps you read the alternate bearing of your olive trees and plan every season ahead.</string>
+    <string name="welcome_start">Get started</string>
+    <string name="welcome_producer_eyebrow">FOR GROWERS</string>
+    <string name="welcome_producer_title_lead">Anticipate</string>
+    <string name="welcome_producer_title_second">the year</string>
+    <string name="welcome_producer_title_emphasis">ahead.</string>
+    <string name="welcome_producer_description">Record bloom, fruit set and harvest. Viora warns you before a low year arrives.</string>
+    <string name="welcome_skip">Skip</string>
+
+    <!-- IAM (sign-in, verification, password recovery) -->
     <string name="iam_country_pe">Peru</string>
     <string name="iam_country_es">Spain</string>
     <string name="iam_country_cl">Chile</string>
-    <string name="iam_field_phone">Mobile · %1$s %2$s</string>
-    <string name="iam_phone_hint">International format %1$s</string>
-    <string name="iam_phone_invalid">It must have %1$d digits and start with %2$s.</string>
-    <string name="iam_phone_invalid_server">That mobile number is not valid for the chosen country.</string>
     <string name="iam_continue">Continue</string>
     <string name="iam_have_account">I already have an account</string>
     <string name="iam_sign_in_lead">Welcome</string>

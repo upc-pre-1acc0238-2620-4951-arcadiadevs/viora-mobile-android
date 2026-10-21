@@ -13,6 +13,8 @@ import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // The manifest opens with the green launch window of the splash; the app itself is cream.
+        setTheme(R.style.Theme_Viora)
         super.onCreate(savedInstanceState)
 
         // On Android 12+ the system shows a mandatory splash screen. On some emulator

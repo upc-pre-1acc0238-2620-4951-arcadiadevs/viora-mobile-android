@@ -30,7 +30,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import pe.edu.upc.viora.core.designsystem.component.TabBarAction
@@ -39,6 +38,7 @@ import pe.edu.upc.viora.core.designsystem.component.TabBarMode
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBar
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarActionColors
 import pe.edu.upc.viora.core.designsystem.theme.Spacing
+import pe.edu.upc.viora.core.navigation.HomeGraph
 import pe.edu.upc.viora.core.navigation.HomeRoute
 import pe.edu.upc.viora.core.navigation.TopLevelDestination
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SelectPlotSamplingRoute
@@ -137,7 +137,8 @@ fun VioraApp(modifier: Modifier = Modifier) {
                         if (onPlotScreen) navController.popBackStack(tabs[originIndex].startRoute, inclusive = false)
                         if (!(onPlotScreen && index == originIndex)) {
                             navController.navigate(tabs[index].graph) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                // The Home graph is the root once signed in (the splash and the IAM screens are gone).
+                                popUpTo<HomeGraph> { saveState = true }
                                 launchSingleTop = true
                                 restoreState = true
                             }
