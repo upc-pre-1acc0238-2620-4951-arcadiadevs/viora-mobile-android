@@ -462,6 +462,7 @@ private fun ErrorLine(error: IamError?) {
         IamError.OFFLINE -> stringResource(R.string.iam_error_offline)
         IamError.WAIT -> stringResource(R.string.iam_error_wait)
         IamError.GENERIC -> stringResource(R.string.iam_error_generic)
+        IamError.PHONE_REJECTED -> stringResource(R.string.iam_error_phone_rejected)
     }
     Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
 }

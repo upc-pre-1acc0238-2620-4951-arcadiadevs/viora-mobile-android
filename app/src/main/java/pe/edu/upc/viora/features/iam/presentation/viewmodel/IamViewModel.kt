@@ -17,6 +17,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.time.Clock
 import pe.edu.upc.viora.core.datastore.SessionStore
+import pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers
+import pe.edu.upc.viora.features.iam.infrastructure.local.OnboardingStore
 import pe.edu.upc.viora.features.iam.infrastructure.remote.AuthSession
 import pe.edu.upc.viora.features.iam.infrastructure.remote.IamService
 import pe.edu.upc.viora.features.iam.infrastructure.remote.NewPasswordRequest
@@ -28,7 +30,6 @@ import pe.edu.upc.viora.features.iam.infrastructure.remote.SignUpRequest
 import pe.edu.upc.viora.features.iam.infrastructure.remote.VerifyEmailRequest
 import pe.edu.upc.viora.features.iam.infrastructure.session.toStoredSession
 import pe.edu.upc.viora.features.iam.presentation.state.CodeError
-import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
 import pe.edu.upc.viora.features.iam.presentation.state.IamError
 import pe.edu.upc.viora.features.iam.presentation.state.IamStep
 import pe.edu.upc.viora.features.iam.presentation.state.IamUiState
@@ -58,6 +59,7 @@ private class Failure(val status: Int?, val problem: IamProblem?, val retryAfter
 class IamViewModel @Inject constructor(
     private val service: IamService,
     private val sessionStore: SessionStore,
+    private val onboardingStore: OnboardingStore,
     private val clock: Clock,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -78,6 +80,10 @@ class IamViewModel @Inject constructor(
 
     init {
         linkToken?.let(::openResetLink)
+        viewModelScope.launch {
+            val firstName = onboardingStore.answers().firstName
+            _uiState.update { it.copy(firstName = firstName) }
+        }
     }
 
     // ---- Navigation between steps ---------------------------------------------------------
@@ -106,13 +112,6 @@ class IamViewModel @Inject constructor(
 
     // ---- Field edits (each one clears the error it may have caused) -----------------------
 
-    fun onName(value: String) = _uiState.update { it.copy(fullName = value) }
-
-    fun onCountry(value: IamCountry) = _uiState.update { it.copy(country = value, phoneRejectedByServer = false) }
-
-    fun onPhone(value: String) =
-        _uiState.update { it.copy(phone = value.filter(Char::isDigit).take(15), phoneRejectedByServer = false) }
-
     fun onEmail(value: String) = _uiState.update {
         it.copy(email = value, emailTaken = false, credentialsError = false, error = null)
     }
@@ -134,7 +133,6 @@ class IamViewModel @Inject constructor(
     fun signIn() {
         val s = _uiState.value
         if (!s.canSignIn || s.loading) return
-
         request {
             try {
                 saveSession(service.signIn(SignInRequest(s.email.trim(), s.password)))
@@ -163,13 +161,19 @@ class IamViewModel @Inject constructor(
         if (!s.canCreateAccount || s.loading) return
         request {
             try {
+                // The terms were accepted on the onboarding summary ("Al continuar aceptas...").
+                val answers = onboardingStore.answers()
                 val response = service.signUp(
                     SignUpRequest(
                         email = s.email.trim(),
                         password = s.password,
                         role = PRODUCER_ROLE,
                         termsAccepted = true,
-                        profile = SignUpProfile(s.fullName.trim(), s.country.iso, s.country.e164(s.phone)),
+                        profile = SignUpProfile(
+                            fullName = answers.fullName.trim(),
+                            country = answers.countryIso,
+                            phoneNumber = MobileNumbers.e164(answers.nationalPhone, answers.countryIso),
+                        ),
                     ),
                 )
                 _uiState.update {
@@ -181,7 +185,7 @@ class IamViewModel @Inject constructor(
                 when {
                     failure.status == 409 -> _uiState.update { it.copy(emailTaken = true) }
                     failure.status == 400 && failure.mentions("profile.") ->
-                        _uiState.update { it.copy(phoneRejectedByServer = true, error = IamError.GENERIC) }
+                        _uiState.update { it.copy(error = IamError.PHONE_REJECTED) }
                     failure.status == 400 -> _uiState.update { it.copy(passwordWeak = true) }
                     failure.status == 429 -> {
                         // The pending account already got a code less than 45 s ago: wait for it.
@@ -200,10 +204,9 @@ class IamViewModel @Inject constructor(
         request {
             try {
                 saveSession(service.verifyEmail(VerifyEmailRequest(s.pendingEmail, s.code)))
-                // Onboarding data lives only until the email is verified (guide, section 3.1).
-                _uiState.update {
-                    it.copy(authenticated = true, password = "", confirmPassword = "", phone = "", fullName = "")
-                }
+                // Onboarding answers live only until the email is verified (guide, section 3.1).
+                onboardingStore.clear()
+                _uiState.update { it.copy(authenticated = true, password = "", confirmPassword = "") }
             } catch (e: Exception) {
                 val failure = e.asFailure()
                 if (failure.status == 422) {
