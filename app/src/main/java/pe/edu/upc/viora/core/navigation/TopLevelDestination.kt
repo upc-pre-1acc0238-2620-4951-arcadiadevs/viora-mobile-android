@@ -11,6 +11,19 @@ import pe.edu.upc.viora.R
 // and adds its detail routes inside it.
 
 @Serializable
+data object AuthRoute
+
+/**
+ * Password-recovery link opened from the email (Android App Link). The token is the last path
+ * segment of `https://<domain>/password-resets/<token>`.
+ */
+@Serializable
+data class ResetPasswordRoute(val token: String)
+
+/** Host and path of the recovery link; must match the manifest intent-filter and the backend's `VIORA_DEEP_LINK_BASE_URL`. */
+const val PASSWORD_RESET_LINK_BASE = "https://viora-platform.onrender.com/password-resets"
+
+@Serializable
 data object HomeGraph
 
 @Serializable
