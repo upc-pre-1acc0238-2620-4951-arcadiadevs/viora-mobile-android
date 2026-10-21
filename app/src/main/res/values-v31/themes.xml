@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Android 10+: stops OEM "force dark" (e.g. MIUI) from recolouring this light-only app. -->
+    <style name="Theme.Viora" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/viora_background</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+
+    <!-- Android 12+ always shows a system splash: plain brand green without the launcher icon,
+         so it blends into the Compose splash (T01) that follows. -->
+    <style name="Theme.Viora.Launch">
+        <item name="android:windowBackground">@color/viora_forest</item>
+        <item name="android:windowSplashScreenBackground">@color/viora_forest</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon_blank</item>
+    </style>
+</resources>

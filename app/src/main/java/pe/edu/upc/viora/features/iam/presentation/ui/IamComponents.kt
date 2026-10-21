@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.iam.presentation.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,18 +54,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
-import pe.edu.upc.viora.core.designsystem.theme.Neutral100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral200
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
@@ -73,23 +75,26 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
-import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
 
 /**
- * Frame shared by every IAM step (Figma frames 03 and 05): back arrow on top, scrollable content
- * and a footer pinned to the bottom (primary pill + caption). The footer rides above the keyboard.
+ * Frame shared by every IAM and onboarding step (Figma frames 02, 03 and 05, "Editorial/Barra
+ * superior"): back arrow and optional step counter ("01 / 06") on top, scrollable content and a
+ * footer pinned to the bottom. The footer rides above the keyboard.
  */
 @Composable
 internal fun IamFrame(
     onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    stepLabel: String? = null,
+    contentSpacing: Dp = 20.dp,
+    footerSpacing: Dp = 12.dp,
     footer: @Composable ColumnScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Neutral100)
+            .background(Neutral50)
             .systemBarsPadding()
             .imePadding(),
     ) {
@@ -103,20 +108,28 @@ internal fun IamFrame(
                     )
                 }
             }
+            if (stepLabel != null) {
+                Text(
+                    text = stepLabel,
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, letterSpacing = 0.78.sp),
+                    color = Neutral600,
+                    modifier = Modifier.align(Alignment.CenterEnd).padding(end = 12.dp),
+                )
+            }
         }
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+                .padding(start = 24.dp, end = 24.dp, top = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(contentSpacing),
             content = content,
         )
         Column(
-            modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(footerSpacing),
             content = footer,
         )
     }
@@ -141,6 +154,9 @@ internal fun UnderlineField(
     imeAction: ImeAction = ImeAction.Next,
     onImeAction: () -> Unit = {},
     enabled: Boolean = true,
+    capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    onFocusLost: () -> Unit = {},
     errorContent: (@Composable () -> Unit)? = null,
 ) {
     var focused by remember { mutableStateOf(false) }
@@ -161,7 +177,7 @@ internal fun UnderlineField(
             if (prefix != null) {
                 Text(
                     text = prefix,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp, lineHeight = 28.sp),
                     color = Neutral600,
                     modifier = Modifier.padding(end = 8.dp),
                 )
@@ -171,19 +187,26 @@ internal fun UnderlineField(
                 onValueChange = onValueChange,
                 enabled = enabled,
                 singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp, color = Neutral900),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp, lineHeight = 28.sp, color = Neutral900),
                 cursorBrush = SolidColor(Green900),
-                visualTransformation = if (secret && !revealed) PasswordVisualTransformation() else VisualTransformation.None,
+                visualTransformation = when {
+                    secret && !revealed -> PasswordVisualTransformation()
+                    else -> visualTransformation
+                },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = if (secret) KeyboardType.Password else keyboardType,
                     imeAction = imeAction,
+                    capitalization = capitalization,
                     autoCorrectEnabled = false,
                 ),
                 keyboardActions = KeyboardActions(onAny = { onImeAction() }),
                 modifier = Modifier
                     .weight(1f)
                     .padding(vertical = 6.dp)
-                    .onFocusChanged { focused = it.isFocused },
+                    .onFocusChanged {
+                        if (focused && !it.isFocused) onFocusLost()
+                        focused = it.isFocused
+                    },
             )
             if (secret) {
                 Text(
@@ -197,11 +220,15 @@ internal fun UnderlineField(
                 )
             }
         }
-        Box(Modifier.fillMaxWidth().height(if (focused || isError) 2.dp else 1.dp).background(lineColor))
+        Box(Modifier.fillMaxWidth().height(if (focused || isError) 1.5.dp else 1.dp).background(lineColor))
         when {
             errorContent != null -> errorContent()
             error != null -> Text(error, style = MaterialTheme.typography.bodySmall, color = errorColor)
-            supporting != null -> Text(supporting, style = MaterialTheme.typography.bodySmall, color = Neutral600)
+            supporting != null -> Text(
+                supporting,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp),
+                color = Neutral600,
+            )
         }
     }
 }
@@ -310,6 +337,37 @@ internal fun PillButton(
     }
 }
 
+/** Figma "Editorial/Botón" (Secundario): outlined 56 dp pill for an equivalent alternative. */
+@Composable
+internal fun OutlinedPillButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clip(CircleShape)
+            .border(1.dp, Neutral300, CircleShape)
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, style = MaterialTheme.typography.titleMedium, color = Neutral900)
+    }
+}
+
+/** Figma "Editorial/Botón" (Texto): a 56 dp tall text-only pill for skip and secondary links. */
+@Composable
+internal fun TextPillButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clip(CircleShape)
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, style = MaterialTheme.typography.titleMedium, color = Neutral900)
+    }
+}
+
 /** Underlined text link ("Cambiar correo", "¿Olvidaste tu contraseña?"). */
 @Composable
 internal fun UnderlinedLink(
@@ -388,29 +446,3 @@ internal fun IsotypeBadge(modifier: Modifier = Modifier) {
         }
     }
 }
-
-/** Pill chips to choose the country of the operation. */
-@Composable
-internal fun CountryChips(selected: IamCountry, onSelect: (IamCountry) -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        IamCountry.entries.forEach { country ->
-            val isSelected = country == selected
-            Box(
-                Modifier
-                    .height(40.dp)
-                    .clip(CircleShape)
-                    .background(if (isSelected) Green900 else Neutral50)
-                    .clickable(role = Role.RadioButton) { onSelect(country) }
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(country.nameRes),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (isSelected) Neutral50 else Neutral900,
-                )
-            }
-        }
-    }
-}
-

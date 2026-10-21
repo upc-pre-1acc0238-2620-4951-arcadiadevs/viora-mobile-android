@@ -37,108 +37,61 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
-import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.features.iam.presentation.state.CodeError
-import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
 import pe.edu.upc.viora.features.iam.presentation.state.IamError
 import pe.edu.upc.viora.features.iam.presentation.state.IamStep
 import pe.edu.upc.viora.features.iam.presentation.state.IamUiState
 import pe.edu.upc.viora.features.iam.presentation.viewmodel.IamViewModel
 
 /**
- * Entry point of the IAM flow (Figma frames 03 and 05). [resetToken] comes from the App Link
- * `https://<domain>/password-resets/<token>` and opens straight at the new-password check.
+ * Entry point of the IAM flow (Figma frames 03 and 05). The route decides the first screen (sign in
+ * or create account) and the recovery link `https://<domain>/password-resets/<token>` opens it
+ * straight at the new-password check. [onExit] runs on back from the first screen and
+ * [onStartOnboarding] on "¿Aún no tienes cuenta? Empecemos".
  */
 @Composable
 fun IamScreen(
     onAuthenticated: () -> Unit,
-    resetToken: String? = null,
+    onExit: () -> Unit,
+    onStartOnboarding: () -> Unit,
     viewModel: IamViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val onBack = { if (!viewModel.back()) onExit() }
 
-    LaunchedEffect(resetToken) { if (resetToken != null) viewModel.openResetLink(resetToken) }
     LaunchedEffect(state.authenticated) { if (state.authenticated) onAuthenticated() }
-    // At the first screen there is nothing to go back to: let the system close the app.
-    BackHandler(enabled = state.step != IamStep.ONBOARDING) { viewModel.back() }
+    BackHandler(onBack = onBack)
 
     when (state.step) {
-        IamStep.ONBOARDING -> OnboardingStep(state, viewModel)
-        IamStep.SIGN_IN -> SignInStep(state, viewModel)
-        IamStep.CREATE_ACCOUNT -> CreateAccountStep(state, viewModel)
-        IamStep.VERIFY -> VerifyStep(state, viewModel)
-        IamStep.FORGOT -> ForgotStep(state, viewModel)
-        IamStep.LINK_SENT -> LinkSentStep(state, viewModel)
+        IamStep.SIGN_IN -> SignInStep(state, viewModel, onBack, onStartOnboarding)
+        IamStep.CREATE_ACCOUNT -> CreateAccountStep(state, viewModel, onBack)
+        IamStep.VERIFY -> VerifyStep(state, viewModel, onBack)
+        IamStep.FORGOT -> ForgotStep(state, viewModel, onBack)
+        IamStep.LINK_SENT -> LinkSentStep(state, viewModel, onBack)
         IamStep.CHECKING_LINK -> CheckingLinkStep(state, viewModel)
-        IamStep.NEW_PASSWORD -> NewPasswordStep(state, viewModel)
+        IamStep.NEW_PASSWORD -> NewPasswordStep(state, viewModel, onBack)
         IamStep.RESET_DONE -> ResetDoneStep(viewModel)
-        IamStep.LINK_EXPIRED -> LinkExpiredStep(viewModel)
-    }
-}
-
-// ---- Onboarding (T02): name, country and mobile, kept in memory until the account exists ----
-
-@Composable
-private fun OnboardingStep(state: IamUiState, vm: IamViewModel) {
-    val country = state.country
-    val phoneError = when {
-        state.phoneRejectedByServer -> stringResource(R.string.iam_phone_invalid_server)
-        state.phone.length >= country.nationalDigits && !state.phoneValid ->
-            stringResource(R.string.iam_phone_invalid, country.nationalDigits, country.mobilePrefixes.toCharArray().joinToString("/"))
-        else -> null
-    }
-    IamFrame(
-        onBack = null,
-        footer = {
-            PillButton(
-                text = stringResource(R.string.iam_continue),
-                onClick = { vm.goTo(IamStep.CREATE_ACCOUNT) },
-                enabled = state.onboardingComplete,
-            )
-            UnderlinedLink(text = stringResource(R.string.iam_have_account), onClick = { vm.goTo(IamStep.SIGN_IN) })
-        },
-    ) {
-        EditorialHeadline(stringResource(R.string.iam_onb_lead), stringResource(R.string.iam_onb_emphasis))
-        VioraVoice(stringResource(R.string.iam_onb_voice))
-        UnderlineField(
-            label = stringResource(R.string.iam_field_name),
-            value = state.fullName,
-            onValueChange = vm::onName,
-        )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.iam_field_country), style = MaterialTheme.typography.labelMedium, color = Neutral600)
-            CountryChips(selected = country, onSelect = vm::onCountry)
-        }
-        UnderlineField(
-            label = stringResource(R.string.iam_field_phone, stringResource(country.nameRes), country.dialCode),
-            value = state.phone,
-            onValueChange = vm::onPhone,
-            prefix = country.dialCode,
-            keyboardType = KeyboardType.Phone,
-            imeAction = ImeAction.Done,
-            error = phoneError,
-            supporting = stringResource(R.string.iam_phone_hint, phoneExample(country)),
-        )
+        IamStep.LINK_EXPIRED -> LinkExpiredStep(viewModel, onBack)
     }
 }
 
 // ---- Create account (T03) ------------------------------------------------------------------
 
 @Composable
-private fun CreateAccountStep(state: IamUiState, vm: IamViewModel) {
+private fun CreateAccountStep(state: IamUiState, vm: IamViewModel, onBack: () -> Unit) {
     val typed = state.password.isNotEmpty()
     val passwordError = if (state.passwordWeak || (typed && !state.passwordOk)) stringResource(R.string.iam_password_weak) else null
     val emailTakenContent: (@Composable () -> Unit)? =
         if (state.emailTaken) { { EmailTakenMessage(onSignIn = vm::goToSignInWithEmail) } } else null
     IamFrame(
-        onBack = vm::back,
+        onBack = onBack,
         footer = {
             PillButton(
                 text = stringResource(R.string.iam_create_action),
@@ -154,7 +107,7 @@ private fun CreateAccountStep(state: IamUiState, vm: IamViewModel) {
             )
         },
     ) {
-        EditorialHeadline(stringResource(R.string.iam_create_lead), stringResource(R.string.iam_create_emphasis))
+        IamTitle(stringResource(R.string.iam_create_lead) + "\n*" + stringResource(R.string.iam_create_emphasis) + "*")
         VioraVoice(stringResource(R.string.iam_create_voice, state.firstName))
         UnderlineField(
             label = stringResource(R.string.iam_field_email),
@@ -210,10 +163,10 @@ private fun EmailTakenMessage(onSignIn: () -> Unit) {
 // ---- Verify email (T04a) -------------------------------------------------------------------
 
 @Composable
-private fun VerifyStep(state: IamUiState, vm: IamViewModel) {
+private fun VerifyStep(state: IamUiState, vm: IamViewModel, onBack: () -> Unit) {
     val codeError = state.codeError
-    IamFrame(onBack = vm::back) {
-        EditorialHeadline(stringResource(R.string.iam_verify_lead), stringResource(R.string.iam_verify_emphasis))
+    IamFrame(onBack = onBack) {
+        IamTitle(stringResource(R.string.iam_verify_lead) + "\n*" + stringResource(R.string.iam_verify_emphasis) + "*")
         VioraVoice(stringResource(R.string.iam_verify_voice, state.pendingEmail))
         Spacer(Modifier.height(4.dp))
         OtpInput(
@@ -259,9 +212,9 @@ private fun codeErrorText(error: CodeError): String = when (error) {
 // ---- Sign in (T03 sign-in / US02) ----------------------------------------------------------
 
 @Composable
-private fun SignInStep(state: IamUiState, vm: IamViewModel) {
+private fun SignInStep(state: IamUiState, vm: IamViewModel, onBack: () -> Unit, onStartOnboarding: () -> Unit) {
     IamFrame(
-        onBack = vm::back,
+        onBack = onBack,
         footer = {
             PillButton(
                 text = stringResource(R.string.iam_sign_in_action),
@@ -270,7 +223,7 @@ private fun SignInStep(state: IamUiState, vm: IamViewModel) {
                 loading = state.loading,
             )
             Row(
-                modifier = Modifier.clickable(role = Role.Button) { vm.goTo(IamStep.ONBOARDING) }.padding(vertical = 8.dp),
+                modifier = Modifier.clickable(role = Role.Button, onClick = onStartOnboarding).padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(stringResource(R.string.iam_no_account) + " ", style = MaterialTheme.typography.bodyMedium, color = Neutral600)
@@ -278,7 +231,7 @@ private fun SignInStep(state: IamUiState, vm: IamViewModel) {
             }
         },
     ) {
-        EditorialHeadline(stringResource(R.string.iam_sign_in_lead), stringResource(R.string.iam_sign_in_emphasis))
+        IamTitle(stringResource(R.string.iam_sign_in_lead) + "\n*" + stringResource(R.string.iam_sign_in_emphasis) + "*")
         VioraVoice(stringResource(R.string.iam_sign_in_voice))
         UnderlineField(
             label = stringResource(R.string.iam_field_email),
@@ -305,9 +258,9 @@ private fun SignInStep(state: IamUiState, vm: IamViewModel) {
 // ---- Password recovery (T06-T09) -----------------------------------------------------------
 
 @Composable
-private fun ForgotStep(state: IamUiState, vm: IamViewModel) {
+private fun ForgotStep(state: IamUiState, vm: IamViewModel, onBack: () -> Unit) {
     IamFrame(
-        onBack = vm::back,
+        onBack = onBack,
         footer = {
             PillButton(
                 text = stringResource(R.string.iam_send_link),
@@ -317,7 +270,7 @@ private fun ForgotStep(state: IamUiState, vm: IamViewModel) {
             )
         },
     ) {
-        EditorialHeadline(stringResource(R.string.iam_forgot_lead), stringResource(R.string.iam_forgot_emphasis))
+        IamTitle(stringResource(R.string.iam_forgot_lead) + "\n*" + stringResource(R.string.iam_forgot_emphasis) + "*")
         VioraVoice(stringResource(R.string.iam_forgot_voice))
         UnderlineField(
             label = stringResource(R.string.iam_field_email),
@@ -332,7 +285,7 @@ private fun ForgotStep(state: IamUiState, vm: IamViewModel) {
 }
 
 @Composable
-private fun LinkSentStep(state: IamUiState, vm: IamViewModel) {
+private fun LinkSentStep(state: IamUiState, vm: IamViewModel, onBack: () -> Unit) {
     val context = LocalContext.current
     val openMail = {
         val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_EMAIL)
@@ -353,7 +306,7 @@ private fun LinkSentStep(state: IamUiState, vm: IamViewModel) {
         }
     }
     IamFrame(
-        onBack = vm::back,
+        onBack = onBack,
         footer = {
             if (state.notice == IamUiState.Notice.LINK_RESENT) {
                 Text(stringResource(R.string.iam_link_resent), style = MaterialTheme.typography.bodySmall, color = Green800)
@@ -402,7 +355,7 @@ private fun CheckingLinkStep(state: IamUiState, vm: IamViewModel) {
 }
 
 @Composable
-private fun NewPasswordStep(state: IamUiState, vm: IamViewModel) {
+private fun NewPasswordStep(state: IamUiState, vm: IamViewModel, onBack: () -> Unit) {
     val typed = state.password.isNotEmpty()
     val passwordError = when {
         state.passwordReused -> stringResource(R.string.iam_password_reused)
@@ -410,7 +363,7 @@ private fun NewPasswordStep(state: IamUiState, vm: IamViewModel) {
         else -> null
     }
     IamFrame(
-        onBack = vm::back,
+        onBack = onBack,
         footer = {
             PillButton(
                 text = stringResource(R.string.iam_save_password),
@@ -420,7 +373,7 @@ private fun NewPasswordStep(state: IamUiState, vm: IamViewModel) {
             )
         },
     ) {
-        EditorialHeadline(stringResource(R.string.iam_new_password_lead), stringResource(R.string.iam_new_password_emphasis))
+        IamTitle(stringResource(R.string.iam_new_password_lead) + "\n*" + stringResource(R.string.iam_new_password_emphasis) + "*")
         VioraVoice(stringResource(R.string.iam_new_password_voice))
         UnderlineField(
             label = stringResource(R.string.iam_field_new_password),
@@ -473,9 +426,9 @@ private fun ResetDoneStep(vm: IamViewModel) {
 }
 
 @Composable
-private fun LinkExpiredStep(vm: IamViewModel) {
+private fun LinkExpiredStep(vm: IamViewModel, onBack: () -> Unit) {
     IamFrame(
-        onBack = vm::back,
+        onBack = onBack,
         footer = {
             PillButton(text = stringResource(R.string.iam_request_new_link), onClick = { vm.goTo(IamStep.FORGOT) })
             UnderlinedLink(stringResource(R.string.iam_back_to_sign_in), onClick = { vm.goTo(IamStep.SIGN_IN) })
@@ -508,14 +461,9 @@ private fun ErrorLine(error: IamError?) {
         IamError.OFFLINE -> stringResource(R.string.iam_error_offline)
         IamError.WAIT -> stringResource(R.string.iam_error_wait)
         IamError.GENERIC -> stringResource(R.string.iam_error_generic)
+        IamError.PHONE_REJECTED -> stringResource(R.string.iam_error_phone_rejected)
     }
     Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
-}
-
-/** "9XX XXX XXX" for a nine-digit mobile number that starts with 9. */
-private fun phoneExample(country: IamCountry): String {
-    val digits = country.mobilePrefixes.first() + "X".repeat(country.nationalDigits - 1)
-    return country.dialCode + " " + digits.chunked(3).joinToString(" ")
 }
 
 private fun formatCountdown(totalSeconds: Int): String = "%d:%02d".format(totalSeconds / 60, totalSeconds % 60)

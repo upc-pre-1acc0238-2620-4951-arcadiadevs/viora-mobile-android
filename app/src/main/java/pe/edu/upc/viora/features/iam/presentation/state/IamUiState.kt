@@ -5,7 +5,6 @@ import pe.edu.upc.viora.R
 
 /** The screens of the IAM flow, in Figma order (frames 03 and 05). */
 enum class IamStep {
-    ONBOARDING,
     SIGN_IN,
     CREATE_ACCOUNT,
     VERIFY,
@@ -17,28 +16,30 @@ enum class IamStep {
     LINK_EXPIRED,
 }
 
-/** Country of the agricultural operation (ISO-3166-1 alpha-2) and how its mobile numbers look. */
+/**
+ * Countries of the operation the onboarding offers (T02b2 "PE +51"): how long their mobile numbers
+ * are and how they start, for the input limit and the error hint. Validity itself is checked with
+ * [pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers].
+ */
 enum class IamCountry(
     val iso: String,
     val dialCode: String,
     @StringRes val nameRes: Int,
     val nationalDigits: Int,
-    val mobilePrefixes: String,
+    @StringRes val invalidHintRes: Int,
 ) {
-    PE("PE", "+51", R.string.iam_country_pe, 9, "9"),
-    ES("ES", "+34", R.string.iam_country_es, 9, "67"),
-    CL("CL", "+56", R.string.iam_country_cl, 9, "9"),
+    PE("PE", "+51", R.string.iam_country_pe, 9, R.string.onboarding_phone_invalid_pe),
+    ES("ES", "+34", R.string.iam_country_es, 9, R.string.onboarding_phone_invalid_es),
+    CL("CL", "+56", R.string.iam_country_cl, 9, R.string.onboarding_phone_invalid_cl),
     ;
 
-    fun isValidMobile(national: String): Boolean =
-        national.length == nationalDigits && national.all(Char::isDigit) && national.first() in mobilePrefixes
-
-    /** E.164, the only format the backend accepts. */
-    fun e164(national: String): String = dialCode + national
+    companion object {
+        fun fromIso(iso: String): IamCountry = entries.firstOrNull { it.iso == iso } ?: PE
+    }
 }
 
 /** Failures that are not tied to one field; the UI maps each one to a string resource. */
-enum class IamError { OFFLINE, GENERIC, WAIT }
+enum class IamError { OFFLINE, GENERIC, WAIT, PHONE_REJECTED }
 
 /** Why the code screen shows a message under the digits. */
 sealed interface CodeError {
@@ -49,15 +50,12 @@ sealed interface CodeError {
 }
 
 data class IamUiState(
-    val step: IamStep = IamStep.ONBOARDING,
+    val step: IamStep = IamStep.SIGN_IN,
     val loading: Boolean = false,
     val authenticated: Boolean = false,
 
-    // Onboarding data. Kept in memory until the account is created (guide, option B).
-    val fullName: String = "",
-    val country: IamCountry = IamCountry.PE,
-    val phone: String = "",
-    val phoneRejectedByServer: Boolean = false,
+    /** From the onboarding answers, for "Guardo lo que elegiste, Teodoro." */
+    val firstName: String = "",
 
     val email: String = "",
     val password: String = "",
@@ -80,11 +78,7 @@ data class IamUiState(
 ) {
     enum class Notice { CODE_RESENT, LINK_RESENT }
 
-    val firstName: String get() = fullName.trim().substringBefore(' ')
-
     val emailValid: Boolean get() = EMAIL_REGEX.matches(email.trim())
-    val phoneValid: Boolean get() = country.isValidMobile(phone)
-    val onboardingComplete: Boolean get() = fullName.trim().length >= 2 && phoneValid
 
     val passwordLongEnough: Boolean get() = password.length >= MIN_PASSWORD
     val passwordHasLettersAndDigits: Boolean get() = password.any(Char::isLetter) && password.any(Char::isDigit)

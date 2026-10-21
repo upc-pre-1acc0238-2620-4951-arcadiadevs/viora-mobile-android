@@ -10,8 +10,21 @@ import pe.edu.upc.viora.R
 // A feature builds its graph with `navigation<XGraph>(startDestination = XRoute) { … }`
 // and adds its detail routes inside it.
 
+/** T01 · Splash: the first screen of every launch; it decides between the Home and the welcome. */
 @Serializable
-data object AuthRoute
+data object SplashRoute
+
+/** T02 · Bienvenida: the two plates shown before the onboarding. */
+@Serializable
+data object WelcomeRoute
+
+/** T02b-T02f · the onboarding questions and their summary, before "Crea tu cuenta". */
+@Serializable
+data object OnboardingRoute
+
+/** The IAM screens; [createAccount] opens them at "Crea tu cuenta" instead of "Hola de nuevo". */
+@Serializable
+data class AuthRoute(val createAccount: Boolean = false)
 
 /**
  * Password-recovery link opened from the email (Android App Link). The token is the last path
