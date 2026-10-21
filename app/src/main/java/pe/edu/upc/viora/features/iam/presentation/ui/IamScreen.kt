@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
-import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
@@ -108,7 +107,7 @@ private fun CreateAccountStep(state: IamUiState, vm: IamViewModel, onBack: () ->
             )
         },
     ) {
-        EditorialHeadline(stringResource(R.string.iam_create_lead), stringResource(R.string.iam_create_emphasis))
+        IamTitle(stringResource(R.string.iam_create_lead) + "\n*" + stringResource(R.string.iam_create_emphasis) + "*")
         VioraVoice(stringResource(R.string.iam_create_voice, state.firstName))
         UnderlineField(
             label = stringResource(R.string.iam_field_email),
@@ -167,7 +166,7 @@ private fun EmailTakenMessage(onSignIn: () -> Unit) {
 private fun VerifyStep(state: IamUiState, vm: IamViewModel, onBack: () -> Unit) {
     val codeError = state.codeError
     IamFrame(onBack = onBack) {
-        EditorialHeadline(stringResource(R.string.iam_verify_lead), stringResource(R.string.iam_verify_emphasis))
+        IamTitle(stringResource(R.string.iam_verify_lead) + "\n*" + stringResource(R.string.iam_verify_emphasis) + "*")
         VioraVoice(stringResource(R.string.iam_verify_voice, state.pendingEmail))
         Spacer(Modifier.height(4.dp))
         OtpInput(
@@ -232,7 +231,7 @@ private fun SignInStep(state: IamUiState, vm: IamViewModel, onBack: () -> Unit, 
             }
         },
     ) {
-        EditorialHeadline(stringResource(R.string.iam_sign_in_lead), stringResource(R.string.iam_sign_in_emphasis))
+        IamTitle(stringResource(R.string.iam_sign_in_lead) + "\n*" + stringResource(R.string.iam_sign_in_emphasis) + "*")
         VioraVoice(stringResource(R.string.iam_sign_in_voice))
         UnderlineField(
             label = stringResource(R.string.iam_field_email),
@@ -271,7 +270,7 @@ private fun ForgotStep(state: IamUiState, vm: IamViewModel, onBack: () -> Unit) 
             )
         },
     ) {
-        EditorialHeadline(stringResource(R.string.iam_forgot_lead), stringResource(R.string.iam_forgot_emphasis))
+        IamTitle(stringResource(R.string.iam_forgot_lead) + "\n*" + stringResource(R.string.iam_forgot_emphasis) + "*")
         VioraVoice(stringResource(R.string.iam_forgot_voice))
         UnderlineField(
             label = stringResource(R.string.iam_field_email),
@@ -374,7 +373,7 @@ private fun NewPasswordStep(state: IamUiState, vm: IamViewModel, onBack: () -> U
             )
         },
     ) {
-        EditorialHeadline(stringResource(R.string.iam_new_password_lead), stringResource(R.string.iam_new_password_emphasis))
+        IamTitle(stringResource(R.string.iam_new_password_lead) + "\n*" + stringResource(R.string.iam_new_password_emphasis) + "*")
         VioraVoice(stringResource(R.string.iam_new_password_voice))
         UnderlineField(
             label = stringResource(R.string.iam_field_new_password),
