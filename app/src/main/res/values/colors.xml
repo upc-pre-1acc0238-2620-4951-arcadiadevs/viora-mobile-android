@@ -2,4 +2,6 @@
 <resources>
     <!-- Figma primitives/neutral/50. Same value as Neutral50 in Color.kt. -->
     <color name="viora_background">#FFF9F6F1</color>
+    <!-- Brand Forest, the splash background. Same value as Forest in Color.kt. -->
+    <color name="viora_forest">#FF2E4A3A</color>
 </resources>
