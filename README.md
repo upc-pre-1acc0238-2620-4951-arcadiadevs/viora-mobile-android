@@ -50,6 +50,14 @@ in memory and needs no login: every request is treated as one fixed producer unt
 On a physical device use `adb reverse tcp:8080 tcp:8080` and `viora.apiBaseUrl=http://localhost:8080/api/v1/`.
 Cleartext HTTP is allowed only in the debug build and only for `10.0.2.2` / `localhost`.
 
+A debug build can start on a screen that no other screen opens yet, to try it on a phone
+(release builds always start on the Home):
+
+```properties
+# P05 · Canjear código (cooperative invitation code), then P06
+viora.debugStartScreen=cooperative-code
+```
+
 ## Architecture
 
 Clean Architecture + DDD organised by bounded context under `features/`, with

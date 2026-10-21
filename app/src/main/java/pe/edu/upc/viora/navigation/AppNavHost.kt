@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import pe.edu.upc.viora.BuildConfig
 import pe.edu.upc.viora.core.navigation.HomeGraph
 import pe.edu.upc.viora.core.navigation.HomeRoute
 import pe.edu.upc.viora.core.navigation.LogbookGraph
@@ -39,6 +40,8 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNav
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
+import pe.edu.upc.viora.features.subscription.presentation.navigation.CooperativeCodeGraph
+import pe.edu.upc.viora.features.subscription.presentation.navigation.cooperativeCodeNavGraph
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
@@ -58,7 +61,7 @@ import pe.edu.upc.viora.features.telemetry.presentation.navigation.climateNavGra
 fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = HomeGraph,
+        startDestination = debugStartDestination() ?: HomeGraph,
         modifier = modifier,
     ) {
         navigation<HomeGraph>(startDestination = HomeRoute) {
@@ -115,6 +118,14 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         )
         agronomicDossierComposable(navController)
         plotsNavGraph(navController)
+        cooperativeCodeNavGraph(
+            navController = navController,
+            onLeave = { navController.leaveForHome() },
+            onRegisterPlot = {
+                navController.leaveForHome()
+                navController.navigate(RegisterPlotRoute)
+            },
+        )
         plotScreens(navController)
         climateNavGraph(navController)
         alertsNavGraph(
@@ -187,4 +198,20 @@ private fun NavHostController.openCampaignReceipt(plotId: String, year: Int, pop
     navigate(CampaignClosedRoute(plotId = plotId, campaignYear = year)) {
         if (popForm) popUpTo<SettleHarvestRoute> { inclusive = true }
     }
+}
+
+/** Clears the back stack and opens the Home, as a flow that stands outside the tabs ends. */
+private fun NavHostController.leaveForHome() {
+    navigate(HomeGraph) {
+        popUpTo(graph.findStartDestination().id) { inclusive = true }
+    }
+}
+
+/**
+ * Debug builds may start on a screen no other screen opens yet, to try it on a phone:
+ * `viora.debugStartScreen=cooperative-code` in `local.properties`. Release builds always start on the Home.
+ */
+private fun debugStartDestination(): Any? = when (BuildConfig.DEBUG_START_SCREEN) {
+    "cooperative-code" -> CooperativeCodeGraph
+    else -> null
 }
