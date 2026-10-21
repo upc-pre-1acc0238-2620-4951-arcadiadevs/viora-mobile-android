@@ -52,6 +52,7 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
 import pe.edu.upc.viora.features.subscription.presentation.navigation.CooperativeCodeGraph
+import pe.edu.upc.viora.features.subscription.presentation.navigation.RedeemCodeRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.cooperativeCodeNavGraph
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
@@ -97,7 +98,9 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         }
         composable<AuthRoute> {
             IamScreen(
-                onAuthenticated = navController::openHome,
+                onAuthenticated = { cooperativeCode ->
+                    if (cooperativeCode == null) navController.openHome() else navController.redeemSavedCode(cooperativeCode)
+                },
                 onExit = { navController.popBackStack() },
                 onStartOnboarding = { navController.navigate(OnboardingRoute) { launchSingleTop = true } },
             )
@@ -108,7 +111,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             deepLinks = listOf(navDeepLink<ResetPasswordRoute>(basePath = PASSWORD_RESET_LINK_BASE)),
         ) {
             IamScreen(
-                onAuthenticated = navController::openHome,
+                onAuthenticated = { navController.openHome() },
                 onExit = { navController.navigate(WelcomeRoute) { popUpTo(navController.graph.id) { inclusive = true } } },
                 onStartOnboarding = { navController.navigate(OnboardingRoute) { launchSingleTop = true } },
             )
@@ -250,7 +253,7 @@ private fun NavHostController.openCampaignReceipt(plotId: String, year: Int, pop
 }
 
 /**
- * Debug builds may start on a screen no other screen opens yet, to try it on a phone:
+ * Debug builds may start on a screen directly, without going through the sign-up that opens it:
  * `viora.debugStartScreen=cooperative-code` in `local.properties`. Release builds always start on the splash.
  */
 private fun debugStartDestination(): Any? = when (BuildConfig.DEBUG_START_SCREEN) {
@@ -261,4 +264,9 @@ private fun debugStartDestination(): Any? = when (BuildConfig.DEBUG_START_SCREEN
 /** Opens the Home as the only screen: nothing of the splash or the IAM flow stays below it. */
 private fun NavHostController.openHome() {
     navigate(HomeGraph) { popUpTo(graph.id) { inclusive = true } }
+}
+
+/** After the email is verified, P05 redeems the code saved in T02c (F04); the IAM flow does not stay below. */
+private fun NavHostController.redeemSavedCode(code: String) {
+    navigate(RedeemCodeRoute(code = code)) { popUpTo(graph.id) { inclusive = true } }
 }

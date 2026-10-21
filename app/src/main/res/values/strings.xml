@@ -1273,6 +1273,10 @@
     <!-- Subscription · cooperative code (P05, P06) -->
     <string name="redeem_code_title_lead">Redeem your</string>
     <string name="redeem_code_title_emphasis">member code.</string>
+    <string name="redeem_code_validating_eyebrow">Code %1$s</string>
+    <string name="redeem_code_validating_title_lead">Validating your</string>
+    <string name="redeem_code_validating_title_emphasis">code…</string>
+    <string name="redeem_code_validating_body">We are checking with your cooperative that the code is still valid.</string>
     <string name="redeem_code_voice">Your cooperative gives it to you. With it, your plan is covered.</string>
     <string name="redeem_code_rejected_title_lead">This code</string>
     <string name="redeem_code_rejected_title_emphasis">didn\'t work.</string>

@@ -45,16 +45,18 @@ Override it per developer in `local.properties` (never committed):
 viora.apiBaseUrl=http://192.168.1.50:8080/api/v1/
 ```
 
-Run the backend locally from `viora-platform` (`./mvnw spring-boot:run`); it starts on H2
-in memory and needs no login: every request is treated as one fixed producer until IAM ships.
+Run the backend locally from `viora-platform` (`mvn spring-boot:run -Dspring-boot.run.profiles=demo`);
+it starts on H2 in memory. The `demo` profile treats requests without a session as one seeded
+producer, so screens opened without signing in still reach their data.
 On a physical device use `adb reverse tcp:8080 tcp:8080` and `viora.apiBaseUrl=http://localhost:8080/api/v1/`.
 Cleartext HTTP is allowed only in the debug build and only for `10.0.2.2` / `localhost`.
 
-A debug build can start on a screen that no other screen opens yet, to try it on a phone
-(release builds always start on the Home):
+A debug build can start on a screen directly, to try it without going through the sign-up
+(release builds always start on the splash):
 
 ```properties
-# P05 · Canjear código (cooperative invitation code), then P06
+# P05 · Canjear código (cooperative invitation code), then P06. In the app it opens after the
+# email is verified, when the producer saved a code in the onboarding (T02c).
 viora.debugStartScreen=cooperative-code
 ```
 

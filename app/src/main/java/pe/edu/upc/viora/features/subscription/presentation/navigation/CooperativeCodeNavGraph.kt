@@ -9,12 +9,16 @@ import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.features.subscription.presentation.ui.CooperativeMembershipScreen
 import pe.edu.upc.viora.features.subscription.presentation.ui.RedeemCodeScreen
 
-/** P05 → P06. No screen opens it yet: the sign-up flow that leads here (P02) does not exist in the app. */
+/**
+ * P05 → P06. The sign-up opens it at [RedeemCodeRoute] with the code saved in T02c, once the email is
+ * verified; the other ways in (P02 and the Home without access) do not exist in the app yet.
+ */
 @Serializable
 data object CooperativeCodeGraph
 
+/** [code] is the one saved in the onboarding: P05 redeems it as soon as it opens. */
 @Serializable
-data object RedeemCodeRoute
+data class RedeemCodeRoute(val code: String? = null)
 
 /** P06 gets what it shows from the redemption itself; nothing is cached. */
 @Serializable
@@ -29,7 +33,7 @@ fun NavGraphBuilder.cooperativeCodeNavGraph(
     onLeave: () -> Unit,
     onRegisterPlot: () -> Unit,
 ) {
-    navigation<CooperativeCodeGraph>(startDestination = RedeemCodeRoute) {
+    navigation<CooperativeCodeGraph>(startDestination = RedeemCodeRoute()) {
         composable<RedeemCodeRoute> {
             RedeemCodeScreen(
                 onBack = { if (navController.previousBackStackEntry != null) navController.popBackStack() else onLeave() },

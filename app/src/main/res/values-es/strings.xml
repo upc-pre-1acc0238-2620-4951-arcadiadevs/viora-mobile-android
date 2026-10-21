@@ -1278,6 +1278,10 @@
     <!-- Subscription · cooperative code (P05, P06) -->
     <string name="redeem_code_title_lead">Canjea tu</string>
     <string name="redeem_code_title_emphasis">código de socio.</string>
+    <string name="redeem_code_validating_eyebrow">Código %1$s</string>
+    <string name="redeem_code_validating_title_lead">Validando tu</string>
+    <string name="redeem_code_validating_title_emphasis">código…</string>
+    <string name="redeem_code_validating_body">Confirmamos con tu cooperativa que el código sigue vigente.</string>
     <string name="redeem_code_voice">Te lo entrega tu cooperativa. Con él, tu plan queda cubierto.</string>
     <string name="redeem_code_rejected_title_lead">Este código</string>
     <string name="redeem_code_rejected_title_emphasis">no funcionó.</string>

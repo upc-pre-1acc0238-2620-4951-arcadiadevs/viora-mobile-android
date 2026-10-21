@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,7 +46,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
+import pe.edu.upc.viora.core.designsystem.component.MorphingShapeIndicator
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
+import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Neutral100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
@@ -91,6 +94,10 @@ internal fun RedeemCodeContent(
     onPayPlan: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (state.isRedeeming) {
+        ValidatingCodeContent(code = state.code, modifier = modifier)
+        return
+    }
     val rejected = state.isCodeRejected
     Column(
         modifier = modifier
@@ -144,6 +151,38 @@ internal fun RedeemCodeContent(
             }
             OutlinedPillButton(text = stringResource(R.string.redeem_code_action_pay_plan), onClick = onPayPlan)
         }
+    }
+}
+
+/** P05 · Validando: the code is with the backend; it ends in P06 or in "Este código no funcionó". */
+@Composable
+private fun ValidatingCodeContent(code: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Neutral100)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 24.dp)
+            .padding(top = 76.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(modifier = Modifier.size(220.dp), contentAlignment = Alignment.Center) {
+            MorphingShapeIndicator(color = Green200, modifier = Modifier.fillMaxSize())
+            Icon(
+                painter = painterResource(R.drawable.ic_isotype),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = Modifier.size(104.dp),
+            )
+        }
+        Spacer(Modifier.height(32.dp))
+        StatusHeading(
+            eyebrow = stringResource(R.string.redeem_code_validating_eyebrow, code),
+            lead = stringResource(R.string.redeem_code_validating_title_lead),
+            emphasis = stringResource(R.string.redeem_code_validating_title_emphasis),
+            body = stringResource(R.string.redeem_code_validating_body),
+        )
     }
 }
 

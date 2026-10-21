@@ -53,6 +53,8 @@ data class IamUiState(
     val step: IamStep = IamStep.SIGN_IN,
     val loading: Boolean = false,
     val authenticated: Boolean = false,
+    /** Cooperative code saved in T02c, redeemed right after the email is verified (P05 · Validando). */
+    val cooperativeCodeToRedeem: String? = null,
 
     /** From the onboarding answers, for "Guardo lo que elegiste, Teodoro." */
     val firstName: String = "",

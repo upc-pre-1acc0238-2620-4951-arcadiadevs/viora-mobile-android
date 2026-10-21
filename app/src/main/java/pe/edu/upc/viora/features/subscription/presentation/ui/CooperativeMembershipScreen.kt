@@ -78,30 +78,11 @@ fun CooperativeMembershipScreen(
                 )
             }
             Spacer(Modifier.height(40.dp))
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(Modifier.size(6.dp).clip(CircleShape).background(Green900))
-                Text(
-                    text = stringResource(R.string.membership_badge).uppercase(),
-                    style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.4.sp),
-                    color = Neutral700,
-                )
-            }
-            Spacer(Modifier.height(12.dp))
-            val headline = MaterialTheme.typography.displayMedium.copy(fontSize = 40.sp, lineHeight = 44.sp, letterSpacing = (-1).sp)
-            Text(stringResource(R.string.membership_title_lead), style = headline, color = Neutral900, textAlign = TextAlign.Center)
-            Text(
-                stringResource(R.string.membership_title_emphasis),
-                style = headline,
-                fontStyle = FontStyle.Italic,
-                color = Neutral900,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(Modifier.height(20.dp))
-            Text(
-                text = stringResource(R.string.membership_body),
-                style = MaterialTheme.typography.bodyLarge,
-                color = Neutral700,
-                textAlign = TextAlign.Center,
+            StatusHeading(
+                eyebrow = stringResource(R.string.membership_badge),
+                lead = stringResource(R.string.membership_title_lead),
+                emphasis = stringResource(R.string.membership_title_emphasis),
+                body = stringResource(R.string.membership_body),
             )
             Spacer(Modifier.height(28.dp))
             HorizontalDivider(color = Neutral200)
@@ -145,3 +126,38 @@ private fun MembershipRow(label: String, value: String) {
 
 /** 12.0 is shown as "12" and 12.5 as "12,5" (or "12.5"), as the design writes the quota. */
 private fun Double.asHectares(): String = if (this % 1.0 == 0.0) formatWhole(this.toLong()) else formatDecimal(this, 1)
+
+/**
+ * The centered head of P06 and of P05 · Validando: the eyebrow with its dot, the two-line editorial
+ * title and the body under it.
+ */
+@Composable
+internal fun StatusHeading(eyebrow: String, lead: String, emphasis: String, body: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(Modifier.size(6.dp).clip(CircleShape).background(Green900))
+            Text(
+                text = eyebrow.uppercase(),
+                style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.4.sp),
+                color = Neutral700,
+            )
+        }
+        Spacer(Modifier.height(12.dp))
+        val headline = MaterialTheme.typography.displayMedium.copy(fontSize = 40.sp, lineHeight = 44.sp, letterSpacing = (-1).sp)
+        Text(lead, style = headline, color = Neutral900, textAlign = TextAlign.Center)
+        Text(
+            emphasis,
+            style = headline,
+            fontStyle = FontStyle.Italic,
+            color = Neutral900,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = body,
+            style = MaterialTheme.typography.bodyLarge,
+            color = Neutral700,
+            textAlign = TextAlign.Center,
+        )
+    }
+}

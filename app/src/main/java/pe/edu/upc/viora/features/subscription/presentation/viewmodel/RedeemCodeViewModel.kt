@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.subscription.presentation.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,10 +19,20 @@ import pe.edu.upc.viora.features.subscription.presentation.state.RedeemFailure
 @HiltViewModel
 class RedeemCodeViewModel @Inject constructor(
     private val redeemCode: RedeemCooperativeCodeUseCase,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RedeemCodeUiState())
     val uiState: StateFlow<RedeemCodeUiState> = _uiState.asStateFlow()
+
+    init {
+        // `RedeemCodeRoute.code`: the code saved in T02c is redeemed right away (P05 · Validando);
+        // a malformed one waits in the field for the producer to fix it.
+        savedStateHandle.get<String>("code")?.let { saved ->
+            setCode(saved)
+            redeem()
+        }
+    }
 
     fun setCode(text: String) = _uiState.update {
         it.copy(code = InvitationCode.normalize(text).take(InvitationCode.LENGTH), failure = null)

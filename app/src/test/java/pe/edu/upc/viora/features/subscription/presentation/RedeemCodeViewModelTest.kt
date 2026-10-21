@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.subscription.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,7 +42,7 @@ class RedeemCodeViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
-        viewModel = RedeemCodeViewModel(RedeemCooperativeCodeUseCase(repository))
+        viewModel = RedeemCodeViewModel(RedeemCooperativeCodeUseCase(repository), SavedStateHandle())
     }
 
     @After
@@ -134,6 +135,24 @@ class RedeemCodeViewModelTest {
         viewModel.setCode("COOP-7K")
         viewModel.redeem()
 
+        assertTrue(repository.redeemed.isEmpty())
+    }
+
+    @Test
+    fun `a code handed over from the onboarding is redeemed as soon as the screen opens`() {
+        val opened = RedeemCodeViewModel(RedeemCooperativeCodeUseCase(repository), SavedStateHandle(mapOf("code" to "coop-7k2q")))
+
+        assertEquals("COOP-7K2Q", opened.uiState.value.code)
+        assertTrue(opened.uiState.value.isRedeeming)
+        assertEquals(listOf("COOP-7K2Q"), repository.redeemed.map { it.value })
+    }
+
+    @Test
+    fun `a malformed code handed over from the onboarding waits in the field instead of being sent`() {
+        val opened = RedeemCodeViewModel(RedeemCooperativeCodeUseCase(repository), SavedStateHandle(mapOf("code" to "coop-7k")))
+
+        assertEquals("COOP-7K", opened.uiState.value.code)
+        assertFalse(opened.uiState.value.isRedeeming)
         assertTrue(repository.redeemed.isEmpty())
     }
 }
