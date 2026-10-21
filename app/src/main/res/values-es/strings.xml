@@ -1275,6 +1275,37 @@
     <string name="warm_winter_change_thinning_lead">Plan de aclareo:</string>
     <string name="warm_winter_change_thinning">tu muestreo de cuajado dirá cuánto quitar; con menos flor puede no hacer falta.</string>
 
+    <!-- Subscription · cooperative code (P05, P06) -->
+    <string name="redeem_code_title_lead">Canjea tu</string>
+    <string name="redeem_code_title_emphasis">código de socio.</string>
+    <string name="redeem_code_validating_eyebrow">Código %1$s</string>
+    <string name="redeem_code_validating_title_lead">Validando tu</string>
+    <string name="redeem_code_validating_title_emphasis">código…</string>
+    <string name="redeem_code_validating_body">Confirmamos con tu cooperativa que el código sigue vigente.</string>
+    <string name="redeem_code_voice">Te lo entrega tu cooperativa. Con él, tu plan queda cubierto.</string>
+    <string name="redeem_code_rejected_title_lead">Este código</string>
+    <string name="redeem_code_rejected_title_emphasis">no funcionó.</string>
+    <string name="redeem_code_rejected_voice">Puede haber vencido o ya fue usado por otro socio.</string>
+    <string name="redeem_code_label">Código de cooperativa</string>
+    <string name="redeem_code_hint">Está en el mensaje de tu cooperativa. Ej.: COOP-7K2Q</string>
+    <string name="redeem_code_error_not_redeemable">Código vencido o ya canjeado. Pide uno nuevo a tu cooperativa.</string>
+    <string name="redeem_code_error_already_subscribed">Ya tienes un plan activo.</string>
+    <string name="redeem_code_error_too_many_attempts">Probaste demasiados códigos. Espera unos minutos e inténtalo de nuevo.</string>
+    <string name="redeem_code_action_redeem">Canjear código</string>
+    <string name="redeem_code_action_try_another">Probar otro código</string>
+    <string name="redeem_code_action_pay_plan">Pagar mi Plan Productor</string>
+    <string name="membership_badge">Membresía activa</string>
+    <string name="membership_title_lead">Tu cooperativa</string>
+    <string name="membership_title_emphasis">cubre tu plan.</string>
+    <string name="membership_body">Te uniste con tu código de socio. Empecemos por registrar tu primer lote.</string>
+    <string name="membership_row_cooperative">Cooperativa</string>
+    <string name="membership_row_quota">Cupo</string>
+    <string name="membership_row_validity">Vigencia</string>
+    <string name="membership_quota_value">%1$s ha cubiertas</string>
+    <string name="membership_validity_value">Según tu convenio</string>
+    <string name="membership_action_register_plot">Registrar mi primer lote</string>
+    <string name="membership_action_home">Ir al inicio</string>
+
     <!-- Welcome (T01 splash and T02 welcome plates) -->
     <string name="welcome_intro_eyebrow">BIENVENIDO A VIORA</string>
     <string name="welcome_intro_title_lead">Tu olivar tiene</string>

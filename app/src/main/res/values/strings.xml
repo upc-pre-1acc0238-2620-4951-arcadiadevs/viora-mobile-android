@@ -1270,6 +1270,37 @@
     <string name="warm_winter_change_thinning_lead">Thinning plan:</string>
     <string name="warm_winter_change_thinning">your fruit set sampling will say how much to remove; with less bloom it may not be needed.</string>
 
+    <!-- Subscription · cooperative code (P05, P06) -->
+    <string name="redeem_code_title_lead">Redeem your</string>
+    <string name="redeem_code_title_emphasis">member code.</string>
+    <string name="redeem_code_validating_eyebrow">Code %1$s</string>
+    <string name="redeem_code_validating_title_lead">Validating your</string>
+    <string name="redeem_code_validating_title_emphasis">code…</string>
+    <string name="redeem_code_validating_body">We are checking with your cooperative that the code is still valid.</string>
+    <string name="redeem_code_voice">Your cooperative gives it to you. With it, your plan is covered.</string>
+    <string name="redeem_code_rejected_title_lead">This code</string>
+    <string name="redeem_code_rejected_title_emphasis">didn\'t work.</string>
+    <string name="redeem_code_rejected_voice">It may have expired or been used by another member.</string>
+    <string name="redeem_code_label">Cooperative code</string>
+    <string name="redeem_code_hint">It\'s in your cooperative\'s message. E.g.: COOP-7K2Q</string>
+    <string name="redeem_code_error_not_redeemable">Expired or already redeemed code. Ask your cooperative for a new one.</string>
+    <string name="redeem_code_error_already_subscribed">You already have an active plan.</string>
+    <string name="redeem_code_error_too_many_attempts">Too many codes tried. Wait a few minutes and try again.</string>
+    <string name="redeem_code_action_redeem">Redeem code</string>
+    <string name="redeem_code_action_try_another">Try another code</string>
+    <string name="redeem_code_action_pay_plan">Pay my Producer Plan</string>
+    <string name="membership_badge">Active membership</string>
+    <string name="membership_title_lead">Your cooperative</string>
+    <string name="membership_title_emphasis">covers your plan.</string>
+    <string name="membership_body">You joined with your member code. Let\'s start by registering your first plot.</string>
+    <string name="membership_row_cooperative">Cooperative</string>
+    <string name="membership_row_quota">Quota</string>
+    <string name="membership_row_validity">Validity</string>
+    <string name="membership_quota_value">%1$s ha covered</string>
+    <string name="membership_validity_value">Per your agreement</string>
+    <string name="membership_action_register_plot">Register my first plot</string>
+    <string name="membership_action_home">Go to home</string>
+
     <!-- Welcome (T01 splash and T02 welcome plates) -->
     <string name="welcome_intro_eyebrow">WELCOME TO VIORA</string>
     <string name="welcome_intro_title_lead">Your olive grove</string>

@@ -54,11 +54,12 @@ import pe.edu.upc.viora.features.iam.presentation.viewmodel.IamViewModel
  * Entry point of the IAM flow (Figma frames 03 and 05). The route decides the first screen (sign in
  * or create account) and the recovery link `https://<domain>/password-resets/<token>` opens it
  * straight at the new-password check. [onExit] runs on back from the first screen and
- * [onStartOnboarding] on "¿Aún no tienes cuenta? Empecemos".
+ * [onStartOnboarding] on "¿Aún no tienes cuenta? Empecemos". [onAuthenticated] gets the cooperative
+ * code saved in the onboarding when the producer just verified the email with one, so it can be redeemed.
  */
 @Composable
 fun IamScreen(
-    onAuthenticated: () -> Unit,
+    onAuthenticated: (cooperativeCode: String?) -> Unit,
     onExit: () -> Unit,
     onStartOnboarding: () -> Unit,
     viewModel: IamViewModel = hiltViewModel(),
@@ -66,7 +67,7 @@ fun IamScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val onBack = { if (!viewModel.back()) onExit() }
 
-    LaunchedEffect(state.authenticated) { if (state.authenticated) onAuthenticated() }
+    LaunchedEffect(state.authenticated) { if (state.authenticated) onAuthenticated(state.cooperativeCodeToRedeem) }
     BackHandler(onBack = onBack)
 
     when (state.step) {
