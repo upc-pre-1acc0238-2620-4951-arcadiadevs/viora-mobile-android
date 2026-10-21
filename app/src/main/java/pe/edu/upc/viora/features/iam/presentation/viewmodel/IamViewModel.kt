@@ -37,19 +37,6 @@ import retrofit2.HttpException
 private const val RESEND_COOLDOWN_SECONDS = 45
 private const val CODE_LENGTH = 6
 
-private const val DEMO_EMAIL = "demo@viora.ag"
-private const val DEMO_PASSWORD = "Password123!"
-private const val DEMO_ALT_EMAIL = "productor.demo@viora.ag"
-private const val DEMO_ALT_PASSWORD = "PasswordSegura123!"
-
-private fun isDemoCredentials(email: String, password: String): Boolean {
-    val cleanEmail = email.trim()
-    val isDemoEmail = cleanEmail.equals(DEMO_EMAIL, ignoreCase = true) || cleanEmail.equals(DEMO_ALT_EMAIL, ignoreCase = true)
-    val isDemoPassword = password == DEMO_PASSWORD || password == DEMO_ALT_PASSWORD ||
-        password == "Password123" || password == "PasswordSegura123"
-    return isDemoEmail && isDemoPassword
-}
-
 /** Extra members of the RFC 7807 body that the guide tells the app to branch on (section 3.4). */
 @Serializable
 private data class IamProblem(
@@ -147,24 +134,6 @@ class IamViewModel @Inject constructor(
     fun signIn() {
         val s = _uiState.value
         if (!s.canSignIn || s.loading) return
-
-
-        if (isDemoCredentials(s.email, s.password)) {
-            viewModelScope.launch {
-                _uiState.update { it.copy(loading = true, credentialsError = false, error = null) }
-                saveSession(
-                    AuthSession(
-                        accessToken = "demo_jwt_access_token",
-                        refreshToken = "demo_jwt_refresh_token",
-                        userId = "demo-producer-user-id",
-                        role = "ROLE_PRODUCER",
-                    ),
-                )
-                _uiState.update { it.copy(loading = false, authenticated = true) }
-            }
-            return
-        }
-
 
         request {
             try {
