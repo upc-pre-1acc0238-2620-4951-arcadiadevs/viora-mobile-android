@@ -31,6 +31,20 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Password-recovery link from the email (guide 02, section 2.6). Keep the host in sync with
+                 PASSWORD_RESET_LINK_BASE and the backend's VIORA_DEEP_LINK_BASE_URL. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="viora-platform.onrender.com"
+                    android:pathPrefix="/password-resets/" />
+            </intent-filter>
         </activity>
 
         <!-- Shares the sealed dossier PDFs (P77) with the viewer, WhatsApp or the file picker, read-only. -->
