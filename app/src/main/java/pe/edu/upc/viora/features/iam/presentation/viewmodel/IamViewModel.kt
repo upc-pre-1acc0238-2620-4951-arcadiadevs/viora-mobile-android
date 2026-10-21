@@ -204,9 +204,13 @@ class IamViewModel @Inject constructor(
         request {
             try {
                 saveSession(service.verifyEmail(VerifyEmailRequest(s.pendingEmail, s.code)))
-                // Onboarding answers live only until the email is verified (guide, section 3.1).
+                // Onboarding answers live only until the email is verified (guide, section 3.1); the
+                // cooperative code goes on to P05, which redeems it now that there is a session.
+                val cooperativeCode = onboardingStore.answers().cooperativeCode
                 onboardingStore.clear()
-                _uiState.update { it.copy(authenticated = true, password = "", confirmPassword = "") }
+                _uiState.update {
+                    it.copy(authenticated = true, cooperativeCodeToRedeem = cooperativeCode, password = "", confirmPassword = "")
+                }
             } catch (e: Exception) {
                 val failure = e.asFailure()
                 if (failure.status == 422) {

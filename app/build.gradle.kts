@@ -77,10 +77,14 @@ android {
         debug {
             val url = localProperties.getProperty("viora.apiBaseUrl", defaultDebugApiBaseUrl)
             buildConfigField("String", "API_BASE_URL", "\"$url\"")
+            // Screen to start on instead of the Home, for screens no other one opens yet (see AppNavHost).
+            val startScreen = localProperties.getProperty("viora.debugStartScreen", "")
+            buildConfigField("String", "DEBUG_START_SCREEN", "\"$startScreen\"")
         }
         release {
             val url = localProperties.getProperty("viora.apiBaseUrl", defaultReleaseApiBaseUrl)
             buildConfigField("String", "API_BASE_URL", "\"$url\"")
+            buildConfigField("String", "DEBUG_START_SCREEN", "\"\"")
             signingConfig = signingConfigs.findByName("release")
             optimization {
                 enable = false
