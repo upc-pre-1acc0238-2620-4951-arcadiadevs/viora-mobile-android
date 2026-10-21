@@ -8,10 +8,10 @@ Objective: the producer redeems the invitation code of their cooperative (P05) a
 - S4 Out of scope: payment of the individual plan (teammate), so "Pagar mi Plan Productor" is shown as in the design and does nothing yet; sign-up/onboarding (P02).
 
 ## Tasks
-- [x] T1 — S1: data layer in `features/subscription` (service, DTOs, domain, repository mapping 400/409/429, use case, DI) + repository tests. Route: inline.
-- [x] T2 — S2, S4: P05 view model and screen + tests. Route: inline.
-- [x] T3 — S2: P06 screen; nav graph `cooperativeCodeNavGraph`. Route: inline.
-- [x] T4 — S3: debug start screen (`viora.debugStartScreen` in local.properties) and docs. Route: inline.
+- [x] T1 — S1: data layer in `features/subscription` (service, DTOs, domain, repository mapping 400/409/429, use case, DI) + repository tests. Route: inline. Commit 1d11bdd.
+- [x] T2 — S2, S4: P05 view model and screen + tests. Route: inline. Commit 552c8fc.
+- [x] T3 — S2: P06 screen; nav graph `cooperativeCodeNavGraph`. Route: inline. Commit 552c8fc.
+- [x] T4 — S3: debug start screen (`viora.debugStartScreen` in local.properties) and docs. Route: inline. Commit 552c8fc.
 - [ ] T5 — End-to-end check against the backend branch with the user.
 
 ## Log
