@@ -155,6 +155,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.libphonenumber)
 
     // Unit tests
     testImplementation(libs.junit)
