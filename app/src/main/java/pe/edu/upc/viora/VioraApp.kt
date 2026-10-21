@@ -38,9 +38,11 @@ import pe.edu.upc.viora.core.designsystem.component.TabBarMode
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBar
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarActionColors
 import pe.edu.upc.viora.core.designsystem.theme.Spacing
+import pe.edu.upc.viora.core.navigation.AuthRoute
 import pe.edu.upc.viora.core.navigation.HomeGraph
 import pe.edu.upc.viora.core.navigation.HomeRoute
 import pe.edu.upc.viora.core.navigation.TopLevelDestination
+import pe.edu.upc.viora.core.navigation.WelcomeRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SelectPlotSamplingRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourOverlay
@@ -62,6 +64,15 @@ import pe.edu.upc.viora.navigation.AppNavHost
 fun VioraApp(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+
+    // An expired session sends the producer to sign in, with the welcome below so back still works.
+    val sessionViewModel: AppSessionViewModel = hiltViewModel()
+    LaunchedEffect(navController) {
+        sessionViewModel.sessionExpired.collect {
+            navController.navigate(WelcomeRoute) { popUpTo(navController.graph.id) { inclusive = true } }
+            navController.navigate(AuthRoute())
+        }
+    }
 
     val tabs = TopLevelDestination.entries
     val tourTargets = remember { HomeTourTargets() }

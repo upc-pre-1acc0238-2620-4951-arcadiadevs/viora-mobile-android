@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.time.Clock
 import pe.edu.upc.viora.core.datastore.SessionStore
 import pe.edu.upc.viora.features.iam.infrastructure.remote.AuthSession
 import pe.edu.upc.viora.features.iam.infrastructure.remote.IamService
@@ -25,6 +26,7 @@ import pe.edu.upc.viora.features.iam.infrastructure.remote.SignInRequest
 import pe.edu.upc.viora.features.iam.infrastructure.remote.SignUpProfile
 import pe.edu.upc.viora.features.iam.infrastructure.remote.SignUpRequest
 import pe.edu.upc.viora.features.iam.infrastructure.remote.VerifyEmailRequest
+import pe.edu.upc.viora.features.iam.infrastructure.session.toStoredSession
 import pe.edu.upc.viora.features.iam.presentation.state.CodeError
 import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
 import pe.edu.upc.viora.features.iam.presentation.state.IamError
@@ -69,6 +71,7 @@ private class Failure(val status: Int?, val problem: IamProblem?, val retryAfter
 class IamViewModel @Inject constructor(
     private val service: IamService,
     private val sessionStore: SessionStore,
+    private val clock: Clock,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -352,7 +355,7 @@ class IamViewModel @Inject constructor(
         }
     }
 
-    private suspend fun saveSession(session: AuthSession) = sessionStore.save(session.accessToken, session.refreshToken)
+    private suspend fun saveSession(session: AuthSession) = sessionStore.save(session.toStoredSession(clock))
 
     private fun startCountdown(seconds: Int) {
         countdownJob?.cancel()
