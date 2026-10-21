@@ -1275,6 +1275,20 @@
     <string name="warm_winter_change_thinning_lead">Plan de aclareo:</string>
     <string name="warm_winter_change_thinning">tu muestreo de cuajado dirá cuánto quitar; con menos flor puede no hacer falta.</string>
 
+    <!-- Welcome (T01 splash and T02 welcome plates) -->
+    <string name="welcome_intro_eyebrow">BIENVENIDO A VIORA</string>
+    <string name="welcome_intro_title_lead">Tu olivar tiene</string>
+    <string name="welcome_intro_title_second">su propio</string>
+    <string name="welcome_intro_title_emphasis">ritmo.</string>
+    <string name="welcome_intro_description">Viora te ayuda a leer la vecería de tu olivo y a planificar cada campaña con tiempo.</string>
+    <string name="welcome_start">Comenzar</string>
+    <string name="welcome_producer_eyebrow">PARA PRODUCTORES</string>
+    <string name="welcome_producer_title_lead">Anticipa el</string>
+    <string name="welcome_producer_title_second">año</string>
+    <string name="welcome_producer_title_emphasis">que viene.</string>
+    <string name="welcome_producer_description">Registra floración, cuaje y cosecha. Viora te avisa antes de que llegue un año bajo.</string>
+    <string name="welcome_skip">Omitir</string>
+
     <!-- IAM (onboarding, sign-in, verification, password recovery) -->
     <string name="iam_onb_lead">Empecemos</string>
     <string name="iam_onb_emphasis">por conocerte.</string>
