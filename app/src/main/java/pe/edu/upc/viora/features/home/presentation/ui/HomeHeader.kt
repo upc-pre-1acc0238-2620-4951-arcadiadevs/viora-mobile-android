@@ -60,6 +60,7 @@ fun HomeHeader(
     modifier: Modifier = Modifier,
     displayName: String? = null,
     hasUnreadAlerts: Boolean = false,
+    onOpenAccount: () -> Unit = {},
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -67,7 +68,11 @@ fun HomeHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.size(48.dp).clip(CircleShape).background(Green200),
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(Green200)
+                .clickable(onClick = onOpenAccount),
             contentAlignment = Alignment.Center,
         ) {
             if (displayName != null) {
