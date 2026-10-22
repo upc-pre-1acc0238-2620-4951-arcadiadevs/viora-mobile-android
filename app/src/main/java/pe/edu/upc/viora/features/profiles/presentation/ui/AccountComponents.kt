@@ -1,8 +1,11 @@
 package pe.edu.upc.viora.features.profiles.presentation.ui
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -30,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -264,6 +269,55 @@ internal fun AccountRow(
         if (!isDestructive) {
             Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null, tint = Neutral500, modifier = Modifier.size(20.dp))
         }
+    }
+}
+
+/** A row with a switch instead of a value (Figma "Viora/Interruptor"); the whole row toggles it. */
+@Composable
+internal fun AccountSwitchRow(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    showDivider: Boolean = false,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+            .then(if (showDivider) Modifier.hairline(Neutral200) else Modifier)
+            .padding(vertical = 9.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp, lineHeight = 20.sp),
+            color = Neutral900,
+            modifier = Modifier.weight(1f),
+        )
+        VioraSwitch(checked = checked)
+    }
+}
+
+/** 52 × 32 pill: dark green with the knob right when on, grey with the knob left when off. */
+@Composable
+private fun VioraSwitch(checked: Boolean, modifier: Modifier = Modifier) {
+    val knobX by animateDpAsState(targetValue = if (checked) 24.dp else 4.dp, label = "knob")
+    val track by animateColorAsState(targetValue = if (checked) Green900 else Neutral200, label = "track")
+    Box(
+        modifier = modifier
+            .size(width = 52.dp, height = 32.dp)
+            .clip(CircleShape)
+            .background(track),
+    ) {
+        Box(
+            modifier = Modifier
+                .offset(x = knobX, y = 4.dp)
+                .size(24.dp)
+                .shadow(elevation = 1.dp, shape = CircleShape)
+                .background(Neutral0, CircleShape),
+        )
     }
 }
 

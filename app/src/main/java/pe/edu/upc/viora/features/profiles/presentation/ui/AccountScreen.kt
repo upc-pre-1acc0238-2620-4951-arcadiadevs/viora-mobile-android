@@ -147,7 +147,13 @@ fun AccountScreen(
                 AccountRow(
                     label = stringResource(R.string.account_home_tour_label),
                     value = stringResource(R.string.account_home_tour_replay),
+                    showDivider = true,
                     onClick = { viewModel.replayHomeTour(onReplayHomeTour) },
+                )
+                AccountSwitchRow(
+                    label = stringResource(R.string.account_animated_voice_label),
+                    checked = state.animatedVoice,
+                    onCheckedChange = viewModel::onAnimatedVoiceChange,
                 )
             }
 

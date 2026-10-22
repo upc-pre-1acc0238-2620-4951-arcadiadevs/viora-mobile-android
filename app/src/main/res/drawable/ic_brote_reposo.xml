@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Viora/Brote (guía) · Estado=Reposo, exported from Figma (Mobile Lab, 62:515). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M60 58C64 41.8 62.35 12.1 59.1 4C55.85 12.1 54.5 41.8 60 58Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M61.2313 58.4239C73.3473 52.6618 85.8281 34.4944 86.567 27.4576C79.918 29.8769 65.0732 46.1973 61.2313 58.4239Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M61.9487 59.5501C77.5203 60.3169 103.927 52.45 110.465 47.4256C102.387 45.7755 75.2708 50.5732 61.9487 59.5501Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M61.7659 60.9389C68.6023 71.0862 86.6832 79.256 93.1295 78.6346C90.0399 72.9429 73.297 62.2567 61.7659 60.9389Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M60.7492 61.8544C63.2215 78.6513 76.0832 106.081 82.187 112.512C82.1099 103.646 72.0297 75.0926 60.7492 61.8544Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M59.316 61.8794C49.1334 71.5819 42.5718 93.7762 44.1054 101.039C49.9484 96.461 59.47 75.3441 59.316 61.8794Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M58.3039 61.0598C43.5854 65.2454 21.6447 80.9896 17.2265 87.7891C25.2746 86.7987 48.8846 73.7259 58.3039 61.0598Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M58.0367 59.6183C47.991 51.5534 27.2174 48.8906 20.9066 51.4841C25.7864 56.2528 45.9876 61.8604 58.0367 59.6183Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M58.7687 58.424C52.1194 43.8223 33.2704 22.2548 26.0451 18.0015C28.4241 26.0412 45.0273 49.3632 58.7687 58.424Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M60 68C64.4183 68 68 64.4183 68 60C68 55.5817 64.4183 52 60 52C55.5817 52 52 55.5817 52 60C52 64.4183 55.5817 68 60 68Z" />
+</vector>

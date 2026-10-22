@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Viora/Brote (guía) · Estado=Pensando, exported from Figma (Mobile Lab, 62:515). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M60.684 58.1206C68.4406 46.8966 75.3221 23.6482 74.8872 16.4663C69.9377 21.6884 60.5472 44.0237 60.684 58.1206Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M61.6961 58.9402C76.3402 56.334 97.152 41.8967 101.183 35.3272C93.5114 36.0706 71.253 48.1927 61.6961 58.9402Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M61.9851 60.2437C74.0433 65.4269 97.1603 66.7011 103.782 64.4689C97.897 60.7012 75.1219 56.6429 61.9851 60.2437Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M61.3382 61.4863C66.8157 75.5278 84.9655 93.9703 92.1186 97.0164C89.8368 89.5841 73.6155 69.4053 61.3382 61.4863Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M60.0698 61.9988C57.0826 75.3112 59.4112 99.4446 62.5048 105.941C65.1378 99.2446 65.4775 75.018 60.0698 61.9988Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M58.7144 61.5321C45.42 68.3914 30.14 88.5967 28.4567 96.1916C35.644 93.2151 53.1188 74.8514 58.7144 61.5321Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M58.0437 60.4158C44.955 59.4408 22.6825 65.7622 17.1486 70.0285C23.9394 71.6751 46.795 68.0974 58.0437 60.4158Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M58.2857 58.97C49.0581 46.9507 26.2745 34.6784 18.4623 33.9917C22.7362 40.5671 44.1137 55.1795 58.2857 58.97Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M59.382 58.0979C58.3701 44.5474 49.5438 21.9698 44.9293 16.5295C44.3938 23.6432 50.8092 47.0041 59.382 58.0979Z" />
+    <path
+        android:fillColor="#C15A2E"
+        android:pathData="M60 67C63.866 67 67 63.866 67 60C67 56.134 63.866 53 60 53C56.134 53 53 56.134 53 60C53 63.866 56.134 67 60 67Z" />
+</vector>

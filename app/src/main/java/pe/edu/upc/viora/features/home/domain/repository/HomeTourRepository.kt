@@ -1,15 +1,16 @@
 package pe.edu.upc.viora.features.home.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import pe.edu.upc.viora.features.home.domain.valueobject.HomeTour
 
-/** Remembers whether the producer already went through (or dismissed) the Home tour. */
+/** Remembers which Home tours the producer already went through (or dismissed). */
 interface HomeTourRepository {
 
-    /** `true` once the tour was finished, skipped or dismissed. */
-    val hasSeenTour: Flow<Boolean>
+    /** The tours finished, skipped or dismissed on this account. */
+    val seenTours: Flow<Set<HomeTour>>
 
-    suspend fun markSeen()
+    suspend fun markSeen(tour: HomeTour)
 
-    /** Lets the tour show again (the "Recorrido del Inicio" entry in the account screen). */
+    /** Lets both tours show again (the "Recorrido del Inicio" entry in the account screen). */
     suspend fun reset()
 }

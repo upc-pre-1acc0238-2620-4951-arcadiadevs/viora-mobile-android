@@ -13,8 +13,10 @@ import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.locale.AppLanguage
 import pe.edu.upc.viora.features.home.application.usecase.RestartHomeTourUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.CheckMembershipUseCase
+import pe.edu.upc.viora.features.profiles.application.usecase.ObserveAnimatedVoiceUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveProfileUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.RefreshProfileUseCase
+import pe.edu.upc.viora.features.profiles.application.usecase.SetAnimatedVoiceUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.SignOutUseCase
 import pe.edu.upc.viora.features.profiles.presentation.state.AccountUiState
 
@@ -29,6 +31,8 @@ class AccountViewModel @Inject constructor(
     private val checkMembership: CheckMembershipUseCase,
     private val restartHomeTour: RestartHomeTourUseCase,
     private val signOut: SignOutUseCase,
+    observeAnimatedVoice: ObserveAnimatedVoiceUseCase,
+    private val setAnimatedVoice: SetAnimatedVoiceUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AccountUiState())
@@ -37,6 +41,9 @@ class AccountViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             observeProfile().collect { profile -> _uiState.update { it.copy(profile = profile) } }
+        }
+        viewModelScope.launch {
+            observeAnimatedVoice().collect { on -> _uiState.update { it.copy(animatedVoice = on) } }
         }
         viewModelScope.launch { refreshProfile() }
         viewModelScope.launch {
@@ -54,6 +61,11 @@ class AccountViewModel @Inject constructor(
         _uiState.update { it.copy(showLanguageSheet = false, languageNotice = language) }
 
     fun dismissLanguageNotice() = _uiState.update { it.copy(languageNotice = null) }
+
+    /** Voz de Viora animada: whether fixed texts are written letter by letter. */
+    fun onAnimatedVoiceChange(enabled: Boolean) {
+        viewModelScope.launch { setAnimatedVoice(enabled) }
+    }
 
     /** The tour shows again on the next visit to the Home (Recorrido del Inicio · Ver de nuevo). */
     fun replayHomeTour(then: () -> Unit) {

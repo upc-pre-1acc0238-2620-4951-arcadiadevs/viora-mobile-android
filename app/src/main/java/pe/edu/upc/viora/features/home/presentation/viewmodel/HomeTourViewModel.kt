@@ -11,9 +11,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.features.home.application.usecase.CompleteHomeTourUseCase
 import pe.edu.upc.viora.features.home.application.usecase.ObserveHomeTourSeenUseCase
+import pe.edu.upc.viora.features.home.domain.valueobject.HomeTour
 
 /**
- * Whether the Home tour should be offered. It is shared by the whole window (the tour dims the
+ * Which Home tours are still to be offered. It is shared by the whole window (the tour dims the
  * tab bar too), so it is created once at the app level.
  */
 @HiltViewModel
@@ -22,12 +23,12 @@ class HomeTourViewModel @Inject constructor(
     private val completeTour: CompleteHomeTourUseCase,
 ) : ViewModel() {
 
-    /** `null` until the stored flag is read, so the tour never flashes for someone who saw it. */
-    val isPending: StateFlow<Boolean?> = observeSeen()
-        .map { seen -> !seen }
+    /** `null` until the stored flags are read, so a tour never flashes for someone who saw it. */
+    val pendingTours: StateFlow<Set<HomeTour>?> = observeSeen()
+        .map { seen -> HomeTour.entries.toSet() - seen }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    fun complete() {
-        viewModelScope.launch { completeTour() }
+    fun complete(tour: HomeTour) {
+        viewModelScope.launch { completeTour(tour) }
     }
 }

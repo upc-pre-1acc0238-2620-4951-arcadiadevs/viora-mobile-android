@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.core.database
 
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
@@ -40,6 +41,17 @@ class LocalDataOwnerTest {
 
         assertEquals(2, wipes)
         assertNull(preferences.data.first()[focusedPlot])
+    }
+
+    @Test
+    fun `another account sees the Home tours again`() = runTest {
+        val tourSeen = booleanPreferencesKey("home_tour_seen")
+        owner.claimFor("ana")
+        preferences.edit { it[tourSeen] = true }
+
+        owner.claimFor("bruno")
+
+        assertNull(preferences.data.first()[tourSeen])
     }
 
     @Test

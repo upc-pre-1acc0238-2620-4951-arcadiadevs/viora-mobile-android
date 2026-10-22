@@ -11,6 +11,8 @@ data class AccountUiState(
     val showLanguageSheet: Boolean = false,
     /** The language just switched to, for the "Language: English" notice; null when there is none. */
     val languageNotice: AppLanguage? = null,
+    /** Voz de Viora animada (Preferencias), kept on the phone; on by default. */
+    val animatedVoice: Boolean = true,
     val isSigningOut: Boolean = false,
     val isSignedOut: Boolean = false,
 )

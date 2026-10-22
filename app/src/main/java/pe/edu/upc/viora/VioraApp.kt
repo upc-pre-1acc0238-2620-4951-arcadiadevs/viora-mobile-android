@@ -32,6 +32,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import pe.edu.upc.viora.core.designsystem.component.LocalVioraVoiceAnimated
 import pe.edu.upc.viora.core.designsystem.component.TabBarAction
 import pe.edu.upc.viora.core.designsystem.component.TabBarItem
 import pe.edu.upc.viora.core.designsystem.component.TabBarMode
@@ -45,6 +46,7 @@ import pe.edu.upc.viora.core.navigation.TopLevelDestination
 import pe.edu.upc.viora.core.navigation.WelcomeRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SelectPlotSamplingRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
+import pe.edu.upc.viora.features.home.domain.valueobject.HomeTour
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourOverlay
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTargets
@@ -53,6 +55,8 @@ import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeTourViewModel
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
+import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
+import pe.edu.upc.viora.features.profiles.presentation.viewmodel.VoicePreferenceViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
@@ -77,8 +81,10 @@ fun VioraApp(modifier: Modifier = Modifier) {
     val tabs = TopLevelDestination.entries
     val tourTargets = remember { HomeTourTargets() }
     val tourViewModel: HomeTourViewModel = hiltViewModel()
-    val tourPending by tourViewModel.isPending.collectAsStateWithLifecycle()
-    var tourRunning by remember { mutableStateOf(false) }
+    val voicePreference: VoicePreferenceViewModel = hiltViewModel()
+    val animatedVoice by voicePreference.animatedVoice.collectAsStateWithLifecycle()
+    val pendingTours by tourViewModel.pendingTours.collectAsStateWithLifecycle()
+    var runningTour by remember { mutableStateOf<HomeTour?>(null) }
     // -1 on the plot screens (detail, alternation...): they belong to no tab, they are opened on
     // top of the tab the producer was in, which stays highlighted.
     val tabIndex = tabs.indexOfFirst { tab ->
@@ -107,17 +113,27 @@ fun VioraApp(modifier: Modifier = Modifier) {
     LaunchedEffect(selectedIndex, showTabBar) { barMode = TabBarMode.Rest }
     BackHandler(enabled = barMode == TabBarMode.Actions) { barMode = TabBarMode.Rest }
 
-    // The tour opens the first time the Home has data on screen (a plots section and the tab bar).
+    // An account without plots gets the short tour around "Primer paso"; the full one opens the
+    // first time the Home shows a plots section. Each one only once per account.
     val onHome = currentDestination?.hasRoute(HomeRoute::class) == true
-    val tourReady = HomeTourTarget.Today in tourTargets.rects && HomeTourTarget.Plots in tourTargets.rects &&
-        HomeTourTarget.Register in tourTargets.rects
-    LaunchedEffect(tourPending, onHome, tourReady, barMode) {
-        if (tourPending == true && onHome && tourReady && barMode == TabBarMode.Rest) tourRunning = true
+    val onScreen = tourTargets.rects.keys
+    val tourToOffer = when {
+        HomeTourTarget.Register !in onScreen -> null
+        HomeTourTarget.Today in onScreen && HomeTourTarget.Plots in onScreen -> HomeTour.FULL
+        HomeTourTarget.FirstPlot in onScreen -> HomeTour.FIRST_STEPS
+        else -> null
+    }
+    LaunchedEffect(pendingTours, onHome, tourToOffer, barMode) {
+        if (runningTour == null && onHome && barMode == TabBarMode.Rest &&
+            tourToOffer != null && pendingTours?.contains(tourToOffer) == true
+        ) {
+            runningTour = tourToOffer
+        }
     }
 
     // No insets here: each screen decides how to use the area under the system bars (maps go
     // beneath them, lists pad themselves), so the status bar can stay transparent.
-    CompositionLocalProvider(LocalHomeTourTargets provides tourTargets) {
+    CompositionLocalProvider(LocalHomeTourTargets provides tourTargets, LocalVioraVoiceAnimated provides animatedVoice) {
     Scaffold(modifier = modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0, 0, 0, 0)) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             AppNavHost(navController = navController)
@@ -174,12 +190,16 @@ fun VioraApp(modifier: Modifier = Modifier) {
                 )
             }
 
-            if (tourRunning && onHome) {
+            val tour = runningTour
+            if (tour != null && onHome) {
                 HomeTourOverlay(
                     targets = tourTargets,
-                    onFinish = {
-                        tourRunning = false
-                        tourViewModel.complete()
+                    tour = tour,
+                    onFinish = { accepted ->
+                        runningTour = null
+                        tourViewModel.complete(tour)
+                        // "Registrar mi primer lote" closes the short tour and opens the plot wizard.
+                        if (accepted && tour == HomeTour.FIRST_STEPS) navController.navigate(RegisterPlotRoute)
                     },
                 )
             }
