@@ -49,6 +49,7 @@ import pe.edu.upc.viora.features.home.presentation.state.HomeUiState
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
 import pe.edu.upc.viora.features.home.presentation.tour.LocalHomeTourTargets
 import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
+import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeGreetingViewModel
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeViewModel
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
@@ -75,11 +76,14 @@ fun HomeScreen(
     onOpenSoilMoisture: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenAccount: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
+    greetingViewModel: HomeGreetingViewModel = hiltViewModel(),
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
+    val fullName = greetingViewModel.fullName.collectAsStateWithLifecycle().value
     HomeScreenContent(
         state = state,
+        displayName = fullName,
         onRefresh = viewModel::refresh,
         onRegisterPlot = onRegisterPlot,
         onOpenPlot = onOpenPlot,
@@ -110,6 +114,7 @@ fun HomeScreenContent(
     onOpenSoilMoisture: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenAccount: () -> Unit = {},
     onFocusPlot: (PlotId) -> Unit = {},
+    displayName: String? = null,
     today: LocalDate = LocalDate.now(),
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
@@ -145,6 +150,7 @@ fun HomeScreenContent(
                 isOffline = state.isOffline,
                 lastRefresh = state.lastRefresh,
                 onOpenAlerts = onOpenAlerts,
+                displayName = displayName,
                 hasUnreadAlerts = state.activeAlertsCount > 0,
                 onOpenAccount = onOpenAccount,
                 modifier = Modifier.padding(horizontal = ScreenPadding),

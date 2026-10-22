@@ -48,7 +48,7 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 
 /**
  * Greeting row of the Home: avatar, "Hola, name" with the date and sync state, and the alerts
- * bell. [displayName] is null until the profile exists (then the greeting has no name and the
+ * bell. [displayName] is the full name (initials of two names, greeting with the first); null until the profile exists (then the greeting has no name and the
  * avatar shows the Viora isotype). [hasUnreadAlerts] draws the red dot on the bell.
  */
 @Composable
@@ -92,7 +92,7 @@ fun HomeHeader(
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
-                text = if (displayName != null) stringResource(R.string.home_greeting, displayName) else stringResource(R.string.home_greeting_anonymous),
+                text = if (displayName != null) stringResource(R.string.home_greeting, displayName.trim().substringBefore(' ')) else stringResource(R.string.home_greeting_anonymous),
                 style = MaterialTheme.typography.titleMedium.copy(letterSpacing = 0.sp),
                 color = Neutral900,
                 maxLines = 1,
