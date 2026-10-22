@@ -1465,4 +1465,72 @@
         <item quantity="one">Código incorrecto. Te queda %1$d intento.</item>
         <item quantity="other">Código incorrecto. Te quedan %1$d intentos.</item>
     </plurals>
+
+    <!-- Mi cuenta / My account (P15) -->
+    <string name="account_title">Mi cuenta</string>
+    <string name="account_role_manager_org">Gestor técnico · Olivar del Sur</string>
+    <string name="account_role_producer_farm">Productor olivarero · Predio Los Olivos</string>
+    <string name="account_headline_lead">Tu</string>
+    <string name="account_headline_emphasis">cuenta.</string>
+    <string name="account_license_active">Licencia activa</string>
+    <string name="account_section_personal">DATOS PERSONALES</string>
+    <string name="account_section_security">SEGURIDAD</string>
+    <string name="account_section_preferences">PREFERENCIAS</string>
+    <string name="account_section_session">SESIÓN</string>
+    <string name="account_name_label">Nombre</string>
+    <string name="account_phone_label">Celular</string>
+    <string name="account_email_label">Correo</string>
+    <string name="account_email_verified">Verificado</string>
+    <string name="account_change_password">Cambiar contraseña</string>
+    <string name="account_language_label">Idioma</string>
+    <string name="account_language_es">Español</string>
+    <string name="account_language_en">English</string>
+    <string name="account_notifications_label">Notificaciones</string>
+    <string name="account_notifications_enabled">Activadas</string>
+    <string name="account_sign_out">Cerrar sesión</string>
+    <string name="account_version_footer">Viora 1.0 · Android · iOS</string>
+    <string name="account_sign_out_confirm_title">¿Cerrar sesión?</string>
+    <string name="account_sign_out_confirm_message">Tendrás que volver a iniciar sesión para acceder a tu cuenta.</string>
+    <string name="account_sign_out_confirm_action">Cerrar sesión</string>
+    <string name="account_cancel">Cancelar</string>
+
+    <!-- Datos personales / Personal details (P16 - US03 / US43) -->
+    <string name="profile_edit_title">Datos personales</string>
+    <string name="profile_edit_headline_lead">Tus</string>
+    <string name="profile_edit_headline_emphasis">datos.</string>
+    <string name="profile_fullname_label">Nombre completo</string>
+    <string name="profile_fullname_placeholder">Escribe tu nombre</string>
+    <string name="profile_name_required_error">⚠ Tu nombre es obligatorio.</string>
+    <string name="profile_phone_label">Celular · Perú +51</string>
+    <string name="profile_phone_helper">Formato internacional: +51 9XX XXX XXX</string>
+    <string name="profile_phone_invalid_error">⚠ Debe tener 9 dígitos y empezar con 9.</string>
+    <string name="profile_email_helper">Verificado · se usa para entrar a Viora</string>
+    <string name="profile_save_changes">Guardar cambios</string>
+    <string name="profile_save_success">Cambios guardados con éxito</string>
+
+    <!-- Seguridad / Security (P17 - US04) -->
+    <string name="security_title">Seguridad</string>
+    <string name="security_headline_lead">Nueva</string>
+    <string name="security_headline_emphasis">contraseña.</string>
+    <string name="security_current_password_label">Contraseña actual</string>
+    <string name="security_new_password_label">Nueva contraseña</string>
+    <string name="security_confirm_password_label">Confirmar nueva contraseña</string>
+    <string name="security_rule_length">8 caracteres o más</string>
+    <string name="security_rule_alphanumeric">Letras y números</string>
+    <string name="security_rule_different">Distinta a la actual</string>
+    <string name="security_action_change">Cambiar contraseña</string>
+    <string name="security_error_current_wrong">⚠ La contraseña actual no es correcta.</string>
+    <string name="security_error_not_different_or_numbers">⚠ Es igual a la actual y no tiene números.</string>
+    <string name="security_change_success">Contraseña actualizada con éxito</string>
+
+    <!-- Idioma / Language bottom sheet (P18 - US42) -->
+    <string name="language_sheet_title">Idioma de la app</string>
+    <string name="language_sheet_subtitle">Cambia al instante, sin cerrar sesión</string>
+    <string name="language_es_title">Español (Perú)</string>
+    <string name="language_es_example">12 345,6 kg · 14/05/2026</string>
+    <string name="language_en_title">English</string>
+    <string name="language_en_example">12,345.6 kg · 05/14/2026</string>
+    <string name="language_sheet_note">También cambian los separadores de miles y el formato de fechas. Queda guardado en este teléfono.</string>
+    <string name="language_switch_to_en">Cambiar a English</string>
+    <string name="language_switch_to_es">Cambiar a Español</string>
 </resources>
