@@ -7,9 +7,6 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-/**
- * Endpoints for User Profiles (EP10: TS04, TS05, TS35, TS36).
- */
 interface ProfileService {
     @GET("profiles/{userId}")
     suspend fun getProfile(@Path("userId") userId: String): Response<ProfileResource>
