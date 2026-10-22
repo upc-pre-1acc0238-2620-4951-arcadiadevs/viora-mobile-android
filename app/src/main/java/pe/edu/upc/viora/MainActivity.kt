@@ -1,5 +1,6 @@
 package pe.edu.upc.viora
 
+import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -8,10 +9,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
+import pe.edu.upc.viora.core.locale.AppLanguage
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    // Before Android 13 the language chosen in Mi cuenta is applied here (from 13 the system does it).
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguage.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // The manifest opens with the green launch window of the splash; the app itself is cream.
         setTheme(R.style.Theme_Viora)

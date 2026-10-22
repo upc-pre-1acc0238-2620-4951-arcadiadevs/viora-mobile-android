@@ -91,6 +91,10 @@ android {
             }
         }
     }
+    // Lists Spanish and English in the phone's per-app language settings (Android 13+), as Mi cuenta does.
+    androidResources {
+        generateLocaleConfig = true
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
