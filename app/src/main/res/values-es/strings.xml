@@ -1565,7 +1565,7 @@
     <string name="producer_plan_total">TOTAL ANUAL ESTIMADO</string>
     <string name="producer_plan_base">Base por %1$d meses: %2$s</string>
     <string name="producer_plan_tax">IGV (%1$s): %2$s</string>
-    <string name="producer_plan_monthly">Base mensual: %1$s · Precio referencial</string>
+    <string name="producer_plan_monthly">Equivale a %1$s al mes · Pago anual</string>
     <string name="producer_plan_estimate_notice">El precio y las condiciones definitivas se confirman antes de pagar.</string>
     <string name="producer_plan_updated">Catálogo actualizado: %1$s</string>
     <string name="producer_plan_saved_copy">Información guardada. Actualiza para verificar las condiciones vigentes.</string>
@@ -1574,4 +1574,5 @@
     <string name="producer_plan_retry">Reintentar</string>
     <string name="producer_plan_empty">No hay planes disponibles. Actualiza el catálogo para volver a consultar.</string>
     <string name="producer_plan_cooperative">Tengo un código de cooperativa</string>
+    <string name="producer_plan_tax_included">Incluye IGV</string>
 </resources>

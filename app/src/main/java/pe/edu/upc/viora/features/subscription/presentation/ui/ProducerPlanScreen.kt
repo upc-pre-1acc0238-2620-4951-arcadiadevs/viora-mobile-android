@@ -70,11 +70,6 @@ internal fun ProducerPlanContent(
             IconButton(onBack, Modifier.size(Spacing.minTouchTarget)) {
                 Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.action_back), tint = Neutral900)
             }
-            TextButton(onRefresh, enabled = state !is ProducerPlanUiState.Loading &&
-                (state as? ProducerPlanUiState.Content)?.isRefreshing != true &&
-                (state as? ProducerPlanUiState.Empty)?.isRefreshing != true) {
-                Text(stringResource(R.string.producer_plan_refresh))
-            }
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(top = Spacing.md, bottom = Spacing.lg)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
@@ -103,7 +98,6 @@ internal fun ProducerPlanContent(
                     Text(stringResource(R.string.producer_plan_empty), Modifier.padding(vertical = Spacing.lg),
                         style = MaterialTheme.typography.bodyLarge, color = Neutral700)
                     state.error?.let { Text(stringResource(it.messageRes()), color = Terracotta600) }
-                    CatalogUpdatedAt(state.fetchedAt)
                     TextButton(onRefresh, enabled = !state.isRefreshing) { Text(stringResource(R.string.producer_plan_retry)) }
                 }
                 is ProducerPlanUiState.Content -> {
@@ -118,7 +112,7 @@ internal fun ProducerPlanContent(
                     PlanBenefits(state)
                     HorizontalDivider(color = Neutral200)
                     PlanEstimateSummary(state)
-                    PlanFreshness(state)
+                    PlanFreshness(state, onRefresh)
                 }
             }
             Spacer(Modifier.height(Spacing.lg))
@@ -186,6 +180,8 @@ private fun PlanEstimateSummary(state: ProducerPlanUiState.Content) {
         drawLine(Harvest300.copy(alpha = 0.55f), Offset(0f, size.height * 0.82f),
             Offset(size.width, size.height * 0.82f), strokeWidth = size.height * 0.16f)
     }, style = EditorialPrice, color = Neutral900)
+    Text(stringResource(R.string.producer_plan_tax_included),
+        style = MaterialTheme.typography.bodySmall, color = Neutral700)
     Column(Modifier.padding(top = Spacing.sm), verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
         Text(stringResource(R.string.producer_plan_base, state.selectedOffer.billingMonths,
             formatPlanMoney(estimate.base, currency, locale)), style = MaterialTheme.typography.bodyMedium, color = Neutral700)
@@ -201,14 +197,19 @@ private fun PlanEstimateSummary(state: ProducerPlanUiState.Content) {
 }
 
 @Composable
-private fun PlanFreshness(state: ProducerPlanUiState.Content) {
-    CatalogUpdatedAt(state.fetchedAt)
-    if (state.isSavedCopy) Text(stringResource(R.string.producer_plan_saved_copy),
-        style = MaterialTheme.typography.bodySmall, color = Neutral600)
+private fun PlanFreshness(state: ProducerPlanUiState.Content, onRefresh: () -> Unit) {
+    if (state.isSavedCopy && !state.isRefreshing) {
+        Text(stringResource(R.string.producer_plan_saved_copy),
+            Modifier.padding(top = Spacing.lg), style = MaterialTheme.typography.bodySmall, color = Neutral600)
+        CatalogUpdatedAt(state.fetchedAt)
+    }
     if (state.isRefreshing) Text(stringResource(R.string.producer_plan_loading),
         style = MaterialTheme.typography.bodySmall, color = Neutral600)
     state.error?.let { Text(stringResource(it.messageRes()), Modifier.padding(top = Spacing.xs),
         style = MaterialTheme.typography.bodySmall, color = Terracotta600) }
+    if (state.error != null) {
+        TextButton(onRefresh, enabled = !state.isRefreshing) { Text(stringResource(R.string.producer_plan_retry)) }
+    }
 }
 
 @Composable
