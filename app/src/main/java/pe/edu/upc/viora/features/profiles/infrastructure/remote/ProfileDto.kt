@@ -9,23 +9,24 @@ data class ProfileResource(
     val fullName: String,
     val country: String,
     val phoneNumber: String,
-    val createdAt: String? = null,
 )
-@Serializable
-data class CreateProfileRequest(
-    val fullName: String,
-    val country: String,
-    val phoneNumber: String,
-)
+
 @Serializable
 data class UpdateProfileRequest(
     val fullName: String,
     val country: String,
     val phoneNumber: String,
 )
+
 @Serializable
 data class ChangePasswordRequest(
     val currentPassword: String,
     val newPassword: String,
-    val confirmPassword: String,
+)
+
+/** The part of the current subscription the account needs: whether access is active today. */
+@Serializable
+data class CurrentSubscriptionResource(
+    val status: String? = null,
+    val entitlementActive: Boolean = false,
 )

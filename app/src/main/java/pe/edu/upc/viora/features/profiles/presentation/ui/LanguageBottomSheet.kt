@@ -1,8 +1,5 @@
 package pe.edu.upc.viora.features.profiles.presentation.ui
 
-import android.app.LocaleManager
-import android.os.Build
-import android.os.LocaleList
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,13 +10,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -32,61 +28,69 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.os.LocaleListCompat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green900
+import pe.edu.upc.viora.core.designsystem.theme.Harvest400
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
+import pe.edu.upc.viora.core.designsystem.theme.Neutral100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral200
-import pe.edu.upc.viora.core.designsystem.theme.Neutral50
+import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
+import pe.edu.upc.viora.core.locale.AppLanguage
+import pe.edu.upc.viora.core.presentation.vioraNumberFormat
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 
+/**
+ * P98 · Idioma (US42): Spanish of Peru or English, each with a sample of its numbers and dates.
+ * The button names the language it switches to; choosing the current one just closes the sheet.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguageBottomSheet(
-    currentLanguage: String,
-    onSelectLanguage: (String) -> Unit,
+    current: AppLanguage,
+    onConfirm: (AppLanguage) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var selectedLang by remember { mutableStateOf(currentLanguage) }
-    val context = LocalContext.current
+    var selected by remember { mutableStateOf(current) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = Neutral50,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = Neutral100,
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(top = 12.dp, bottom = 8.dp)
+                    .size(width = 36.dp, height = 4.dp)
+                    .clip(CircleShape)
+                    .background(Neutral300),
+            )
+        },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = AccountGutter).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Header with title and close icon
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    val titleStyle = MaterialTheme.typography.displaySmall.copy(fontFamily = NewsreaderFamily, fontSize = 34.sp, lineHeight = 38.sp)
+                    Text(text = stringResource(R.string.language_sheet_title_lead), style = titleStyle, color = Neutral900)
                     Text(
-                        text = stringResource(R.string.language_sheet_title),
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontFamily = NewsreaderFamily,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        ),
+                        text = stringResource(R.string.language_sheet_title_emphasis),
+                        style = titleStyle,
+                        fontStyle = FontStyle.Italic,
                         color = Neutral900,
                     )
                     Text(
@@ -95,126 +99,89 @@ fun LanguageBottomSheet(
                         color = Neutral600,
                     )
                 }
-                IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
-                        contentDescription = stringResource(R.string.action_close),
-                        tint = Neutral900,
-                    )
-                }
+                CircleIconButton(
+                    icon = R.drawable.ic_close,
+                    contentDescription = stringResource(R.string.action_close),
+                    onClick = onDismiss,
+                )
             }
 
-            Spacer(Modifier.height(8.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(Neutral0)
+                    .padding(horizontal = 20.dp, vertical = 4.dp),
+            ) {
+                LanguageOption(
+                    title = stringResource(R.string.language_es_title),
+                    sample = formatSample(AppLanguage.SPANISH),
+                    selected = selected == AppLanguage.SPANISH,
+                    onClick = { selected = AppLanguage.SPANISH },
+                )
+                Spacer(Modifier.fillMaxWidth().height(1.dp).background(Neutral200))
+                LanguageOption(
+                    title = stringResource(R.string.language_en_title),
+                    sample = formatSample(AppLanguage.ENGLISH),
+                    selected = selected == AppLanguage.ENGLISH,
+                    onClick = { selected = AppLanguage.ENGLISH },
+                )
+            }
 
-            // Option 1: Spanish
-            LanguageOptionRow(
-                title = stringResource(R.string.language_es_title),
-                example = stringResource(R.string.language_es_example),
-                isSelected = selectedLang == "es",
-                onClick = { selectedLang = "es" },
-            )
-
-            // Option 2: English
-            LanguageOptionRow(
-                title = stringResource(R.string.language_en_title),
-                example = stringResource(R.string.language_en_example),
-                isSelected = selectedLang == "en",
-                onClick = { selectedLang = "en" },
-            )
-
-            Spacer(Modifier.height(4.dp))
-
-            // Explanation note
             Text(
                 text = stringResource(R.string.language_sheet_note),
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 14.sp),
                 color = Neutral600,
+                modifier = Modifier.padding(horizontal = 4.dp),
             )
-
-            Spacer(Modifier.height(8.dp))
-
-            // Action button
-            val buttonText = if (selectedLang == "en") {
-                stringResource(R.string.language_switch_to_en)
-            } else {
-                stringResource(R.string.language_switch_to_es)
-            }
 
             CheckmarkPillButton(
-                text = buttonText,
-                onClick = {
-                    // Switch locale en caliente (US42)
-                    applyAppLocale(context, selectedLang)
-                    onSelectLanguage(selectedLang)
-                },
+                text = stringResource(
+                    if (selected == AppLanguage.ENGLISH) R.string.language_switch_to_en else R.string.language_switch_to_es,
+                ),
+                onClick = { onConfirm(selected) },
+                checkColor = Harvest400,
+                modifier = Modifier.padding(bottom = 16.dp),
             )
-
-            Spacer(Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-private fun LanguageOptionRow(
-    title: String,
-    example: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-) {
+private fun LanguageOption(title: String, sample: String, selected: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Neutral0)
             .clickable(role = Role.RadioButton, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, fontWeight = FontWeight.Medium),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium),
                 color = Neutral900,
             )
-            Text(
-                text = example,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
-                color = Neutral600,
-            )
+            Text(text = sample, style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp), color = Neutral600)
         }
-        // Radio button circle
-        Box(
-            modifier = Modifier
-                .size(22.dp)
-                .clip(CircleShape)
-                .border(2.dp, if (isSelected) Green900 else Neutral200, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (isSelected) {
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .clip(CircleShape)
-                        .background(Green900),
-                )
+        if (selected) {
+            Box(
+                modifier = Modifier.size(24.dp).clip(CircleShape).background(Green900),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(Modifier.size(10.dp).clip(CircleShape).background(Neutral0))
             }
+        } else {
+            Box(Modifier.size(24.dp).border(2.dp, Neutral200, CircleShape))
         }
     }
 }
 
-/** Switches application locale in-process without losing session (US42). */
-private fun applyAppLocale(context: android.content.Context, langCode: String) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        context.getSystemService(LocaleManager::class.java).applicationLocales =
-            LocaleList.forLanguageTags(langCode)
-    } else {
-        val locale = Locale.forLanguageTag(langCode)
-        Locale.setDefault(locale)
-        val resources = context.resources
-        val config = resources.configuration
-        config.setLocale(locale)
-        @Suppress("DEPRECATION")
-        resources.updateConfiguration(config, resources.displayMetrics)
-    }
+/** "12 345,6 kg · 14/05/2026" or "12,345.6 kg · 05/14/2026": how that language writes a weight and a date. */
+private fun formatSample(language: AppLanguage): String {
+    val locale = Locale.forLanguageTag(language.tag)
+    val number = vioraNumberFormat(minFractionDigits = 1, locale = locale).format(12_345.6)
+    val pattern = if (language == AppLanguage.SPANISH) "dd/MM/yyyy" else "MM/dd/yyyy"
+    return "$number kg · ${LocalDate.of(2026, 5, 14).format(DateTimeFormatter.ofPattern(pattern, locale))}"
 }

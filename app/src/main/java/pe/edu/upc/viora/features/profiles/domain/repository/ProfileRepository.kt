@@ -5,34 +5,33 @@ import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.profiles.domain.entity.UserProfile
 
 interface ProfileRepository {
+
+    /** The profile kept on the phone, so Mi cuenta and the Home greeting work offline. */
     fun observeProfile(): Flow<UserProfile?>
-    suspend fun getProfile(userId: String): AppResult<UserProfile>
 
-    suspend fun updateProfile(
-        userId: String,
-        fullName: String,
-        country: String,
-        phoneNumber: String,
-    ): AppResult<UserProfile>
+    /** Downloads the signed-in producer's profile and keeps it; offline, answers the kept one. */
+    suspend fun refreshProfile(): AppResult<UserProfile>
 
     /**
-     * Completes initial profile for a new user with E.164 normalization (US43).
+     * Saves the full name and the mobile (US03). [nationalNumber] is the digits without the dial
+     * code; it is sent in E.164 for [country]. Nothing is kept on the phone unless the server accepts it.
      */
-    suspend fun createProfile(
-        fullName: String,
-        country: String,
-        phoneNumber: String,
-    ): AppResult<UserProfile>
+    suspend fun updateProfile(fullName: String, country: String, nationalNumber: String): AppResult<UserProfile>
 
     /**
-     * Updates authentication password checking current password (US04).
+     * Changes the password after checking the current one (US04). The server closes every other
+     * session and hands this phone a new one, which replaces the stored tokens. A wrong current
+     * password fails with [WRONG_CURRENT_PASSWORD] as the validation code.
      */
-    suspend fun changePassword(
-        currentPassword: String,
-        newPassword: String,
-        confirmPassword: String,
-    ): AppResult<Unit>
+    suspend fun changePassword(currentPassword: String, newPassword: String): AppResult<Unit>
 
-    /** Signs out the user, clearing stored session and cached profile data. */
+    /** Whether the producer's access (plan or cooperative membership) is active today. */
+    suspend fun hasActiveMembership(): AppResult<Boolean>
+
+    /** Closes the session on the server (best effort) and forgets the tokens and the kept profile. */
     suspend fun signOut()
+
+    companion object {
+        const val WRONG_CURRENT_PASSWORD = "WRONG_CURRENT_PASSWORD"
+    }
 }

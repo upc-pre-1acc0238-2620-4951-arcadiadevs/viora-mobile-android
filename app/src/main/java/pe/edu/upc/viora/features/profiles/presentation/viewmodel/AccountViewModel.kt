@@ -9,16 +9,26 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import pe.edu.upc.viora.core.datastore.SessionStore
-import pe.edu.upc.viora.features.profiles.domain.repository.ProfileRepository
-import pe.edu.upc.viora.features.profiles.infrastructure.local.ProfileStore
+import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.locale.AppLanguage
+import pe.edu.upc.viora.features.home.application.usecase.RestartHomeTourUseCase
+import pe.edu.upc.viora.features.profiles.application.usecase.CheckMembershipUseCase
+import pe.edu.upc.viora.features.profiles.application.usecase.ObserveProfileUseCase
+import pe.edu.upc.viora.features.profiles.application.usecase.RefreshProfileUseCase
+import pe.edu.upc.viora.features.profiles.application.usecase.SignOutUseCase
 import pe.edu.upc.viora.features.profiles.presentation.state.AccountUiState
 
+/**
+ * P95 · Mi cuenta. The language itself is switched by the screen (it needs the activity); this
+ * ViewModel survives the recreation and keeps the notice of the switch.
+ */
 @HiltViewModel
 class AccountViewModel @Inject constructor(
-    private val repository: ProfileRepository,
-    private val profileStore: ProfileStore,
-    private val sessionStore: SessionStore,
+    observeProfile: ObserveProfileUseCase,
+    private val refreshProfile: RefreshProfileUseCase,
+    private val checkMembership: CheckMembershipUseCase,
+    private val restartHomeTour: RestartHomeTourUseCase,
+    private val signOut: SignOutUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AccountUiState())
@@ -26,44 +36,39 @@ class AccountViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            repository.observeProfile().collect { profile ->
-                _uiState.update { it.copy(profile = profile) }
-            }
+            observeProfile().collect { profile -> _uiState.update { it.copy(profile = profile) } }
         }
+        viewModelScope.launch { refreshProfile() }
         viewModelScope.launch {
-            profileStore.languageFlow.collect { lang ->
-                _uiState.update { it.copy(currentLanguage = lang) }
-            }
-        }
-        refresh()
-    }
-
-    fun refresh() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            val userId = sessionStore.session()?.userId ?: "current-user"
-            repository.getProfile(userId)
-            _uiState.update { it.copy(isLoading = false) }
+            val membership = checkMembership()
+            if (membership is AppResult.Success) _uiState.update { it.copy(isMember = membership.value) }
         }
     }
 
     fun openLanguageSheet() = _uiState.update { it.copy(showLanguageSheet = true) }
+
     fun closeLanguageSheet() = _uiState.update { it.copy(showLanguageSheet = false) }
 
-    fun selectLanguage(lang: String) {
+    /** Called right before the screen applies [language]; the notice shows once the screen is back. */
+    fun onLanguageChosen(language: AppLanguage) =
+        _uiState.update { it.copy(showLanguageSheet = false, languageNotice = language) }
+
+    fun dismissLanguageNotice() = _uiState.update { it.copy(languageNotice = null) }
+
+    /** The tour shows again on the next visit to the Home (Recorrido del Inicio · Ver de nuevo). */
+    fun replayHomeTour(then: () -> Unit) {
         viewModelScope.launch {
-            profileStore.saveLanguage(lang)
-            _uiState.update { it.copy(currentLanguage = lang, showLanguageSheet = false) }
+            restartHomeTour()
+            then()
         }
     }
 
-    fun openSignOutDialog() = _uiState.update { it.copy(showSignOutDialog = true) }
-    fun closeSignOutDialog() = _uiState.update { it.copy(showSignOutDialog = false) }
-
-    fun confirmSignOut() {
+    fun signOut() {
+        if (_uiState.value.isSigningOut) return
+        _uiState.update { it.copy(isSigningOut = true) }
         viewModelScope.launch {
-            repository.signOut()
-            _uiState.update { it.copy(isSignedOut = true, showSignOutDialog = false) }
+            signOut.invoke()
+            _uiState.update { it.copy(isSigningOut = false, isSignedOut = true) }
         }
     }
 }

@@ -2,7 +2,6 @@ package pe.edu.upc.viora.features.profiles.infrastructure.local
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import javax.inject.Inject
@@ -13,39 +12,13 @@ import kotlinx.coroutines.flow.map
 import pe.edu.upc.viora.features.profiles.domain.entity.UserProfile
 import pe.edu.upc.viora.features.profiles.domain.valueobject.ProfileId
 
+/** Keeps the signed-in producer's profile in the app's preferences, so it shows offline. */
 @Singleton
 class ProfileStore @Inject constructor(private val dataStore: DataStore<Preferences>) {
 
-    val profileFlow: Flow<UserProfile?> = dataStore.data.map { prefs ->
-        val userId = prefs[KEY_USER_ID] ?: return@map null
-        UserProfile(
-            id = ProfileId(prefs[KEY_PROFILE_ID] ?: userId),
-            userId = userId,
-            fullName = prefs[KEY_FULL_NAME] ?: "",
-            country = prefs[KEY_COUNTRY] ?: "",
-            phoneNumber = prefs[KEY_PHONE] ?: "",
-            email = prefs[KEY_EMAIL],
-            role = prefs[KEY_ROLE],
-            organization = prefs[KEY_ORGANIZATION],
-            licenseActive = prefs[KEY_LICENSE_ACTIVE] ?: true,
-        )
-    }
+    val profileFlow: Flow<UserProfile?> = dataStore.data.map(::read)
 
-    suspend fun getProfile(): UserProfile? {
-        val prefs = dataStore.data.first()
-        val userId = prefs[KEY_USER_ID] ?: return null
-        return UserProfile(
-            id = ProfileId(prefs[KEY_PROFILE_ID] ?: userId),
-            userId = userId,
-            fullName = prefs[KEY_FULL_NAME] ?: "",
-            country = prefs[KEY_COUNTRY] ?: "",
-            phoneNumber = prefs[KEY_PHONE] ?: "",
-            email = prefs[KEY_EMAIL],
-            role = prefs[KEY_ROLE],
-            organization = prefs[KEY_ORGANIZATION],
-            licenseActive = prefs[KEY_LICENSE_ACTIVE] ?: true,
-        )
-    }
+    suspend fun getProfile(): UserProfile? = read(dataStore.data.first())
 
     suspend fun saveProfile(profile: UserProfile) {
         dataStore.edit { prefs ->
@@ -54,36 +27,25 @@ class ProfileStore @Inject constructor(private val dataStore: DataStore<Preferen
             prefs[KEY_FULL_NAME] = profile.fullName
             prefs[KEY_COUNTRY] = profile.country
             prefs[KEY_PHONE] = profile.phoneNumber
-            profile.email?.let { prefs[KEY_EMAIL] = it }
-            profile.role?.let { prefs[KEY_ROLE] = it }
-            profile.organization?.let { prefs[KEY_ORGANIZATION] = it }
-            prefs[KEY_LICENSE_ACTIVE] = profile.licenseActive
+            if (profile.email != null) prefs[KEY_EMAIL] = profile.email else prefs.remove(KEY_EMAIL)
         }
     }
 
     suspend fun clear() {
-        dataStore.edit { prefs ->
-            prefs.remove(KEY_PROFILE_ID)
-            prefs.remove(KEY_USER_ID)
-            prefs.remove(KEY_FULL_NAME)
-            prefs.remove(KEY_COUNTRY)
-            prefs.remove(KEY_PHONE)
-            prefs.remove(KEY_EMAIL)
-            prefs.remove(KEY_ROLE)
-            prefs.remove(KEY_ORGANIZATION)
-            prefs.remove(KEY_LICENSE_ACTIVE)
-        }
+        dataStore.edit { prefs -> ALL_KEYS.forEach { prefs.remove(it) } }
     }
 
-    val languageFlow: Flow<String> = dataStore.data.map { prefs ->
-        prefs[KEY_LANGUAGE] ?: "es"
+    private fun read(prefs: Preferences): UserProfile? {
+        val userId = prefs[KEY_USER_ID] ?: return null
+        return UserProfile(
+            id = ProfileId(prefs[KEY_PROFILE_ID] ?: userId),
+            userId = userId,
+            fullName = prefs[KEY_FULL_NAME].orEmpty(),
+            country = prefs[KEY_COUNTRY].orEmpty(),
+            phoneNumber = prefs[KEY_PHONE].orEmpty(),
+            email = prefs[KEY_EMAIL],
+        )
     }
-
-    suspend fun saveLanguage(lang: String) {
-        dataStore.edit { it[KEY_LANGUAGE] = lang }
-    }
-
-    suspend fun getLanguage(): String = dataStore.data.first()[KEY_LANGUAGE] ?: "es"
 
     private companion object {
         val KEY_PROFILE_ID = stringPreferencesKey("profile_id")
@@ -92,9 +54,6 @@ class ProfileStore @Inject constructor(private val dataStore: DataStore<Preferen
         val KEY_COUNTRY = stringPreferencesKey("profile_country")
         val KEY_PHONE = stringPreferencesKey("profile_phone")
         val KEY_EMAIL = stringPreferencesKey("profile_email")
-        val KEY_ROLE = stringPreferencesKey("profile_role")
-        val KEY_ORGANIZATION = stringPreferencesKey("profile_org")
-        val KEY_LICENSE_ACTIVE = booleanPreferencesKey("profile_license_active")
-        val KEY_LANGUAGE = stringPreferencesKey("app_language")
+        val ALL_KEYS = listOf(KEY_PROFILE_ID, KEY_USER_ID, KEY_FULL_NAME, KEY_COUNTRY, KEY_PHONE, KEY_EMAIL)
     }
 }

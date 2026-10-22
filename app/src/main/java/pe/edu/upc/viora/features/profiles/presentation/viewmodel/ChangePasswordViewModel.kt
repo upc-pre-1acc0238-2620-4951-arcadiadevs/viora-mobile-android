@@ -9,55 +9,54 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.profiles.application.usecase.ChangePasswordUseCase
 import pe.edu.upc.viora.features.profiles.domain.repository.ProfileRepository
+import pe.edu.upc.viora.features.profiles.presentation.state.ChangePasswordError
 import pe.edu.upc.viora.features.profiles.presentation.state.ChangePasswordUiState
 
+/** P97 · Cambiar contraseña. On success the phone keeps its session with the new tokens. */
 @HiltViewModel
 class ChangePasswordViewModel @Inject constructor(
-    private val repository: ProfileRepository,
+    private val changePassword: ChangePasswordUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ChangePasswordUiState())
     val uiState: StateFlow<ChangePasswordUiState> = _uiState.asStateFlow()
 
-    fun onCurrentPasswordChange(value: String) {
-        _uiState.update { it.copy(currentPassword = value, currentPasswordTouched = true, currentPasswordIncorrect = false) }
-    }
+    fun onCurrentPasswordChange(value: String) =
+        _uiState.update { it.copy(currentPassword = value, currentPasswordIncorrect = false, error = null) }
 
-    fun onNewPasswordChange(value: String) {
-        _uiState.update { it.copy(newPassword = value, newPasswordTouched = true) }
-    }
+    fun onNewPasswordChange(value: String) =
+        _uiState.update { it.copy(newPassword = value, newPasswordRejection = null, error = null) }
 
-    fun onConfirmPasswordChange(value: String) {
-        _uiState.update { it.copy(confirmPassword = value, confirmPasswordTouched = true) }
-    }
+    fun onConfirmPasswordChange(value: String) = _uiState.update { it.copy(confirmPassword = value, error = null) }
 
     fun submit() {
         val state = _uiState.value
-        if (!state.canSubmit || state.isLoading) return
-
+        if (!state.canSubmit) return
+        _uiState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            val result = repository.changePassword(
-                currentPassword = state.currentPassword,
-                newPassword = state.newPassword,
-                confirmPassword = state.confirmPassword,
-            )
-            when (result) {
-                is AppResult.Success -> {
-                    _uiState.update { it.copy(isLoading = false, isSuccess = true) }
-                }
-                is AppResult.Failure -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            currentPasswordIncorrect = true,
-                            errorMessage = result.error.toString(),
-                        )
-                    }
+            val result = changePassword(state.currentPassword, state.newPassword)
+            _uiState.update {
+                when (result) {
+                    is AppResult.Success -> it.copy(isLoading = false, isChanged = true)
+                    is AppResult.Failure -> failed(it, result.error)
                 }
             }
+        }
+    }
+
+    private fun failed(state: ChangePasswordUiState, error: AppError): ChangePasswordUiState {
+        val idle = state.copy(isLoading = false)
+        return when {
+            error is AppError.Validation && error.code == ProfileRepository.WRONG_CURRENT_PASSWORD ->
+                idle.copy(currentPasswordIncorrect = true)
+            // The local rules passed, so the server refused it for one of its own (e.g. a recent password).
+            error is AppError.Validation -> idle.copy(newPasswordRejection = error.detail)
+            error is AppError.Offline || error is AppError.Timeout -> idle.copy(error = ChangePasswordError.OFFLINE)
+            else -> idle.copy(error = ChangePasswordError.GENERIC)
         }
     }
 }

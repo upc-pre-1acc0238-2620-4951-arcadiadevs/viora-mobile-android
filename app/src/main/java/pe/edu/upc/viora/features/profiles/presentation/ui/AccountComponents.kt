@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -20,7 +19,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,296 +29,255 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest
+import pe.edu.upc.viora.core.designsystem.theme.Harvest400
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
+import pe.edu.upc.viora.core.designsystem.theme.Neutral100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral200
-import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral500
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.profiles.domain.entity.UserProfile
 
-private val PaleTerracottaCard = Color(0xFFFBE8DE)
-private val AvatarSalmon = Color(0xFFF6D9CD)
-private val AvatarTextBrown = Color(0xFFC15A2E)
-
-/**
- * Top bar matching Figma frames (P15, P16, P17):
- * Back arrow or close (X) button on left, centered title and subtitle.
- */
+/** Top bar of the account screens: round back (or close) button and a centered title over a subtitle, or [notice]. */
 @Composable
-fun AccountTopBar(
+internal fun AccountTopBar(
     title: String,
     subtitle: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     isClose: Boolean = false,
+    notice: String? = null,
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(horizontal = 8.dp),
+    Row(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(
+        CircleIconButton(
+            icon = if (isClose) R.drawable.ic_close else R.drawable.ic_arrow_back,
+            contentDescription = stringResource(if (isClose) R.string.action_close else R.string.action_back),
             onClick = onBack,
-            modifier = Modifier.align(Alignment.CenterStart),
-        ) {
-            Icon(
-                painter = painterResource(if (isClose) R.drawable.ic_close else R.drawable.ic_arrow_back),
-                contentDescription = stringResource(if (isClose) R.string.action_close else R.string.action_back),
-                tint = Neutral900,
-            )
-        }
-        Column(
-            modifier = Modifier.align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        )
+        if (notice != null) {
+            // The confirmation of a language switch takes the place of the title (P95 · English).
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { LanguageNotice(text = notice) }
+        } else Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
                 color = Neutral900,
                 maxLines = 1,
             )
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
                 color = Neutral600,
                 maxLines = 1,
             )
         }
+        Spacer(Modifier.size(48.dp))
     }
 }
 
-/** Editorial headline with Newsreader font (e.g. "Tu\n*cuenta.*"). */
+/** The "Language: English" pill that confirms the switch, in place of the title (P95 · English). */
 @Composable
-fun AccountEditorialTitle(lead: String, emphasis: String, modifier: Modifier = Modifier) {
-    val annotated = buildAnnotatedString {
-        append(lead)
-        append("\n")
-        withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-            append(emphasis)
+internal fun LanguageNotice(text: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .clip(CircleShape)
+            .background(Green800)
+            .padding(start = 6.dp, top = 6.dp, end = 14.dp, bottom = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.size(28.dp).clip(CircleShape).background(Harvest400),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = Neutral900, modifier = Modifier.size(18.dp))
         }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium),
+            color = Neutral0,
+        )
     }
-    Text(
-        text = annotated,
-        style = MaterialTheme.typography.displaySmall.copy(
-            fontFamily = NewsreaderFamily,
-            fontSize = 38.sp,
-            lineHeight = 42.sp,
-            letterSpacing = (-0.76).sp,
-        ),
-        color = Neutral900,
-        modifier = modifier.fillMaxWidth(),
-    )
 }
 
-/**
- * Warm salmon / pale terracotta card with user avatar, "Licencia activa" badge, name and email.
- */
+/** The sage card of P95: initials, the membership badge, the name in two lines and the email. */
 @Composable
-fun ProfileHeroCard(profile: UserProfile, modifier: Modifier = Modifier) {
-    Box(
+internal fun ProfileHeroCard(profile: UserProfile, isMember: Boolean, modifier: Modifier = Modifier) {
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(PaleTerracottaCard)
-            .padding(20.dp),
+            .clip(RoundedCornerShape(32.dp))
+            .background(Green200)
+            .padding(start = 22.dp, top = 22.dp, end = 22.dp, bottom = 16.dp),
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top,
+        ) {
+            Box(
+                modifier = Modifier.size(64.dp).clip(CircleShape).background(Neutral0),
+                contentAlignment = Alignment.Center,
             ) {
-                // Avatar circle
-                Box(
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(CircleShape)
-                        .background(AvatarSalmon),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = profile.initials,
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = AvatarTextBrown,
-                        ),
-                    )
-                }
-
-                // Active license badge
-                if (profile.licenseActive) {
-                    Row(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Neutral0)
-                            .border(1.dp, Neutral200, CircleShape)
-                            .padding(horizontal = 10.dp, vertical = 5.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_check),
-                            contentDescription = null,
-                            tint = Green800,
-                            modifier = Modifier.size(14.dp),
-                        )
-                        Text(
-                            text = stringResource(R.string.account_license_active),
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 11.sp,
-                            ),
-                            color = Green900,
-                        )
-                    }
-                }
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    text = profile.fullName,
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontFamily = NewsreaderFamily,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                    color = Neutral900,
+                    text = profile.initials,
+                    style = MaterialTheme.typography.headlineSmall.copy(fontFamily = NewsreaderFamily, fontSize = 24.sp),
+                    color = Green900,
                 )
-                if (!profile.email.isNullOrBlank()) {
-                    Text(
-                        text = profile.email,
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
-                        color = Neutral600,
-                    )
-                }
             }
+            if (isMember) MembershipBadge(modifier = Modifier.padding(top = 18.dp))
+        }
+        Spacer(Modifier.height(8.dp))
+        // "Teodoro" over an italic "Mamani", like the editorial titles.
+        val first = profile.fullName.trim().substringBefore(' ')
+        val rest = profile.fullName.trim().substringAfter(' ', missingDelimiterValue = "")
+        val nameStyle = MaterialTheme.typography.displaySmall.copy(
+            fontFamily = NewsreaderFamily,
+            fontSize = 34.sp,
+            lineHeight = 36.sp,
+            letterSpacing = (-0.34).sp,
+        )
+        Text(text = first, style = nameStyle, color = Green900, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (rest.isNotEmpty()) {
+            Text(text = rest, style = nameStyle, fontStyle = FontStyle.Italic, color = Green900, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        if (!profile.email.isNullOrBlank()) {
+            Spacer(Modifier.height(14.dp))
+            Text(text = profile.email, style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp), color = Green900)
         }
     }
 }
 
-/** Group of settings rows inside a rounded white card. */
 @Composable
-fun AccountSection(
-    title: String,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun MembershipBadge(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .clip(CircleShape)
+            .background(Neutral0)
+            .padding(start = 8.dp, top = 6.dp, end = 12.dp, bottom = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(painterResource(R.drawable.ic_task_alt), contentDescription = null, tint = Green900, modifier = Modifier.size(16.dp))
         Text(
-            text = title,
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.8.sp,
-            ),
+            text = stringResource(R.string.account_membership_active),
+            style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium),
+            color = Green900,
+        )
+    }
+}
+
+/** A group of rows: the spaced capitals over a white card. */
+@Composable
+internal fun AccountSection(title: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+        Text(
+            text = title.uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.88.sp),
             color = Neutral600,
             modifier = Modifier.padding(horizontal = 4.dp),
         )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(Neutral0),
+                .clip(RoundedCornerShape(28.dp))
+                .background(Neutral0)
+                .padding(start = 20.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
         ) {
             content()
         }
     }
 }
 
-/**
- * Single setting row: label on left, value on right with chevron indicator.
- */
+/** One row of a section: label, value and chevron; [showDivider] draws the hairline under it. */
 @Composable
-fun AccountRow(
+internal fun AccountRow(
     label: String,
     modifier: Modifier = Modifier,
     value: String? = null,
     isDestructive: Boolean = false,
+    showDivider: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .then(if (showDivider) Modifier.hairline(Neutral200) else Modifier)
+            .padding(vertical = 15.dp)
+            .height(20.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
-            color = if (isDestructive) Terracotta500 else Neutral900,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 14.sp,
+                lineHeight = 20.sp,
+                fontWeight = if (isDestructive) FontWeight.Medium else FontWeight.Normal,
+            ),
+            color = if (isDestructive) Terracotta700 else Neutral900,
+            modifier = Modifier.weight(1f),
         )
-        if (value != null || onClick != null) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                if (value != null) {
-                    Text(
-                        text = value,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-                        color = Neutral600,
-                    )
-                }
-                if (onClick != null && !isDestructive) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_chevron_right),
-                        contentDescription = null,
-                        tint = Neutral500,
-                        modifier = Modifier.size(16.dp),
-                    )
-                }
-            }
+        if (value != null) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 20.sp),
+                color = Neutral600,
+                maxLines = 1,
+            )
+        }
+        if (!isDestructive) {
+            Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null, tint = Neutral500, modifier = Modifier.size(20.dp))
         }
     }
 }
 
-/** Row divider. */
-@Composable
-fun AccountDivider() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .height(0.5.dp)
-            .background(Neutral200),
-    )
+private fun Modifier.hairline(color: Color): Modifier = drawBehind {
+    val y = size.height - 0.5.dp.toPx()
+    drawLine(color, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx())
 }
 
 /**
- * Card input field matching P16:
- * Rounded card with inner label, value input, and helper/error text below.
+ * The white field card of P96/P97: a small label over the value, an optional eye for secrets, and
+ * under it a helper or an error with the warning icon. An error paints the border terracotta.
  */
 @Composable
-fun ValidatedFieldCard(
+internal fun ValidatedFieldCard(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
@@ -328,165 +285,150 @@ fun ValidatedFieldCard(
     placeholder: String? = null,
     helperText: String? = null,
     errorText: String? = null,
-    isError: Boolean = errorText != null,
-    enabled: Boolean = true,
+    readOnly: Boolean = false,
     isSecret: Boolean = false,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Next,
     onImeAction: () -> Unit = {},
 ) {
     var revealed by remember { mutableStateOf(false) }
+    val isError = errorText != null
+    val shape = RoundedCornerShape(24.dp)
 
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Box(
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
+                .clip(shape)
                 .background(Neutral0)
-                .border(
-                    width = if (isError) 1.5.dp else 1.dp,
-                    color = if (isError) Terracotta500 else Neutral200,
-                    shape = RoundedCornerShape(14.dp),
-                )
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .then(if (isError) Modifier.border(1.5.dp, Terracotta500, shape) else Modifier)
+                .padding(horizontal = 18.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                    ),
-                    color = if (isError) Terracotta500 else Neutral600,
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium),
+                    color = if (isError) Terracotta700 else Neutral600,
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    BasicTextField(
-                        value = value,
-                        onValueChange = onValueChange,
-                        enabled = enabled,
-                        singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(
-                            fontSize = 17.sp,
-                            color = if (enabled) Neutral900 else Neutral600,
-                        ),
-                        cursorBrush = SolidColor(Green900),
-                        visualTransformation = when {
-                            isSecret && !revealed -> PasswordVisualTransformation()
-                            else -> VisualTransformation.None
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = if (isSecret) KeyboardType.Password else keyboardType,
-                            imeAction = imeAction,
-                        ),
-                        keyboardActions = KeyboardActions(onAny = { onImeAction() }),
-                        decorationBox = { innerTextField ->
-                            if (value.isEmpty() && placeholder != null) {
-                                Text(
-                                    text = placeholder,
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 17.sp),
-                                    color = Neutral500,
-                                )
-                            }
-                            innerTextField()
-                        },
-                        modifier = Modifier.weight(1f),
-                    )
-                    if (isSecret) {
-                        IconButton(
-                            onClick = { revealed = !revealed },
-                            modifier = Modifier.size(24.dp),
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_visibility),
-                                contentDescription = null,
-                                tint = Neutral600,
-                                modifier = Modifier.size(18.dp),
+                val textColor = when {
+                    isError -> Terracotta700
+                    readOnly -> Neutral600
+                    else -> Neutral900
+                }
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    readOnly = readOnly,
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.sp, color = textColor),
+                    cursorBrush = SolidColor(Green900),
+                    visualTransformation = if (isSecret && !revealed) PasswordVisualTransformation() else visualTransformation,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = if (isSecret) KeyboardType.Password else keyboardType,
+                        imeAction = imeAction,
+                    ),
+                    keyboardActions = KeyboardActions(onAny = { onImeAction() }),
+                    decorationBox = { inner ->
+                        if (value.isEmpty() && placeholder != null) {
+                            Text(
+                                text = placeholder,
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.sp),
+                                color = Neutral500,
                             )
                         }
-                    }
-                }
-            }
-        }
-
-        // Subtext / Helper / Error
-        when {
-            isError && errorText != null -> {
-                Text(
-                    text = errorText,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                    color = Terracotta500,
-                    modifier = Modifier.padding(horizontal = 4.dp),
+                        inner()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
-            helperText != null -> {
-                Text(
-                    text = helperText,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                    color = Neutral600,
-                    modifier = Modifier.padding(horizontal = 4.dp),
+            if (isSecret) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_visibility),
+                    contentDescription = null,
+                    tint = Neutral500,
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clickable(role = Role.Switch) { revealed = !revealed },
                 )
             }
         }
+        FieldNote(text = errorText ?: helperText, isError = isError)
     }
 }
 
-/**
- * 56dp action pill button with right-aligned circular check badge.
- * Matches Figma P16/P17 "Guardar cambios" / "Cambiar contraseña".
- */
+/** The line under a field: the helper in grey, or the error with the warning icon. */
 @Composable
-fun CheckmarkPillButton(
+internal fun FieldNote(text: String?, isError: Boolean, modifier: Modifier = Modifier) {
+    if (text == null) return
+    Row(
+        modifier = modifier.padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (isError) {
+            Icon(painterResource(R.drawable.ic_warning), contentDescription = null, tint = Terracotta500, modifier = Modifier.size(14.dp))
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 14.sp),
+            color = if (isError) Terracotta700 else Neutral600,
+        )
+    }
+}
+
+/** The 60 dp dark pill with the yellow check of P96–P98; disabled it turns grey. */
+@Composable
+internal fun CheckmarkPillButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     loading: Boolean = false,
+    checkColor: Color = Harvest,
 ) {
-    Box(
+    val active = enabled || loading
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .height(60.dp)
             .clip(CircleShape)
-            .background(if (enabled) Green900 else Neutral200)
+            .background(if (active) Green900 else Neutral200)
             .clickable(enabled = enabled && !loading, role = Role.Button, onClick = onClick)
-            .padding(horizontal = 20.dp),
-        contentAlignment = Alignment.Center,
+            .padding(start = 24.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (loading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(22.dp),
-                strokeWidth = 2.5.dp,
-                color = Neutral50,
-            )
-        } else {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = if (enabled) Neutral50 else Neutral500,
-                )
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(if (enabled) Harvest else Neutral300),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_check),
-                        contentDescription = null,
-                        tint = if (enabled) Green900 else Neutral500,
-                        modifier = Modifier.size(18.dp),
-                    )
-                }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
+            color = if (active) Neutral50 else Neutral500,
+            modifier = Modifier.weight(1f),
+        )
+        Box(
+            modifier = Modifier.size(44.dp).clip(CircleShape).background(if (active) checkColor else Neutral100),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (loading) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Neutral900)
+            } else {
+                Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = Neutral900, modifier = Modifier.size(24.dp))
             }
         }
     }
 }
+
+/** Shows the digits of a mobile in groups of three ("952184337" reads "952 184 337"); the value keeps only digits. */
+internal object DigitGroupsTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val grouped = text.text.chunked(3).joinToString(" ")
+        val mapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int = offset + (offset - 1).coerceAtLeast(0) / 3
+            override fun transformedToOriginal(offset: Int): Int = (offset - offset / 4).coerceIn(0, text.length)
+        }
+        return TransformedText(AnnotatedString(grouped), mapping)
+    }
+}
+
+/** Horizontal margin of the account screens, as in Figma. */
+internal val AccountGutter: Dp = 24.dp

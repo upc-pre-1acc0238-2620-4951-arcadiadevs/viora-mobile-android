@@ -152,10 +152,11 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         }
         profilesNavGraph(
             navController = navController,
-            onSignOut = {
-                navController.navigate(WelcomeRoute) {
-                    popUpTo(navController.graph.id) { inclusive = true }
-                }
+            onBackHome = { navController.popBackStack<HomeRoute>(inclusive = false) },
+            // Signing out opens the sign-in (T03) over the welcome, so Back from it does not close the app.
+            onSignedOut = {
+                navController.navigate(WelcomeRoute) { popUpTo(navController.graph.id) { inclusive = true } }
+                navController.navigate(AuthRoute())
             },
         )
         // The form is replaced by the P73 receipt (inclusive pop), so Back never returns to it.
