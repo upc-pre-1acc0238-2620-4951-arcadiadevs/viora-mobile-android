@@ -256,6 +256,8 @@
     <string name="tour_not_now">Not now</string>
     <string name="tour_start">Start</string>
     <string name="tour_next">Next</string>
+    <!-- Voz de Viora -->
+    <string name="viora_voice_thinking">Viora is thinking</string>
     <string name="tour_finish">Start using Viora</string>
     <string name="tour_welcome_title">Hello.\nLet me show you *your Home*.</string>
     <plurals name="tour_welcome_body">

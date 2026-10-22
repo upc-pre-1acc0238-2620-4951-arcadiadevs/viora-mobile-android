@@ -258,6 +258,8 @@
     <string name="tour_not_now">Ahora no</string>
     <string name="tour_start">Empezar</string>
     <string name="tour_next">Siguiente</string>
+    <!-- Voz de Viora -->
+    <string name="viora_voice_thinking">Viora está pensando</string>
     <string name="tour_finish">Empezar a usar Viora</string>
     <string name="tour_welcome_title">Hola.\nTe muestro *tu Inicio*.</string>
     <plurals name="tour_welcome_body">
