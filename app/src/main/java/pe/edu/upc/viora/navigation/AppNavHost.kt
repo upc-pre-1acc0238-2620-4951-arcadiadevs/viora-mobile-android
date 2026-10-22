@@ -57,6 +57,8 @@ import pe.edu.upc.viora.features.profiles.presentation.navigation.profilesNavGra
 import pe.edu.upc.viora.features.subscription.presentation.navigation.CooperativeCodeGraph
 import pe.edu.upc.viora.features.subscription.presentation.navigation.RedeemCodeRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.cooperativeCodeNavGraph
+import pe.edu.upc.viora.features.subscription.presentation.navigation.ProducerPlanRoute
+import pe.edu.upc.viora.features.subscription.presentation.navigation.producerPlanComposable
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
@@ -186,11 +188,13 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         cooperativeCodeNavGraph(
             navController = navController,
             onLeave = { navController.openHome() },
+            onOpenProducerPlan = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
             onRegisterPlot = {
                 navController.openHome()
                 navController.navigate(RegisterPlotRoute)
             },
         )
+        producerPlanComposable(navController, onLeave = { navController.openHome() })
         plotScreens(navController)
         climateNavGraph(navController)
         alertsNavGraph(
@@ -270,6 +274,7 @@ private fun NavHostController.openCampaignReceipt(plotId: String, year: Int, pop
  * `viora.debugStartScreen=cooperative-code` in `local.properties`. Release builds always start on the splash.
  */
 private fun debugStartDestination(): Any? = when (BuildConfig.DEBUG_START_SCREEN) {
+    "producer-plan" -> ProducerPlanRoute
     "cooperative-code" -> CooperativeCodeGraph
     "account" -> AccountRoute
     "edit-profile" -> EditProfileRoute
