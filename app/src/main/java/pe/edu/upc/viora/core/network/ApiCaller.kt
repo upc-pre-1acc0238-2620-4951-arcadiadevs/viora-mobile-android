@@ -36,6 +36,10 @@ class ApiCaller @Inject constructor(
             }
         }
 
+    /** Runs [block] for a resource that may not exist yet: 204 No Content (or no body) answers null. */
+    suspend fun <T : Any> callOptional(block: suspend () -> Response<T>): AppResult<T?> =
+        execute(block) { response -> AppResult.Success(response.body()) }
+
     /** Runs [block] ignoring the body (e.g. 204 No Content or a message-only 200). */
     suspend fun <T> callUnit(block: suspend () -> Response<T>): AppResult<Unit> =
         execute(block) { AppResult.Success(Unit) }

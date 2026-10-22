@@ -30,6 +30,10 @@ object MobileNumbers {
         parse(national, countryIso)?.let { util.format(it, PhoneNumberFormat.INTERNATIONAL) }
             ?: "+${util.getCountryCodeForRegion(countryIso)} $national"
 
+    /** The national digits of a stored E.164 number ("+51987654321" -> "987654321"). */
+    fun national(e164: String, countryIso: String): String =
+        parse(e164, countryIso)?.nationalNumber?.toString() ?: e164.filter(Char::isDigit)
+
     private fun parse(national: String, countryIso: String) = try {
         util.parse(national, countryIso)
     } catch (e: NumberParseException) {

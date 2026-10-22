@@ -51,6 +51,9 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNav
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
+import pe.edu.upc.viora.features.profiles.presentation.navigation.AccountRoute
+import pe.edu.upc.viora.features.profiles.presentation.navigation.EditProfileRoute
+import pe.edu.upc.viora.features.profiles.presentation.navigation.profilesNavGraph
 import pe.edu.upc.viora.features.subscription.presentation.navigation.CooperativeCodeGraph
 import pe.edu.upc.viora.features.subscription.presentation.navigation.RedeemCodeRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.cooperativeCodeNavGraph
@@ -138,6 +141,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                             TelemetryDetailRoute(plotId = id.value, plotName = name, metric = TelemetryMetric.SOIL_MOISTURE.name),
                         )
                     },
+                    onOpenAccount = { navController.navigate(AccountRoute) },
                     sections = {
                         HarvestEntrySection(
                             onSettle = { plotId, year -> navController.navigate(SettleHarvestRoute(plotId = plotId, campaignYear = year)) },
@@ -146,6 +150,15 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 )
             }
         }
+        profilesNavGraph(
+            navController = navController,
+            onBackHome = { navController.popBackStack<HomeRoute>(inclusive = false) },
+            // Signing out opens the sign-in (T03) over the welcome, so Back from it does not close the app.
+            onSignedOut = {
+                navController.navigate(WelcomeRoute) { popUpTo(navController.graph.id) { inclusive = true } }
+                navController.navigate(AuthRoute())
+            },
+        )
         // The form is replaced by the P73 receipt (inclusive pop), so Back never returns to it.
         settleHarvestComposable(
             navController = navController,
@@ -258,6 +271,8 @@ private fun NavHostController.openCampaignReceipt(plotId: String, year: Int, pop
  */
 private fun debugStartDestination(): Any? = when (BuildConfig.DEBUG_START_SCREEN) {
     "cooperative-code" -> CooperativeCodeGraph
+    "account" -> AccountRoute
+    "edit-profile" -> EditProfileRoute
     else -> null
 }
 

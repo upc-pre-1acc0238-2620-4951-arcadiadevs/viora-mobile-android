@@ -1460,4 +1460,72 @@
         <item quantity="one">Incorrect code. You have %1$d attempt left.</item>
         <item quantity="other">Incorrect code. You have %1$d attempts left.</item>
     </plurals>
+
+    <!-- 18 · My account (P95–P98) -->
+    <string name="account_title">My account</string>
+    <string name="account_role_producer">Producer</string>
+    <string name="account_headline_lead">Your</string>
+    <string name="account_headline_emphasis">account.</string>
+    <string name="account_membership_active">Active membership</string>
+    <string name="account_section_personal">Personal details</string>
+    <string name="account_section_security">Security</string>
+    <string name="account_section_preferences">Preferences</string>
+    <string name="account_section_session">Session</string>
+    <string name="account_name_label">Name</string>
+    <string name="account_phone_label">Mobile</string>
+    <string name="account_email_label">Email</string>
+    <string name="account_email_verified">Verified</string>
+    <string name="account_change_password">Change password</string>
+    <string name="account_language_label">Language</string>
+    <string name="account_language_es">Español</string>
+    <string name="account_language_en">English</string>
+    <string name="account_notifications_label">Notifications</string>
+    <string name="account_notifications_on">On</string>
+    <string name="account_notifications_off">Off</string>
+    <string name="account_home_tour_label">Home tour</string>
+    <string name="account_home_tour_replay">Replay</string>
+    <string name="account_sign_out">Log out</string>
+    <string name="account_version_footer">Viora %1$s · Android</string>
+    <string name="account_language_notice">Language: English</string>
+
+    <string name="profile_edit_title">Personal details</string>
+    <string name="profile_edit_headline_lead">Your</string>
+    <string name="profile_edit_headline_emphasis">details.</string>
+    <string name="profile_fullname_label">Full name</string>
+    <string name="profile_fullname_placeholder">Type your name</string>
+    <string name="profile_name_required_error">Your name is required.</string>
+    <string name="profile_phone_label">Mobile · %1$s %2$s</string>
+    <string name="profile_phone_helper">International format: %1$s</string>
+    <string name="profile_email_helper">Verified · used to sign in to Viora</string>
+    <string name="profile_save_changes">Save changes</string>
+    <string name="profile_error_offline">No connection: your changes were not saved. Try again.</string>
+    <string name="profile_error_generic">We could not save your changes. Try again.</string>
+
+    <string name="security_title">Security</string>
+    <string name="security_headline_lead">New</string>
+    <string name="security_headline_emphasis">password.</string>
+    <string name="security_current_password_label">Current password</string>
+    <string name="security_new_password_label">New password</string>
+    <string name="security_confirm_password_label">Confirm new password</string>
+    <string name="security_rule_length">8 characters or more</string>
+    <string name="security_rule_alphanumeric">Letters and numbers</string>
+    <string name="security_rule_different">Different from the current one</string>
+    <string name="security_action_change">Change password</string>
+    <string name="security_error_current_wrong">The current password is not correct.</string>
+    <string name="security_error_length">It must have 8 characters or more.</string>
+    <string name="security_error_alphanumeric">It must have letters and numbers.</string>
+    <string name="security_error_same">It is the same as the current one.</string>
+    <string name="security_error_same_and_no_numbers">It is the same as the current one and has no numbers.</string>
+    <string name="security_error_confirm">It does not match the new password.</string>
+    <string name="security_error_offline">No connection: your password did not change. Try again.</string>
+    <string name="security_error_generic">We could not change your password. Try again.</string>
+
+    <string name="language_sheet_title_lead">App</string>
+    <string name="language_sheet_title_emphasis">language</string>
+    <string name="language_sheet_subtitle">Changes right away, without signing out</string>
+    <string name="language_es_title">Español (Perú)</string>
+    <string name="language_en_title">English</string>
+    <string name="language_sheet_note">Thousands separators and the date format change too. It stays saved on this phone.</string>
+    <string name="language_switch_to_en">Change to English</string>
+    <string name="language_switch_to_es">Cambiar a Español</string>
 </resources>
