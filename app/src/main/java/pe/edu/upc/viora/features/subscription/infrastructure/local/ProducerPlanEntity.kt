@@ -16,4 +16,5 @@ data class ProducerPlanEntity(
     @ColumnInfo(name = "quota_increment_ha") val quotaIncrementHa: String,
     @ColumnInfo(name = "billing_months") val billingMonths: Int,
     @ColumnInfo(name = "tariff_version") val tariffVersion: String,
+    @ColumnInfo(name = "tax_included", defaultValue = "0") val taxIncluded: Boolean,
 )

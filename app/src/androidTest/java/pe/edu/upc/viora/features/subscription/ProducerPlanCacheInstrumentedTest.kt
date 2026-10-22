@@ -22,7 +22,7 @@ import pe.edu.upc.viora.features.subscription.infrastructure.local.ProducerPlanE
 class ProducerPlanCacheInstrumentedTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private fun offer(rate: String = "55.123456789012345678") = ProducerPlanEntity(
-        "PRODUCER_ANNUAL", PRODUCER_PLAN_CATALOG_KEY, "PEN", rate, "0.18", "0.5", "0.5", 12, "test")
+        "PRODUCER_ANNUAL", PRODUCER_PLAN_CATALOG_KEY, "PEN", rate, "0.18", "0.5", "0.5", 12, "test", true)
     private fun open(name: String) = Room.databaseBuilder<AppDatabase>(context, name)
         .addMigrations(*AppMigrations.ALL).build()
 
@@ -98,4 +98,48 @@ class ProducerPlanCacheInstrumentedTest {
     }
 
     private fun contextForTests() = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().context
+
+    @Test fun migrationFromElevenInvalidatesOnlyLegacyOffersAndPreservesQueuedData() = runBlocking {
+        val name = "producer-tax-migration-${UUID.randomUUID()}"
+        try {
+            val schema = contextForTests().assets.open("pe.edu.upc.viora.core.database.AppDatabase/11.json")
+                .bufferedReader().use { JSONObject(it.readText()).getJSONObject("database") }
+            val sqlite = context.openOrCreateDatabase(name, Context.MODE_PRIVATE, null)
+            try {
+                val entities = schema.getJSONArray("entities")
+                for (index in 0 until entities.length()) {
+                    val entity = entities.getJSONObject(index)
+                    val table = entity.getString("tableName")
+                    sqlite.execSQL(entity.getString("createSql").replace("\${TABLE_NAME}", table))
+                    val indices = entity.optJSONArray("indices") ?: org.json.JSONArray()
+                    for (i in 0 until indices.length()) {
+                        sqlite.execSQL(indices.getJSONObject(i).getString("createSql").replace("\${TABLE_NAME}", table))
+                    }
+                }
+                sqlite.execSQL("INSERT INTO producer_plan_offers VALUES ('PRODUCER_ANNUAL', " +
+                    "'subscription:producer-plans', 'PEN', '55', '0.18', '0.5', '0.5', 12, 'legacy')")
+                sqlite.execSQL("INSERT INTO cache_metadata VALUES ('subscription:producer-plans', 100), ('keep', 99)")
+                sqlite.execSQL("INSERT INTO pending_settlements (plot_id, campaign_year, green_olives_kg, " +
+                    "black_olives_kg, weighed_on, idempotency_key, status, attempt_count, created_at, updated_at) " +
+                    "VALUES ('keep-plot', 2026, 1, 0, '2026-10-22', 'keep-key', 'PENDING', 0, 1, 1)")
+                sqlite.version = 11
+            } finally { sqlite.close() }
+            val db = open(name)
+            try {
+                assertNull(db.producerPlanDao().observeCatalog(PRODUCER_PLAN_CATALOG_KEY).first())
+                assertNull(db.cacheMetadataDao().fetchedAt(PRODUCER_PLAN_CATALOG_KEY))
+                assertEquals(99L, db.cacheMetadataDao().fetchedAt("keep"))
+                db.producerPlanDao().replaceCatalog(listOf(offer()), 300)
+                assertTrue(db.producerPlanDao().observeCatalog(PRODUCER_PLAN_CATALOG_KEY).first()!!.offers.single().taxIncluded)
+            } finally { db.close() }
+            val verified = SQLiteDatabase.openDatabase(context.getDatabasePath(name).path, null, SQLiteDatabase.OPEN_READONLY)
+            try {
+                assertEquals(12, verified.version)
+                verified.rawQuery("SELECT idempotency_key FROM pending_settlements WHERE plot_id = 'keep-plot'", null).use {
+                    assertTrue(it.moveToFirst())
+                    assertEquals("keep-key", it.getString(0))
+                }
+            } finally { verified.close() }
+        } finally { context.deleteDatabase(name) }
+    }
 }

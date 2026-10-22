@@ -168,8 +168,18 @@ object AppMigrations {
     /** Adds the exact-decimal producer offer cache without altering agronomic or queued records. */
     val MIGRATION_10_11 = Migration(10, 11) { connection -> connection.execSQL(MIGRATION_10_11_SQL) }
 
+    internal const val MIGRATION_11_12_SQL =
+        "ALTER TABLE `producer_plan_offers` ADD COLUMN `tax_included` INTEGER NOT NULL DEFAULT 0"
+
+    /** Invalidates only the old public catalog; account, agronomic and queued data stay intact. */
+    val MIGRATION_11_12 = Migration(11, 12) { connection ->
+        connection.execSQL(MIGRATION_11_12_SQL)
+        connection.execSQL("DELETE FROM `producer_plan_offers`")
+        connection.execSQL("DELETE FROM `cache_metadata` WHERE `resource_key` = 'subscription:producer-plans'")
+    }
+
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-        MIGRATION_9_10, MIGRATION_10_11,
+        MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12,
     )
 }

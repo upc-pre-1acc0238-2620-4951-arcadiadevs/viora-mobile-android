@@ -14,4 +14,5 @@ data class ProducerPlanOfferDto(
     @Serializable(with = ProducerPlanDecimalSerializer::class) val quotaIncrementHa: BigDecimal,
     val billingMonths: Int,
     val tariffVersion: String,
+    val taxIncluded: Boolean,
 )

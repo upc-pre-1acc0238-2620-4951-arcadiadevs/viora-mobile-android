@@ -8,11 +8,11 @@ import pe.edu.upc.viora.features.subscription.infrastructure.local.ProducerPlanE
 
 fun ProducerPlanOffer.toEntity() = ProducerPlanEntity(
     code.value, PRODUCER_PLAN_CATALOG_KEY, currency, monthlyRatePerHa.toPlainString(), taxRate.toPlainString(),
-    minimumQuota.hectares.toPlainString(), quotaIncrement.hectares.toPlainString(), billingMonths, tariffVersion,
+    minimumQuota.hectares.toPlainString(), quotaIncrement.hectares.toPlainString(), billingMonths, tariffVersion, taxIncluded,
 )
 
 fun ProducerPlanEntity.toDomain() = ProducerPlanOffer(
     ProducerPlanCode(code), currency, monthlyRatePerHa.toBigDecimal(), taxRate.toBigDecimal(),
     PlanCapacity.of(minimumQuotaHa.toBigDecimal()), PlanCapacity.of(quotaIncrementHa.toBigDecimal()),
-    billingMonths, tariffVersion,
+    billingMonths, tariffVersion, taxIncluded,
 )

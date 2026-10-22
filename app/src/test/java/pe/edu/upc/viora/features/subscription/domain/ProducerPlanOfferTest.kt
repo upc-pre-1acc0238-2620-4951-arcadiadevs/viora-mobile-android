@@ -9,9 +9,37 @@ import pe.edu.upc.viora.features.subscription.domain.valueobject.ProducerPlanCod
 
 class ProducerPlanOfferTest {
     private fun capacity(value: String) = PlanCapacity.of(BigDecimal(value))
-    private fun offer(rate: String = "55", tax: String = "0.18", minimum: String = "0.5", step: String = "0.5") =
+    private fun offer(rate: String = "55", tax: String = "0.18", minimum: String = "0.5", step: String = "0.5", included: Boolean = false) =
         ProducerPlanOffer(ProducerPlanCode("PRODUCER_ANNUAL"), "PEN", BigDecimal(rate), BigDecimal(tax),
-            capacity(minimum), capacity(step), 12, "test-tariff")
+            capacity(minimum), capacity(step), 12, "test-tariff", included)
+
+    @Test fun `inclusive annual prices preserve exact totals and extract tax without monthly rounding`() {
+        val cases = listOf(
+            listOf("0.5", "330.00", "279.66", "50.34"),
+            listOf("1", "660.00", "559.32", "100.68"),
+            listOf("10", "6600.00", "5593.22", "1006.78"),
+            listOf("12", "7920.00", "6711.86", "1208.14"),
+        )
+        cases.forEach { (quota, total, base, tax) ->
+            val price = offer(included = true).estimate(capacity(quota))
+            assertEquals(BigDecimal(total), price.total)
+            assertEquals(BigDecimal(base), price.base)
+            assertEquals(BigDecimal(tax), price.tax)
+            assertEquals(price.total, price.base.add(price.tax))
+            assertEquals(BigDecimal(total).divide(BigDecimal("12")), price.monthlyTotal)
+        }
+    }
+
+    @Test fun `inclusive price uses configured tariff and rate and supports zero tax`() {
+        val custom = offer(rate = "70", tax = "0.10", minimum = "0.25", step = "0.25", included = true)
+            .estimate(capacity("0.25"))
+        assertEquals(BigDecimal("210.00"), custom.total)
+        assertEquals(BigDecimal("190.91"), custom.base)
+        assertEquals(BigDecimal("19.09"), custom.tax)
+        val untaxed = offer(tax = "0", included = true).estimate(capacity("10"))
+        assertEquals(untaxed.total, untaxed.base)
+        assertEquals(BigDecimal("0.00"), untaxed.tax)
+    }
 
     @Test fun `half a hectare includes the agreed tax exactly once`() {
         val estimate = offer().estimate(capacity("0.5"))

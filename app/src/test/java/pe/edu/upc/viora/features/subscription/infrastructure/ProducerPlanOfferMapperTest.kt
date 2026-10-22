@@ -9,7 +9,7 @@ import pe.edu.upc.viora.features.subscription.infrastructure.mapper.toDomain
 import pe.edu.upc.viora.features.subscription.infrastructure.remote.ProducerPlanOfferDto
 
 internal val catalogFixture = """[{"code":"PRODUCER_ANNUAL","currency":"PEN","monthlyRatePerHa":55,
-    "taxRate":0.18,"minimumQuotaHa":0.5,"quotaIncrementHa":0.5,"billingMonths":12,"tariffVersion":"fixture-1"}]"""
+    "taxRate":0.18,"minimumQuotaHa":0.5,"quotaIncrementHa":0.5,"billingMonths":12,"tariffVersion":"fixture-1","taxIncluded":true}]"""
 
 class ProducerPlanOfferMapperTest {
     private val json = Json { ignoreUnknownKeys = true }
@@ -24,6 +24,7 @@ class ProducerPlanOfferMapperTest {
         assertEquals(BigDecimal("0.5"), plan.minimumQuota.hectares)
         assertEquals(12, plan.billingMonths)
         assertEquals("fixture-1", plan.tariffVersion)
+        assertTrue(plan.taxIncluded)
     }
 
     @Test fun `decimal precision survives decoding and encoding without double`() {
@@ -35,6 +36,7 @@ class ProducerPlanOfferMapperTest {
 
     @Test fun `a missing commercial field cannot silently become a default tariff`() {
         assertThrows(SerializationException::class.java) { decode(catalogFixture.replace("\"taxRate\":0.18,", "")) }
+        assertThrows(SerializationException::class.java) { decode(catalogFixture.replace(",\"taxIncluded\":true", "")) }
     }
 
     @Test fun `invalid and non-finite values cannot become an offer`() {

@@ -16,6 +16,7 @@ data class ProducerPlanOffer(
     val quotaIncrement: PlanCapacity,
     val billingMonths: Int,
     val tariffVersion: String,
+    val taxIncluded: Boolean,
 ) {
     init {
         require(currency.matches(Regex("[A-Z]{3}"))) { "subscription.currency.invalid" }
@@ -36,11 +37,14 @@ data class ProducerPlanOffer(
     fun estimate(capacity: PlanCapacity): PlanEstimate {
         require(accepts(capacity)) { "subscription.capacity.invalid" }
         val monthlyBase = monthlyRatePerHa.multiply(capacity.hectares)
-        val base = monthlyBase.multiply(billingMonths.toBigDecimal()).setScale(2, RoundingMode.HALF_UP)
-        val tax = base.multiply(taxRate).setScale(2, RoundingMode.HALF_UP)
-        return PlanEstimate(base, tax, base.add(tax), monthlyBase.setScale(2, RoundingMode.HALF_UP))
+        val annualRate = monthlyBase.multiply(billingMonths.toBigDecimal()).setScale(2, RoundingMode.HALF_UP)
+        // Retain explicit legacy catalog semantics; never assume a missing remote flag is inclusive.
+        val base = if (taxIncluded) annualRate.divide(BigDecimal.ONE.add(taxRate), 2, RoundingMode.HALF_UP) else annualRate
+        val tax = if (taxIncluded) annualRate.subtract(base) else base.multiply(taxRate).setScale(2, RoundingMode.HALF_UP)
+        val total = base.add(tax)
+        return PlanEstimate(base, tax, total, total.divide(billingMonths.toBigDecimal(), 2, RoundingMode.HALF_UP))
     }
 }
 
 /** Exact estimated breakdown in the currency of its offer. */
-data class PlanEstimate(val base: BigDecimal, val tax: BigDecimal, val total: BigDecimal, val monthlyBase: BigDecimal)
+data class PlanEstimate(val base: BigDecimal, val tax: BigDecimal, val total: BigDecimal, val monthlyTotal: BigDecimal)

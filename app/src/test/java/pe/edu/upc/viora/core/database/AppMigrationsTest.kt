@@ -31,6 +31,7 @@ class AppMigrationsTest {
     private val v9 = createSqlByTable(9)
     private val v10 = createSqlByTable(10)
     private val v11 = createSqlByTable(11)
+    private val v12 = createSqlByTable(12)
 
     @Test
     fun `new tables are created exactly as the exported v5 schema`() {
@@ -125,7 +126,7 @@ class AppMigrationsTest {
 
     @Test
     fun `every version from 1 to the current one has a migration`() {
-        (1 until 11).forEach { from ->
+        (1 until 12).forEach { from ->
             assertTrue("missing $from -> ${from + 1}", AppMigrations.ALL.any { it.startVersion == from && it.endVersion == from + 1 })
         }
     }
@@ -141,5 +142,14 @@ class AppMigrationsTest {
     fun `the producer catalog leaves all previous tables untouched`() {
         assertEquals(v10.keys + "producer_plan_offers", v11.keys)
         v10.keys.forEach { assertEquals(v10[it], v11[it]) }
+    }
+
+    @Test
+    fun `tax inclusion migration only adds its declared column and preserves all other tables`() {
+        val column = AppMigrations.MIGRATION_11_12_SQL.substringAfter("ADD COLUMN ")
+        assertEquals(v11.keys, v12.keys)
+        assertEquals(v11.getValue("producer_plan_offers").replace(", PRIMARY KEY(`code`))", ", $column, PRIMARY KEY(`code`))"),
+            v12.getValue("producer_plan_offers"))
+        (v11.keys - "producer_plan_offers").forEach { assertEquals(v11[it], v12[it]) }
     }
 }

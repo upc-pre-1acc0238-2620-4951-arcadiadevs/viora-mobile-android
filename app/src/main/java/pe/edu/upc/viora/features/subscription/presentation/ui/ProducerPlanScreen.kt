@@ -193,7 +193,7 @@ private fun PlanEstimateSummary(state: ProducerPlanUiState.Content) {
             .format(state.selectedOffer.taxRate)
         Text(stringResource(R.string.producer_plan_tax, percent, formatPlanMoney(estimate.tax, currency, locale)),
             style = MaterialTheme.typography.bodyMedium, color = Neutral700)
-        Text(stringResource(R.string.producer_plan_monthly, formatPlanMoney(estimate.monthlyBase, currency, locale)),
+        Text(stringResource(R.string.producer_plan_monthly, formatPlanMoney(estimate.monthlyTotal, currency, locale)),
             style = MaterialTheme.typography.bodySmall, color = Neutral700)
         Text(stringResource(R.string.producer_plan_estimate_notice), Modifier.padding(top = Spacing.xs),
             style = MaterialTheme.typography.bodySmall, color = Neutral600)

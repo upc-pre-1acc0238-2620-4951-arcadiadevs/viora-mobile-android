@@ -29,7 +29,7 @@ class ProducerPlanScreenInstrumentedTest {
 
     @Test fun selectionUpdatesEstimateAndCooperativeActionWorks() {
         val offer = ProducerPlanOffer(ProducerPlanCode("PRODUCER_ANNUAL"), "PEN", BigDecimal("55"),
-            BigDecimal("0.18"), PlanCapacity.of(BigDecimal("0.5")), PlanCapacity.of(BigDecimal("0.5")), 12, "test")
+            BigDecimal("0.18"), PlanCapacity.of(BigDecimal("0.5")), PlanCapacity.of(BigDecimal("0.5")), 12, "test", true)
         var capacity by mutableStateOf(offer.minimumQuota)
         var cooperativeClicks = 0
         var increaseLabel = ""
@@ -48,14 +48,14 @@ class ProducerPlanScreenInstrumentedTest {
             }
         }
         compose.onNodeWithContentDescription(decreaseLabel).assertIsNotEnabled()
-        compose.onNodeWithTag("producer-plan-total").assertTextContains("389", substring = true)
+        compose.onNodeWithTag("producer-plan-total").assertTextContains("330", substring = true)
         val screenshot = compose.onRoot().captureToImage().asAndroidBitmap()
         val destination = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext
             .getExternalFilesDir(null)!!.resolve("producer-plan.png")
         destination.outputStream().use { screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
         compose.onNodeWithContentDescription(increaseLabel).performClick()
         compose.onNodeWithContentDescription(decreaseLabel).assertIsEnabled()
-        compose.onNodeWithTag("producer-plan-total").assertTextContains("778", substring = true)
+        compose.onNodeWithTag("producer-plan-total").assertTextContains("660", substring = true)
         compose.onNodeWithText(cooperativeLabel).performScrollTo().performClick()
         compose.runOnIdle { assertEquals(1, cooperativeClicks) }
     }

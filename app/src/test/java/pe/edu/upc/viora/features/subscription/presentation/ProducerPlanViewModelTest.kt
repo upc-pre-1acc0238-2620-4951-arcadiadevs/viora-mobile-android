@@ -40,7 +40,7 @@ class ProducerPlanViewModelTest {
     private val fetchedAt = Instant.parse("2026-10-21T12:00:00Z")
     private fun offer(step: String = "0.5", code: String = "PRODUCER_ANNUAL") = ProducerPlanOffer(
         ProducerPlanCode(code), "PEN", BigDecimal("55"), BigDecimal("0.18"),
-        PlanCapacity.of(BigDecimal(step)), PlanCapacity.of(BigDecimal(step)), 12, "fixture-1")
+        PlanCapacity.of(BigDecimal(step)), PlanCapacity.of(BigDecimal(step)), 12, "fixture-1", true)
 
     @Before fun setUp() { Dispatchers.setMain(UnconfinedTestDispatcher()) }
     @After fun tearDown() { stores.forEach { it.clear() }; Dispatchers.resetMain() }
@@ -66,7 +66,7 @@ class ProducerPlanViewModelTest {
         assertTrue(state.isSavedCopy)
         assertEquals(fetchedAt, state.fetchedAt)
         assertEquals(AppError.Offline, state.error)
-        assertEquals(BigDecimal("389.40"), state.estimate.total)
+        assertEquals(BigDecimal("330.00"), state.estimate.total)
     }
 
     @Test fun `selection starts at the server minimum and never decreases below it`() {

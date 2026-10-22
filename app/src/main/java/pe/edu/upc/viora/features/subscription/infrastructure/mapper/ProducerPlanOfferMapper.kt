@@ -10,4 +10,5 @@ fun ProducerPlanOfferDto.toDomain() = ProducerPlanOffer(
     code = ProducerPlanCode(code), currency = currency, monthlyRatePerHa = monthlyRatePerHa,
     taxRate = taxRate, minimumQuota = PlanCapacity.of(minimumQuotaHa),
     quotaIncrement = PlanCapacity.of(quotaIncrementHa), billingMonths = billingMonths, tariffVersion = tariffVersion,
+    taxIncluded = taxIncluded,
 )
