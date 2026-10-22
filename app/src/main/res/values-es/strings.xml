@@ -1503,6 +1503,7 @@
     <string name="account_notifications_off">Desactivadas</string>
     <string name="account_home_tour_label">Recorrido del Inicio</string>
     <string name="account_home_tour_replay">Ver de nuevo</string>
+    <string name="account_animated_voice_label">Voz de Viora animada</string>
     <string name="account_sign_out">Cerrar sesión</string>
     <string name="account_version_footer">Viora %1$s · Android</string>
     <string name="account_language_notice">Idioma: Español</string>

@@ -4,6 +4,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.profiles.domain.entity.UserProfile
+import pe.edu.upc.viora.features.profiles.domain.repository.AccountPreferencesRepository
 import pe.edu.upc.viora.features.profiles.domain.repository.ProfileRepository
 
 /** The profile kept on the phone; null until it is downloaded once. */
@@ -36,4 +37,14 @@ class CheckMembershipUseCase @Inject constructor(private val repository: Profile
 /** Closes the session on this phone. */
 class SignOutUseCase @Inject constructor(private val repository: ProfileRepository) {
     suspend operator fun invoke() = repository.signOut()
+}
+
+/** Whether Viora's fixed texts are written letter by letter (Mi cuenta › Voz de Viora animada). */
+class ObserveAnimatedVoiceUseCase @Inject constructor(private val repository: AccountPreferencesRepository) {
+    operator fun invoke(): Flow<Boolean> = repository.animatedVoice
+}
+
+/** Turns the writing of Viora's fixed texts on or off; the assistant's replies are always written. */
+class SetAnimatedVoiceUseCase @Inject constructor(private val repository: AccountPreferencesRepository) {
+    suspend operator fun invoke(enabled: Boolean) = repository.setAnimatedVoice(enabled)
 }

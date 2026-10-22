@@ -1498,6 +1498,7 @@
     <string name="account_notifications_off">Off</string>
     <string name="account_home_tour_label">Home tour</string>
     <string name="account_home_tour_replay">Replay</string>
+    <string name="account_animated_voice_label">Animated Viora voice</string>
     <string name="account_sign_out">Log out</string>
     <string name="account_version_footer">Viora %1$s · Android</string>
     <string name="account_language_notice">Language: English</string>

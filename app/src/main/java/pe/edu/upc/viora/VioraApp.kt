@@ -32,6 +32,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import pe.edu.upc.viora.core.designsystem.component.LocalVioraVoiceAnimated
 import pe.edu.upc.viora.core.designsystem.component.TabBarAction
 import pe.edu.upc.viora.core.designsystem.component.TabBarItem
 import pe.edu.upc.viora.core.designsystem.component.TabBarMode
@@ -55,6 +56,7 @@ import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeTourViewModel
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
+import pe.edu.upc.viora.features.profiles.presentation.viewmodel.VoicePreferenceViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
@@ -79,6 +81,8 @@ fun VioraApp(modifier: Modifier = Modifier) {
     val tabs = TopLevelDestination.entries
     val tourTargets = remember { HomeTourTargets() }
     val tourViewModel: HomeTourViewModel = hiltViewModel()
+    val voicePreference: VoicePreferenceViewModel = hiltViewModel()
+    val animatedVoice by voicePreference.animatedVoice.collectAsStateWithLifecycle()
     val pendingTours by tourViewModel.pendingTours.collectAsStateWithLifecycle()
     var runningTour by remember { mutableStateOf<HomeTour?>(null) }
     // -1 on the plot screens (detail, alternation...): they belong to no tab, they are opened on
@@ -129,7 +133,7 @@ fun VioraApp(modifier: Modifier = Modifier) {
 
     // No insets here: each screen decides how to use the area under the system bars (maps go
     // beneath them, lists pad themselves), so the status bar can stay transparent.
-    CompositionLocalProvider(LocalHomeTourTargets provides tourTargets) {
+    CompositionLocalProvider(LocalHomeTourTargets provides tourTargets, LocalVioraVoiceAnimated provides animatedVoice) {
     Scaffold(modifier = modifier.fillMaxSize(), contentWindowInsets = WindowInsets(0, 0, 0, 0)) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             AppNavHost(navController = navController)
