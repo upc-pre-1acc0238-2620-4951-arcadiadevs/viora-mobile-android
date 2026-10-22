@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.profiles.presentation
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -7,68 +8,48 @@ import pe.edu.upc.viora.features.profiles.presentation.state.ChangePasswordUiSta
 
 class ChangePasswordValidationTest {
 
+    private fun state(current: String = "Olivo2025", new: String, confirm: String = new) =
+        ChangePasswordUiState(currentPassword = current, newPassword = new, confirmPassword = confirm)
+
     @Test
-    fun `US04 esc 1 - valid current and new password with alphanumeric enables submit`() {
-        val state = ChangePasswordUiState(
-            currentPassword = "OldPassword1",
-            newPassword = "NewPassword2",
-            confirmPassword = "NewPassword2",
-        )
-        assertTrue(state.ruleLengthMet)
-        assertTrue(state.ruleAlphanumericMet)
-        assertTrue(state.ruleDifferentMet)
-        assertTrue(state.newPasswordValid)
-        assertTrue(state.confirmMatches)
-        assertTrue(state.canSubmit)
+    fun `US04 esc 1 - a new password of 8 or more letters and numbers, different and confirmed, can be sent`() {
+        val ready = state(new = "Cosecha2026")
+
+        assertTrue(ready.newPasswordValid)
+        assertTrue(ready.canSubmit)
+        assertEquals(4, ready.strength)
     }
 
     @Test
-    fun `US04 esc 3 - new password with less than 8 characters or no digits is rejected`() {
-        // Less than 8 characters
-        val shortPassword = ChangePasswordUiState(
-            currentPassword = "OldPassword1",
-            newPassword = "Short1",
-            confirmPassword = "Short1",
-            newPasswordTouched = true,
-        )
-        assertFalse(shortPassword.ruleLengthMet)
-        assertFalse(shortPassword.newPasswordValid)
-        assertFalse(shortPassword.canSubmit)
-
-        // No digits
-        val noDigits = ChangePasswordUiState(
-            currentPassword = "OldPassword1",
-            newPassword = "OnlyLettersHere",
-            confirmPassword = "OnlyLettersHere",
-            newPasswordTouched = true,
-        )
-        assertFalse(noDigits.ruleAlphanumericMet)
-        assertFalse(noDigits.newPasswordValid)
-        assertFalse(noDigits.canSubmit)
+    fun `US04 esc 3 - shorter than 8 or without numbers is refused`() {
+        assertFalse(state(new = "Abc123").newPasswordValid)
+        assertFalse(state(new = "SoloLetras").newPasswordValid)
+        assertFalse(state(new = "SoloLetras").canSubmit)
     }
 
     @Test
-    fun `US04 esc 4 - new password identical to current password is rejected`() {
-        val identicalPassword = ChangePasswordUiState(
-            currentPassword = "OldPassword1",
-            newPassword = "OldPassword1",
-            confirmPassword = "OldPassword1",
-            newPasswordTouched = true,
-        )
-        assertFalse(identicalPassword.ruleDifferentMet)
-        assertFalse(identicalPassword.newPasswordValid)
-        assertFalse(identicalPassword.canSubmit)
+    fun `US04 esc 4 - the same as the current one is refused and judged right away`() {
+        val same = state(current = "Olivo2025", new = "Olivo2025")
+
+        assertFalse(same.ruleDifferentMet)
+        assertFalse(same.canSubmit)
+        assertTrue(same.showRuleErrors)
     }
 
     @Test
-    fun `confirmation mismatch blocks submit`() {
-        val mismatch = ChangePasswordUiState(
-            currentPassword = "OldPassword1",
-            newPassword = "NewPassword2",
-            confirmPassword = "DifferentPassword3",
-        )
-        assertTrue(mismatch.newPasswordValid)
-        assertFalse(mismatch.confirmMatches)
+    fun `the rules are not judged while the first characters are typed`() {
+        val typing = state(new = "Cos")
+
+        assertFalse(typing.showRuleErrors)
+        assertEquals(1, typing.strength)
+    }
+
+    @Test
+    fun `a confirmation that does not match blocks sending and shows once it is as long`() {
+        assertFalse(state(new = "Cosecha2026", confirm = "Cosecha").confirmMismatch)
+        val mismatch = state(new = "Cosecha2026", confirm = "Cosecha2027")
+
+        assertTrue(mismatch.confirmMismatch)
         assertFalse(mismatch.canSubmit)
     }
 }

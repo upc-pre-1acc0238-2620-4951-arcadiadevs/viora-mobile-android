@@ -7,45 +7,26 @@ import pe.edu.upc.viora.features.profiles.domain.valueobject.ProfileId
 
 class UserProfileTest {
 
+    private fun profile(fullName: String, phone: String = "+51952184337", country: String = "PE") =
+        UserProfile(ProfileId("p-1"), "u-1", fullName, country, phone)
+
     @Test
-    fun `initials are extracted correctly from full name`() {
-        val user1 = UserProfile(
-            id = ProfileId("1"),
-            userId = "u1",
-            fullName = "Rubén Ticona",
-            country = "PE",
-            phoneNumber = "+51951406118",
-        )
-        assertEquals("RT", user1.initials)
-
-        val user2 = UserProfile(
-            id = ProfileId("2"),
-            userId = "u2",
-            fullName = "Maria",
-            country = "PE",
-            phoneNumber = "+51987654321",
-        )
-        assertEquals("MA", user2.initials)
-
-        val user3 = UserProfile(
-            id = ProfileId("3"),
-            userId = "u3",
-            fullName = "Carlos Alberto Mendoza",
-            country = "PE",
-            phoneNumber = "+51912345678",
-        )
-        assertEquals("CA", user3.initials)
+    fun `initials take the first letters of the first two names`() {
+        assertEquals("TM", profile("Teodoro Mamani").initials)
+        assertEquals("TM", profile("  teodoro   mamani quispe ").initials)
+        assertEquals("TE", profile("Teodoro").initials)
+        assertEquals("VI", profile("   ").initials)
     }
 
     @Test
-    fun `formatted phone number formats international`() {
-        val user = UserProfile(
-            id = ProfileId("1"),
-            userId = "u1",
-            fullName = "Rubén Ticona",
-            country = "PE",
-            phoneNumber = "+51951406118",
-        )
-        assertEquals("+51 951 406 118", user.formattedPhoneNumber)
+    fun `the stored E164 number reads as national digits and in international format`() {
+        val peru = profile("Teodoro Mamani")
+        assertEquals("952184337", peru.nationalNumber)
+        assertEquals("+51 952 184 337", peru.formattedPhoneNumber)
+
+        // A Chilean number keeps its own dial code, not Peru's.
+        val chile = profile("Ana Rojas", phone = "+56912345678", country = "CL")
+        assertEquals("912345678", chile.nationalNumber)
+        assertEquals("+56 912345678", chile.formattedPhoneNumber)
     }
 }
