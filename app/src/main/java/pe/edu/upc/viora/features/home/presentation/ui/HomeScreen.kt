@@ -73,6 +73,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenSoilMoisture: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
+    onOpenAccount: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
@@ -87,6 +88,7 @@ fun HomeScreen(
         onOpenAlternation = onOpenAlternation,
         onOpenWeatherForecast = onOpenWeatherForecast,
         onOpenSoilMoisture = onOpenSoilMoisture,
+        onOpenAccount = onOpenAccount,
         onFocusPlot = viewModel::focusPlot,
         modifier = modifier,
         sections = sections,
@@ -106,6 +108,7 @@ fun HomeScreenContent(
     onOpenAlternation: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenSoilMoisture: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
+    onOpenAccount: () -> Unit = {},
     onFocusPlot: (PlotId) -> Unit = {},
     today: LocalDate = LocalDate.now(),
     sections: @Composable ColumnScope.() -> Unit = {},
@@ -143,6 +146,7 @@ fun HomeScreenContent(
                 lastRefresh = state.lastRefresh,
                 onOpenAlerts = onOpenAlerts,
                 hasUnreadAlerts = state.activeAlertsCount > 0,
+                onOpenAccount = onOpenAccount,
                 modifier = Modifier.padding(horizontal = ScreenPadding),
             )
             Spacer(Modifier.height(28.dp))
