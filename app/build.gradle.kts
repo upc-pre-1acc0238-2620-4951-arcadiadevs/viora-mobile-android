@@ -53,8 +53,8 @@ android {
         applicationId = "pe.edu.upc.viora"
         minSdk = 26
         targetSdk = 37
-        versionCode = 19
-        versionName = "1.6.1"
+        versionCode = 20
+        versionName = "1.7.0"
 
         // The Maps SDK reads this string resource at startup.
         resValue("string", "mapbox_access_token", mapboxPublicToken)
@@ -90,6 +90,10 @@ android {
                 enable = false
             }
         }
+    }
+    // Lists Spanish and English in the phone's per-app language settings (Android 13+), as Mi cuenta does.
+    androidResources {
+        generateLocaleConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
