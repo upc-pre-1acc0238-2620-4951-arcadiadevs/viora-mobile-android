@@ -256,6 +256,8 @@
     <string name="tour_not_now">Not now</string>
     <string name="tour_start">Start</string>
     <string name="tour_next">Next</string>
+    <!-- Voz de Viora -->
+    <string name="viora_voice_thinking">Viora is thinking</string>
     <string name="tour_finish">Start using Viora</string>
     <string name="tour_welcome_title">Hello.\nLet me show you *your Home*.</string>
     <plurals name="tour_welcome_body">
@@ -276,6 +278,18 @@
     <string name="tour_register_body">Home, Plots, Plan and Logbook. With the + button you record a sampling, a thinning or a harvest in the field, even without signal.</string>
     <string name="tour_done_title">Ready. I\'ll let you know\n*about the rest*.</string>
     <string name="tour_done_body">If you want to go over it again, it is in My account › Home tour.</string>
+    <!-- Tour without plots (P10 · Recorrido sin lotes) -->
+    <string name="tour_first_welcome_title">Hello.\nLet me show you *the first step*.</string>
+    <plurals name="tour_first_welcome_body">
+        <item quantity="one">Just one stop, under half a minute. I will show you the rest of your Home once you register your first plot.</item>
+        <item quantity="other">%1$d stops, under half a minute. I will show you the rest of your Home once you register your first plot.</item>
+    </plurals>
+    <string name="tour_first_plot_title">It all starts with *your plot*.</string>
+    <string name="tour_first_plot_body">Draw its outline on the map or walk it with the GPS. With the variety I work out chill, weather and load for each plot.</string>
+    <string name="tour_first_register_body">Home, Plots, Plan and Log. With the + button you register a plot, a sampling or a harvest, even without signal.</string>
+    <string name="tour_first_done_title">Done. Now draw\n*your first plot*.</string>
+    <string name="tour_first_done_body">Once you register it I will show you the rest of your Home. To go over it again: My account › Home tour.</string>
+    <string name="tour_first_finish">Register my first plot</string>
     <!-- Sensors (US13, US14) -->
     <string name="sensors_subtitle_top">Sensors · virtual nodes</string>
     <string name="sensors_title_lead">Your</string>
@@ -1484,6 +1498,7 @@
     <string name="account_notifications_off">Off</string>
     <string name="account_home_tour_label">Home tour</string>
     <string name="account_home_tour_replay">Replay</string>
+    <string name="account_animated_voice_label">Animated Viora voice</string>
     <string name="account_sign_out">Log out</string>
     <string name="account_version_footer">Viora %1$s · Android</string>
     <string name="account_language_notice">Language: English</string>

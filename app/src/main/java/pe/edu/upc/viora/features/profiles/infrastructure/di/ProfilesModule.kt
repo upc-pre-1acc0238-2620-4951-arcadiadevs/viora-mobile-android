@@ -6,8 +6,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import pe.edu.upc.viora.features.profiles.domain.repository.AccountPreferencesRepository
 import pe.edu.upc.viora.features.profiles.domain.repository.ProfileRepository
 import pe.edu.upc.viora.features.profiles.infrastructure.remote.ProfileService
+import pe.edu.upc.viora.features.profiles.infrastructure.repository.AccountPreferencesRepositoryImpl
 import pe.edu.upc.viora.features.profiles.infrastructure.repository.ProfileRepositoryImpl
 import retrofit2.Retrofit
 
@@ -18,6 +20,10 @@ abstract class ProfilesModule {
     @Binds
     @Singleton
     abstract fun bindProfileRepository(impl: ProfileRepositoryImpl): ProfileRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAccountPreferencesRepository(impl: AccountPreferencesRepositoryImpl): AccountPreferencesRepository
 
     companion object {
         @Provides

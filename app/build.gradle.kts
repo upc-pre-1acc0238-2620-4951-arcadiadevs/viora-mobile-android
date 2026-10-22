@@ -53,8 +53,8 @@ android {
         applicationId = "pe.edu.upc.viora"
         minSdk = 26
         targetSdk = 37
-        versionCode = 20
-        versionName = "1.7.0"
+        versionCode = 21
+        versionName = "1.8.0"
 
         // The Maps SDK reads this string resource at startup.
         resValue("string", "mapbox_access_token", mapboxPublicToken)

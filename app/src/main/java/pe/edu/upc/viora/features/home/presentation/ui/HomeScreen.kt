@@ -182,7 +182,9 @@ fun HomeScreenContent(
                 is HomeUiState.Error -> ErrorState(error = state.error, onRetry = onRefresh)
                 is HomeUiState.NoPlots -> HomeFirstPlotCard(
                     onRegisterPlot = onRegisterPlot,
-                    modifier = Modifier.padding(start = ScreenPadding, end = ScreenPadding, top = 24.dp),
+                    modifier = Modifier
+                        .padding(start = ScreenPadding, end = ScreenPadding, top = 24.dp)
+                        .homeTourTarget(HomeTourTarget.FirstPlot),
                 )
                 is HomeUiState.Content -> {
                     sections()
