@@ -280,6 +280,18 @@
     <string name="tour_register_body">Inicio, Lotes, Plan y Bitácora. Con el botón + registras en campo un muestreo, un aclareo o una cosecha, aunque no tengas señal.</string>
     <string name="tour_done_title">Listo. Lo demás\n*te lo aviso yo*.</string>
     <string name="tour_done_body">Si quieres repasarlo, está en Mi cuenta › Recorrido del Inicio.</string>
+    <!-- Recorrido sin lotes (P10 · Recorrido sin lotes) -->
+    <string name="tour_first_welcome_title">Hola.\nTe muestro *lo primero*.</string>
+    <plurals name="tour_first_welcome_body">
+        <item quantity="one">Es una sola parada, menos de medio minuto. El resto del Inicio te lo muestro cuando registres tu primer lote.</item>
+        <item quantity="other">Son %1$d paradas, menos de medio minuto. El resto del Inicio te lo muestro cuando registres tu primer lote.</item>
+    </plurals>
+    <string name="tour_first_plot_title">Todo parte de *tu lote*.</string>
+    <string name="tour_first_plot_body">Dibuja su contorno en el mapa o camínalo con el GPS. Con la variedad calculo frío, clima y carga para cada parcela.</string>
+    <string name="tour_first_register_body">Inicio, Lotes, Plan y Bitácora. Con el botón + registras un lote, un muestreo o una cosecha, aunque no tengas señal.</string>
+    <string name="tour_first_done_title">Listo. Ahora dibuja\n*tu primer lote*.</string>
+    <string name="tour_first_done_body">Cuando lo registres te muestro el resto del Inicio. Si quieres repasarlo, está en Mi cuenta › Recorrido del Inicio.</string>
+    <string name="tour_first_finish">Registrar mi primer lote</string>
     <!-- Sensores (US13, US14) -->
     <string name="sensors_subtitle_top">Sensores · nodos virtuales</string>
     <string name="sensors_title_lead">Tus</string>

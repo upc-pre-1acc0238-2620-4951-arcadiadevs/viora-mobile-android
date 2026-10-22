@@ -12,8 +12,8 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.toSize
 
 /**
- * The places of the Home the tour can point at, in the order the tour visits them. A stop whose
- * section is not on screen (e.g. a feature that is not integrated yet) is simply skipped.
+ * The places of the Home a tour can point at; each tour lists its own order. A stop whose section
+ * is not on screen (e.g. a feature that is not integrated yet) is simply skipped.
  */
 enum class HomeTourTarget {
     /** Headline, context chips and week. */
@@ -30,6 +30,9 @@ enum class HomeTourTarget {
 
     /** "Mis lotes": the carousel of plot cards. */
     Plots,
+
+    /** "Primer paso": the card that invites an account without plots to draw its first one. */
+    FirstPlot,
 
     /** The tab bar with the "+" button. */
     Register,

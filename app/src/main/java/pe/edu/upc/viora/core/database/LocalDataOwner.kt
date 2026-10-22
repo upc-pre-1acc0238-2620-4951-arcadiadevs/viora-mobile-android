@@ -2,6 +2,7 @@ package pe.edu.upc.viora.core.database
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import javax.inject.Inject
@@ -50,7 +51,11 @@ class LocalDataOwner @Inject constructor(
     private companion object {
         val OWNER = stringPreferencesKey("local_data_owner")
 
-        /** Preferences that point into one account's data. */
-        val ACCOUNT_KEYS = listOf(stringPreferencesKey("home_focused_plot"))
+        /** Preferences that belong to one account: the plot chosen in the Home and the tours it saw. */
+        val ACCOUNT_KEYS = listOf(
+            stringPreferencesKey("home_focused_plot"),
+            booleanPreferencesKey("home_tour_seen"),
+            booleanPreferencesKey("home_tour_first_steps_seen"),
+        )
     }
 }

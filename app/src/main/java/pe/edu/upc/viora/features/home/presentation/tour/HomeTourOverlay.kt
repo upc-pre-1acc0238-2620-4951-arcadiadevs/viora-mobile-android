@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.home.presentation.tour
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -36,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +64,7 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.pluralStringResource
@@ -86,6 +89,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.features.home.domain.valueobject.HomeTour
 
 private val VeilColor = Color(0xFF12100E).copy(alpha = 0.74f)
 private val CardShadow = Color(0xFF121A16)
@@ -98,13 +102,60 @@ private val FocusRadius = 24.dp
 /** Texts of a stop of the tour. The title marks its italic part with `*asterisks*`. */
 private class StopTexts(@StringRes val title: Int, @StringRes val body: Int)
 
-private fun HomeTourTarget.texts(): StopTexts = when (this) {
+/** The welcome and closing cards of a tour; [welcomeBody] is a plural on the number of stops. */
+private class TourTexts(
+    @StringRes val welcomeTitle: Int,
+    @PluralsRes val welcomeBody: Int,
+    @StringRes val doneTitle: Int,
+    @StringRes val doneBody: Int,
+    @StringRes val finish: Int,
+)
+
+/** The stops of each tour, in the order it visits them (Figma P10 · Recorrido and Recorrido sin lotes). */
+private val HomeTour.stops: List<HomeTourTarget>
+    get() = when (this) {
+        HomeTour.FIRST_STEPS -> listOf(HomeTourTarget.FirstPlot, HomeTourTarget.Register)
+        HomeTour.FULL -> listOf(
+            HomeTourTarget.Today,
+            HomeTourTarget.Phase,
+            HomeTourTarget.Field,
+            HomeTourTarget.Alternation,
+            HomeTourTarget.Plots,
+            HomeTourTarget.Register,
+        )
+    }
+
+private val HomeTour.texts: TourTexts
+    get() = when (this) {
+        HomeTour.FIRST_STEPS -> TourTexts(
+            R.string.tour_first_welcome_title,
+            R.plurals.tour_first_welcome_body,
+            R.string.tour_first_done_title,
+            R.string.tour_first_done_body,
+            R.string.tour_first_finish,
+        )
+        HomeTour.FULL -> TourTexts(
+            R.string.tour_welcome_title,
+            R.plurals.tour_welcome_body,
+            R.string.tour_done_title,
+            R.string.tour_done_body,
+            R.string.tour_finish,
+        )
+    }
+
+private fun HomeTourTarget.texts(tour: HomeTour): StopTexts = when (this) {
+    HomeTourTarget.FirstPlot -> StopTexts(R.string.tour_first_plot_title, R.string.tour_first_plot_body)
+    HomeTourTarget.Register ->
+        if (tour == HomeTour.FIRST_STEPS) {
+            StopTexts(R.string.tour_register_title, R.string.tour_first_register_body)
+        } else {
+            StopTexts(R.string.tour_register_title, R.string.tour_register_body)
+        }
     HomeTourTarget.Today -> StopTexts(R.string.tour_today_title, R.string.tour_today_body)
     HomeTourTarget.Phase -> StopTexts(R.string.tour_phase_title, R.string.tour_phase_body)
     HomeTourTarget.Field -> StopTexts(R.string.tour_field_title, R.string.tour_field_body)
     HomeTourTarget.Alternation -> StopTexts(R.string.tour_alternation_title, R.string.tour_alternation_body)
     HomeTourTarget.Plots -> StopTexts(R.string.tour_plots_title, R.string.tour_plots_body)
-    HomeTourTarget.Register -> StopTexts(R.string.tour_register_title, R.string.tour_register_body)
 }
 
 /**
@@ -113,20 +164,23 @@ private fun HomeTourTarget.texts(): StopTexts = when (this) {
  * explains it with Viora's voice. The sections report their position through
  * [homeTourTarget]; the overlay scrolls the Home so the section is in view.
  *
- * [onFinish] is called when the tour ends in any way (finished, skipped, "Ahora no" or back).
+ * [tour] picks the stops and texts. [onFinish] is called when the tour ends in any way; `accepted`
+ * is true only for the button of the closing card (the first-steps tour then opens the plot wizard).
  */
 @Composable
 fun HomeTourOverlay(
     targets: HomeTourTargets,
-    onFinish: () -> Unit,
+    tour: HomeTour,
+    onFinish: (accepted: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // The stops are fixed when the tour opens: sections that load later do not change its length.
-    val stops = remember { HomeTourTarget.entries.filter { it in targets.rects.keys } }
+    val stops = remember(tour) { tour.stops.filter { it in targets.rects.keys } }
     val lastStep = stops.size + 1
     var step by rememberSaveable { mutableIntStateOf(0) }
     var shownStep by remember { mutableStateOf<Int?>(null) }
     var focus by remember { mutableStateOf<Rect?>(null) }
+    var cardHeight by remember { mutableFloatStateOf(0f) }
 
     val density = LocalDensity.current
     val window = LocalWindowInfo.current.containerSize
@@ -147,7 +201,7 @@ fun HomeTourOverlay(
         if (shownStep != null) progress.animateTo(progressTarget, tween(durationMillis = 700, easing = FastOutSlowInEasing))
     }
 
-    BackHandler(onBack = onFinish)
+    BackHandler { onFinish(false) }
 
     LaunchedEffect(step) {
         shownStep = null
@@ -165,7 +219,12 @@ fun HomeTourOverlay(
         if (scroll != null && target != HomeTourTarget.Register) {
             val raw = targets.rects[target]
             if (raw != null) {
-                val desiredTop = statusTop + with(density) { 60.dp.toPx() }
+                val nearTop = statusTop + with(density) { 60.dp.toPx() }
+                val cardSpace = with(density) { (CardGap + CARD_ESTIMATED_HEIGHT + FocusMargin).toPx() }
+                // A section too tall to leave room for the card below it (e.g. "Primer paso") goes
+                // lower, so the card fits above it without covering the status bar.
+                val fitsBelow = nearTop + raw.height + cardSpace <= screenHeight - bottomInset
+                val desiredTop = if (fitsBelow) nearTop else statusTop + with(density) { 16.dp.toPx() } + cardSpace
                 val delta = if (target == HomeTourTarget.Today) -SCROLL_TO_TOP else raw.top - desiredTop
                 scroll(delta)
             }
@@ -205,7 +264,11 @@ fun HomeTourOverlay(
                 if (placedBelow) {
                     Modifier.padding(top = (rect.bottom).toDp() + CardGap)
                 } else {
-                    Modifier.padding(bottom = (screenHeight - rect.top).toDp() + CardGap)
+                    // Above the section, but never over the status bar: on a short screen the card
+                    // overlaps the top of a tall section instead.
+                    val lowest = screenHeight - statusTop - with(density) { 8.dp.toPx() } - cardHeight
+                    val bottom = minOf(screenHeight - rect.top + CardGap.toPx(), lowest.coerceAtLeast(0f))
+                    Modifier.padding(bottom = bottom.toDp())
                 }
             }
         } ?: Modifier
@@ -223,11 +286,14 @@ fun HomeTourOverlay(
                 lastStep = lastStep,
                 stopCount = stops.size,
                 progress = progress.value,
-                texts = stops.getOrNull(current - 1)?.texts(),
+                tourTexts = tour.texts,
+                texts = stops.getOrNull(current - 1)?.texts(tour),
                 pointer = pointerX?.let { CardPointer(it, pointsUp = placedBelow) },
-                onNext = { if (current >= lastStep) onFinish() else step = current + 1 },
-                onSkip = onFinish,
-                modifier = cardPadding.padding(horizontal = CardMargin),
+                onNext = { if (current >= lastStep) onFinish(true) else step = current + 1 },
+                onSkip = { onFinish(false) },
+                modifier = cardPadding
+                    .padding(horizontal = CardMargin)
+                    .onSizeChanged { cardHeight = it.height.toFloat() },
             )
         }
     }
@@ -267,6 +333,7 @@ private fun VoiceCard(
     lastStep: Int,
     stopCount: Int,
     progress: Float,
+    tourTexts: TourTexts,
     texts: StopTexts?,
     pointer: CardPointer?,
     onNext: () -> Unit,
@@ -314,8 +381,8 @@ private fun VoiceCard(
             }
 
             val titleRes = when {
-                isWelcome -> R.string.tour_welcome_title
-                isDone -> R.string.tour_done_title
+                isWelcome -> tourTexts.welcomeTitle
+                isDone -> tourTexts.doneTitle
                 else -> texts?.title
             }
             val bigTitle = isWelcome || isDone
@@ -331,8 +398,8 @@ private fun VoiceCard(
                 )
             }
             val body = when {
-                isWelcome -> pluralStringResource(R.plurals.tour_welcome_body, stopCount, stopCount)
-                isDone -> stringResource(R.string.tour_done_body)
+                isWelcome -> pluralStringResource(tourTexts.welcomeBody, stopCount, stopCount)
+                isDone -> stringResource(tourTexts.doneBody)
                 else -> texts?.let { stringResource(it.body) }
             }
             if (body != null) {
@@ -361,7 +428,7 @@ private fun VoiceCard(
                         )
                         TourPillButton(text = stringResource(R.string.tour_start), onClick = onNext)
                     }
-                    isDone -> TourPillButton(text = stringResource(R.string.tour_finish), onClick = onNext)
+                    isDone -> TourPillButton(text = stringResource(tourTexts.finish), onClick = onNext)
                     else -> {
                         StepDots(current = step, count = stopCount)
                         Box(
@@ -494,6 +561,7 @@ private fun VoiceCardPreview() {
             lastStep = 7,
             stopCount = 6,
             progress = 0.4f,
+            tourTexts = HomeTour.FULL.texts,
             texts = StopTexts(R.string.tour_today_title, R.string.tour_today_body),
             pointer = CardPointer(201.dp, pointsUp = true),
             onNext = {},
@@ -507,6 +575,6 @@ private fun VoiceCardPreview() {
 @Composable
 private fun WelcomeCardPreview() {
     VioraTheme {
-        VoiceCard(step = 0, lastStep = 7, stopCount = 6, progress = 0.15f, texts = null, pointer = null, onNext = {}, onSkip = {}, modifier = Modifier.padding(24.dp))
+        VoiceCard(step = 0, lastStep = 7, stopCount = 6, progress = 0.15f, tourTexts = HomeTour.FULL.texts, texts = null, pointer = null, onNext = {}, onSkip = {}, modifier = Modifier.padding(24.dp))
     }
 }
