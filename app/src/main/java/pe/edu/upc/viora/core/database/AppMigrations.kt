@@ -159,8 +159,17 @@ object AppMigrations {
         connection.execSQL(MIGRATION_9_10_SQL)
     }
 
+    internal const val MIGRATION_10_11_SQL =
+        "CREATE TABLE IF NOT EXISTS `producer_plan_offers` (`code` TEXT NOT NULL, `catalog_key` TEXT NOT NULL, " +
+            "`currency` TEXT NOT NULL, `monthly_rate_per_ha` TEXT NOT NULL, `tax_rate` TEXT NOT NULL, " +
+            "`minimum_quota_ha` TEXT NOT NULL, `quota_increment_ha` TEXT NOT NULL, `billing_months` INTEGER NOT NULL, " +
+            "`tariff_version` TEXT NOT NULL, PRIMARY KEY(`code`))"
+
+    /** Adds the exact-decimal producer offer cache without altering agronomic or queued records. */
+    val MIGRATION_10_11 = Migration(10, 11) { connection -> connection.execSQL(MIGRATION_10_11_SQL) }
+
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-        MIGRATION_9_10,
+        MIGRATION_9_10, MIGRATION_10_11,
     )
 }

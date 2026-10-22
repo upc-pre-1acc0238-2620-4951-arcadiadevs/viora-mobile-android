@@ -30,6 +30,7 @@ class AppMigrationsTest {
     private val v8 = createSqlByTable(8)
     private val v9 = createSqlByTable(9)
     private val v10 = createSqlByTable(10)
+    private val v11 = createSqlByTable(11)
 
     @Test
     fun `new tables are created exactly as the exported v5 schema`() {
@@ -124,10 +125,21 @@ class AppMigrationsTest {
 
     @Test
     fun `every version from 1 to the current one has a migration`() {
-        (1 until 10).forEach { from ->
+        (1 until 11).forEach { from ->
             assertTrue("missing $from -> ${from + 1}", AppMigrations.ALL.any { it.startVersion == from && it.endVersion == from + 1 })
         }
     }
 
     private fun tableOf(createSql: String) = createSql.substringAfter("EXISTS `").substringBefore("`")
+
+    @Test
+    fun `producer offer migration matches the exact exported v11 schema`() {
+        assertEquals(v11.getValue("producer_plan_offers"), AppMigrations.MIGRATION_10_11_SQL)
+    }
+
+    @Test
+    fun `the producer catalog leaves all previous tables untouched`() {
+        assertEquals(v10.keys + "producer_plan_offers", v11.keys)
+        v10.keys.forEach { assertEquals(v10[it], v11[it]) }
+    }
 }
