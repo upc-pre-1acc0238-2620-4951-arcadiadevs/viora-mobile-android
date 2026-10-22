@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import pe.edu.upc.viora.core.database.AccountDataWiper
 import pe.edu.upc.viora.core.database.AppDatabase
 import pe.edu.upc.viora.core.database.AppMigrations
 import pe.edu.upc.viora.core.database.CacheMetadataDao
@@ -26,4 +27,8 @@ object DatabaseModule {
     @Provides
     fun provideCacheMetadataDao(database: AppDatabase): CacheMetadataDao =
         database.cacheMetadataDao()
+
+    @Provides
+    fun provideAccountDataWiper(database: AppDatabase): AccountDataWiper =
+        AccountDataWiper { database.clearAllTables() }
 }

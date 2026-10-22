@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.time.Clock
+import pe.edu.upc.viora.core.database.LocalDataOwner
 import pe.edu.upc.viora.core.datastore.SessionStore
 import pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers
 import pe.edu.upc.viora.features.iam.infrastructure.local.OnboardingStore
@@ -59,6 +60,7 @@ private class Failure(val status: Int?, val problem: IamProblem?, val retryAfter
 class IamViewModel @Inject constructor(
     private val service: IamService,
     private val sessionStore: SessionStore,
+    private val localDataOwner: LocalDataOwner,
     private val onboardingStore: OnboardingStore,
     private val clock: Clock,
     savedStateHandle: SavedStateHandle,
@@ -331,7 +333,11 @@ class IamViewModel @Inject constructor(
         }
     }
 
-    private suspend fun saveSession(session: AuthSession) = sessionStore.save(session.toStoredSession(clock))
+    /** Another account signing in first wipes the data the phone kept for the previous one. */
+    private suspend fun saveSession(session: AuthSession) {
+        localDataOwner.claimFor(session.userId)
+        sessionStore.save(session.toStoredSession(clock))
+    }
 
     private fun startCountdown(seconds: Int) {
         countdownJob?.cancel()

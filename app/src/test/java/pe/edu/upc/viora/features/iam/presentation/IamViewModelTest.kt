@@ -16,6 +16,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import pe.edu.upc.viora.core.database.LocalDataOwner
 import pe.edu.upc.viora.core.datastore.SessionStore
 import pe.edu.upc.viora.features.iam.InMemoryPreferences
 import pe.edu.upc.viora.features.iam.domain.valueobject.OnboardingAnswers
@@ -68,6 +69,7 @@ class IamViewModelTest {
         viewModel = IamViewModel(
             service = VerifyingIamService(),
             sessionStore = SessionStore(InMemoryPreferences()),
+            localDataOwner = LocalDataOwner(InMemoryPreferences()) {},
             onboardingStore = onboardingStore,
             clock = Clock.fixed(Instant.parse("2026-10-21T12:00:00Z"), ZoneOffset.UTC),
             savedStateHandle = SavedStateHandle(),
