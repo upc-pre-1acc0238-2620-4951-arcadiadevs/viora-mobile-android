@@ -1572,4 +1572,12 @@
     <string name="producer_plan_empty">No hay planes disponibles. Actualiza el catálogo para volver a consultar.</string>
     <string name="producer_plan_cooperative">Tengo un código de cooperativa</string>
     <string name="producer_plan_tax_included">Incluye IGV</string>
+    <string name="purchase_pay">Pagar con Mercado Pago</string>
+    <string name="purchase_working">Preparando el pago…</string>
+    <string name="purchase_confirm_title">Confirma tu plan anual</string>
+    <string name="purchase_confirm_terms">%1$s ha · %2$s al año, con IGV incluido. Continúa a Mercado Pago para pagar.</string>
+    <string name="purchase_confirm_changed">Estas son las condiciones confirmadas por el servidor para tu contratación guardada. Difieren de la selección o estimación actual.</string>
+    <string name="purchase_continue">Continuar al pago</string>
+    <string name="purchase_later">Más tarde</string>
+    <string name="purchase_not_pending">Este contrato ya no está pendiente de pago. No se abrió otro pago.</string>
 </resources>

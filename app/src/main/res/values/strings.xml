@@ -1567,4 +1567,12 @@
     <string name="producer_plan_empty">No plans are available. Refresh the catalog to check again.</string>
     <string name="producer_plan_cooperative">I have a cooperative code</string>
     <string name="producer_plan_tax_included">Includes IGV</string>
+    <string name="purchase_pay">Pay with Mercado Pago</string>
+    <string name="purchase_working">Preparing payment…</string>
+    <string name="purchase_confirm_title">Confirm your annual plan</string>
+    <string name="purchase_confirm_terms">%1$s ha · %2$s annually, including IGV. Continue to Mercado Pago to pay.</string>
+    <string name="purchase_confirm_changed">These are the conditions confirmed by the server for your saved purchase. They differ from the current selection or estimate.</string>
+    <string name="purchase_continue">Continue to payment</string>
+    <string name="purchase_later">Later</string>
+    <string name="purchase_not_pending">This contract is no longer awaiting payment. No new payment was opened.</string>
 </resources>
