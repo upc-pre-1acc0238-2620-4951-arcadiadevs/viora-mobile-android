@@ -5,9 +5,17 @@ import androidx.lifecycle.ViewModelStore
 import java.math.BigDecimal
 import java.time.Instant
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -28,8 +36,18 @@ import pe.edu.upc.viora.features.subscription.presentation.viewmodel.ProducerPla
 private class FakeCatalogRepository : ProducerPlanRepository {
     val catalog = MutableStateFlow(ProducerPlanCatalog(emptyList(), null))
     var refreshCount = 0
+    var activeObservers = 0
+    var observationFailure: Exception? = null
     var response: suspend () -> AppResult<Unit> = { AppResult.Failure(AppError.Offline) }
-    override fun observeCatalog() = catalog
+    override fun observeCatalog() = flow {
+        activeObservers++
+        try {
+            observationFailure?.let { throw it }
+            emitAll(catalog)
+        } finally {
+            activeObservers--
+        }
+    }
     override suspend fun refresh(): AppResult<Unit> { refreshCount++; return response() }
 }
 
@@ -37,20 +55,25 @@ private class FakeCatalogRepository : ProducerPlanRepository {
 class ProducerPlanViewModelTest {
     private val repository = FakeCatalogRepository()
     private val stores = mutableListOf<ViewModelStore>()
+    private val collectors = mutableListOf<Job>()
     private val fetchedAt = Instant.parse("2026-10-21T12:00:00Z")
     private fun offer(step: String = "0.5", code: String = "PRODUCER_ANNUAL") = ProducerPlanOffer(
         ProducerPlanCode(code), "PEN", BigDecimal("55"), BigDecimal("0.18"),
         PlanCapacity.of(BigDecimal(step)), PlanCapacity.of(BigDecimal(step)), 12, "fixture-1", true)
 
     @Before fun setUp() { Dispatchers.setMain(UnconfinedTestDispatcher()) }
-    @After fun tearDown() { stores.forEach { it.clear() }; Dispatchers.resetMain() }
+    @After fun tearDown() { collectors.forEach { it.cancel() }; stores.forEach { it.clear() }; Dispatchers.resetMain() }
 
-    private fun model(saved: SavedStateHandle = SavedStateHandle()): ProducerPlanViewModel {
+    private fun model(saved: SavedStateHandle = SavedStateHandle(), subscribe: Boolean = true): ProducerPlanViewModel {
         val model = ProducerPlanViewModel(ObserveProducerPlanCatalogUseCase(repository),
             RefreshProducerPlanCatalogUseCase(repository), saved)
         ViewModelStore().also { it.put("plan", model); stores += it }
+        if (subscribe) subscribe(model)
         return model
     }
+
+    private fun subscribe(model: ProducerPlanViewModel): Job =
+        CoroutineScope(Dispatchers.Main).launch { model.uiState.collect() }.also { collectors += it }
 
     private fun cache(vararg offers: ProducerPlanOffer = arrayOf(offer())) {
         repository.catalog.value = ProducerPlanCatalog(offers.toList(), fetchedAt)
@@ -117,5 +140,79 @@ class ProducerPlanViewModelTest {
         assertFalse(state.isRefreshing)
         assertFalse(state.isSavedCopy)
         assertNull(state.error)
+    }
+
+    @Test fun `catalog observation starts only with a subscriber and stops after the grace period`() = runTest {
+        cache()
+        val model = model(subscribe = false)
+        runCurrent()
+        assertEquals(0, repository.activeObservers)
+        val collector = subscribe(model)
+        runCurrent()
+        assertEquals(1, repository.activeObservers)
+        collector.cancel()
+        runCurrent()
+        advanceTimeBy(4_999)
+        runCurrent()
+        assertEquals(1, repository.activeObservers)
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(0, repository.activeObservers)
+    }
+
+    @Test fun `returning observes the latest catalog and preserves selection without another refresh`() = runTest {
+        cache()
+        val model = model(subscribe = false)
+        val collector = subscribe(model)
+        runCurrent()
+        model.increase()
+        runCurrent()
+        val refreshCount = repository.refreshCount
+        collector.cancel()
+        runCurrent()
+        advanceTimeBy(5_000)
+        runCurrent()
+        val previous = model.uiState.value
+        cache(offer().copy(monthlyRatePerHa = BigDecimal("60")))
+        runCurrent()
+        assertEquals(previous, model.uiState.value)
+        assertEquals(0, repository.activeObservers)
+        subscribe(model)
+        runCurrent()
+        val state = model.uiState.value as ProducerPlanUiState.Content
+        assertEquals(BigDecimal.ONE, state.capacity.hectares)
+        assertEquals(BigDecimal("720.00"), state.estimate.total)
+        assertEquals(1, repository.activeObservers)
+        assertEquals(refreshCount, repository.refreshCount)
+    }
+
+    @Test fun `a brief absence does not duplicate the catalog observer`() = runTest {
+        cache()
+        val model = model(subscribe = false)
+        val collector = subscribe(model)
+        runCurrent()
+        collector.cancel()
+        runCurrent()
+        advanceTimeBy(1_000)
+        subscribe(model)
+        runCurrent()
+        assertEquals(1, repository.activeObservers)
+        advanceTimeBy(5_000)
+        runCurrent()
+        assertEquals(1, repository.activeObservers)
+    }
+
+    @Test fun `retry recovers a failed observation without a separate background job`() = runTest {
+        cache()
+        repository.observationFailure = IllegalStateException("Unreadable cache")
+        val model = model()
+        runCurrent()
+        assertTrue(model.uiState.value is ProducerPlanUiState.Failed)
+        assertEquals(0, repository.activeObservers)
+        repository.observationFailure = null
+        model.refresh()
+        runCurrent()
+        assertTrue(model.uiState.value is ProducerPlanUiState.Content)
+        assertEquals(1, repository.activeObservers)
     }
 }

@@ -6,10 +6,13 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
@@ -22,23 +25,32 @@ import pe.edu.upc.viora.features.subscription.presentation.state.ProducerPlanUiS
 
 /** Restores selection only; server-backed policy remains the source of the displayed estimate. */
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class ProducerPlanViewModel @Inject constructor(
     private val observe: ObserveProducerPlanCatalogUseCase,
     private val refreshCatalog: RefreshProducerPlanCatalogUseCase,
     private val savedState: SavedStateHandle,
 ) : ViewModel() {
     private data class Refresh(val busy: Boolean = false, val succeeded: Boolean = false, val error: AppError? = null)
-    private val catalog = MutableStateFlow(ProducerPlanCatalog(emptyList(), null))
+    private data class Observation(val catalog: ProducerPlanCatalog? = null, val error: AppError? = null)
+    // Retry changes the upstream only while uiState has subscribers; it never launches a separate reader.
+    private val observationVersion = MutableStateFlow(0L)
+    private val catalog = observationVersion.flatMapLatest {
+        observe().map { Observation(catalog = it) }
+            .catch { exception ->
+                if (exception is CancellationException) throw exception
+                emit(Observation(error = AppError.Unknown(exception)))
+            }
+    }
     private val refreshState = MutableStateFlow(Refresh())
-    private val readError = MutableStateFlow<AppError?>(null)
     private val selectedCode = savedState.getStateFlow<String?>(PLAN_CODE, null)
     private val selectedCapacity = savedState.getStateFlow<String?>(QUOTA_HA, null)
-    private var observation: Job? = null
 
-    val uiState = combine(catalog, refreshState, selectedCode, selectedCapacity, readError) { data, request, code, quota, failure ->
+    val uiState = combine(catalog, refreshState, selectedCode, selectedCapacity) { observation, request, code, quota ->
+        val data = observation.catalog
         when {
-            failure != null -> ProducerPlanUiState.Failed(failure)
-            data.fetchedAt == null -> request.error?.let { ProducerPlanUiState.Failed(it) } ?: ProducerPlanUiState.Loading
+            observation.error != null -> ProducerPlanUiState.Failed(observation.error)
+            data?.fetchedAt == null -> request.error?.let { ProducerPlanUiState.Failed(it) } ?: ProducerPlanUiState.Loading
             data.offers.isEmpty() -> ProducerPlanUiState.Empty(data.fetchedAt, request.busy, request.error)
             else -> {
                 val offer = data.offers.find { it.code.value == code } ?: data.offers.first()
@@ -48,37 +60,20 @@ class ProducerPlanViewModel @Inject constructor(
                     !request.succeeded, request.error)
             }
         }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, ProducerPlanUiState.Loading)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ProducerPlanUiState.Loading)
 
     init {
-        observeCatalog()
         refresh()
-    }
-
-    private fun observeCatalog() {
-        observation?.cancel()
-        observation = viewModelScope.launch {
-            try {
-                observe().collect { catalog.value = it; readError.value = null }
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (exception: Exception) {
-                readError.value = AppError.Unknown(exception)
-            }
-        }
     }
 
     fun refresh() {
         if (refreshState.value.busy) return
         refreshState.value = Refresh(busy = true)
-        if (observation?.isActive != true) observeCatalog()
+        observationVersion.value += 1
         viewModelScope.launch {
             try {
                 refreshState.value = when (val result = refreshCatalog()) {
-                    is AppResult.Success -> {
-                        if (observation?.isActive != true) observeCatalog()
-                        Refresh(succeeded = true)
-                    }
+                    is AppResult.Success -> Refresh(succeeded = true)
                     is AppResult.Failure -> Refresh(error = result.error)
                 }
             } catch (cancelled: CancellationException) {
@@ -92,7 +87,8 @@ class ProducerPlanViewModel @Inject constructor(
     }
 
     fun selectOffer(code: String) {
-        if (catalog.value.offers.none { it.code.value == code } || code == selectedCode.value) return
+        val state = uiState.value as? ProducerPlanUiState.Content ?: return
+        if (state.offers.none { it.code.value == code } || code == selectedCode.value) return
         savedState[QUOTA_HA] = null
         savedState[PLAN_CODE] = code
     }
@@ -110,6 +106,7 @@ class ProducerPlanViewModel @Inject constructor(
     }
 
     private companion object {
+        const val STOP_TIMEOUT_MS = 5_000L
         const val PLAN_CODE = "producer_plan_code"
         const val QUOTA_HA = "producer_plan_quota_ha"
     }
