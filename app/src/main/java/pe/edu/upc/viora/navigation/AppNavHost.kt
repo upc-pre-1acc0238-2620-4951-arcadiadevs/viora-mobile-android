@@ -145,9 +145,11 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     },
                     onOpenAccount = { navController.navigate(AccountRoute) },
                     sections = {
-                        androidx.compose.material3.TextButton(onClick = { navController.navigate(pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionAccessRoute) }) {
-                            androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(pe.edu.upc.viora.R.string.subscription_access_title))
-                        }
+                        pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionHomeSection(
+                            onRenew = { navController.navigate(ProducerPlanRoute) },
+                            onRedeemCode = { navController.navigate(pe.edu.upc.viora.features.subscription.presentation.navigation.RedeemCodeRoute()) },
+                            onOpenSubscription = { navController.navigate(pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionAccessRoute) },
+                        )
                         HarvestEntrySection(
                             onSettle = { plotId, year -> navController.navigate(SettleHarvestRoute(plotId = plotId, campaignYear = year)) },
                         )

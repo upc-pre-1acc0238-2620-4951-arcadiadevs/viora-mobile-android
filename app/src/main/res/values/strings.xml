@@ -1592,4 +1592,11 @@
     <string name="subscription_mode_individual">Individual</string>
     <string name="subscription_mode_cooperative">Cooperative</string>
     <string name="subscription_mode_unknown">Unavailable</string>
+    <string name="home_access_inactive_chip">Access inactive</string>
+    <string name="home_access_expired_title">Your plan expired on\n%1$s</string>
+    <string name="home_access_none_title">You don\'t have\nan active plan yet</string>
+    <string name="home_access_inactive_body">Your plots and history are still saved. Renew the Producer Plan or use a code from your cooperative to receive alerts again.</string>
+    <string name="home_access_renew">Renew Producer Plan</string>
+    <string name="home_access_redeem_code">I have a cooperative code</string>
+    <string name="home_access_date_pattern" translatable="false">MMMM d</string>
 </resources>

@@ -1597,4 +1597,11 @@
     <string name="subscription_mode_individual">Individual</string>
     <string name="subscription_mode_cooperative">Cooperativa</string>
     <string name="subscription_mode_unknown">No disponible</string>
+    <string name="home_access_inactive_chip">Acceso inactivo</string>
+    <string name="home_access_expired_title">Tu plan venció el\n%1$s</string>
+    <string name="home_access_none_title">Aún no tienes\nun plan activo</string>
+    <string name="home_access_inactive_body">Tus lotes y tu historial siguen guardados. Renueva el Plan Productor o usa un código de tu cooperativa para volver a recibir alertas.</string>
+    <string name="home_access_renew">Renovar Plan Productor</string>
+    <string name="home_access_redeem_code">Tengo un código de cooperativa</string>
+    <string name="home_access_date_pattern" translatable="false">d \'de\' MMMM</string>
 </resources>
