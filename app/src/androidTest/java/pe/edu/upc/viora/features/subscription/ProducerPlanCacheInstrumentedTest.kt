@@ -20,6 +20,26 @@ import pe.edu.upc.viora.features.subscription.infrastructure.local.ProducerPlanE
 
 @RunWith(AndroidJUnit4::class)
 class ProducerPlanCacheInstrumentedTest {
+    @Test fun purchaseJournalSurvivesReopeningAndKeepsAccountsSeparate() = runBlocking {
+        val name = "purchase-journal-${UUID.randomUUID()}"
+        val row = pe.edu.upc.viora.features.subscription.infrastructure.local.IndividualPurchaseEntity(
+            "owner-a", "PRODUCER_ANNUAL", "0.5", "create-key", "checkout-key", null, null, null, null)
+        try {
+            val initial = open(name)
+            try {
+                initial.individualPurchaseDao().insert(row)
+                initial.cacheMetadataDao().upsert(CacheMetadataEntity("keep", 123))
+            } finally { initial.close() }
+            val reopened = open(name)
+            try {
+                assertEquals(row, reopened.individualPurchaseDao().find("owner-a"))
+                assertNull(reopened.individualPurchaseDao().find("owner-b"))
+                reopened.individualPurchaseDao().insert(row.copy(createKey = "must-not-replace"))
+                assertEquals(row, reopened.individualPurchaseDao().find("owner-a"))
+                assertEquals(123L, reopened.cacheMetadataDao().fetchedAt("keep"))
+            } finally { reopened.close() }
+        } finally { context.deleteDatabase(name) }
+    }
     private val context: Context = ApplicationProvider.getApplicationContext()
     private fun offer(rate: String = "55.123456789012345678") = ProducerPlanEntity(
         "PRODUCER_ANNUAL", PRODUCER_PLAN_CATALOG_KEY, "PEN", rate, "0.18", "0.5", "0.5", 12, "test", true)
@@ -134,7 +154,7 @@ class ProducerPlanCacheInstrumentedTest {
             } finally { db.close() }
             val verified = SQLiteDatabase.openDatabase(context.getDatabasePath(name).path, null, SQLiteDatabase.OPEN_READONLY)
             try {
-                assertEquals(12, verified.version)
+                assertEquals(13, verified.version)
                 verified.rawQuery("SELECT idempotency_key FROM pending_settlements WHERE plot_id = 'keep-plot'", null).use {
                     assertTrue(it.moveToFirst())
                     assertEquals("keep-key", it.getString(0))
