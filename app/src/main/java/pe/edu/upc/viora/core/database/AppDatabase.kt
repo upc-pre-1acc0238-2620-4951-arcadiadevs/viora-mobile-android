@@ -2,6 +2,8 @@ package pe.edu.upc.viora.core.database
 
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
+import pe.edu.upc.viora.features.subscription.infrastructure.local.IndividualPurchaseDao
+import pe.edu.upc.viora.features.subscription.infrastructure.local.IndividualPurchaseEntity
 import pe.edu.upc.viora.features.subscription.infrastructure.local.ProducerPlanDao
 import pe.edu.upc.viora.features.subscription.infrastructure.local.ProducerPlanEntity
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.AgronomicDossierDao
@@ -49,6 +51,7 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
     entities = [
         CacheMetadataEntity::class,
         ProducerPlanEntity::class,
+        IndividualPurchaseEntity::class,
         PlotEntity::class,
         SensorNodeEntity::class,
         IncidentEntity::class,
@@ -64,10 +67,11 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
         ThinningPrescriptionEntity::class,
         AgronomicDossierEntity::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
+    abstract fun individualPurchaseDao(): IndividualPurchaseDao
     abstract fun producerPlanDao(): ProducerPlanDao
     abstract fun cacheMetadataDao(): CacheMetadataDao
     abstract fun plotDao(): PlotDao

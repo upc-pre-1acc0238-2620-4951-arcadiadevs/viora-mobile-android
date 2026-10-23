@@ -39,6 +39,7 @@ import pe.edu.upc.viora.core.designsystem.theme.*
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.subscription.presentation.state.ProducerPlanUiState
 import pe.edu.upc.viora.features.subscription.presentation.viewmodel.ProducerPlanViewModel
+import pe.edu.upc.viora.features.subscription.presentation.viewmodel.IndividualCheckoutViewModel
 
 /** P02 browsing/selection. Payment is deliberately supplied by the separate checkout feature. */
 @Composable
@@ -47,10 +48,19 @@ fun ProducerPlanScreen(
     onRedeemCode: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProducerPlanViewModel = hiltViewModel(),
+    checkoutViewModel: IndividualCheckoutViewModel = hiltViewModel(),
 ) {
-    ProducerPlanContent(viewModel.uiState.collectAsStateWithLifecycle().value,
+    val offer = viewModel.uiState.collectAsStateWithLifecycle().value
+    val checkout = checkoutViewModel.uiState.collectAsStateWithLifecycle().value
+    val openBrowser = rememberCheckoutBrowser(checkoutViewModel::dismiss, checkoutViewModel::browserFailed)
+    ProducerPlanContent(offer,
         onBack, onRedeemCode, viewModel::increase, viewModel::decrease, viewModel::selectOffer,
-        viewModel::refresh, modifier)
+        viewModel::refresh, modifier,
+        checkoutAction = { content ->
+            IndividualCheckoutAction(content, checkout,
+                { checkoutViewModel.start(content.selectedOffer.code, content.capacity) },
+                checkoutViewModel::pay, checkoutViewModel::dismiss, openBrowser)
+        })
 }
 
 @Composable
@@ -63,6 +73,7 @@ internal fun ProducerPlanContent(
     onSelectOffer: (String) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
+    checkoutAction: @Composable (ProducerPlanUiState.Content) -> Unit = {},
 ) {
     Column(modifier.fillMaxSize().background(Neutral50).statusBarsPadding().navigationBarsPadding()
         .padding(horizontal = Spacing.lg)) {
@@ -114,6 +125,7 @@ internal fun ProducerPlanContent(
                     HorizontalDivider(color = Neutral200)
                     PlanEstimateSummary(state)
                     PlanFreshness(state, onRefresh)
+                    checkoutAction(state)
                 }
             }
             Spacer(Modifier.height(Spacing.lg))
