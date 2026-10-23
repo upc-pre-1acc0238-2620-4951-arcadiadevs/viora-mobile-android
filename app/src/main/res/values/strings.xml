@@ -1558,10 +1558,7 @@
     <string name="producer_plan_benefit_sampling">Offline sampling and thinning prescription</string>
     <string name="producer_plan_benefit_capacity">Up to %1$s ha registered in your plots</string>
     <string name="producer_plan_total">ESTIMATED ANNUAL TOTAL</string>
-    <string name="producer_plan_base">Base for %1$d months: %2$s</string>
-    <string name="producer_plan_tax">IGV (%1$s): %2$s</string>
     <string name="producer_plan_monthly">Equivalent to %1$s per month · Paid annually</string>
-    <string name="producer_plan_estimate_notice">The final price and conditions are confirmed before payment.</string>
     <string name="producer_plan_updated">Catalog updated: %1$s</string>
     <string name="producer_plan_saved_copy">Saved information. Refresh to check the latest conditions.</string>
     <string name="producer_plan_loading">Updating plan conditions…</string>

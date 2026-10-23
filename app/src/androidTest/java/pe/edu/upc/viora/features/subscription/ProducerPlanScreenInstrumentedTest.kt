@@ -67,6 +67,12 @@ class ProducerPlanScreenInstrumentedTest {
         }
         compose.onNodeWithContentDescription(decreaseLabel).assertIsNotEnabled()
         compose.onNodeWithTag("producer-plan-total").assertTextContains("330", substring = true)
+        compose.onNodeWithTag("producer-plan-total").assertTextContains("S/", substring = true)
+        compose.onNodeWithText("Base for 12 months:", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Base por 12 meses:", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("IGV (18%)", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("The final price and conditions", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("El precio y las condiciones definitivas", substring = true).assertDoesNotExist()
         compose.onNodeWithText(includedLabel).assertExists()
         val screenshot = compose.onRoot().captureToImage().asAndroidBitmap()
         val destination = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext

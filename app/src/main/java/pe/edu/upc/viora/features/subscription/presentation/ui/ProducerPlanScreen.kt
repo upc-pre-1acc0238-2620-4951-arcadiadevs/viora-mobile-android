@@ -27,6 +27,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.math.BigDecimal
 import java.text.NumberFormat
+import java.text.DecimalFormat
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -183,16 +184,8 @@ private fun PlanEstimateSummary(state: ProducerPlanUiState.Content) {
     Text(stringResource(R.string.producer_plan_tax_included),
         style = MaterialTheme.typography.bodySmall, color = Neutral700)
     Column(Modifier.padding(top = Spacing.sm), verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
-        Text(stringResource(R.string.producer_plan_base, state.selectedOffer.billingMonths,
-            formatPlanMoney(estimate.base, currency, locale)), style = MaterialTheme.typography.bodyMedium, color = Neutral700)
-        val percent = NumberFormat.getPercentInstance(locale).apply { maximumFractionDigits = 2 }
-            .format(state.selectedOffer.taxRate)
-        Text(stringResource(R.string.producer_plan_tax, percent, formatPlanMoney(estimate.tax, currency, locale)),
-            style = MaterialTheme.typography.bodyMedium, color = Neutral700)
         Text(stringResource(R.string.producer_plan_monthly, formatPlanMoney(estimate.monthlyTotal, currency, locale)),
             style = MaterialTheme.typography.bodySmall, color = Neutral700)
-        Text(stringResource(R.string.producer_plan_estimate_notice), Modifier.padding(top = Spacing.xs),
-            style = MaterialTheme.typography.bodySmall, color = Neutral600)
     }
 }
 
@@ -225,4 +218,11 @@ internal fun formatPlanCapacity(value: BigDecimal, locale: Locale): String = Num
     .apply { maximumFractionDigits = value.scale().coerceAtLeast(0) }.format(value)
 
 internal fun formatPlanMoney(value: BigDecimal, currency: String, locale: Locale): String =
-    NumberFormat.getCurrencyInstance(locale).apply { this.currency = Currency.getInstance(currency) }.format(value)
+    NumberFormat.getCurrencyInstance(locale).apply {
+        this.currency = Currency.getInstance(currency)
+        if (currency == "PEN" && this is DecimalFormat) {
+            decimalFormatSymbols = decimalFormatSymbols.apply { currencySymbol = "S/" }
+            minimumFractionDigits = 0
+            maximumFractionDigits = 2
+        }
+    }.format(value)
