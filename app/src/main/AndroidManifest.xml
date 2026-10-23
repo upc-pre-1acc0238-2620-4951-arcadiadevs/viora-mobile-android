@@ -47,6 +47,24 @@
                     android:host="viora-platform.onrender.com"
                     android:pathPrefix="/password-resets/" />
             </intent-filter>
+
+            <!-- Checkout return link from Mercado Pago (plan action 6.2). Keep the host in sync with
+                 VIORA_DEEP_LINK_BASE_URL and returnUrl configuration. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="viora-platform.onrender.com"
+                    android:pathPrefix="/payments/return" />
+                <data
+                    android:scheme="https"
+                    android:host="viora-platform.onrender.com"
+                    android:pathPrefix="/subscriptions/return" />
+            </intent-filter>
         </activity>
 
         <!-- Shares the sealed dossier PDFs (P77) with the viewer, WhatsApp or the file picker, read-only. -->
