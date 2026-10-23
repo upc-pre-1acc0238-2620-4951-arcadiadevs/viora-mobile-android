@@ -145,6 +145,9 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     },
                     onOpenAccount = { navController.navigate(AccountRoute) },
                     sections = {
+                        androidx.compose.material3.TextButton(onClick = { navController.navigate(pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionAccessRoute) }) {
+                            androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(pe.edu.upc.viora.R.string.subscription_access_title))
+                        }
                         HarvestEntrySection(
                             onSettle = { plotId, year -> navController.navigate(SettleHarvestRoute(plotId = plotId, campaignYear = year)) },
                         )
@@ -194,6 +197,11 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 navController.navigate(RegisterPlotRoute)
             },
         )
+        composable<pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionAccessRoute> {
+            pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionAccessScreen(
+                onBack = { navController.popBackStack() },
+                onPlan = { navController.navigate(ProducerPlanRoute) })
+        }
         producerPlanComposable(navController, onLeave = { navController.openHome() })
         plotScreens(navController)
         climateNavGraph(navController)

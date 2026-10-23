@@ -1588,4 +1588,13 @@
     <string name="purchase_confirmed_title">Suscripción activa</string>
     <string name="purchase_confirmed_message">Tu suscripción ya está activa con %1$s ha. ¡Bienvenido a Viora!</string>
     <string name="purchase_close">Cerrar</string>
+    <string name="subscription_access_title">Mi suscripción</string>
+    <string name="subscription_access_inactive">Sin acceso activo confirmado</string>
+    <string name="subscription_access_quota">Cupo contratado: %1$s ha</string>
+    <string name="subscription_access_mode">Modalidad: %1$s</string>
+    <string name="subscription_access_until">Vigente hasta: %1$s</string>
+    <string name="subscription_access_plan">Ver Plan Productor</string>
+    <string name="subscription_mode_individual">Individual</string>
+    <string name="subscription_mode_cooperative">Cooperativa</string>
+    <string name="subscription_mode_unknown">No disponible</string>
 </resources>

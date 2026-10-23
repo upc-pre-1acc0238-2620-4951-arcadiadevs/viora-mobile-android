@@ -1583,4 +1583,13 @@
     <string name="purchase_confirmed_title">Subscription active</string>
     <string name="purchase_confirmed_message">Your subscription is now active with %1$s ha. Welcome to Viora!</string>
     <string name="purchase_close">Close</string>
+    <string name="subscription_access_title">My subscription</string>
+    <string name="subscription_access_inactive">No confirmed active access</string>
+    <string name="subscription_access_quota">Contracted capacity: %1$s ha</string>
+    <string name="subscription_access_mode">Mode: %1$s</string>
+    <string name="subscription_access_until">Valid until: %1$s</string>
+    <string name="subscription_access_plan">View Producer Plan</string>
+    <string name="subscription_mode_individual">Individual</string>
+    <string name="subscription_mode_cooperative">Cooperative</string>
+    <string name="subscription_mode_unknown">Unavailable</string>
 </resources>
