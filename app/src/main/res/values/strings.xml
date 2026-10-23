@@ -1575,4 +1575,12 @@
     <string name="purchase_continue">Continue to payment</string>
     <string name="purchase_later">Later</string>
     <string name="purchase_not_pending">This contract is no longer awaiting payment. No new payment was opened.</string>
+    <string name="purchase_verifying">Verifying payment with Mercado Pago…</string>
+    <string name="purchase_verifying_hint">Please wait while we confirm your transaction.</string>
+    <string name="purchase_unconfirmed_title">Payment pending confirmation</string>
+    <string name="purchase_unconfirmed_message">Mercado Pago is still processing your payment. If you have already completed it, access will be activated shortly.</string>
+    <string name="purchase_check_status">Check status</string>
+    <string name="purchase_confirmed_title">Subscription active</string>
+    <string name="purchase_confirmed_message">Your subscription is now active with %1$s ha. Welcome to Viora!</string>
+    <string name="purchase_close">Close</string>
 </resources>

@@ -1580,4 +1580,12 @@
     <string name="purchase_continue">Continuar al pago</string>
     <string name="purchase_later">Más tarde</string>
     <string name="purchase_not_pending">Este contrato ya no está pendiente de pago. No se abrió otro pago.</string>
+    <string name="purchase_verifying">Verificando el pago con Mercado Pago…</string>
+    <string name="purchase_verifying_hint">Espera un momento mientras confirmamos tu transacción.</string>
+    <string name="purchase_unconfirmed_title">Pago pendiente de confirmación</string>
+    <string name="purchase_unconfirmed_message">Mercado Pago aún está procesando tu pago. Si ya lo completaste, el acceso se activará en breve.</string>
+    <string name="purchase_check_status">Consultar estado</string>
+    <string name="purchase_confirmed_title">Suscripción activa</string>
+    <string name="purchase_confirmed_message">Tu suscripción ya está activa con %1$s ha. ¡Bienvenido a Viora!</string>
+    <string name="purchase_close">Cerrar</string>
 </resources>

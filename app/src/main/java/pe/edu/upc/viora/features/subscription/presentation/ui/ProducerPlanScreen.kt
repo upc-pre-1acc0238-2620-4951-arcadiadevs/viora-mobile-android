@@ -24,10 +24,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.withStyle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.math.BigDecimal
-import java.text.NumberFormat
 import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -37,9 +39,10 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.MorphingShapeIndicator
 import pe.edu.upc.viora.core.designsystem.theme.*
 import pe.edu.upc.viora.core.presentation.messageRes
+import pe.edu.upc.viora.features.subscription.presentation.state.IndividualCheckoutUiState
 import pe.edu.upc.viora.features.subscription.presentation.state.ProducerPlanUiState
-import pe.edu.upc.viora.features.subscription.presentation.viewmodel.ProducerPlanViewModel
 import pe.edu.upc.viora.features.subscription.presentation.viewmodel.IndividualCheckoutViewModel
+import pe.edu.upc.viora.features.subscription.presentation.viewmodel.ProducerPlanViewModel
 
 /** P02 browsing/selection. Payment is deliberately supplied by the separate checkout feature. */
 @Composable
@@ -52,15 +55,39 @@ fun ProducerPlanScreen(
 ) {
     val offer = viewModel.uiState.collectAsStateWithLifecycle().value
     val checkout = checkoutViewModel.uiState.collectAsStateWithLifecycle().value
-    val openBrowser = rememberCheckoutBrowser(checkoutViewModel::dismiss, checkoutViewModel::browserFailed)
-    ProducerPlanContent(offer,
+    val openBrowser = rememberCheckoutBrowser(
+        onOpened = checkoutViewModel::onBrowserOpened,
+        onFailed = checkoutViewModel::browserFailed,
+    )
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        checkoutViewModel.onAppResumed()
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+        checkoutViewModel.onAppPaused()
+    }
+
+    ProducerPlanContent(
+        offer,
         onBack, onRedeemCode, viewModel::increase, viewModel::decrease, viewModel::selectOffer,
         viewModel::refresh, modifier,
         checkoutAction = { content ->
-            IndividualCheckoutAction(content, checkout,
-                { checkoutViewModel.start(content.selectedOffer.code, content.capacity) },
-                checkoutViewModel::pay, checkoutViewModel::dismiss, openBrowser)
-        })
+            IndividualCheckoutAction(
+                offer = content,
+                state = checkout,
+                onStart = { checkoutViewModel.start(content.selectedOffer.code, content.capacity) },
+                onPay = checkoutViewModel::pay,
+                onDismiss = {
+                    checkoutViewModel.dismiss()
+                    if (checkout is IndividualCheckoutUiState.Confirmed) {
+                        viewModel.refresh()
+                    }
+                },
+                onCheckStatus = checkoutViewModel::checkStatus,
+                onOpen = openBrowser,
+            )
+        }
+    )
 }
 
 @Composable
