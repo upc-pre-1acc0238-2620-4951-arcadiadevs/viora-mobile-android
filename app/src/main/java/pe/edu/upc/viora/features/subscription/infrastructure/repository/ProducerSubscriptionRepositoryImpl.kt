@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.subscription.infrastructure.repository
 
 import javax.inject.Inject
 import javax.inject.Singleton
+import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.features.subscription.domain.entity.ProducerSubscription
@@ -17,13 +18,21 @@ class ProducerSubscriptionRepositoryImpl @Inject constructor(
 
     override suspend fun getCurrent(): AppResult<ProducerSubscription?> =
         when (val result = caller.callOptional { service.getCurrent() }) {
-            is AppResult.Success -> AppResult.Success(result.value?.toDomain())
+            is AppResult.Success -> runCatching { result.value?.toDomain() }
+                .fold(
+                    onSuccess = { AppResult.Success(it) },
+                    onFailure = { AppResult.Failure(AppError.Unknown(it)) },
+                )
             is AppResult.Failure -> result
         }
 
     override suspend fun getById(id: String): AppResult<ProducerSubscription> =
         when (val result = caller.call { service.getById(id) }) {
-            is AppResult.Success -> AppResult.Success(result.value.toDomain())
+            is AppResult.Success -> runCatching { result.value.toDomain() }
+                .fold(
+                    onSuccess = { AppResult.Success(it) },
+                    onFailure = { AppResult.Failure(AppError.Unknown(it)) },
+                )
             is AppResult.Failure -> result
         }
 }

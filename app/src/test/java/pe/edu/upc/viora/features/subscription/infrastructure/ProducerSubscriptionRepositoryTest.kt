@@ -160,4 +160,26 @@ class ProducerSubscriptionRepositoryTest {
         assertTrue(result is AppResult.Failure)
         assertTrue((result as AppResult.Failure).error is AppError.NotFound)
     }
+
+    @Test
+    fun `getById returns Unknown error when response contains malformed date format without throwing`() = runTest {
+        val malformedJson = activeJson.replace("2026-10-22T00:00:00Z", "not-a-valid-iso-date")
+        server.enqueue(MockResponse().setResponseCode(200).setBody(malformedJson))
+
+        val result = repository().getById(subId)
+
+        assertTrue(result is AppResult.Failure)
+        assertTrue((result as AppResult.Failure).error is AppError.Unknown)
+    }
+
+    @Test
+    fun `getCurrent returns Unknown error when response contains malformed date format without throwing`() = runTest {
+        val malformedJson = activeJson.replace("2026-10-22T00:00:00Z", "not-a-valid-iso-date")
+        server.enqueue(MockResponse().setResponseCode(200).setBody(malformedJson))
+
+        val result = repository().getCurrent()
+
+        assertTrue(result is AppResult.Failure)
+        assertTrue((result as AppResult.Failure).error is AppError.Unknown)
+    }
 }
