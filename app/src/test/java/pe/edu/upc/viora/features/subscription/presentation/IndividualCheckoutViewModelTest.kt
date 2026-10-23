@@ -123,12 +123,25 @@ class IndividualCheckoutViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun model() = IndividualCheckoutViewModel(
+    private class VirtualTestClock(private val scheduler: TestCoroutineScheduler) : java.time.Clock() {
+        private val base = 1_700_000_000_000L
+        override fun getZone(): java.time.ZoneId = java.time.ZoneOffset.UTC
+        override fun withZone(zone: java.time.ZoneId?): java.time.Clock = this
+        override fun instant(): Instant = Instant.ofEpochMilli(millis())
+        override fun millis(): Long = base + scheduler.currentTime
+    }
+
+    private fun model(
+        clock: java.time.Clock = VirtualTestClock(testDispatcher.scheduler),
+        savedStateHandle: androidx.lifecycle.SavedStateHandle = androidx.lifecycle.SavedStateHandle(),
+    ) = IndividualCheckoutViewModel(
         PrepareIndividualPurchaseUseCase(repository),
         ResumeIndividualPurchaseUseCase(repository),
         CreateIndividualCheckoutUseCase(repository),
         GetSubscriptionByIdUseCase(subscriptionRepo),
         GetCurrentSubscriptionUseCase(subscriptionRepo),
+        clock,
+        savedStateHandle,
     ).also {
         ViewModelStore().apply { put("checkout", it); stores += this }
     }
@@ -316,5 +329,110 @@ class IndividualCheckoutViewModelTest {
 
         // No queries fired while paused:
         assertEquals(countBefore, queryCount)
+    }
+
+    @Test
+    fun `polling does not confirm access when status is ACTIVE but entitlementActive is false`() = runTest(testDispatcher) {
+        val vm = model()
+        vm.onBrowserOpened(purchase.id)
+        vm.onAppResumed()
+        testScheduler.runCurrent()
+
+        // Server reports status ACTIVE but entitlementActive is still false:
+        subscriptionStatus = SubscriptionStatus.ACTIVE
+        entitlementActive = false
+
+        testScheduler.advanceTimeBy(5_000L)
+        testScheduler.runCurrent()
+
+        // Must remain in Verifying, never prematurely confirm:
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Verifying)
+        assertFalse(vm.uiState.value is IndividualCheckoutUiState.Confirmed)
+
+        // Now entitlementActive becomes true:
+        entitlementActive = true
+        testScheduler.advanceTimeBy(5_000L)
+        testScheduler.runCurrent()
+
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Confirmed)
+    }
+
+    @Test
+    fun `start does not confirm access when status is ACTIVE but entitlementActive is false`() = runTest(testDispatcher) {
+        recovered = purchase
+        subscriptionStatus = SubscriptionStatus.ACTIVE
+        entitlementActive = false
+
+        val vm = model()
+        vm.start(plan, quota)
+        testScheduler.advanceUntilIdle()
+
+        // Should NOT be Confirmed, should be Confirm:
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Confirm)
+        assertFalse(vm.uiState.value is IndividualCheckoutUiState.Confirmed)
+    }
+
+    @Test
+    fun `reopening or recreating ViewModel recovers purchase automatically on onAppResumed`() = runTest(testDispatcher) {
+        recovered = purchase
+        entitlementActive = true
+        subscriptionStatus = SubscriptionStatus.ACTIVE
+
+        // Fresh ViewModel with no activeSubscriptionId set in memory:
+        val vm = model()
+        vm.onAppResumed()
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(1, queryCount)
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Confirmed)
+    }
+
+    @Test
+    fun `polling terminates immediately on 404 NotFound without retrying`() = runTest(testDispatcher) {
+        val vm = model()
+        queryFailure = AppError.NotFound()
+        vm.onBrowserOpened(purchase.id)
+        vm.onAppResumed()
+        testScheduler.runCurrent()
+
+        assertEquals(1, queryCount)
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Unconfirmed)
+
+        // Advancing time should not fire more queries because polling terminated:
+        testScheduler.advanceTimeBy(30_000L)
+        testScheduler.runCurrent()
+        assertEquals(1, queryCount)
+    }
+
+    @Test
+    fun `polling terminates immediately on 401 Unauthorized`() = runTest(testDispatcher) {
+        val vm = model()
+        queryFailure = AppError.Unauthorized
+        vm.onBrowserOpened(purchase.id)
+        vm.onAppResumed()
+        testScheduler.runCurrent()
+
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Failed)
+        assertEquals(AppError.Unauthorized, (vm.uiState.value as IndividualCheckoutUiState.Failed).error)
+    }
+
+    @Test
+    fun `server error triggers backoff delay during polling`() = runTest(testDispatcher) {
+        val vm = model()
+        queryFailure = AppError.Server(503)
+        vm.onBrowserOpened(purchase.id)
+        vm.onAppResumed()
+        testScheduler.runCurrent()
+        assertEquals(1, queryCount)
+
+        // Advance 5 seconds (standard interval): backoff delays next poll by 10 seconds:
+        testScheduler.advanceTimeBy(5_000L)
+        testScheduler.runCurrent()
+        assertEquals(1, queryCount)
+
+        // Advance remaining 5 seconds (total 10 seconds):
+        testScheduler.advanceTimeBy(5_000L)
+        testScheduler.runCurrent()
+        assertEquals(2, queryCount)
     }
 }

@@ -1,8 +1,10 @@
 package pe.edu.upc.viora.features.subscription.presentation.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Clock
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
@@ -25,16 +27,48 @@ class IndividualCheckoutViewModel @Inject constructor(
     private val checkout: CreateIndividualCheckoutUseCase,
     private val getSubscriptionById: GetSubscriptionByIdUseCase,
     private val getCurrentSubscription: GetCurrentSubscriptionUseCase,
+    private val clock: Clock,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    constructor(
+        prepare: PrepareIndividualPurchaseUseCase,
+        resume: ResumeIndividualPurchaseUseCase,
+        checkout: CreateIndividualCheckoutUseCase,
+        getSubscriptionById: GetSubscriptionByIdUseCase,
+        getCurrentSubscription: GetCurrentSubscriptionUseCase,
+    ) : this(
+        prepare,
+        resume,
+        checkout,
+        getSubscriptionById,
+        getCurrentSubscription,
+        Clock.systemDefaultZone(),
+        SavedStateHandle(),
+    )
+
     private val mutableState = MutableStateFlow<IndividualCheckoutUiState>(IndividualCheckoutUiState.Idle)
     val uiState = mutableState.asStateFlow()
 
-    private var activeSubscriptionId: String? = null
+    private var activeSubscriptionId: String?
+        get() = savedStateHandle[KEY_ACTIVE_SUBSCRIPTION_ID] ?: inMemoryActiveSubscriptionId
+        set(value) {
+            inMemoryActiveSubscriptionId = value
+            if (value != null) {
+                savedStateHandle[KEY_ACTIVE_SUBSCRIPTION_ID] = value
+            } else {
+                savedStateHandle.remove<String>(KEY_ACTIVE_SUBSCRIPTION_ID)
+            }
+        }
+    private var inMemoryActiveSubscriptionId: String? = null
+    private var userDismissed: Boolean = false
+
     private var pollingJob: Job? = null
     var pollIntervalMs: Long = 5_000L
     var maxPollDurationMs: Long = 60_000L
 
     fun start(plan: ProducerPlanCode, capacity: PlanCapacity) = launchOperation {
+        userDismissed = false
         // A durable operation always takes precedence over a new screen selection.
         when (val previous = resume()) {
             is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(previous.error)
@@ -44,7 +78,7 @@ class IndividualCheckoutViewModel @Inject constructor(
                     activeSubscriptionId = recovered.id
                     when (val check = getSubscriptionById(recovered.id)) {
                         is AppResult.Success -> {
-                            if (check.value.entitlementActive || check.value.status == SubscriptionStatus.ACTIVE) {
+                            if (check.value.entitlementActive) {
                                 mutableState.value = IndividualCheckoutUiState.Confirmed(check.value)
                             } else {
                                 confirm(recovered)
@@ -71,6 +105,7 @@ class IndividualCheckoutViewModel @Inject constructor(
 
     fun pay() {
         val value = (mutableState.value as? IndividualCheckoutUiState.Confirm)?.purchase ?: return
+        userDismissed = false
         activeSubscriptionId = value.id
         launchOperation {
             mutableState.value = when (val result = checkout(value.id)) {
@@ -81,15 +116,35 @@ class IndividualCheckoutViewModel @Inject constructor(
     }
 
     fun onBrowserOpened(subscriptionId: String) {
+        userDismissed = false
         activeSubscriptionId = subscriptionId
         mutableState.value = IndividualCheckoutUiState.Verifying(subscriptionId)
     }
 
     fun onAppResumed() {
-        val id = activeSubscriptionId ?: return
-        val current = mutableState.value
-        if (current is IndividualCheckoutUiState.Ready || current is IndividualCheckoutUiState.Verifying) {
-            startPolling(id)
+        if (userDismissed) return
+        val id = activeSubscriptionId
+        if (id != null) {
+            val current = mutableState.value
+            if (current is IndividualCheckoutUiState.Ready ||
+                current is IndividualCheckoutUiState.Verifying ||
+                current is IndividualCheckoutUiState.Idle
+            ) {
+                startPolling(id)
+            }
+        } else {
+            viewModelScope.launch {
+                when (val previous = resume()) {
+                    is AppResult.Success -> {
+                        val recovered = previous.value
+                        if (recovered != null) {
+                            activeSubscriptionId = recovered.id
+                            startPolling(recovered.id)
+                        }
+                    }
+                    is AppResult.Failure -> Unit
+                }
+            }
         }
     }
 
@@ -100,6 +155,7 @@ class IndividualCheckoutViewModel @Inject constructor(
 
     fun checkStatus() {
         val id = activeSubscriptionId ?: return
+        userDismissed = false
         startPolling(id)
     }
 
@@ -108,26 +164,50 @@ class IndividualCheckoutViewModel @Inject constructor(
         pollingJob?.cancel()
         pollingJob = viewModelScope.launch {
             mutableState.value = IndividualCheckoutUiState.Verifying(subscriptionId)
-            var elapsed = 0L
-            while (isActive && elapsed <= maxPollDurationMs) {
+            val startTime = clock.millis()
+            while (isActive) {
+                val elapsedBefore = clock.millis() - startTime
+                if (elapsedBefore >= maxPollDurationMs) break
+
+                var backoffNeeded = false
                 when (val result = getSubscriptionById(subscriptionId)) {
                     is AppResult.Success -> {
                         val sub = result.value
-                        if (sub.entitlementActive || sub.status == SubscriptionStatus.ACTIVE) {
+                        if (sub.entitlementActive) {
                             mutableState.value = IndividualCheckoutUiState.Confirmed(sub)
                             return@launch
                         }
                     }
                     is AppResult.Failure -> {
-                        if (result.error is AppError.Unauthorized) {
-                            mutableState.value = IndividualCheckoutUiState.Failed(result.error)
-                            return@launch
+                        val error = result.error
+                        when {
+                            error is AppError.Unauthorized || error is AppError.Forbidden -> {
+                                mutableState.value = IndividualCheckoutUiState.Failed(error)
+                                return@launch
+                            }
+                            error is AppError.NotFound -> {
+                                mutableState.value = IndividualCheckoutUiState.Unconfirmed(subscriptionId)
+                                return@launch
+                            }
+                            error is AppError.Server -> {
+                                backoffNeeded = true
+                            }
+                            (error as? AppError.Unknown)?.cause is retrofit2.HttpException &&
+                                (error.cause as retrofit2.HttpException).code() == 429 -> {
+                                backoffNeeded = true
+                            }
                         }
                     }
                 }
-                if (elapsed >= maxPollDurationMs) break
-                delay(pollIntervalMs)
-                elapsed += pollIntervalMs
+
+                val elapsedAfter = clock.millis() - startTime
+                if (elapsedAfter >= maxPollDurationMs) break
+
+                val remainingWindow = maxPollDurationMs - elapsedAfter
+                val desiredDelay = if (backoffNeeded) pollIntervalMs * 2 else pollIntervalMs
+                val waitTime = minOf(desiredDelay, remainingWindow)
+                if (waitTime <= 0L) break
+                delay(waitTime)
             }
             if (isActive) {
                 mutableState.value = IndividualCheckoutUiState.Unconfirmed(subscriptionId)
@@ -136,8 +216,10 @@ class IndividualCheckoutViewModel @Inject constructor(
     }
 
     fun dismiss() {
+        userDismissed = true
         pollingJob?.cancel()
         pollingJob = null
+        activeSubscriptionId = null
         if (mutableState.value !is IndividualCheckoutUiState.Working) {
             mutableState.value = IndividualCheckoutUiState.Idle
         }
@@ -146,6 +228,7 @@ class IndividualCheckoutViewModel @Inject constructor(
     fun browserFailed() {
         pollingJob?.cancel()
         pollingJob = null
+        activeSubscriptionId = null
         mutableState.value = IndividualCheckoutUiState.Failed(AppError.Unknown())
     }
 
@@ -157,5 +240,9 @@ class IndividualCheckoutViewModel @Inject constructor(
             catch (cancelled: CancellationException) { throw cancelled }
             catch (exception: Exception) { mutableState.value = IndividualCheckoutUiState.Failed(AppError.Unknown(exception)) }
         }
+    }
+
+    private companion object {
+        const val KEY_ACTIVE_SUBSCRIPTION_ID = "checkout_active_sub_id"
     }
 }
