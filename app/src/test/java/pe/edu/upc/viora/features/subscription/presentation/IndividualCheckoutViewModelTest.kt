@@ -36,6 +36,7 @@ class IndividualCheckoutViewModelTest {
     private var entitlementActive: Boolean = false
     private var queryFailure: AppError? = null
     private var queryCount = 0
+    private var queryDelayMs = 0L
 
     private val repository = object : IndividualPurchaseRepository {
         override suspend fun resume(): AppResult<IndividualPurchase?> {
@@ -81,6 +82,7 @@ class IndividualCheckoutViewModelTest {
 
         override suspend fun getById(id: String): AppResult<ProducerSubscription> {
             queryCount++
+            delay(queryDelayMs)
             return queryFailure?.let { AppResult.Failure(it) } ?: AppResult.Success(
                 ProducerSubscription(
                     id = id,
@@ -121,6 +123,48 @@ class IndividualCheckoutViewModelTest {
     fun teardown() {
         stores.forEach { it.clear() }
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `pausing cancels recovery before it can start polling`() = runTest(testDispatcher) {
+        delayed = CompletableDeferred()
+        recovered = purchase
+        val vm = model()
+        vm.onAppResumed()
+        runCurrent()
+        vm.onAppPaused()
+        delayed!!.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(0, queryCount)
+    }
+
+    @Test
+    fun `deadline cancels a slow request within one minute`() = runTest(testDispatcher) {
+        queryDelayMs = 120_000L
+        val vm = model()
+        vm.onBrowserOpened(purchase.id)
+        vm.onAppResumed()
+        runCurrent()
+        advanceTimeBy(60_000L)
+        runCurrent()
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Unconfirmed)
+        assertEquals(1, queryCount)
+    }
+
+    @Test
+    fun `rate limit minimum delay prevents early retries`() = runTest(testDispatcher) {
+        queryFailure = AppError.RateLimited(30_000L)
+        val vm = model()
+        vm.onBrowserOpened(purchase.id)
+        vm.onAppResumed()
+        runCurrent()
+        advanceTimeBy(29_999L)
+        runCurrent()
+        assertEquals(1, queryCount)
+        advanceTimeBy(1L)
+        runCurrent()
+        assertEquals(2, queryCount)
+        vm.onAppPaused()
     }
 
     private class VirtualTestClock(private val scheduler: TestCoroutineScheduler) : java.time.Clock() {

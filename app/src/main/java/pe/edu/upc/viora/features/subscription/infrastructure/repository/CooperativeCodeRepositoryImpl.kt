@@ -31,8 +31,7 @@ class CooperativeCodeRepositoryImpl @Inject constructor(
     private fun AppError.toOutcome(): RedemptionOutcome = when {
         this is AppError.Validation -> RedemptionOutcome.NotRedeemable
         this is AppError.Conflict -> RedemptionOutcome.AlreadySubscribed
-        // The shared mapper has no type for 429, so it reaches here as an unknown HTTP failure.
-        this is AppError.Unknown && (cause as? HttpException)?.code() == TOO_MANY_REQUESTS -> RedemptionOutcome.TooManyAttempts
+        this is AppError.RateLimited || (this is AppError.Unknown && (cause as? HttpException)?.code() == TOO_MANY_REQUESTS) -> RedemptionOutcome.TooManyAttempts
         else -> RedemptionOutcome.Failed(this)
     }
 
