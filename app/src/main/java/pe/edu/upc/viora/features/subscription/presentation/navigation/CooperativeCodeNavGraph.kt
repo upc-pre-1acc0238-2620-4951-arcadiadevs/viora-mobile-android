@@ -32,6 +32,7 @@ fun NavGraphBuilder.cooperativeCodeNavGraph(
     navController: NavController,
     onLeave: () -> Unit,
     onRegisterPlot: () -> Unit,
+    onOpenProducerPlan: () -> Unit,
 ) {
     navigation<CooperativeCodeGraph>(startDestination = RedeemCodeRoute()) {
         composable<RedeemCodeRoute> {
@@ -43,8 +44,7 @@ fun NavGraphBuilder.cooperativeCodeNavGraph(
                         popUpTo<RedeemCodeRoute> { inclusive = true }
                     }
                 },
-                // Paying the individual plan is not built yet (subscription payment, another feature).
-                onPayPlan = {},
+                onPayPlan = onOpenProducerPlan,
             )
         }
         composable<CooperativeMembershipRoute> { entry ->

@@ -1548,4 +1548,28 @@
     <string name="language_sheet_note">También cambian los separadores de miles y el formato de fechas. Queda guardado en este teléfono.</string>
     <string name="language_switch_to_en">Cambiar a English</string>
     <string name="language_switch_to_es">Cambiar a Español</string>
+    <!-- Individual producer offer (P02); conditions come from the catalog. -->
+    <string name="producer_plan_eyebrow">SUSCRIPCIÓN ANUAL</string>
+    <string name="producer_plan_title_lead">"Plan "</string>
+    <string name="producer_plan_title_emphasis">Productor</string>
+    <string name="producer_plan_hectares">TUS HECTÁREAS</string>
+    <string name="producer_plan_ha_suffix">" ha"</string>
+    <string name="producer_plan_increase">Aumentar %1$s ha</string>
+    <string name="producer_plan_decrease">Disminuir %1$s ha</string>
+    <string name="producer_plan_minus">−</string>
+    <string name="producer_plan_includes">INCLUYE</string>
+    <string name="producer_plan_benefit_bbi">Diagnóstico de vecería (BBI)</string>
+    <string name="producer_plan_benefit_climate">Frío acumulado y alertas de estrés hídrico</string>
+    <string name="producer_plan_benefit_sampling">Muestreo sin señal y prescripción de aclareo</string>
+    <string name="producer_plan_benefit_capacity">Hasta %1$s ha registradas en tus lotes</string>
+    <string name="producer_plan_total">TOTAL ANUAL ESTIMADO</string>
+    <string name="producer_plan_monthly">Equivale a %1$s al mes · Pago anual</string>
+    <string name="producer_plan_updated">Catálogo actualizado: %1$s</string>
+    <string name="producer_plan_saved_copy">Información guardada. Actualiza para verificar las condiciones vigentes.</string>
+    <string name="producer_plan_loading">Actualizando las condiciones del plan…</string>
+    <string name="producer_plan_refresh">Actualizar</string>
+    <string name="producer_plan_retry">Reintentar</string>
+    <string name="producer_plan_empty">No hay planes disponibles. Actualiza el catálogo para volver a consultar.</string>
+    <string name="producer_plan_cooperative">Tengo un código de cooperativa</string>
+    <string name="producer_plan_tax_included">Incluye IGV</string>
 </resources>

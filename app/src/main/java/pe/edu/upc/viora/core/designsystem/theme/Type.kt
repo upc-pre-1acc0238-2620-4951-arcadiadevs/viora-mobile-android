@@ -133,3 +133,9 @@ val AppTypography = Typography(
  * Style for the emphasised part; combine with [AppTypography] display/headline styles.
  */
 val NewsreaderItalic = TextStyle(fontFamily = NewsreaderFamily, fontStyle = FontStyle.Italic)
+
+/** Editorial P02 tokens: exact measure, price and functional symbols from the producer offer. */
+val EditorialMeasure = AppTypography.displayLarge.copy(fontSize = 64.sp, lineHeight = 72.sp, letterSpacing = (-1.92).sp)
+val EditorialPrice = AppTypography.displayLarge.copy(fontSize = 52.sp, lineHeight = 60.sp, letterSpacing = (-1.56).sp)
+val EditorialAction = AppTypography.titleLarge.copy(fontSize = 24.sp, lineHeight = 28.sp)
+val EditorialEyebrow = AppTypography.labelSmall.copy(letterSpacing = 1.32.sp)

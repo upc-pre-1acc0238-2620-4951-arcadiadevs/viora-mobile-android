@@ -1543,4 +1543,28 @@
     <string name="language_sheet_note">Thousands separators and the date format change too. It stays saved on this phone.</string>
     <string name="language_switch_to_en">Change to English</string>
     <string name="language_switch_to_es">Cambiar a Español</string>
+    <!-- Individual producer offer (P02); commercial values come from the catalog. -->
+    <string name="producer_plan_eyebrow">ANNUAL SUBSCRIPTION</string>
+    <string name="producer_plan_title_lead">"Plan "</string>
+    <string name="producer_plan_title_emphasis">Producer</string>
+    <string name="producer_plan_hectares">YOUR HECTARES</string>
+    <string name="producer_plan_ha_suffix">" ha"</string>
+    <string name="producer_plan_increase">Increase by %1$s ha</string>
+    <string name="producer_plan_decrease">Decrease by %1$s ha</string>
+    <string name="producer_plan_minus">−</string>
+    <string name="producer_plan_includes">INCLUDES</string>
+    <string name="producer_plan_benefit_bbi">Alternate bearing diagnosis (BBI)</string>
+    <string name="producer_plan_benefit_climate">Accumulated chill and water stress alerts</string>
+    <string name="producer_plan_benefit_sampling">Offline sampling and thinning prescription</string>
+    <string name="producer_plan_benefit_capacity">Up to %1$s ha registered in your plots</string>
+    <string name="producer_plan_total">ESTIMATED ANNUAL TOTAL</string>
+    <string name="producer_plan_monthly">Equivalent to %1$s per month · Paid annually</string>
+    <string name="producer_plan_updated">Catalog updated: %1$s</string>
+    <string name="producer_plan_saved_copy">Saved information. Refresh to check the latest conditions.</string>
+    <string name="producer_plan_loading">Updating plan conditions…</string>
+    <string name="producer_plan_refresh">Refresh</string>
+    <string name="producer_plan_retry">Try again</string>
+    <string name="producer_plan_empty">No plans are available. Refresh the catalog to check again.</string>
+    <string name="producer_plan_cooperative">I have a cooperative code</string>
+    <string name="producer_plan_tax_included">Includes IGV</string>
 </resources>
