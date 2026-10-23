@@ -30,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,6 +76,7 @@ fun HomeScreen(
     onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenSoilMoisture: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenAccount: () -> Unit = {},
+    isAccessPaused: Boolean = false,
     viewModel: HomeViewModel = hiltViewModel(),
     greetingViewModel: HomeGreetingViewModel = hiltViewModel(),
     sections: @Composable ColumnScope.() -> Unit = {},
@@ -94,6 +96,7 @@ fun HomeScreen(
         onOpenSoilMoisture = onOpenSoilMoisture,
         onOpenAccount = onOpenAccount,
         onFocusPlot = viewModel::focusPlot,
+        isAccessPaused = isAccessPaused,
         modifier = modifier,
         sections = sections,
     )
@@ -116,6 +119,7 @@ fun HomeScreenContent(
     onFocusPlot: (PlotId) -> Unit = {},
     displayName: String? = null,
     today: LocalDate = LocalDate.now(),
+    isAccessPaused: Boolean = false,
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
     val systemBars = WindowInsets.systemBars.asPaddingValues()
@@ -158,10 +162,17 @@ fun HomeScreenContent(
             Spacer(Modifier.height(28.dp))
             // Headline, chips, notice and week are one block for the tour: "what is today".
             Column(modifier = Modifier.padding(horizontal = ScreenPadding).homeTourTarget(HomeTourTarget.Today)) {
-                HomeHeadline(
-                    lead = stringResource(if (hasNoPlots) R.string.home_headline_empty_lead else R.string.home_headline_lead),
-                    emphasis = stringResource(if (hasNoPlots) R.string.home_headline_empty_emphasis else R.string.home_headline_emphasis),
-                )
+                val headlineLead = when {
+                    isAccessPaused -> stringResource(R.string.home_headline_paused_lead)
+                    hasNoPlots -> stringResource(R.string.home_headline_empty_lead)
+                    else -> stringResource(R.string.home_headline_lead)
+                }
+                val headlineEmphasis = when {
+                    isAccessPaused -> stringResource(R.string.home_headline_paused_emphasis)
+                    hasNoPlots -> stringResource(R.string.home_headline_empty_emphasis)
+                    else -> stringResource(R.string.home_headline_emphasis)
+                }
+                HomeHeadline(lead = headlineLead, emphasis = headlineEmphasis)
                 HomeContextChips(
                     campaignYear = Year.from(today).value,
                     plotCount = plots.size,
@@ -171,8 +182,8 @@ fun HomeScreenContent(
                     onChangeFocus = { pickingFocus = true },
                 )
                 if (state.isOffline) HomeOfflineNotice(modifier = Modifier.padding(top = 16.dp))
-                // Without plots the design drops the week and goes straight to the invitation.
-                if (!hasNoPlots) HomeWeekStrip(today = today, modifier = Modifier.padding(top = 22.dp))
+                // In Figma P10, without active access or without plots the week strip is omitted.
+                if (!hasNoPlots && !isAccessPaused) HomeWeekStrip(today = today, modifier = Modifier.padding(top = 22.dp))
             }
             if (pickingFocus && state is HomeUiState.Content) {
                 FocusPicker(state = state, onSelect = onFocusPlot, onDismiss = { pickingFocus = false })
@@ -188,40 +199,43 @@ fun HomeScreenContent(
                 )
                 is HomeUiState.Content -> {
                     sections()
-                    HomeTodayInFieldSection(
-                        plotId = state.focusedPlot?.id?.value,
-                        activeAlertsCount = state.activeAlertsCount,
-                        onOpenAlerts = onOpenAlerts,
-                        onOpenWeatherForecast = {
-                            state.focusedPlot?.let { onOpenWeatherForecast(it.id, it.name) }
-                        },
-                        onOpenSoilMoisture = {
-                            state.focusedPlot?.let { onOpenSoilMoisture(it.id, it.name) }
-                        },
-                        modifier = Modifier
-                            .padding(top = 28.dp)
-                            .homeTourTarget(HomeTourTarget.Field),
-                    )
-                    val focused = state.focusedPlot
-                    val alternation = state.alternation
-                    if (focused != null && alternation != null) {
-                        HomeAlternationCard(
-                            plotName = focused.name,
-                            alternation = alternation,
-                            onOpen = { onOpenAlternation(focused.id, focused.name) },
+                    val subordinateModifier = if (isAccessPaused) Modifier.alpha(0.42f) else Modifier
+                    Column(modifier = subordinateModifier) {
+                        HomeTodayInFieldSection(
+                            plotId = state.focusedPlot?.id?.value,
+                            activeAlertsCount = state.activeAlertsCount,
+                            onOpenAlerts = onOpenAlerts,
+                            onOpenWeatherForecast = {
+                                state.focusedPlot?.let { onOpenWeatherForecast(it.id, it.name) }
+                            },
+                            onOpenSoilMoisture = {
+                                state.focusedPlot?.let { onOpenSoilMoisture(it.id, it.name) }
+                            },
                             modifier = Modifier
-                                .padding(start = ScreenPadding, end = ScreenPadding, top = 32.dp)
-                                .homeTourTarget(HomeTourTarget.Alternation),
+                                .padding(top = 28.dp)
+                                .homeTourTarget(HomeTourTarget.Field),
                         )
-                    }
-                    Column(modifier = Modifier.padding(top = 32.dp).homeTourTarget(HomeTourTarget.Plots)) {
-                        VioraSectionHeader(
-                            title = stringResource(R.string.home_my_plots),
-                            actionLabel = stringResource(R.string.home_see_all),
-                            onAction = onOpenPlots,
-                            modifier = Modifier.padding(horizontal = ScreenPadding),
-                        )
-                        HomePlotsCarousel(plots = state.plots, onOpenPlot = onOpenPlot)
+                        val focused = state.focusedPlot
+                        val alternation = state.alternation
+                        if (focused != null && alternation != null) {
+                            HomeAlternationCard(
+                                plotName = focused.name,
+                                alternation = alternation,
+                                onOpen = { onOpenAlternation(focused.id, focused.name) },
+                                modifier = Modifier
+                                    .padding(start = ScreenPadding, end = ScreenPadding, top = 32.dp)
+                                    .homeTourTarget(HomeTourTarget.Alternation),
+                            )
+                        }
+                        Column(modifier = Modifier.padding(top = 32.dp).homeTourTarget(HomeTourTarget.Plots)) {
+                            VioraSectionHeader(
+                                title = stringResource(R.string.home_my_plots),
+                                actionLabel = stringResource(R.string.home_see_all),
+                                onAction = onOpenPlots,
+                                modifier = Modifier.padding(horizontal = ScreenPadding),
+                            )
+                            HomePlotsCarousel(plots = state.plots, onOpenPlot = onOpenPlot)
+                        }
                     }
                 }
             }

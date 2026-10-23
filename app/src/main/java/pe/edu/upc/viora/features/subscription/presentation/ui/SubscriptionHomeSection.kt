@@ -45,6 +45,7 @@ fun SubscriptionHomeSection(
     onRenew: () -> Unit,
     onRedeemCode: () -> Unit,
     onOpenSubscription: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: SubscriptionAccessViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -52,28 +53,69 @@ fun SubscriptionHomeSection(
     LaunchedEffect(owner) {
         owner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { viewModel.refresh() }
     }
-    val result = state as? AppResult.Success ?: return
-    val sub = result.value
-    if (sub?.entitlementActive == true) {
-        TextButton(onClick = onOpenSubscription, modifier = Modifier.testTag("home_subscription_link")) {
-            Text(stringResource(R.string.subscription_access_title), color = Green800)
+    SubscriptionHomeContent(
+        result = state,
+        onRenew = onRenew,
+        onRedeemCode = onRedeemCode,
+        onOpenSubscription = onOpenSubscription,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun SubscriptionHomeContent(
+    result: AppResult<pe.edu.upc.viora.features.subscription.domain.entity.ProducerSubscription?>?,
+    onRenew: () -> Unit,
+    onRedeemCode: () -> Unit,
+    onOpenSubscription: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    when (result) {
+        is AppResult.Success -> {
+            val sub = result.value
+            if (sub?.entitlementActive == true) {
+                TextButton(
+                    onClick = onOpenSubscription,
+                    modifier = modifier.testTag("home_subscription_link"),
+                ) {
+                    Text(stringResource(R.string.subscription_access_title), color = Green800)
+                }
+            } else {
+                InactiveAccessCard(
+                    endsAt = sub?.endsAt,
+                    onRenew = onRenew,
+                    onRedeemCode = onRedeemCode,
+                    modifier = modifier,
+                )
+            }
         }
-    } else {
-        InactiveAccessCard(endsAt = sub?.endsAt, onRenew = onRenew, onRedeemCode = onRedeemCode)
+        null -> {
+            // While loading or uninitialized, nothing is displayed so Home never claims an unconfirmed state
+            Box(modifier = modifier.testTag("home_subscription_loading"))
+        }
+        is AppResult.Failure -> {
+            // On network failure or error, nothing is displayed to avoid false claims
+            Box(modifier = modifier.testTag("home_subscription_error"))
+        }
     }
 }
 
 @Composable
-fun InactiveAccessCard(endsAt: Instant?, onRenew: () -> Unit, onRedeemCode: () -> Unit) {
+fun InactiveAccessCard(
+    endsAt: Instant?,
+    onRenew: () -> Unit,
+    onRedeemCode: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val title = if (endsAt != null) {
-        val date = DateTimeFormatter.ofPattern(stringResource(R.string.home_access_date_pattern), Locale.getDefault())
+        val date = DateTimeFormatter.ofPattern(stringResource(R.string.home_access_date_pattern), androidx.compose.ui.platform.LocalConfiguration.current.locales[0])
             .withZone(ZoneId.systemDefault()).format(endsAt)
         stringResource(R.string.home_access_expired_title, date)
     } else {
         stringResource(R.string.home_access_none_title)
     }
     Column(
-        Modifier
+        modifier
             .fillMaxWidth()
             .testTag("home_inactive_access_card")
             .clip(RoundedCornerShape(32.dp))

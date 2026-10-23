@@ -31,6 +31,8 @@
     <string name="home_headline_emphasis">hoy.</string>
     <string name="home_headline_empty_lead">Empecemos por</string>
     <string name="home_headline_empty_emphasis">tu olivar.</string>
+    <string name="home_headline_paused_lead">Tu acceso</string>
+    <string name="home_headline_paused_emphasis">está en pausa.</string>
     <string name="home_campaign">Campaña %1$d</string>
     <plurals name="home_plots_chip">
         <item quantity="one">%1$d lote · %2$s ha</item>
@@ -1600,8 +1602,8 @@
     <string name="home_access_inactive_chip">Acceso inactivo</string>
     <string name="home_access_expired_title">Tu plan venció el\n%1$s</string>
     <string name="home_access_none_title">Aún no tienes\nun plan activo</string>
-    <string name="home_access_inactive_body">Tus lotes y tu historial siguen guardados. Renueva el Plan Productor o usa un código de tu cooperativa para volver a recibir alertas.</string>
-    <string name="home_access_renew">Renovar Plan Productor</string>
+    <string name="home_access_inactive_body">Tus lotes y tu historial siguen guardados. Consulta tu suscripción o usa un código de tu cooperativa.</string>
+    <string name="home_access_renew">Ver mi suscripción</string>
     <string name="home_access_redeem_code">Tengo un código de cooperativa</string>
     <string name="home_access_date_pattern" translatable="false">d \'de\' MMMM</string>
 </resources>
