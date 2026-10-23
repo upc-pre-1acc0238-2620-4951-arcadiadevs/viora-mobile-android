@@ -188,4 +188,40 @@ class SubscriptionHomeSectionInstrumentedTest {
         compose.onNodeWithTag("home_inactive_access_card").assertIsDisplayed()
         compose.onNodeWithTag("home_subscription_link").assertDoesNotExist()
     }
+
+    @Test
+    fun subscriptionHomeContentInLoadingStateRendersNoUnconfirmedCard() {
+        compose.setContent {
+            VioraTheme {
+                pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionHomeContent(
+                    result = null,
+                    onRenew = {},
+                    onRedeemCode = {},
+                    onOpenSubscription = {},
+                )
+            }
+        }
+
+        compose.onNodeWithTag("home_subscription_loading").assertExists()
+        compose.onNodeWithTag("home_inactive_access_card").assertDoesNotExist()
+        compose.onNodeWithTag("home_subscription_link").assertDoesNotExist()
+    }
+
+    @Test
+    fun subscriptionHomeContentInErrorStateRendersNoFalseClaim() {
+        compose.setContent {
+            VioraTheme {
+                pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionHomeContent(
+                    result = pe.edu.upc.viora.core.domain.AppResult.Failure(pe.edu.upc.viora.core.domain.AppError.Offline),
+                    onRenew = {},
+                    onRedeemCode = {},
+                    onOpenSubscription = {},
+                )
+            }
+        }
+
+        compose.onNodeWithTag("home_subscription_error").assertExists()
+        compose.onNodeWithTag("home_inactive_access_card").assertDoesNotExist()
+        compose.onNodeWithTag("home_subscription_link").assertDoesNotExist()
+    }
 }
