@@ -42,9 +42,13 @@ import pe.edu.upc.viora.features.harvestsettlement.presentation.state.LogbookPer
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.LogbookRowType
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.LogbookUiState
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettledHarvestEntry
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveFieldNotesUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsLastRefreshUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.RefreshFieldNotesUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RefreshPlotsUseCase
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNote
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteSyncState
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
@@ -67,6 +71,8 @@ class LogbookViewModel @Inject constructor(
     observePendingDraftSamplesCount: ObservePendingDraftSamplesCountUseCase? = null,
     observeThinningEvents: ObserveThinningEventsUseCase? = null,
     observeIncidents: ObserveIncidentsUseCase? = null,
+    observeNotes: ObserveFieldNotesUseCase? = null,
+    private val refreshNotes: RefreshFieldNotesUseCase? = null,
 ) : ViewModel() {
 
     /** The bell of the header carries the unread dot while any plot has an active alert (as on the Home). */
@@ -95,11 +101,15 @@ class LogbookViewModel @Inject constructor(
     /** Read from the Room cache, so the timeline is drawn before the network answers. */
     private val thinningEvents: Flow<List<ThinningEvent>?> = observeThinningEvents?.invoke() ?: flowOf(null)
 
+    private val notes: Flow<List<FieldNote>> = observeNotes?.invoke() ?: flowOf(emptyList())
+
+    /** "N en el teléfono" counts the tree samples and the notes not sent yet. */
     private val draftSamplingFlow = combine(
         observeActiveSampling?.invoke() ?: flowOf(null),
         observePendingDraftSamplesCount?.invoke() ?: flowOf(0),
-    ) { activeDraft, pendingCount ->
-        activeDraft to pendingCount
+        notes,
+    ) { activeDraft, pendingCount, allNotes ->
+        activeDraft to pendingCount + allNotes.count { it.syncState == FieldNoteSyncState.PENDING }
     }
 
     private val localState = combine(
@@ -142,15 +152,16 @@ class LogbookViewModel @Inject constructor(
         observePlots(),
         observePlotsLastRefresh(),
         localState,
-    ) { settlements, plots, lastPlotRefresh, local ->
+        notes,
+    ) { settlements, plots, lastPlotRefresh, local, allNotes ->
         val (refresh, selected, activeSampling, thinningEvents, pendingCount) = local
         // A timeline downloaded before (even an empty one) is drawn at once; only a first visit waits.
-        if (settlements.isEmpty() && thinningEvents == null && activeSampling == null && !refresh.hasFinishedOnce) {
+        if (settlements.isEmpty() && allNotes.isEmpty() && thinningEvents == null && activeSampling == null && !refresh.hasFinishedOnce) {
             LogbookUiState.Loading
         } else {
             LogbookUiState.Content(
                 filter = selected,
-                groups = groupsFor(selected, settlements, plots, thinningEvents.orEmpty()),
+                groups = groupsFor(selected, settlements, plots, thinningEvents.orEmpty(), allNotes),
                 activeSampling = activeSampling,
                 pendingLocalCount = pendingCount,
                 refreshError = refresh.error,
@@ -202,7 +213,9 @@ class LogbookViewModel @Inject constructor(
             if (plotsResult is AppResult.Failure) return plotsResult
             plots = observePlots().first()
         }
-        return refreshSettlements(plots.map { it.id.value })
+        val ids = plots.map { it.id.value }
+        refreshNotes?.invoke(ids)
+        return refreshSettlements(ids)
     }
 
     /** The server's sampling in progress, shown when the phone has no draft of its own. */
@@ -230,6 +243,7 @@ class LogbookViewModel @Inject constructor(
         settlements: List<HarvestSettlement>,
         plots: List<Plot>,
         thinningEvents: List<ThinningEvent>,
+        notes: List<FieldNote> = emptyList(),
     ): List<LogbookGroup> {
         val names = plots.associate { it.id.value to it.name }
         val today = LocalDate.now(clock)
@@ -279,11 +293,27 @@ class LogbookViewModel @Inject constructor(
                 )
             }
 
+        // A note is placed on the day it refers to, at the time it was written.
+        val noteEntries = notes.map {
+            val written = it.createdAt.atZone(clock.zone)
+            SettledHarvestEntry(
+                id = it.id,
+                plotId = it.plotId,
+                plotName = names[it.plotId],
+                campaignYear = it.observedOn.year,
+                settledAt = it.observedOn.atTime(written.toLocalTime()).atZone(clock.zone).toInstant(),
+                type = LogbookRowType.NOTE,
+                noteType = it.type,
+                noteText = it.text,
+                noteSyncState = it.syncState,
+            )
+        }
+
         val allItems = when (selected) {
             LogbookFilter.HARVESTS -> harvestEntries
             LogbookFilter.SAMPLINGS -> samplingEntries
             LogbookFilter.THINNINGS -> thinningEntries
-            LogbookFilter.ALL -> (harvestEntries + samplingEntries + thinningEntries)
+            LogbookFilter.ALL -> (harvestEntries + samplingEntries + thinningEntries + noteEntries)
         }
 
         return allItems
