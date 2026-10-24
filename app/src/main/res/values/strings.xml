@@ -1473,7 +1473,7 @@
     <string name="account_role_producer">Producer</string>
     <string name="account_headline_lead">Your</string>
     <string name="account_headline_emphasis">account.</string>
-    <string name="account_membership_active">Active membership</string>
+    <string name="account_membership_active">Active plan</string>
     <string name="account_section_personal">Personal details</string>
     <string name="account_section_security">Security</string>
     <string name="account_section_preferences">Preferences</string>
@@ -1748,5 +1748,117 @@
     <plurals name="phase_msg_chill_missing">
         <item quantity="one">chill portions. %1$d more to bloom evenly.</item>
         <item quantity="other">chill portions. %1$d more to bloom evenly.</item>
+    </plurals>
+    <!-- P99 · Mi plan, P100 · Eliminar cuenta, P101 · Cuenta eliminada -->
+    <string name="my_plan_title">My plan</string>
+    <string name="my_plan_retry">Try again</string>
+    <string name="my_plan_headline_lead">Your plan,</string>
+    <string name="my_plan_headline_emphasis">in hectares.</string>
+    <string name="my_plan_section_validity">Validity</string>
+    <string name="my_plan_section_plots">Your plots in the plan</string>
+    <string name="my_plan_section_details">Details</string>
+    <string name="my_plan_have_code">I have a code</string>
+    <string name="my_plan_other_code">Enter another code</string>
+    <string name="my_plan_renew_and_expand">Renew and expand</string>
+    <string name="my_plan_expand">Expand my plan</string>
+    <string name="my_plan_how_plans_work">See how the plans work</string>
+    <string name="my_plan_free_chip">Free · %1$s</string>
+    <string name="my_plan_register_plot">Register a plot</string>
+    <string name="my_plan_renew">Renew my plan</string>
+    <string name="my_plan_activate">Activate Producer Plan</string>
+    <string name="my_plan_ring_kept">ha kept</string>
+    <string name="my_plan_ring_over">ha over the quota</string>
+    <string name="my_plan_hero_over">Your plots add up to %1$s ha and your plan covers %2$s ha. Expand it to cover them all.</string>
+    <string name="my_plan_voice_over">You are %1$s ha over your plan. New plots cannot be registered until you expand it.</string>
+    <string name="my_plan_ring_free">ha free</string>
+    <string name="my_plan_ring_of">of %1$s ha</string>
+    <string name="my_plan_since">Since %1$s</string>
+    <string name="my_plan_until">Until %1$s</string>
+    <string name="my_plan_ends_on">Ends %1$s</string>
+    <string name="my_plan_free_label">Free</string>
+    <string name="my_plan_hectares">%1$s ha</string>
+    <string name="my_plan_detail_plan">Plan</string>
+    <string name="my_plan_detail_plan_value">Producer · %1$s ha</string>
+    <string name="my_plan_detail_activation">Activation</string>
+    <string name="my_plan_detail_paid">Annual payment</string>
+    <string name="my_plan_detail_by_code">Access code</string>
+    <string name="my_plan_detail_receipt">Receipt</string>
+    <string name="my_plan_detail_receipt_sent">Sent to your email</string>
+    <string name="my_plan_detail_no_receipt">Not applicable</string>
+    <string name="my_plan_account_section">Your plan</string>
+    <string name="my_plan_account_none">Activate your plan</string>
+    <string name="my_plan_account_caption">%1$s of %2$s ha in use · Until %3$s</string>
+    <string name="my_plan_date_pattern">MM/dd/yyyy</string>
+    <string name="my_plan_plot_detail">%1$s · %2$s trees</string>
+    <string name="my_plan_eyebrow_none">No active plan</string>
+    <string name="my_plan_eyebrow_code">Producer Plan · with a code</string>
+    <string name="my_plan_eyebrow_active">Producer Plan · active</string>
+    <string name="my_plan_hero_none">Your plots and history are still saved. Activate your plan to receive alerts again.</string>
+    <string name="my_plan_hero_expiring">Your plan ends on %1$s. Renew it so you keep your alerts.</string>
+    <string name="my_plan_hero_active">Your quota covers %1$s ha until %2$s. Today you use %3$s ha.</string>
+    <string name="my_plan_hero_code">Your code covers %1$s ha until %2$s. Today you use %3$s ha.</string>
+    <string name="my_plan_voice_none">When you activate your plan, here you will see how many hectares you have left.</string>
+    <string name="my_plan_voice_expiring">When it ends, your plots and history are kept, but you stop receiving alerts.</string>
+    <string name="my_plan_voice_code">Your plan came with a code. If you need more hectares, ask whoever gave it to you for a new one.</string>
+    <string name="my_plan_voice_active">You have %1$s ha left. If you plant more, expand your plan before registering the plot.</string>
+    <string name="account_delete">Delete account</string>
+    <string name="account_membership_paused">Access paused</string>
+    <string name="delete_account_title">Delete account</string>
+    <string name="delete_account_headline_lead">Delete your</string>
+    <string name="delete_account_headline_emphasis">account.</string>
+    <string name="delete_account_warning_title">This cannot be undone</string>
+    <string name="delete_account_warning_body">Deleting your account erases for good:</string>
+    <string name="delete_account_item_records">Samplings, thinnings and harvests of every campaign</string>
+    <string name="delete_account_item_notes">Your notes, photos and sealed dossiers</string>
+    <string name="delete_account_item_profile">Your profile and your access to Viora</string>
+    <string name="delete_account_section_before">Before you go</string>
+    <string name="delete_account_download">Download my dossiers</string>
+    <string name="delete_account_download_value">Logbook</string>
+    <string name="delete_account_plan">Your active plan</string>
+    <string name="delete_account_plan_value">Not refunded</string>
+    <string name="delete_account_password_label">Confirm with your password</string>
+    <string name="delete_account_error_password">The password does not match. Your account is intact.</string>
+    <string name="delete_account_error_protected">The shared demo account cannot be deleted.</string>
+    <string name="delete_account_error_offline">No connection. Your account is intact; try again with signal.</string>
+    <string name="delete_account_error_generic">We could not delete your account. It is intact; try again.</string>
+    <string name="delete_account_understood">I understand everything will be deleted and I will not be able to recover it.</string>
+    <string name="delete_account_action">Delete my account</string>
+    <string name="delete_account_keep">Keep my account</string>
+    <string name="delete_account_sheet_lead">Delete your account</string>
+    <string name="delete_account_sheet_emphasis">for good?</string>
+    <string name="delete_account_sheet_confirm">Yes, delete my account</string>
+    <string name="delete_account_sheet_keep">No, keep my account</string>
+    <string name="account_deleted_eyebrow">Account deleted</string>
+    <string name="account_deleted_lead">See you soon,</string>
+    <string name="account_deleted_name">%1$s.</string>
+    <string name="account_deleted_body">We deleted your account and all your data. If you ever come back, create a new account: we will be here.</string>
+    <string name="account_deleted_done">Back to start</string>
+    <plurals name="my_plan_ring_plots">
+        <item quantity="one">in %1$d plot</item>
+        <item quantity="other">in %1$d plots</item>
+    </plurals>
+    <plurals name="my_plan_days_left">
+        <item quantity="one">day of plan</item>
+        <item quantity="other">days of plan</item>
+    </plurals>
+    <plurals name="my_plan_days_to_renew">
+        <item quantity="one">day to renew</item>
+        <item quantity="other">days to renew</item>
+    </plurals>
+    <plurals name="my_plan_free_detail">
+        <item quantity="one">About %1$d more plot fits</item>
+        <item quantity="other">About %1$d more plots fit</item>
+    </plurals>
+    <plurals name="my_plan_eyebrow_expiring">
+        <item quantity="one">Ends in %1$d day</item>
+        <item quantity="other">Ends in %1$d days</item>
+    </plurals>
+    <plurals name="delete_account_item_plots">
+        <item quantity="one">Your %1$d plot, with its outline and sensors</item>
+        <item quantity="other">Your %1$d plots, with their outlines and sensors</item>
+    </plurals>
+    <plurals name="delete_account_sheet_body">
+        <item quantity="one">We will delete your %1$d plot and all its history right now. There is no recycle bin and no way to recover it.</item>
+        <item quantity="other">We will delete your %1$d plots and all their history right now. There is no recycle bin and no way to recover them.</item>
     </plurals>
 </resources>

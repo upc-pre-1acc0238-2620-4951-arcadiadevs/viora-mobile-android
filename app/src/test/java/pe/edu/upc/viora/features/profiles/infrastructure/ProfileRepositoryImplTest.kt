@@ -17,6 +17,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import pe.edu.upc.viora.core.database.LocalDataOwner
 import pe.edu.upc.viora.core.datastore.SessionStore
 import pe.edu.upc.viora.core.datastore.StoredSession
 import pe.edu.upc.viora.core.domain.AppError
@@ -42,6 +43,7 @@ class ProfileRepositoryImplTest {
     private val sessionStore = SessionStore(preferences)
     private val profileStore = ProfileStore(preferences)
     private lateinit var repository: ProfileRepositoryImpl
+    private var wipes = 0
 
     private val accessToken = token(email = "teodoro.mamani@gmail.com")
 
@@ -59,6 +61,7 @@ class ProfileRepositoryImplTest {
             profileStore = profileStore,
             sessionStore = sessionStore,
             clock = Clock.fixed(Instant.parse("2026-10-22T12:00:00Z"), ZoneOffset.UTC),
+            localDataOwner = LocalDataOwner(preferences) { wipes++ },
         )
     }
 
@@ -114,6 +117,39 @@ class ProfileRepositoryImplTest {
         assertEquals("""{"refreshToken":"old-refresh"}""", server.takeRequest().body.readUtf8())
         assertNull(sessionStore.session())
         assertNull(profileStore.getProfile())
+    }
+
+    @Test
+    fun `deleting the account forgets the session, the profile and every local record`() = runTest {
+        signedInAs("u-1")
+        profileStore.saveProfile(UserProfile(ProfileId("p-1"), "u-1", "Teodoro Mamani", "PE", "+51952184337"))
+        server.enqueue(MockResponse().setResponseCode(204))
+
+        val result = repository.deleteAccount("Olivo2025")
+
+        assertTrue(result is AppResult.Success)
+        val request = server.takeRequest()
+        assertEquals("/auth/account-deletions", request.path)
+        assertEquals("""{"password":"Olivo2025"}""", request.body.readUtf8())
+        assertNull(sessionStore.session())
+        assertNull(profileStore.getProfile())
+        assertEquals(1, wipes)
+    }
+
+    @Test
+    fun `a wrong password deletes nothing and keeps the phone as it was`() = runTest {
+        signedInAs("u-1")
+        server.enqueue(
+            MockResponse().setResponseCode(422).setHeader("Content-Type", "application/problem+json")
+                .setBody("""{"status":422,"code":"BUSINESS_RULE_VIOLATION","detail":"La contraseña actual es incorrecta"}"""),
+        )
+
+        val result = repository.deleteAccount("equivocada1")
+
+        val error = (result as AppResult.Failure).error as AppError.Validation
+        assertEquals(ProfileRepository.WRONG_CURRENT_PASSWORD, error.code)
+        assertEquals("old-refresh", sessionStore.session()!!.refreshToken)
+        assertEquals(0, wipes)
     }
 
     @Test
