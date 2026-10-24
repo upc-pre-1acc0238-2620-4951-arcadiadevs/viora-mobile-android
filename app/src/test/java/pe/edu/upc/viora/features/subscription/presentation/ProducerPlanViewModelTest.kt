@@ -115,6 +115,13 @@ class ProducerPlanViewModelTest {
         assertEquals(BigDecimal("1.5"), (restored.uiState.value as ProducerPlanUiState.Content).capacity.hectares)
     }
 
+    @Test fun `right after the sign-up the selection starts at the onboarding hectares`() {
+        cache(); val model = model(SavedStateHandle(mapOf("hectares" to 7)))
+        assertEquals(0, BigDecimal("7").compareTo((model.uiState.value as ProducerPlanUiState.Content).capacity.hectares))
+        model.decrease()
+        assertEquals(0, BigDecimal("6.5").compareTo((model.uiState.value as ProducerPlanUiState.Content).capacity.hectares))
+    }
+
     @Test fun `an updated catalog revalidates a saved capacity against the new server step`() {
         cache(); val model = model(); model.increase(); model.increase()
         cache(offer("1"))
