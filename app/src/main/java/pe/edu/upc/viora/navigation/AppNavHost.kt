@@ -44,9 +44,13 @@ import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.agron
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.SettleHarvestRoute
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.campaignClosedComposable
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.settleHarvestComposable
-import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestEntrySection
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
+import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
+import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
+import pe.edu.upc.viora.features.home.presentation.ui.HomePhaseActions
+import pe.edu.upc.viora.features.home.presentation.ui.HomePhaseCarousel
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
+import pe.edu.upc.viora.features.home.presentation.viewmodel.HomePhaseViewModel
 import pe.edu.upc.viora.features.iam.presentation.ui.IamScreen
 import pe.edu.upc.viora.features.iam.presentation.ui.OnboardingScreen
 import pe.edu.upc.viora.features.iam.presentation.ui.SplashScreen
@@ -139,9 +143,13 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 LaunchedEffect(owner) {
                     owner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { subViewModel.refresh() }
                 }
-                val isAccessPaused = (subState as? AppResult.Success)?.value?.let { !it.entitlementActive } ?: false
+                // Figma P10 · Sin acceso activo: a plan that ended and no plan at all (204) are the same state.
+                val isAccessPaused = (subState as? AppResult.Success)?.let { it.value?.entitlementActive != true } ?: false
+                val phaseViewModel: HomePhaseViewModel = hiltViewModel()
+                val phase by phaseViewModel.uiState.collectAsStateWithLifecycle()
                 HomeScreen(
                     isAccessPaused = isAccessPaused,
+                    phase = phase.headlinePhase,
                     onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
                     onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
                     onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id.value, plotName = name)) },
@@ -169,9 +177,24 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                             onRedeemCode = { navController.navigate(RedeemCodeRoute()) },
                             modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 22.dp),
                         )
-                        HarvestEntrySection(
-                            onSettle = { plotId, year -> navController.navigate(SettleHarvestRoute(plotId = plotId, campaignYear = year)) },
-                        )
+                        // Figma P10 · Sin acceso activo drops the phase card: the yellow card takes its place.
+                        if (!isAccessPaused) {
+                            HomePhaseCarousel(
+                                state = phase,
+                                actions = HomePhaseActions(
+                                    onOpenChill = { id, name -> navController.navigate(WinterChillRoute(plotId = id, plotName = name)) },
+                                    onOpenForecast = { id, name -> navController.navigate(PlotClimateRoute(plotId = id, plotName = name)) },
+                                    onRecordBloom = { id, name ->
+                                        navController.navigate(ThinningPlanRoute(plotId = id, plotName = name, recordBloom = true))
+                                    },
+                                    onSample = { id, name -> navController.navigate(SamplingRoundRoute(plotId = id, plotName = name)) },
+                                    onOpenThinningPlan = { id, name -> navController.navigate(ThinningPlanRoute(plotId = id, plotName = name)) },
+                                    onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id, plotName = name)) },
+                                    onSettle = { plotId, year -> navController.navigate(SettleHarvestRoute(plotId = plotId, campaignYear = year)) },
+                                ),
+                                modifier = Modifier.padding(top = 24.dp).homeTourTarget(HomeTourTarget.Phase),
+                            )
+                        }
                     },
                 )
             }
