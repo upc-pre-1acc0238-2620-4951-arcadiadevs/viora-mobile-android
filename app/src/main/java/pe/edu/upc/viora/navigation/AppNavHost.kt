@@ -2,14 +2,24 @@ package pe.edu.upc.viora.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import pe.edu.upc.viora.BuildConfig
 import androidx.navigation.navDeepLink
+import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionHomeContent
+import pe.edu.upc.viora.features.subscription.presentation.viewmodel.SubscriptionAccessViewModel
 import pe.edu.upc.viora.core.navigation.AuthRoute
 import pe.edu.upc.viora.core.navigation.OnboardingRoute
 import pe.edu.upc.viora.core.navigation.SplashRoute
@@ -123,7 +133,15 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         }
         navigation<HomeGraph>(startDestination = HomeRoute) {
             composable<HomeRoute> {
+                val subViewModel: SubscriptionAccessViewModel = hiltViewModel()
+                val subState by subViewModel.uiState.collectAsStateWithLifecycle()
+                val owner = LocalLifecycleOwner.current
+                LaunchedEffect(owner) {
+                    owner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { subViewModel.refresh() }
+                }
+                val isAccessPaused = (subState as? AppResult.Success)?.value?.let { !it.entitlementActive } ?: false
                 HomeScreen(
+                    isAccessPaused = isAccessPaused,
                     onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
                     onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
                     onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id.value, plotName = name)) },
@@ -145,6 +163,13 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     },
                     onOpenAccount = { navController.navigate(AccountRoute) },
                     sections = {
+                        SubscriptionHomeContent(
+                            result = subState,
+                            onRenew = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
+                            onRedeemCode = { navController.navigate(RedeemCodeRoute()) },
+                            onOpenSubscription = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
+                            modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 22.dp),
+                        )
                         HarvestEntrySection(
                             onSettle = { plotId, year -> navController.navigate(SettleHarvestRoute(plotId = plotId, campaignYear = year)) },
                         )
@@ -194,7 +219,10 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 navController.navigate(RegisterPlotRoute)
             },
         )
-        producerPlanComposable(navController, onLeave = { navController.openHome() })
+        producerPlanComposable(navController, onLeave = { navController.openHome() }, onRegisterPlot = {
+            navController.openHome()
+            navController.navigate(RegisterPlotRoute)
+        })
         plotScreens(navController)
         climateNavGraph(navController)
         alertsNavGraph(
@@ -274,6 +302,7 @@ private fun NavHostController.openCampaignReceipt(plotId: String, year: Int, pop
  * `viora.debugStartScreen=cooperative-code` in `local.properties`. Release builds always start on the splash.
  */
 private fun debugStartDestination(): Any? = when (BuildConfig.DEBUG_START_SCREEN) {
+    "home" -> HomeGraph
     "producer-plan" -> ProducerPlanRoute
     "cooperative-code" -> CooperativeCodeGraph
     "account" -> AccountRoute

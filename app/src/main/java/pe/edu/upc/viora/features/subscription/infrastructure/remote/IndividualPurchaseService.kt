@@ -32,6 +32,9 @@ data class IndividualPurchaseDto(
 data class IndividualCheckoutDto(val intentId: String, val checkoutUrl: String, val expiresAt: String)
 
 interface IndividualPurchaseService {
+    @GET("subscriptions")
+    suspend fun current(): Response<IndividualPurchaseDto>
+
     @POST("subscriptions")
     suspend fun create(@Header("Idempotency-Key") key: String, @Body request: IndividualPurchaseRequest): Response<IndividualPurchaseDto>
 

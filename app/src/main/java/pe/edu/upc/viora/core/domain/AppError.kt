@@ -7,6 +7,8 @@ import kotlinx.serialization.json.JsonObject
  * transport/persistence problems into these types so presentation never sees HTTP or IO details.
  */
 sealed interface AppError {
+    /** Request throttled; infrastructure supplies the minimum retry delay when available. */
+    data class RateLimited(val retryAfterMillis: Long? = null) : AppError
 
     /** No connectivity, DNS failure or the server could not be reached. */
     data object Offline : AppError

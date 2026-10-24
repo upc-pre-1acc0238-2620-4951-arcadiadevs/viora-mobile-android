@@ -31,6 +31,8 @@
     <string name="home_headline_emphasis">hoy.</string>
     <string name="home_headline_empty_lead">Empecemos por</string>
     <string name="home_headline_empty_emphasis">tu olivar.</string>
+    <string name="home_headline_paused_lead">Tu acceso</string>
+    <string name="home_headline_paused_emphasis">está en pausa.</string>
     <string name="home_campaign">Campaña %1$d</string>
     <plurals name="home_plots_chip">
         <item quantity="one">%1$d lote · %2$s ha</item>
@@ -1580,4 +1582,52 @@
     <string name="purchase_continue">Continuar al pago</string>
     <string name="purchase_later">Más tarde</string>
     <string name="purchase_not_pending">Este contrato ya no está pendiente de pago. No se abrió otro pago.</string>
+    <string name="purchase_verifying">Verificando el pago con Mercado Pago…</string>
+    <string name="purchase_verifying_hint">Espera un momento mientras confirmamos tu transacción.</string>
+    <string name="purchase_unconfirmed_title">Pago pendiente de confirmación</string>
+    <string name="purchase_unconfirmed_message">Todavía no hemos confirmado el pago. Si ya pagaste, vuelve a consultar el estado. Este mensaje no significa que el pago haya sido rechazado.</string>
+    <string name="purchase_check_status">Consultar estado</string>
+    <string name="purchase_confirmed_title">Suscripción activa</string>
+    <string name="purchase_confirmed_message">Tu suscripción ya está activa con %1$s ha. ¡Bienvenido a Viora!</string>
+    <string name="purchase_close">Cerrar</string>
+    <string name="subscription_access_title">Mi suscripción</string>
+    <string name="subscription_access_inactive">Sin acceso activo confirmado</string>
+    <string name="subscription_access_quota">Cupo contratado: %1$s ha</string>
+    <string name="subscription_access_mode">Modalidad: %1$s</string>
+    <string name="subscription_access_until">Vigente hasta: %1$s</string>
+    <string name="subscription_access_plan">Ver Plan Productor</string>
+    <string name="subscription_mode_individual">Individual</string>
+    <string name="subscription_mode_cooperative">Cooperativa</string>
+    <string name="subscription_mode_unknown">No disponible</string>
+    <string name="home_access_inactive_chip">Acceso inactivo</string>
+    <string name="home_access_expired_title">Tu plan venció el\n%1$s</string>
+    <string name="home_access_none_title">Aún no tienes\nun plan activo</string>
+    <string name="home_access_inactive_body">Tus lotes y tu historial siguen guardados. Consulta tu suscripción o usa un código de tu cooperativa.</string>
+    <string name="home_access_renew">Ver Plan Productor</string>
+    <string name="home_access_redeem_code">Tengo un código de cooperativa</string>
+    <string name="home_access_date_pattern" translatable="false">d \'de\' MMMM</string>
+
+    <!-- P04 payment results -->
+    <string name="payment_result_illustration">Resultado del pago de Viora</string>
+    <string name="payment_result_active_badge">PLAN ACTIVO</string>
+    <string name="payment_result_rejected_badge">PAGO NO COMPLETADO</string>
+    <string name="payment_result_provider_badge">MERCADO PAGO</string>
+    <string name="payment_result_active_lead">Bienvenido a Viora,</string>
+    <string name="payment_result_name">%1$s.</string>
+    <string name="payment_result_rejected_lead">El pago no</string>
+    <string name="payment_result_rejected_emphasis">se completó.</string>
+    <string name="payment_result_verifying_lead">Confirmando</string>
+    <string name="payment_result_verifying_emphasis">tu pago…</string>
+    <string name="payment_result_unconfirmed_lead">Pago pendiente de</string>
+    <string name="payment_result_unconfirmed_emphasis">confirmación</string>
+    <string name="payment_result_active_body">Tu olivar ya tiene quien lo lea. Empecemos por registrar tu primer lote.</string>
+    <string name="payment_result_verifying_body">Estamos validando la transacción con Mercado Pago. No cierres la app.</string>
+    <string name="payment_result_rejected_body">El último intento de pago no fue aprobado por Mercado Pago. Puedes intentar con otro medio.</string>
+    <string name="payment_result_retry">Intentar con otro medio</string>
+    <string name="payment_result_plan">Plan</string>
+    <string name="payment_result_quota">Productor · %1$s ha</string>
+    <string name="payment_result_validity">Vigencia</string>
+    <string name="payment_result_until">Hasta el %1$s</string>
+    <string name="payment_result_receipt">Comprobante</string>
+    <string name="payment_result_unavailable">No disponible</string>
 </resources>

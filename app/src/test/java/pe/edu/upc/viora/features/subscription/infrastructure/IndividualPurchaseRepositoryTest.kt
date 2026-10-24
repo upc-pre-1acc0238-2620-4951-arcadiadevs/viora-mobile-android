@@ -85,6 +85,35 @@ class IndividualPurchaseRepositoryTest {
         assertNotEquals(journal.rows.getValue("owner-a").createKey, journal.rows.getValue("owner-a").checkoutKey)
     }
 
+    @Test fun `fresh journal recovers owned pending purchase after creation conflict`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(409))
+        server.enqueue(MockResponse().setResponseCode(200).setBody(contract))
+        val recovered = repository().prepare(plan, capacity) as AppResult.Success
+        assertEquals(id, recovered.value.id)
+        assertEquals("POST", server.takeRequest().method)
+        val current = server.takeRequest()
+        assertEquals("GET", current.method)
+        assertEquals("/api/v1/subscriptions", current.path)
+        assertTrue(journal.rows.getValue("owner-a").contractJson!!.contains(id))
+        assertEquals(2, server.requestCount)
+    }
+
+    @Test fun `missing historical contract adopts existing current contract without creating purchase`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(201).setBody(contract))
+        repository().prepare(plan, capacity)
+        server.takeRequest()
+        val replacement = UUID.randomUUID().toString()
+        server.enqueue(MockResponse().setResponseCode(404))
+        server.enqueue(MockResponse().setResponseCode(200).setBody(contract.replace(id, replacement)))
+        val recovered = repository().resume() as AppResult.Success
+        assertEquals(replacement, recovered.value!!.id)
+        assertEquals("GET", server.takeRequest().method)
+        val current = server.takeRequest()
+        assertEquals("GET", current.method)
+        assertEquals("/api/v1/subscriptions", current.path)
+        assertTrue(journal.rows.getValue("owner-a").contractJson!!.contains(replacement))
+    }
+
     @Test fun `a lost creation response replays the persisted key after repository recreation`() = runTest {
         server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST))
         assertTrue(repository().prepare(plan, capacity) is AppResult.Failure)

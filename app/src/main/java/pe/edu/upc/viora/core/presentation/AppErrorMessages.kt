@@ -19,5 +19,6 @@ fun AppError.messageRes(): Int = when (this) {
     is AppError.PreconditionFailed -> R.string.error_precondition_failed
     is AppError.Validation -> R.string.error_validation
     is AppError.Server -> R.string.error_server
+    is AppError.RateLimited -> R.string.error_server
     is AppError.Unknown -> R.string.error_unknown
 }
