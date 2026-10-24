@@ -90,6 +90,23 @@ class ProducerSubscriptionRepositoryTest {
     }
 
     @Test
+    fun `payment evidence maps rejection and safely handles unknown or absent values`() = runTest {
+        val cases = listOf(
+            "REJECTED" to pe.edu.upc.viora.features.subscription.domain.valueobject.IndividualPaymentStatus.REJECTED,
+            "NEW_PROVIDER_STATE" to pe.edu.upc.viora.features.subscription.domain.valueobject.IndividualPaymentStatus.UNKNOWN,
+            null to pe.edu.upc.viora.features.subscription.domain.valueobject.IndividualPaymentStatus.UNKNOWN,
+        )
+        for ((status, expected) in cases) {
+            val payload = if (status == null) activeJson else activeJson.replace(
+                "\"status\": \"ACTIVE\",", "\"status\": \"ACTIVE\", \"paymentStatus\": \"$status\",")
+            server.enqueue(MockResponse().setResponseCode(200).setBody(payload))
+            val result = repository().getById(subId)
+            assertTrue(result is AppResult.Success)
+            assertEquals(expected, (result as AppResult.Success).value.paymentStatus)
+        }
+    }
+
+    @Test
     fun `getCurrent returns subscription when active on 200 OK`() = runTest {
         server.enqueue(MockResponse().setResponseCode(200).setBody(activeJson))
 

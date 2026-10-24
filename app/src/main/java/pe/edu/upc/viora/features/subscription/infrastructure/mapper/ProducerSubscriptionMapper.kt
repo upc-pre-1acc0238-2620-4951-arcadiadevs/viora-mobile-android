@@ -22,4 +22,5 @@ fun ProducerSubscriptionDto.toDomain(): ProducerSubscription = ProducerSubscript
     endsAt = endsAt?.takeIf { it.isNotBlank() }?.let { Instant.parse(it) },
     entitlementActive = entitlementActive,
     cooperativeId = cooperativeId?.takeIf { it.isNotBlank() },
+    paymentStatus = pe.edu.upc.viora.features.subscription.domain.valueobject.IndividualPaymentStatus.from(paymentStatus),
 )

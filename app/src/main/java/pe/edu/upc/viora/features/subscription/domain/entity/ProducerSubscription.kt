@@ -26,6 +26,8 @@ data class ProducerSubscription(
     val endsAt: Instant?,
     val entitlementActive: Boolean,
     val cooperativeId: String?,
+    val paymentStatus: pe.edu.upc.viora.features.subscription.domain.valueobject.IndividualPaymentStatus =
+        pe.edu.upc.viora.features.subscription.domain.valueobject.IndividualPaymentStatus.UNKNOWN,
 ) {
     init {
         UUID.fromString(id)

@@ -18,4 +18,5 @@ data class ProducerSubscriptionDto(
     val endsAt: String? = null,
     val entitlementActive: Boolean = false,
     val cooperativeId: String? = null,
+    val paymentStatus: String? = null,
 )
