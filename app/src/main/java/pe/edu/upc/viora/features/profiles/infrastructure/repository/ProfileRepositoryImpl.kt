@@ -6,6 +6,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import pe.edu.upc.viora.core.datastore.SessionStore
+import pe.edu.upc.viora.core.database.LocalDataOwner
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.network.ApiCaller
@@ -18,6 +19,7 @@ import pe.edu.upc.viora.features.profiles.domain.valueobject.ProfileId
 import pe.edu.upc.viora.features.profiles.infrastructure.local.AccessTokenClaims
 import pe.edu.upc.viora.features.profiles.infrastructure.local.ProfileStore
 import pe.edu.upc.viora.features.profiles.infrastructure.remote.ChangePasswordRequest
+import pe.edu.upc.viora.features.profiles.infrastructure.remote.DeleteAccountRequest
 import pe.edu.upc.viora.features.profiles.infrastructure.remote.ProfileResource
 import pe.edu.upc.viora.features.profiles.infrastructure.remote.ProfileService
 import pe.edu.upc.viora.features.profiles.infrastructure.remote.UpdateProfileRequest
@@ -29,6 +31,7 @@ class ProfileRepositoryImpl @Inject constructor(
     private val profileStore: ProfileStore,
     private val sessionStore: SessionStore,
     private val clock: Clock,
+    private val localDataOwner: LocalDataOwner,
 ) : ProfileRepository {
 
     /** Only the signed-in account's profile: one kept for another account never shows. */
@@ -103,6 +106,25 @@ class ProfileRepositoryImpl @Inject constructor(
         sessionStore.clear()
         profileStore.clear()
     }
+
+    override suspend fun deleteAccount(password: String): AppResult<Unit> =
+        when (val result = apiCaller.callUnit { service.deleteAccount(DeleteAccountRequest(password)) }) {
+            is AppResult.Success -> {
+                // The server has nothing left of the account: the phone forgets its session and every record too.
+                sessionStore.clear()
+                profileStore.clear()
+                localDataOwner.claimFor(null)
+                result
+            }
+            is AppResult.Failure -> {
+                val error = result.error
+                if (error is AppError.Validation && error.code == BUSINESS_RULE_VIOLATION) {
+                    AppResult.Failure(AppError.Validation(error.detail, ProfileRepository.WRONG_CURRENT_PASSWORD))
+                } else {
+                    result
+                }
+            }
+        }
 
     private fun ProfileResource.toDomain(userId: String, email: String?): UserProfile = UserProfile(
         id = ProfileId(id ?: userId),

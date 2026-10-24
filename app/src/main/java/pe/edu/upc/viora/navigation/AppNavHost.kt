@@ -71,7 +71,11 @@ import pe.edu.upc.viora.features.profiles.presentation.navigation.profilesNavGra
 import pe.edu.upc.viora.features.subscription.presentation.navigation.CooperativeCodeGraph
 import pe.edu.upc.viora.features.subscription.presentation.navigation.RedeemCodeRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.cooperativeCodeNavGraph
+import pe.edu.upc.viora.features.subscription.presentation.navigation.MyPlanRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.ProducerPlanRoute
+import pe.edu.upc.viora.features.subscription.presentation.navigation.myPlanComposable
+import pe.edu.upc.viora.features.subscription.presentation.ui.AccountPlanCard
+import pe.edu.upc.viora.features.subscription.presentation.ui.MyPlanActions
 import pe.edu.upc.viora.features.subscription.presentation.navigation.producerPlanComposable
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
@@ -207,6 +211,23 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 navController.navigate(WelcomeRoute) { popUpTo(navController.graph.id) { inclusive = true } }
                 navController.navigate(AuthRoute())
             },
+            onOpenLogbook = {
+                navController.navigate(LogbookGraph) {
+                    popUpTo<HomeGraph> { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            onAccountDeleted = { navController.navigate(WelcomeRoute) { popUpTo(navController.graph.id) { inclusive = true } } },
+            planSection = { AccountPlanCard(onOpen = { navController.navigate(MyPlanRoute) { launchSingleTop = true } }) },
+        )
+        myPlanComposable(
+            MyPlanActions(
+                onBack = { navController.popBackStack() },
+                onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
+                onOpenPlans = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
+                onRedeemCode = { navController.navigate(RedeemCodeRoute()) { launchSingleTop = true } },
+            ),
         )
         // The form is replaced by the P73 receipt (inclusive pop), so Back never returns to it.
         settleHarvestComposable(

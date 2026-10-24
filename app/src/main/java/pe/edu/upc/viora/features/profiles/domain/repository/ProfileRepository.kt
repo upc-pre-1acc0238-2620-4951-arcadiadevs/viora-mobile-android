@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.profiles.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.profiles.domain.entity.UserProfile
 
@@ -30,6 +31,13 @@ interface ProfileRepository {
 
     /** Closes the session on the server (best effort) and forgets the tokens and the kept profile. */
     suspend fun signOut()
+
+    /**
+     * Deletes the account for good after checking [password] (P100). On success the phone forgets the session, the
+     * profile and every local record of the account. A wrong password fails with [WRONG_CURRENT_PASSWORD] as the
+     * validation code and deletes nothing; the shared demo account fails with [AppError.Forbidden].
+     */
+    suspend fun deleteAccount(password: String): AppResult<Unit>
 
     companion object {
         const val WRONG_CURRENT_PASSWORD = "WRONG_CURRENT_PASSWORD"

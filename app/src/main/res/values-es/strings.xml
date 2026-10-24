@@ -1478,7 +1478,7 @@
     <string name="account_role_producer">Productor</string>
     <string name="account_headline_lead">Tu</string>
     <string name="account_headline_emphasis">cuenta.</string>
-    <string name="account_membership_active">Membresía activa</string>
+    <string name="account_membership_active">Plan activo</string>
     <string name="account_section_personal">Datos personales</string>
     <string name="account_section_security">Seguridad</string>
     <string name="account_section_preferences">Preferencias</string>
@@ -1754,8 +1754,7 @@
         <item quantity="one">porciones de frío. Falta %1$d para florecer parejo.</item>
         <item quantity="other">porciones de frío. Faltan %1$d para florecer parejo.</item>
     </plurals>
-
-    <!-- P99 · Mi plan -->
+    <!-- P99 · Mi plan, P100 · Eliminar cuenta, P101 · Cuenta eliminada -->
     <string name="my_plan_title">Mi plan</string>
     <string name="my_plan_retry">Reintentar</string>
     <string name="my_plan_headline_lead">Tu plan,</string>
@@ -1807,6 +1806,38 @@
     <string name="my_plan_voice_expiring">Al vencer, tus lotes y tu historial se guardan, pero dejas de recibir alertas.</string>
     <string name="my_plan_voice_code">Tu plan llegó con un código. Si necesitas más hectáreas, pide un código nuevo a quien te lo dio.</string>
     <string name="my_plan_voice_active">Te quedan %1$s ha. Si siembras más, amplía tu plan antes de registrar el lote.</string>
+    <string name="account_delete">Eliminar cuenta</string>
+    <string name="account_membership_paused">Acceso en pausa</string>
+    <string name="delete_account_title">Eliminar cuenta</string>
+    <string name="delete_account_headline_lead">Eliminar tu</string>
+    <string name="delete_account_headline_emphasis">cuenta.</string>
+    <string name="delete_account_warning_title">Esto no se puede deshacer</string>
+    <string name="delete_account_warning_body">Al eliminar tu cuenta borramos para siempre:</string>
+    <string name="delete_account_item_records">Muestreos, aclareos y cosechas de todas tus campañas</string>
+    <string name="delete_account_item_notes">Tus notas, fotos y expedientes sellados</string>
+    <string name="delete_account_item_profile">Tu perfil y tu acceso a Viora</string>
+    <string name="delete_account_section_before">Antes de irte</string>
+    <string name="delete_account_download">Descargar mis expedientes</string>
+    <string name="delete_account_download_value">Bitácora</string>
+    <string name="delete_account_plan">Tu plan activo</string>
+    <string name="delete_account_plan_value">No se reembolsa</string>
+    <string name="delete_account_password_label">Confirma con tu contraseña</string>
+    <string name="delete_account_error_password">La contraseña no coincide. Tu cuenta sigue intacta.</string>
+    <string name="delete_account_error_protected">La cuenta demo compartida no se puede eliminar.</string>
+    <string name="delete_account_error_offline">Sin conexión. Tu cuenta sigue intacta; inténtalo con señal.</string>
+    <string name="delete_account_error_generic">No pudimos eliminar tu cuenta. Sigue intacta; inténtalo de nuevo.</string>
+    <string name="delete_account_understood">Entiendo que se borrará todo y que no podré recuperarlo.</string>
+    <string name="delete_account_action">Eliminar mi cuenta</string>
+    <string name="delete_account_keep">Mantener mi cuenta</string>
+    <string name="delete_account_sheet_lead">¿Eliminar tu cuenta</string>
+    <string name="delete_account_sheet_emphasis">para siempre?</string>
+    <string name="delete_account_sheet_confirm">Sí, eliminar mi cuenta</string>
+    <string name="delete_account_sheet_keep">No, mantener mi cuenta</string>
+    <string name="account_deleted_eyebrow">Cuenta eliminada</string>
+    <string name="account_deleted_lead">Hasta pronto,</string>
+    <string name="account_deleted_name">%1$s.</string>
+    <string name="account_deleted_body">Borramos tu cuenta y todos tus datos. Si algún día vuelves, crea una cuenta nueva: aquí estaremos.</string>
+    <string name="account_deleted_done">Volver al inicio</string>
     <plurals name="my_plan_ring_plots">
         <item quantity="one">en %1$d lote</item>
         <item quantity="other">en %1$d lotes</item>
@@ -1826,5 +1857,13 @@
     <plurals name="my_plan_eyebrow_expiring">
         <item quantity="one">Vence en %1$d día</item>
         <item quantity="other">Vence en %1$d días</item>
+    </plurals>
+    <plurals name="delete_account_item_plots">
+        <item quantity="one">Tu %1$d lote, con su contorno y sensores</item>
+        <item quantity="other">Tus %1$d lotes, con sus contornos y sensores</item>
+    </plurals>
+    <plurals name="delete_account_sheet_body">
+        <item quantity="one">Borraremos tu %1$d lote y todo su historial ahora mismo. No hay papelera ni forma de recuperarlo.</item>
+        <item quantity="other">Borraremos tus %1$d lotes y todo su historial ahora mismo. No hay papelera ni forma de recuperarlos.</item>
     </plurals>
 </resources>

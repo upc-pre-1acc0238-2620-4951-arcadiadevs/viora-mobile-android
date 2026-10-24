@@ -56,7 +56,10 @@ fun AccountScreen(
     onChangePassword: () -> Unit,
     onReplayHomeTour: () -> Unit,
     onSignedOut: () -> Unit,
+    onDeleteAccount: () -> Unit,
     modifier: Modifier = Modifier,
+    /** "Tu plan" (Figma P95 · Con plan), plugged in by the composition root from the subscription feature. */
+    planSection: @Composable () -> Unit = {},
     viewModel: AccountViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -102,7 +105,9 @@ fun AccountScreen(
                 emphasis = stringResource(R.string.account_headline_emphasis),
             )
 
-            state.profile?.let { profile -> ProfileHeroCard(profile = profile, isMember = state.isMember == true) }
+            state.profile?.let { profile -> ProfileHeroCard(profile = profile, isMember = state.isMember) }
+
+            planSection()
 
             AccountSection(title = stringResource(R.string.account_section_personal)) {
                 AccountRow(
@@ -161,7 +166,13 @@ fun AccountScreen(
                 AccountRow(
                     label = stringResource(R.string.account_sign_out),
                     isDestructive = true,
+                    showDivider = true,
                     onClick = viewModel::signOut,
+                )
+                AccountRow(
+                    label = stringResource(R.string.account_delete),
+                    isDestructive = true,
+                    onClick = onDeleteAccount,
                 )
             }
 

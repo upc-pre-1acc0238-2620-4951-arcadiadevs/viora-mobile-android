@@ -39,6 +39,11 @@ class SignOutUseCase @Inject constructor(private val repository: ProfileReposito
     suspend operator fun invoke() = repository.signOut()
 }
 
+/** P100 · Eliminar cuenta: deletes the account and everything of it, after checking the password. */
+class DeleteAccountUseCase @Inject constructor(private val repository: ProfileRepository) {
+    suspend operator fun invoke(password: String): AppResult<Unit> = repository.deleteAccount(password)
+}
+
 /** Whether Viora's fixed texts are written letter by letter (Mi cuenta › Voz de Viora animada). */
 class ObserveAnimatedVoiceUseCase @Inject constructor(private val repository: AccountPreferencesRepository) {
     operator fun invoke(): Flow<Boolean> = repository.animatedVoice
