@@ -1478,7 +1478,7 @@
     <string name="account_role_producer">Productor</string>
     <string name="account_headline_lead">Tu</string>
     <string name="account_headline_emphasis">cuenta.</string>
-    <string name="account_membership_active">Membresía activa</string>
+    <string name="account_membership_active">Plan activo</string>
     <string name="account_section_personal">Datos personales</string>
     <string name="account_section_security">Seguridad</string>
     <string name="account_section_preferences">Preferencias</string>
@@ -1753,5 +1753,117 @@
     <plurals name="phase_msg_chill_missing">
         <item quantity="one">porciones de frío. Falta %1$d para florecer parejo.</item>
         <item quantity="other">porciones de frío. Faltan %1$d para florecer parejo.</item>
+    </plurals>
+    <!-- P99 · Mi plan, P100 · Eliminar cuenta, P101 · Cuenta eliminada -->
+    <string name="my_plan_title">Mi plan</string>
+    <string name="my_plan_retry">Reintentar</string>
+    <string name="my_plan_headline_lead">Tu plan,</string>
+    <string name="my_plan_headline_emphasis">en hectáreas.</string>
+    <string name="my_plan_section_validity">Vigencia</string>
+    <string name="my_plan_section_plots">Tus lotes en el plan</string>
+    <string name="my_plan_section_details">Detalle</string>
+    <string name="my_plan_have_code">Tengo un código</string>
+    <string name="my_plan_other_code">Ingresar otro código</string>
+    <string name="my_plan_renew_and_expand">Renovar y ampliar</string>
+    <string name="my_plan_expand">Ampliar mi plan</string>
+    <string name="my_plan_how_plans_work">Ver cómo funcionan los planes</string>
+    <string name="my_plan_free_chip">Libre · %1$s</string>
+    <string name="my_plan_register_plot">Registrar un lote</string>
+    <string name="my_plan_renew">Renovar mi plan</string>
+    <string name="my_plan_activate">Activar Plan Productor</string>
+    <string name="my_plan_ring_kept">ha guardadas</string>
+    <string name="my_plan_ring_over">ha sobre el cupo</string>
+    <string name="my_plan_hero_over">Tus lotes suman %1$s ha y tu plan cubre %2$s ha. Amplíalo para cubrirlos todos.</string>
+    <string name="my_plan_voice_over">Te pasas por %1$s ha de tu plan. No podrás registrar lotes nuevos hasta ampliarlo.</string>
+    <string name="my_plan_ring_free">ha libres</string>
+    <string name="my_plan_ring_of">de %1$s ha</string>
+    <string name="my_plan_since">Desde el %1$s</string>
+    <string name="my_plan_until">Hasta el %1$s</string>
+    <string name="my_plan_ends_on">Vence el %1$s</string>
+    <string name="my_plan_free_label">Libre</string>
+    <string name="my_plan_hectares">%1$s ha</string>
+    <string name="my_plan_detail_plan">Plan</string>
+    <string name="my_plan_detail_plan_value">Productor · %1$s ha</string>
+    <string name="my_plan_detail_activation">Activación</string>
+    <string name="my_plan_detail_paid">Pago anual</string>
+    <string name="my_plan_detail_by_code">Código de acceso</string>
+    <string name="my_plan_detail_receipt">Comprobante</string>
+    <string name="my_plan_detail_receipt_sent">Enviado a tu correo</string>
+    <string name="my_plan_detail_no_receipt">No aplica</string>
+    <string name="my_plan_account_section">Tu plan</string>
+    <string name="my_plan_account_none">Activa tu plan</string>
+    <string name="my_plan_account_caption">%1$s de %2$s ha en uso · Hasta el %3$s</string>
+    <string name="my_plan_date_pattern">dd/MM/yyyy</string>
+    <string name="my_plan_plot_detail">%1$s · %2$s árboles</string>
+    <string name="my_plan_eyebrow_none">Sin plan activo</string>
+    <string name="my_plan_eyebrow_code">Plan Productor · con código</string>
+    <string name="my_plan_eyebrow_active">Plan Productor · activo</string>
+    <string name="my_plan_hero_none">Tus lotes y tu historial siguen guardados. Activa tu plan para volver a recibir alertas.</string>
+    <string name="my_plan_hero_expiring">Tu plan vence el %1$s. Renuévalo para no perder tus alertas.</string>
+    <string name="my_plan_hero_active">Tu cupo cubre %1$s ha hasta el %2$s. Hoy usas %3$s ha.</string>
+    <string name="my_plan_hero_code">Tu código cubre %1$s ha hasta el %2$s. Hoy usas %3$s ha.</string>
+    <string name="my_plan_voice_none">Cuando actives tu plan, aquí verás cuántas hectáreas te quedan.</string>
+    <string name="my_plan_voice_expiring">Al vencer, tus lotes y tu historial se guardan, pero dejas de recibir alertas.</string>
+    <string name="my_plan_voice_code">Tu plan llegó con un código. Si necesitas más hectáreas, pide un código nuevo a quien te lo dio.</string>
+    <string name="my_plan_voice_active">Te quedan %1$s ha. Si siembras más, amplía tu plan antes de registrar el lote.</string>
+    <string name="account_delete">Eliminar cuenta</string>
+    <string name="account_membership_paused">Acceso en pausa</string>
+    <string name="delete_account_title">Eliminar cuenta</string>
+    <string name="delete_account_headline_lead">Eliminar tu</string>
+    <string name="delete_account_headline_emphasis">cuenta.</string>
+    <string name="delete_account_warning_title">Esto no se puede deshacer</string>
+    <string name="delete_account_warning_body">Al eliminar tu cuenta borramos para siempre:</string>
+    <string name="delete_account_item_records">Muestreos, aclareos y cosechas de todas tus campañas</string>
+    <string name="delete_account_item_notes">Tus notas, fotos y expedientes sellados</string>
+    <string name="delete_account_item_profile">Tu perfil y tu acceso a Viora</string>
+    <string name="delete_account_section_before">Antes de irte</string>
+    <string name="delete_account_download">Descargar mis expedientes</string>
+    <string name="delete_account_download_value">Bitácora</string>
+    <string name="delete_account_plan">Tu plan activo</string>
+    <string name="delete_account_plan_value">No se reembolsa</string>
+    <string name="delete_account_password_label">Confirma con tu contraseña</string>
+    <string name="delete_account_error_password">La contraseña no coincide. Tu cuenta sigue intacta.</string>
+    <string name="delete_account_error_protected">La cuenta demo compartida no se puede eliminar.</string>
+    <string name="delete_account_error_offline">Sin conexión. Tu cuenta sigue intacta; inténtalo con señal.</string>
+    <string name="delete_account_error_generic">No pudimos eliminar tu cuenta. Sigue intacta; inténtalo de nuevo.</string>
+    <string name="delete_account_understood">Entiendo que se borrará todo y que no podré recuperarlo.</string>
+    <string name="delete_account_action">Eliminar mi cuenta</string>
+    <string name="delete_account_keep">Mantener mi cuenta</string>
+    <string name="delete_account_sheet_lead">¿Eliminar tu cuenta</string>
+    <string name="delete_account_sheet_emphasis">para siempre?</string>
+    <string name="delete_account_sheet_confirm">Sí, eliminar mi cuenta</string>
+    <string name="delete_account_sheet_keep">No, mantener mi cuenta</string>
+    <string name="account_deleted_eyebrow">Cuenta eliminada</string>
+    <string name="account_deleted_lead">Hasta pronto,</string>
+    <string name="account_deleted_name">%1$s.</string>
+    <string name="account_deleted_body">Borramos tu cuenta y todos tus datos. Si algún día vuelves, crea una cuenta nueva: aquí estaremos.</string>
+    <string name="account_deleted_done">Volver al inicio</string>
+    <plurals name="my_plan_ring_plots">
+        <item quantity="one">en %1$d lote</item>
+        <item quantity="other">en %1$d lotes</item>
+    </plurals>
+    <plurals name="my_plan_days_left">
+        <item quantity="one">día de plan</item>
+        <item quantity="other">días de plan</item>
+    </plurals>
+    <plurals name="my_plan_days_to_renew">
+        <item quantity="one">día para renovar</item>
+        <item quantity="other">días para renovar</item>
+    </plurals>
+    <plurals name="my_plan_free_detail">
+        <item quantity="one">Cabe unos %1$d lote más</item>
+        <item quantity="other">Caben unos %1$d lotes más</item>
+    </plurals>
+    <plurals name="my_plan_eyebrow_expiring">
+        <item quantity="one">Vence en %1$d día</item>
+        <item quantity="other">Vence en %1$d días</item>
+    </plurals>
+    <plurals name="delete_account_item_plots">
+        <item quantity="one">Tu %1$d lote, con su contorno y sensores</item>
+        <item quantity="other">Tus %1$d lotes, con sus contornos y sensores</item>
+    </plurals>
+    <plurals name="delete_account_sheet_body">
+        <item quantity="one">Borraremos tu %1$d lote y todo su historial ahora mismo. No hay papelera ni forma de recuperarlo.</item>
+        <item quantity="other">Borraremos tus %1$d lotes y todo su historial ahora mismo. No hay papelera ni forma de recuperarlos.</item>
     </plurals>
 </resources>

@@ -139,9 +139,12 @@ internal fun LanguageNotice(text: String, modifier: Modifier = Modifier) {
     }
 }
 
-/** The sage card of P95: initials, the membership badge, the name in two lines and the email. */
+/**
+ * The sage card of P95: initials, the access badge ("Plan activo" or "Acceso en pausa", none until the server
+ * answers), the name in two lines and the email.
+ */
 @Composable
-internal fun ProfileHeroCard(profile: UserProfile, isMember: Boolean, modifier: Modifier = Modifier) {
+internal fun ProfileHeroCard(profile: UserProfile, isMember: Boolean?, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -164,7 +167,7 @@ internal fun ProfileHeroCard(profile: UserProfile, isMember: Boolean, modifier: 
                     color = Green900,
                 )
             }
-            if (isMember) MembershipBadge(modifier = Modifier.padding(top = 18.dp))
+            if (isMember != null) MembershipBadge(active = isMember, modifier = Modifier.padding(top = 18.dp))
         }
         Spacer(Modifier.height(8.dp))
         // "Teodoro" over an italic "Mamani", like the editorial titles.
@@ -188,7 +191,7 @@ internal fun ProfileHeroCard(profile: UserProfile, isMember: Boolean, modifier: 
 }
 
 @Composable
-private fun MembershipBadge(modifier: Modifier = Modifier) {
+private fun MembershipBadge(active: Boolean, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .clip(CircleShape)
@@ -197,9 +200,14 @@ private fun MembershipBadge(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(painterResource(R.drawable.ic_task_alt), contentDescription = null, tint = Green900, modifier = Modifier.size(16.dp))
+        Icon(
+            painterResource(if (active) R.drawable.ic_task_alt else R.drawable.ic_priority_high),
+            contentDescription = null,
+            tint = if (active) Green900 else Terracotta700,
+            modifier = Modifier.size(16.dp),
+        )
         Text(
-            text = stringResource(R.string.account_membership_active),
+            text = stringResource(if (active) R.string.account_membership_active else R.string.account_membership_paused),
             style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium),
             color = Green900,
         )

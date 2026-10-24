@@ -28,6 +28,10 @@ interface ProfileService {
     @GET("subscriptions")
     suspend fun currentSubscription(): Response<CurrentSubscriptionResource>
 
+    /** 204 once the account and all its data are gone; 422 for a wrong password, 403 for the demo account. */
+    @POST("auth/account-deletions")
+    suspend fun deleteAccount(@Body request: DeleteAccountRequest): Response<Unit>
+
     @POST("auth/sign-out")
     suspend fun signOut(@Body request: RefreshTokenRequest): Response<Unit>
 }

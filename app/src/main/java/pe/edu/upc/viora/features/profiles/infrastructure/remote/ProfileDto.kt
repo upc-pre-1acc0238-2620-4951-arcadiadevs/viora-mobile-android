@@ -30,3 +30,6 @@ data class CurrentSubscriptionResource(
     val status: String? = null,
     val entitlementActive: Boolean = false,
 )
+
+@Serializable
+data class DeleteAccountRequest(val password: String)
