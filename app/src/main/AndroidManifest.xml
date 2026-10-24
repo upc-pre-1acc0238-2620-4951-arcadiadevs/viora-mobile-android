@@ -58,11 +58,11 @@
 
                 <data
                     android:scheme="https"
-                    android:host="viora-platform.onrender.com"
+                    android:host="${checkoutReturnHost}"
                     android:pathPrefix="/payments/return" />
                 <data
                     android:scheme="https"
-                    android:host="viora-platform.onrender.com"
+                    android:host="${checkoutReturnHost}"
                     android:pathPrefix="/subscriptions/return" />
             </intent-filter>
         </activity>
