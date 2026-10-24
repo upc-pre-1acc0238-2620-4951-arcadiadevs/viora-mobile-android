@@ -25,7 +25,7 @@ interface ProfileService {
     suspend fun changePassword(@Body request: ChangePasswordRequest): Response<AuthSession>
 
     /** 204 when the producer has no subscription yet. */
-    @GET("subscriptions/current")
+    @GET("subscriptions")
     suspend fun currentSubscription(): Response<CurrentSubscriptionResource>
 
     @POST("auth/sign-out")
