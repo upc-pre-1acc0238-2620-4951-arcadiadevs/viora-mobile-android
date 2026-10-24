@@ -16,9 +16,10 @@ val SUBSCRIPTION_RETURN_LINK_BASE = "https://${BuildConfig.CHECKOUT_RETURN_HOST}
 /**
  * Independent full-screen commercial offer; the agronomic Plan tab remains unchanged. With [renewal]
  * it is "Renueva y amplía" (Figma P102 · Por vencer): the next year of a plan in its last 30 days.
+ * [hectares] are the ones chosen in the onboarding (T02d), the starting selection right after the sign-up.
  */
 @Serializable
-data class ProducerPlanRoute(val renewal: Boolean = false)
+data class ProducerPlanRoute(val renewal: Boolean = false, val hectares: Int? = null)
 
 fun NavGraphBuilder.producerPlanComposable(navController: NavController, onLeave: () -> Unit, onRegisterPlot: () -> Unit) {
     composable<ProducerPlanRoute>(

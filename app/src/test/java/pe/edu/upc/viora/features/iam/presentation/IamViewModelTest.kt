@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -64,8 +65,8 @@ class IamViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun verifyEmailAfterOnboarding(cooperativeCode: String?) {
-        runBlocking { onboardingStore.save(OnboardingAnswers(fullName = "Teodoro Mamani", cooperativeCode = cooperativeCode)) }
+    private fun verifyEmailAfterOnboarding(cooperativeCode: String?, hectares: Int? = null) {
+        runBlocking { onboardingStore.save(OnboardingAnswers(fullName = "Teodoro Mamani", cooperativeCode = cooperativeCode, hectares = hectares)) }
         viewModel = IamViewModel(
             service = VerifyingIamService(),
             sessionStore = SessionStore(InMemoryPreferences()),
@@ -84,15 +85,18 @@ class IamViewModelTest {
         val state = viewModel.uiState.value
         assertTrue(state.authenticated)
         assertEquals("COOP-7K2Q", state.cooperativeCodeToRedeem)
+        assertFalse(state.buysPlan)
         assertNull(runBlocking { onboardingStore.answers().cooperativeCode })
     }
 
     @Test
-    fun `verifying the email without a saved code still signs the producer in`() {
-        verifyEmailAfterOnboarding(cooperativeCode = null)
+    fun `verifying the email without a saved code goes on to pay the plan with the onboarding hectares`() {
+        verifyEmailAfterOnboarding(cooperativeCode = null, hectares = 7)
 
         val state = viewModel.uiState.value
         assertTrue(state.authenticated)
         assertNull(state.cooperativeCodeToRedeem)
+        assertTrue(state.buysPlan)
+        assertEquals(7, state.planHectares)
     }
 }

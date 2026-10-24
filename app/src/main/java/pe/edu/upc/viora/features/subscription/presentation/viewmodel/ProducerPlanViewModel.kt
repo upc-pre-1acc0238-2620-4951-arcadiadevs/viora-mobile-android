@@ -72,6 +72,8 @@ class ProducerPlanViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ProducerPlanUiState.Loading)
 
     init {
+        // The hectares of the onboarding only seed the first selection; later changes win.
+        savedState.get<Int>(HECTARES)?.let { if (savedState.get<String>(QUOTA_HA) == null) savedState[QUOTA_HA] = it.toString() }
         refresh()
         if (savedState.get<Boolean>(RENEWAL) == true) loadEndingPlan()
     }
@@ -128,5 +130,6 @@ class ProducerPlanViewModel @Inject constructor(
         const val PLAN_CODE = "producer_plan_code"
         const val QUOTA_HA = "producer_plan_quota_ha"
         const val RENEWAL = "renewal"
+        const val HECTARES = "hectares"
     }
 }
