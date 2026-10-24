@@ -1630,4 +1630,35 @@
     <string name="payment_result_until">Hasta el %1$s</string>
     <string name="payment_result_receipt">Comprobante</string>
     <string name="payment_result_unavailable">No disponible</string>
+
+    <!-- P75 · New logbook note and its logbook row -->
+    <string name="note_title_lead">Nueva</string>
+    <string name="note_title_emphasis">nota</string>
+    <string name="note_date_pattern">EEEE d \'de\' MMMM</string>
+    <string name="note_today">Hoy, %1$s</string>
+    <string name="note_plot_label">LOTE</string>
+    <string name="note_type_label">TIPO</string>
+    <string name="note_no_plots">Primero registra un lote: cada nota pertenece a uno.</string>
+    <string name="note_type_irrigation">Riego</string>
+    <string name="note_type_pruning">Poda</string>
+    <string name="note_type_fertilization">Fertilización</string>
+    <string name="note_type_pests">Plagas</string>
+    <string name="note_type_other">Otro</string>
+    <string name="note_text_label">Nota</string>
+    <string name="note_text_hint">¿Qué hiciste o viste en el lote?</string>
+    <string name="note_text_counter">%1$d/%2$d</string>
+    <string name="note_photo_add">Agregar foto (opcional)</string>
+    <string name="note_photo_attached">Foto agregada · Quitar</string>
+    <string name="note_photo_failed">No se pudo leer esa imagen. Prueba con otra.</string>
+    <string name="note_save">Guardar nota</string>
+    <string name="note_saved_toast">Nota guardada en tu Bitácora</string>
+    <string name="logbook_note_title">Nota de %1$s</string>
+    <string name="logbook_note_details">%1$s · %2$s</string>
+    <string name="logbook_note_pending">En el teléfono · se enviará cuando haya señal</string>
+    <string name="logbook_note_failed">El servidor no aceptó esta nota</string>
+    <string name="note_type_irrigation_title">riego</string>
+    <string name="note_type_pruning_title">poda</string>
+    <string name="note_type_fertilization_title">fertilización</string>
+    <string name="note_type_pests_title">plagas</string>
+    <string name="note_type_other_title">campo</string>
 </resources>

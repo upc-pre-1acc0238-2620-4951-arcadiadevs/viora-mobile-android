@@ -1625,4 +1625,35 @@
     <string name="payment_result_until">Until %1$s</string>
     <string name="payment_result_receipt">Receipt</string>
     <string name="payment_result_unavailable">Not available</string>
+
+    <!-- P75 · New logbook note and its logbook row -->
+    <string name="note_title_lead">New</string>
+    <string name="note_title_emphasis">note</string>
+    <string name="note_date_pattern">EEEE, MMMM d</string>
+    <string name="note_today">Today, %1$s</string>
+    <string name="note_plot_label">PLOT</string>
+    <string name="note_type_label">TYPE</string>
+    <string name="note_no_plots">Register a plot first: every note belongs to one.</string>
+    <string name="note_type_irrigation">Irrigation</string>
+    <string name="note_type_pruning">Pruning</string>
+    <string name="note_type_fertilization">Fertilization</string>
+    <string name="note_type_pests">Pests</string>
+    <string name="note_type_other">Other</string>
+    <string name="note_text_label">Note</string>
+    <string name="note_text_hint">What did you do or see in the plot?</string>
+    <string name="note_text_counter">%1$d/%2$d</string>
+    <string name="note_photo_add">Add photo (optional)</string>
+    <string name="note_photo_attached">Photo added · Remove</string>
+    <string name="note_photo_failed">That image could not be read. Try another one.</string>
+    <string name="note_save">Save note</string>
+    <string name="note_saved_toast">Note saved in your Logbook</string>
+    <string name="logbook_note_title">%1$s note</string>
+    <string name="logbook_note_details">%1$s · %2$s</string>
+    <string name="logbook_note_pending">On the phone · it will be sent when there is signal</string>
+    <string name="logbook_note_failed">The server did not accept this note</string>
+    <string name="note_type_irrigation_title">Irrigation</string>
+    <string name="note_type_pruning_title">Pruning</string>
+    <string name="note_type_fertilization_title">Fertilization</string>
+    <string name="note_type_pests_title">Pest</string>
+    <string name="note_type_other_title">Field</string>
 </resources>
