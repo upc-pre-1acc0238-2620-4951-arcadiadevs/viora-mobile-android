@@ -51,11 +51,16 @@ class LocalDataOwner @Inject constructor(
     private companion object {
         val OWNER = stringPreferencesKey("local_data_owner")
 
-        /** Preferences that belong to one account: the plot chosen in the Home and the tours it saw. */
+        /**
+         * Preferences that belong to one account: the plot chosen in the Home, the tours it saw and
+         * the plan extension it went to pay.
+         */
         val ACCOUNT_KEYS = listOf(
             stringPreferencesKey("home_focused_plot"),
             booleanPreferencesKey("home_tour_seen"),
             booleanPreferencesKey("home_tour_first_steps_seen"),
+            stringPreferencesKey("plan_extension_pending_subscription"),
+            stringPreferencesKey("plan_extension_pending_id"),
         )
     }
 }

@@ -99,4 +99,13 @@ class MyPlanRulesTest {
         assertEquals(0.0, state.freeHectares, 1e-9)
         assertEquals(110.5, state.excessHectares, 1e-9)
     }
+
+    @Test
+    fun `the plots list shows the quota only below one free hectare or over the quota`() {
+        val ends = LocalDate.of(2027, 10, 21)
+        assertFalse(MyPlanRules.state(plan(ends), listOf(plot("A", 11.0)), today, ZoneOffset.UTC).isQuotaTight)
+        assertTrue(MyPlanRules.state(plan(ends), listOf(plot("A", 11.5)), today, ZoneOffset.UTC).isQuotaTight)
+        assertTrue(MyPlanRules.state(plan(ends), listOf(plot("A", 13.0)), today, ZoneOffset.UTC).isQuotaTight)
+        assertFalse(MyPlanRules.state(plan(ends, active = false), listOf(plot("A", 13.0)), today, ZoneOffset.UTC).isQuotaTight)
+    }
 }

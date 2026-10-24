@@ -35,14 +35,30 @@ class IndividualPurchaseRepositoryImpl @Inject constructor(
     private val mutex = Mutex()
 
     override suspend fun prepare(plan: ProducerPlanCode, capacity: PlanCapacity): AppResult<IndividualPurchase> = guarded {
+        prepareLocked(plan, capacity)
+    }
+
+    override suspend fun prepareRenewal(plan: ProducerPlanCode, capacity: PlanCapacity): AppResult<IndividualPurchase> = guarded {
         val owner = owner() ?: return@guarded AppResult.Failure(AppError.Unauthorized)
+        val stored = dao.find(owner)?.contractJson?.let { json.decodeFromString<IndividualPurchaseDto>(it) }
+        if (stored != null) {
+            val latest = caller.call { service.get(stored.id) }
+            if (latest is AppResult.Failure) return@guarded latest
+            // Only a paid purchase is closed; a pending one is still the purchase to finish.
+            if ((latest as AppResult.Success).value.status == "ACTIVE") dao.delete(owner)
+        }
+        prepareLocked(plan, capacity)
+    }
+
+    private suspend fun prepareLocked(plan: ProducerPlanCode, capacity: PlanCapacity): AppResult<IndividualPurchase> {
+        val owner = owner() ?: return AppResult.Failure(AppError.Unauthorized)
         dao.insert(IndividualPurchaseEntity(owner, plan.value, capacity.hectares.toPlainString(),
             UUID.randomUUID().toString(), UUID.randomUUID().toString(), null, null, null, null))
         val row = requireNotNull(dao.find(owner))
         if (row.plan != plan.value || row.quota.toBigDecimal().compareTo(capacity.hectares) != 0) {
-            return@guarded AppResult.Failure(AppError.Conflict(code = "subscription.purchase.selection_conflict"))
+            return AppResult.Failure(AppError.Conflict(code = "subscription.purchase.selection_conflict"))
         }
-        contract(row)
+        return contract(row)
     }
 
     override suspend fun resume(): AppResult<IndividualPurchase?> = guarded {

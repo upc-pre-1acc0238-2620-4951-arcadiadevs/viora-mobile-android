@@ -40,6 +40,9 @@ private class PurchaseJournalFake : IndividualPurchaseDao {
         rows[row.owner] = row
         return 1
     }
+    override suspend fun delete(owner: String) {
+        rows.remove(owner)
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

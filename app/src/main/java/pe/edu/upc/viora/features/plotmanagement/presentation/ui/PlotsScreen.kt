@@ -70,6 +70,7 @@ fun PlotsScreen(
     onOpenMap: () -> Unit,
     onOpenPlot: (PlotId) -> Unit,
     modifier: Modifier = Modifier,
+    quotaCard: @Composable () -> Unit = {},
     viewModel: PlotsViewModel = hiltViewModel(),
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
@@ -82,6 +83,7 @@ fun PlotsScreen(
         onSelectFilter = viewModel::selectFilter,
         onRestore = viewModel::restore,
         modifier = modifier,
+        quotaCard = quotaCard,
     )
 }
 
@@ -96,6 +98,8 @@ fun PlotsScreenContent(
     onOpenPlot: (PlotId) -> Unit = {},
     onSelectFilter: (PlotsFilter) -> Unit = {},
     onRestore: (PlotId) -> Unit = {},
+    /** The plan quota under the title (Figma P20); it draws itself only while the quota is tight. */
+    quotaCard: @Composable () -> Unit = {},
 ) {
     val systemBars = WindowInsets.systemBars.asPaddingValues()
     PullToRefreshBox(
@@ -119,6 +123,7 @@ fun PlotsScreenContent(
                 PlotsUiState.Empty -> item { EmptyState() }
                 is PlotsUiState.Error -> item { ErrorState(error = state.error, onRetry = onRefresh) }
                 is PlotsUiState.Content -> {
+                    if (state.filter == PlotsFilter.ACTIVE) item { quotaCard() }
                     item { FilterAndStatus(state, onSelectFilter) }
                     when {
                         state.filter == PlotsFilter.ARCHIVED -> {

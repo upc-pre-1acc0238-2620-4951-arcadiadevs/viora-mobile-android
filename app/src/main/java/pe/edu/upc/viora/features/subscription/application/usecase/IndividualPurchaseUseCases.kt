@@ -9,6 +9,10 @@ class PrepareIndividualPurchaseUseCase @Inject constructor(private val repositor
     suspend operator fun invoke(plan: ProducerPlanCode, capacity: PlanCapacity) = repository.prepare(plan, capacity)
 }
 
+class PrepareRenewalPurchaseUseCase @Inject constructor(private val repository: IndividualPurchaseRepository) {
+    suspend operator fun invoke(plan: ProducerPlanCode, capacity: PlanCapacity) = repository.prepareRenewal(plan, capacity)
+}
+
 class ResumeIndividualPurchaseUseCase @Inject constructor(private val repository: IndividualPurchaseRepository) {
     suspend operator fun invoke() = repository.resume()
 }

@@ -45,6 +45,8 @@ class IndividualCheckoutViewModelTest {
             delayed?.await()
             return AppResult.Success(recovered)
         }
+        override suspend fun prepareRenewal(plan: ProducerPlanCode, capacity: PlanCapacity): AppResult<IndividualPurchase> =
+            prepare(plan, capacity)
         override suspend fun prepare(plan: ProducerPlanCode, capacity: PlanCapacity): AppResult<IndividualPurchase> {
             creates++
             return failure?.let { AppResult.Failure(it) } ?: AppResult.Success(purchase.copy(status = preparedStatus))
@@ -226,6 +228,7 @@ class IndividualCheckoutViewModelTest {
         CreateIndividualCheckoutUseCase(repository),
         GetSubscriptionByIdUseCase(subscriptionRepo),
         GetCurrentSubscriptionUseCase(subscriptionRepo),
+        PrepareRenewalPurchaseUseCase(repository),
         clock,
         savedStateHandle,
     ).also {

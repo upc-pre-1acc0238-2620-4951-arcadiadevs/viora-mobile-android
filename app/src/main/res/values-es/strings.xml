@@ -1763,7 +1763,6 @@
     <string name="my_plan_section_plots">Tus lotes en el plan</string>
     <string name="my_plan_section_details">Detalle</string>
     <string name="my_plan_have_code">Tengo un código</string>
-    <string name="my_plan_other_code">Ingresar otro código</string>
     <string name="my_plan_renew_and_expand">Renovar y ampliar</string>
     <string name="my_plan_expand">Ampliar mi plan</string>
     <string name="my_plan_how_plans_work">Ver cómo funcionan los planes</string>
@@ -1804,7 +1803,7 @@
     <string name="my_plan_hero_code">Tu código cubre %1$s ha hasta el %2$s. Hoy usas %3$s ha.</string>
     <string name="my_plan_voice_none">Cuando actives tu plan, aquí verás cuántas hectáreas te quedan.</string>
     <string name="my_plan_voice_expiring">Al vencer, tus lotes y tu historial se guardan, pero dejas de recibir alertas.</string>
-    <string name="my_plan_voice_code">Tu plan llegó con un código. Si necesitas más hectáreas, pide un código nuevo a quien te lo dio.</string>
+    <string name="my_plan_voice_code">Tu plan llegó con un código. Si necesitas más hectáreas, pide un código de ampliación a quien te lo dio.</string>
     <string name="my_plan_voice_active">Te quedan %1$s ha. Si siembras más, amplía tu plan antes de registrar el lote.</string>
     <string name="account_delete">Eliminar cuenta</string>
     <string name="account_membership_paused">Acceso en pausa</string>
@@ -1866,4 +1865,73 @@
         <item quantity="one">Borraremos tu %1$d lote y todo su historial ahora mismo. No hay papelera ni forma de recuperarlo.</item>
         <item quantity="other">Borraremos tus %1$d lotes y todo su historial ahora mismo. No hay papelera ni forma de recuperarlos.</item>
     </plurals>
+    <!-- Plan extension: P102, P103, P104 and the P04 results (Figma section 22) -->
+    <string name="plan_extension_eyebrow">Ampliación · mismo vencimiento</string>
+    <string name="plan_extension_title_lead">"Amplía "</string>
+    <string name="plan_extension_title_emphasis">tu plan</string>
+    <string name="plan_extension_hectares">HECTÁREAS NUEVAS</string>
+    <string name="plan_extension_added">+%1$s</string>
+    <string name="plan_extension_bar_current">%1$s ha de tu plan</string>
+    <string name="plan_extension_bar_new">+%1$s ha nuevas · %2$s ha</string>
+    <string name="plan_extension_includes">TU PLAN CON LA AMPLIACIÓN</string>
+    <string name="plan_extension_item_quota">Tu cupo pasa de %1$s ha a %2$s ha</string>
+    <string name="plan_extension_item_end">Vence igual: %1$s</string>
+    <plurals name="plan_extension_item_months">
+        <item quantity="one">Pagas solo el mes que queda</item>
+        <item quantity="many">Pagas solo los %1$d meses que quedan</item>
+        <item quantity="other">Pagas solo los %1$d meses que quedan</item>
+    </plurals>
+    <string name="plan_extension_item_history">Tus lotes y tu historial siguen igual</string>
+    <string name="plan_extension_total">PAGAS HOY</string>
+    <plurals name="plan_extension_breakdown">
+        <item quantity="one">%2$s ha × %3$s al mes × %1$d mes · Incluye IGV</item>
+        <item quantity="many">%2$s ha × %3$s al mes × %1$d meses · Incluye IGV</item>
+        <item quantity="other">%2$s ha × %3$s al mes × %1$d meses · Incluye IGV</item>
+    </plurals>
+    <string name="plan_extension_later">Ahora no</string>
+    <string name="plan_extension_loading">Calculando tu ampliación…</string>
+    <string name="plan_extension_error_renewal">Tu plan vence pronto: renuévalo y amplíalo en un solo pago.</string>
+    <string name="plan_extension_applied_badge">Plan ampliado</string>
+    <string name="plan_extension_applied_lead">Tu plan creció,</string>
+    <string name="plan_extension_applied_lead_alone">Tu plan creció.</string>
+    <string name="plan_extension_applied_body">Sumamos %1$s ha a tu plan. Ya puedes registrar más lotes sin cambiar tu vencimiento.</string>
+    <string name="plan_extension_quota_change">%1$s ha → %2$s ha</string>
+    <string name="plan_extension_retry">Intentar de nuevo</string>
+    <string name="plan_extension_view_plan">Ver mi plan</string>
+    <string name="extension_code_title_lead">Amplía con</string>
+    <string name="extension_code_title_emphasis">un código.</string>
+    <string name="extension_code_voice">Pídelo a quien te dio tu código. Suma hectáreas a tu plan y la fecha de fin no cambia.</string>
+    <string name="extension_code_label">Código de ampliación</string>
+    <string name="extension_code_hint">Solo suma a tu plan actual. Ej.: AMPL-3R8T</string>
+    <string name="extension_code_back">Volver a mi plan</string>
+    <string name="extension_code_rejected_title_lead">Este código</string>
+    <string name="extension_code_rejected_title_emphasis">no suma.</string>
+    <string name="extension_code_rejected_voice">Solo suma hectáreas al plan del que salió tu código. Pide uno nuevo a quien te lo dio.</string>
+    <string name="extension_code_error_not_redeemable">Es de otro plan, ya lo usaste o se acabaron sus hectáreas.</string>
+    <string name="extension_code_validating_lead">Sumando tus</string>
+    <string name="extension_code_validating_emphasis">hectáreas…</string>
+    <string name="extension_code_validating_body">Confirmamos que el código es de tu plan y que aún le quedan hectáreas.</string>
+    <string name="extension_applied_badge">Cupo ampliado</string>
+    <string name="extension_applied_lead">Tu cupo</string>
+    <string name="extension_applied_emphasis">creció.</string>
+    <string name="extension_applied_body">Sumamos %1$s ha a tu plan con tu código de ampliación. Tu vencimiento no cambia.</string>
+    <string name="extension_applied_activation">Código %1$s</string>
+    <string name="my_plan_expand_with_code">Ampliar con un código</string>
+    <string name="plots_quota_of">de %1$s ha de tu Plan Productor</string>
+    <string name="plots_quota_left">Te quedan %1$s ha libres</string>
+    <string name="plots_quota_over">Estás %1$s ha sobre tu cupo</string>
+    <string name="plots_quota_expand">Ampliar mi plan ›</string>
+    <plurals name="producer_plan_renew_eyebrow">
+        <item quantity="one">Vence en %1$d día</item>
+        <item quantity="many">Vence en %1$d días</item>
+        <item quantity="other">Vence en %1$d días</item>
+    </plurals>
+    <string name="producer_plan_renew_title_lead">"Renueva "</string>
+    <string name="producer_plan_renew_title_emphasis">y amplía</string>
+    <string name="producer_plan_renew_includes">TU NUEVO AÑO</string>
+    <string name="producer_plan_renew_item_capacity">Hasta %1$s ha registradas (antes %2$s ha)</string>
+    <string name="producer_plan_renew_item_period">Del %1$s al %2$s</string>
+    <string name="producer_plan_renew_item_history">Tus lotes y tu historial siguen igual</string>
+    <string name="producer_plan_renew_item_alerts">Alertas, muestreo y aclareo sin pausa</string>
+    <string name="producer_plan_renew_total">TOTAL ANUAL</string>
 </resources>

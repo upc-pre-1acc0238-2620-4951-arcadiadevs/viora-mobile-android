@@ -1,10 +1,8 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraConfirmDialog
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.MarkingMethod
@@ -111,21 +111,19 @@ fun RegisterPlotScreen(
     }
 
     if (askDiscard) {
-        AlertDialog(
-            onDismissRequest = { askDiscard = false },
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-            title = { Text(stringResource(R.string.discard_title), style = MaterialTheme.typography.headlineSmall) },
-            text = { Text(stringResource(R.string.discard_body), style = MaterialTheme.typography.bodyMedium) },
-            confirmButton = {
-                TextButton(onClick = { askDiscard = false }) { Text(stringResource(R.string.discard_keep)) }
-            },
-            dismissButton = {
-                TextButton(onClick = onLeave) {
-                    Text(stringResource(R.string.discard_confirm), color = Terracotta700)
-                }
-            },
-            tonalElevation = 0.dp,
+        // Figma "Capa · ¿Descartar este lote? / abierta".
+        VioraConfirmDialog(
+            icon = R.drawable.ic_warning,
+            iconBackground = Terracotta100,
+            iconTint = Terracotta700,
+            title = stringResource(R.string.discard_title),
+            body = stringResource(R.string.discard_body),
+            primaryLabel = stringResource(R.string.discard_keep),
+            onPrimary = { askDiscard = false },
+            secondaryLabel = stringResource(R.string.discard_confirm),
+            onSecondary = onLeave,
+            onDismiss = { askDiscard = false },
+            secondaryColor = Terracotta700,
         )
     }
 }
