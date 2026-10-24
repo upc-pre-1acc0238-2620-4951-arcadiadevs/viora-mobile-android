@@ -1580,7 +1580,7 @@
     <string name="purchase_verifying">Verifying payment with Mercado Pago…</string>
     <string name="purchase_verifying_hint">Please wait while we confirm your transaction.</string>
     <string name="purchase_unconfirmed_title">Payment pending confirmation</string>
-    <string name="purchase_unconfirmed_message">Mercado Pago is still processing your payment. If you have already completed it, access will be activated shortly.</string>
+    <string name="purchase_unconfirmed_message">We have not confirmed payment yet. If you paid, check the status again. This message does not mean your payment was rejected.</string>
     <string name="purchase_check_status">Check status</string>
     <string name="purchase_confirmed_title">Subscription active</string>
     <string name="purchase_confirmed_message">Your subscription is now active with %1$s ha. Welcome to Viora!</string>
@@ -1598,7 +1598,31 @@
     <string name="home_access_expired_title">Your plan expired on\n%1$s</string>
     <string name="home_access_none_title">You don\'t have\nan active plan yet</string>
     <string name="home_access_inactive_body">Your plots and history are still saved. Check your subscription or use a code from your cooperative.</string>
-    <string name="home_access_renew">View my subscription</string>
+    <string name="home_access_renew">View Producer Plan</string>
     <string name="home_access_redeem_code">I have a cooperative code</string>
     <string name="home_access_date_pattern" translatable="false">MMMM d</string>
+
+    <!-- P04 payment results -->
+    <string name="payment_result_illustration">Viora payment result</string>
+    <string name="payment_result_active_badge">ACTIVE PLAN</string>
+    <string name="payment_result_rejected_badge">PAYMENT NOT COMPLETED</string>
+    <string name="payment_result_provider_badge">MERCADO PAGO</string>
+    <string name="payment_result_active_lead">Welcome to Viora,</string>
+    <string name="payment_result_name">%1$s.</string>
+    <string name="payment_result_rejected_lead">Your payment</string>
+    <string name="payment_result_rejected_emphasis">was not completed.</string>
+    <string name="payment_result_verifying_lead">Confirming</string>
+    <string name="payment_result_verifying_emphasis">your payment…</string>
+    <string name="payment_result_unconfirmed_lead">Payment awaiting</string>
+    <string name="payment_result_unconfirmed_emphasis">confirmation</string>
+    <string name="payment_result_active_body">Your olive grove now has someone to read it. Let’s start by registering your first plot.</string>
+    <string name="payment_result_verifying_body">We are validating the transaction with Mercado Pago. Keep the app open.</string>
+    <string name="payment_result_rejected_body">The last payment attempt was not approved by Mercado Pago. You can try another payment method.</string>
+    <string name="payment_result_retry">Try another payment method</string>
+    <string name="payment_result_plan">Plan</string>
+    <string name="payment_result_quota">Producer · %1$s ha</string>
+    <string name="payment_result_validity">Valid until</string>
+    <string name="payment_result_until">Until %1$s</string>
+    <string name="payment_result_receipt">Receipt</string>
+    <string name="payment_result_unavailable">Not available</string>
 </resources>

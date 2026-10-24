@@ -60,6 +60,16 @@ val RobotoFamily = FontFamily(
 
 private val base = Typography()
 
+/** Editorial P04 styles from the payment-result frames. */
+object PaymentResultTypography {
+    val headline = TextStyle(fontFamily = NewsreaderFamily, fontWeight = FontWeight.Normal,
+        fontSize = 40.sp, lineHeight = 44.sp, letterSpacing = (-0.8).sp)
+    val body = TextStyle(fontFamily = RobotoFamily, fontSize = 15.sp, lineHeight = 22.sp)
+    val eyebrow = TextStyle(fontFamily = RobotoFamily, fontWeight = FontWeight.Medium,
+        fontSize = 11.sp, lineHeight = 14.sp, letterSpacing = 1.54.sp)
+    val rowLabel = TextStyle(fontFamily = RobotoFamily, fontSize = 14.sp, lineHeight = 20.sp)
+}
+
 /**
  * Material 3 scale adapted to Viora: Newsreader for Display/Headline, Roboto for the rest.
  * Display sizes are reduced (48/40/32) because Newsreader is wider than Roboto on compact
