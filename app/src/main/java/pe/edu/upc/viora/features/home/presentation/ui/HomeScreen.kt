@@ -40,6 +40,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.Year
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.features.home.presentation.state.HomePhase
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
@@ -77,6 +78,7 @@ fun HomeScreen(
     onOpenSoilMoisture: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenAccount: () -> Unit = {},
     isAccessPaused: Boolean = false,
+    phase: HomePhase? = null,
     viewModel: HomeViewModel = hiltViewModel(),
     greetingViewModel: HomeGreetingViewModel = hiltViewModel(),
     sections: @Composable ColumnScope.() -> Unit = {},
@@ -97,6 +99,7 @@ fun HomeScreen(
         onOpenAccount = onOpenAccount,
         onFocusPlot = viewModel::focusPlot,
         isAccessPaused = isAccessPaused,
+        phase = phase,
         modifier = modifier,
         sections = sections,
     )
@@ -120,6 +123,7 @@ fun HomeScreenContent(
     displayName: String? = null,
     today: LocalDate = LocalDate.now(),
     isAccessPaused: Boolean = false,
+    phase: HomePhase? = null,
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
     val systemBars = WindowInsets.systemBars.asPaddingValues()
@@ -165,11 +169,14 @@ fun HomeScreenContent(
                 val headlineLead = when {
                     isAccessPaused -> stringResource(R.string.home_headline_paused_lead)
                     hasNoPlots -> stringResource(R.string.home_headline_empty_lead)
+                    // Figma P10 · Fase: the headline names what the phase going on asks for ("Hoy toca aclarar.").
+                    phase != null -> stringResource(phase.headline.first)
                     else -> stringResource(R.string.home_headline_lead)
                 }
                 val headlineEmphasis = when {
                     isAccessPaused -> stringResource(R.string.home_headline_paused_emphasis)
                     hasNoPlots -> stringResource(R.string.home_headline_empty_emphasis)
+                    phase != null -> stringResource(phase.headline.second)
                     else -> stringResource(R.string.home_headline_emphasis)
                 }
                 HomeHeadline(lead = headlineLead, emphasis = headlineEmphasis)
@@ -332,3 +339,13 @@ private fun HomeNoPlotsPreview() {
         )
     }
 }
+
+/** Lead and italic emphasis of the headline for each phase (Figma P10 · Fase). */
+private val HomePhase.headline: Pair<Int, Int>
+    get() = when (this) {
+        HomePhase.DORMANCY -> R.string.home_headline_dormancy_lead to R.string.home_headline_dormancy_emphasis
+        HomePhase.BLOOM -> R.string.home_headline_bloom_lead to R.string.home_headline_bloom_emphasis
+        HomePhase.FRUIT_SET -> R.string.home_headline_fruit_set_lead to R.string.home_headline_fruit_set_emphasis
+        HomePhase.THINNING -> R.string.home_headline_thinning_lead to R.string.home_headline_thinning_emphasis
+        HomePhase.HARVEST -> R.string.home_headline_harvest_lead to R.string.home_headline_harvest_emphasis
+    }

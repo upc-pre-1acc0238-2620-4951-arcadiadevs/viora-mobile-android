@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -87,6 +88,14 @@ class ThinningPlanViewModel @Inject constructor(
 
     init {
         refresh()
+        // From the Home bloom card: open P64 once the plan is on screen, only the first time (not after a rotation).
+        if (savedStateHandle.get<Boolean>(RECORD_BLOOM_KEY) == true) {
+            viewModelScope.launch {
+                uiState.first { it is ThinningPlanUiState.Content }
+                savedStateHandle[RECORD_BLOOM_KEY] = false
+                openFullBloomSheet()
+            }
+        }
     }
 
     fun refresh() {
@@ -139,6 +148,10 @@ class ThinningPlanViewModel @Inject constructor(
                 is AppResult.Failure -> _sheet.update { it?.copy(isSaving = false, error = result.error) }
             }
         }
+    }
+
+    private companion object {
+        const val RECORD_BLOOM_KEY = "recordBloom"
     }
 }
 

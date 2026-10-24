@@ -10,9 +10,9 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.ui.ThinningPlan
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.ThinningResultScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 
-/** P61 · Plan del lote. [campaignYear] 0 means the current campaign. */
+/** P61 · Plan del lote. [campaignYear] 0 means the current campaign; [recordBloom] opens its P64 sheet on arrival. */
 @Serializable
-data class ThinningPlanRoute(val plotId: String, val plotName: String = "", val campaignYear: Int = 0)
+data class ThinningPlanRoute(val plotId: String, val plotName: String = "", val campaignYear: Int = 0, val recordBloom: Boolean = false)
 
 /** P62 · Registrar aclareo, against the prescription cached for the plot and campaign. */
 @Serializable
