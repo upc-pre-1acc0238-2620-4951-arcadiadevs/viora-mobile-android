@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,15 +35,14 @@ import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.subscription.presentation.viewmodel.SubscriptionAccessViewModel
 
 /**
- * Home status block (Figma P10 "Acceso inactivo"). Only the server's effective access decides:
- * without `entitlementActive` the yellow card is shown; with access, a discreet link to "Mi suscripción".
+ * Home status block (Figma P10 "Sin acceso activo"). Only the server's effective access decides:
+ * without `entitlementActive` the yellow card is shown; with access the Home stays as designed, with nothing added.
  * While loading or on a network failure nothing is shown, so Home never claims a state it has not confirmed.
  */
 @Composable
 fun SubscriptionHomeSection(
     onRenew: () -> Unit,
     onRedeemCode: () -> Unit,
-    onOpenSubscription: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SubscriptionAccessViewModel = hiltViewModel(),
 ) {
@@ -57,7 +55,6 @@ fun SubscriptionHomeSection(
         result = state,
         onRenew = onRenew,
         onRedeemCode = onRedeemCode,
-        onOpenSubscription = onOpenSubscription,
         modifier = modifier,
     )
 }
@@ -67,20 +64,12 @@ fun SubscriptionHomeContent(
     result: AppResult<pe.edu.upc.viora.features.subscription.domain.entity.ProducerSubscription?>?,
     onRenew: () -> Unit,
     onRedeemCode: () -> Unit,
-    onOpenSubscription: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (result) {
         is AppResult.Success -> {
             val sub = result.value
-            if (sub?.entitlementActive == true) {
-                TextButton(
-                    onClick = onOpenSubscription,
-                    modifier = modifier.testTag("home_subscription_link"),
-                ) {
-                    Text(stringResource(R.string.home_access_renew), color = Green800)
-                }
-            } else {
+            if (sub?.entitlementActive != true) {
                 InactiveAccessCard(
                     endsAt = sub?.endsAt,
                     onRenew = onRenew,
@@ -125,7 +114,7 @@ fun InactiveAccessCard(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Box(Modifier.size(44.dp).clip(CircleShape).background(Neutral0), contentAlignment = Alignment.Center) {
-                Icon(painterResource(R.drawable.ic_priority_high), contentDescription = null, tint = Terracotta600)
+                Icon(painterResource(R.drawable.ic_priority_high), contentDescription = null, tint = Neutral900)
             }
             Box(Modifier.clip(RoundedCornerShape(999.dp)).background(Harvest300).padding(horizontal = 12.dp, vertical = 6.dp)) {
                 Text(stringResource(R.string.home_access_inactive_chip), color = Neutral900,
@@ -147,7 +136,8 @@ fun InactiveAccessCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text(stringResource(R.string.home_access_renew), color = Neutral50, style = MaterialTheme.typography.labelLarge)
+            // Figma: "Renovar" when a plan ended, "Activar" when there never was one.
+            Text(stringResource(if (endsAt != null) R.string.home_access_renew else R.string.home_access_activate), color = Neutral50, style = MaterialTheme.typography.labelLarge)
             Box(Modifier.size(36.dp).clip(CircleShape).background(Harvest300), contentAlignment = Alignment.Center) {
                 Icon(painterResource(R.drawable.ic_arrow_forward), contentDescription = null, tint = Neutral900)
             }

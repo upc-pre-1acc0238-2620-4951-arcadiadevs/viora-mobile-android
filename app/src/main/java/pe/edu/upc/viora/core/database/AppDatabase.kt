@@ -18,6 +18,8 @@ import pe.edu.upc.viora.features.phenology.infrastructure.local.ChillTrackerDao
 import pe.edu.upc.viora.features.phenology.infrastructure.local.ChillTrackerEntity
 import pe.edu.upc.viora.features.phenology.infrastructure.local.HarvestRecordDao
 import pe.edu.upc.viora.features.phenology.infrastructure.local.HarvestRecordEntity
+import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.FieldNoteDao
+import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.FieldNoteEntity
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.IncidentDao
@@ -66,8 +68,9 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
         ChillTrackerEntity::class,
         ThinningPrescriptionEntity::class,
         AgronomicDossierEntity::class,
+        FieldNoteEntity::class,
     ],
-    version = 13,
+    version = 14,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -88,4 +91,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun chillTrackerDao(): ChillTrackerDao
     abstract fun thinningPrescriptionDao(): ThinningPrescriptionDao
     abstract fun agronomicDossierDao(): AgronomicDossierDao
+    abstract fun fieldNoteDao(): FieldNoteDao
 }

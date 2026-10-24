@@ -56,7 +56,17 @@ data class RegisterPlotUiState(
     val saveFailure: SaveFailure? = null,
     /** The id of the plot once it has been saved, so the screen can open its detail. */
     val savedPlotId: PlotId? = null,
+    /** Hectares the Plan Productor covers, null while unknown (offline, or no plan in force). */
+    val planQuotaHectares: Double? = null,
+    /** Hectares the producer's active plots already use. */
+    val usedHectares: Double = 0.0,
 ) {
+    /** Hectares of the plan still free before this plot. */
+    val freeHectares: Double? get() = planQuotaHectares?.let { (it - usedHectares).coerceAtLeast(0.0) }
+
+    /** P25 · Área mayor al cupo del plan: the plot does not fit what is left of the plan. */
+    val exceedsPlan: Boolean get() = freeHectares?.let { areaHectares > it + QUOTA_TOLERANCE_HECTARES } == true
+
     val isSaved: Boolean get() = savedPlotId != null
 
     val corners: List<GeoPoint> get() = outline.map { it.point }
@@ -81,5 +91,8 @@ data class RegisterPlotUiState(
         const val MIN_SPACING_METERS = 1.0
         const val MAX_SPACING_METERS = 20.0
         const val SPACING_STEP_METERS = 0.5
+
+        /** Rounding of the area shown with two decimals must not refuse a plot that looks like it fits. */
+        private const val QUOTA_TOLERANCE_HECTARES = 0.005
     }
 }

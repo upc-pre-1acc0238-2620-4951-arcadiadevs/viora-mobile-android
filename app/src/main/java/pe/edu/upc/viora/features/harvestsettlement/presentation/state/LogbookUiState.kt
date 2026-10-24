@@ -3,16 +3,18 @@ package pe.edu.upc.viora.features.harvestsettlement.presentation.state
 import java.time.Instant
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementStatus
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteSyncState
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteType
 
-/** The chips under the logbook title (Figma P50). Only [ALL] and [HARVESTS] have entries so far. */
+/** The chips under the logbook title (Figma P50). Notes only show under [ALL]. */
 enum class LogbookFilter { ALL, SAMPLINGS, THINNINGS, HARVESTS }
 
 /** How recent a group of entries is: the calendar week, the rest of the month, anything older. */
 enum class LogbookPeriod { THIS_WEEK, THIS_MONTH, EARLIER }
 
-enum class LogbookRowType { HARVEST, SAMPLING, THINNING }
+enum class LogbookRowType { HARVEST, SAMPLING, THINNING, NOTE }
 
-/** A logbook row (settled campaign, sampling or thinning). [plotName] is null when the plot is not in the cache. */
+/** A logbook row (settled campaign, sampling, thinning or note). [plotName] is null when the plot is not in the cache. */
 data class SettledHarvestEntry(
     val id: String,
     val plotId: String,
@@ -26,6 +28,9 @@ data class SettledHarvestEntry(
     val meanFruitsPerShoot: Double? = null,
     val removalPercentage: Double? = null,
     val timeliness: String? = null,
+    val noteType: FieldNoteType? = null,
+    val noteText: String? = null,
+    val noteSyncState: FieldNoteSyncState? = null,
 )
 
 data class ActiveSamplingUiModel(

@@ -185,8 +185,21 @@ object AppMigrations {
 
     val MIGRATION_12_13 = Migration(12, 13) { connection -> connection.execSQL(MIGRATION_12_13_SQL) }
 
+    internal val MIGRATION_13_14_STATEMENTS = listOf(
+        "CREATE TABLE IF NOT EXISTS `field_notes` (`id` TEXT NOT NULL, `plot_id` TEXT NOT NULL, `type` TEXT NOT NULL, " +
+            "`text` TEXT NOT NULL, `observed_on` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `has_photo` INTEGER NOT NULL, " +
+            "`photo_path` TEXT, `photo_pending` INTEGER NOT NULL, `sync_state` TEXT NOT NULL, `last_error_code` TEXT, " +
+            "PRIMARY KEY(`id`))",
+        "CREATE INDEX IF NOT EXISTS `index_field_notes_plot_id` ON `field_notes` (`plot_id`)",
+    )
+
+    /** Logbook notes (P75), written on the phone and sent when there is signal. */
+    val MIGRATION_13_14 = Migration(13, 14) { connection ->
+        MIGRATION_13_14_STATEMENTS.forEach { connection.execSQL(it) }
+    }
+
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-        MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
+        MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14,
     )
 }

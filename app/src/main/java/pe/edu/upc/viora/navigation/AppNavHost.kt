@@ -167,7 +167,6 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                             result = subState,
                             onRenew = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
                             onRedeemCode = { navController.navigate(RedeemCodeRoute()) },
-                            onOpenSubscription = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
                             modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 22.dp),
                         )
                         HarvestEntrySection(

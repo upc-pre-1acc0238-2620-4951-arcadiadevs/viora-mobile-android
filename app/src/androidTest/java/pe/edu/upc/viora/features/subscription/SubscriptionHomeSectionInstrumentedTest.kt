@@ -105,8 +105,7 @@ class SubscriptionHomeSectionInstrumentedTest {
     }
 
     @Test
-    fun subscriptionHomeSectionShowsDiscreetLinkWhenEntitlementIsActive() {
-        var opened = 0
+    fun subscriptionHomeSectionAddsNothingWhenEntitlementIsActive() {
         val activeSub = ProducerSubscription(
             id = java.util.UUID.randomUUID().toString(),
             mode = SubscriptionMode.INDIVIDUAL,
@@ -137,14 +136,13 @@ class SubscriptionHomeSectionInstrumentedTest {
                 SubscriptionHomeSection(
                     onRenew = {},
                     onRedeemCode = {},
-                    onOpenSubscription = { opened++ },
                     viewModel = vm,
                 )
             }
         }
 
-        compose.onNodeWithTag("home_subscription_link").assertIsDisplayed().performClick()
-        assertEquals(1, opened)
+        compose.waitForIdle()
+        compose.onNodeWithTag("home_inactive_access_card").assertDoesNotExist()
     }
 
     @Test
@@ -179,14 +177,13 @@ class SubscriptionHomeSectionInstrumentedTest {
                 SubscriptionHomeSection(
                     onRenew = {},
                     onRedeemCode = {},
-                    onOpenSubscription = {},
                     viewModel = vm,
                 )
             }
         }
 
         compose.onNodeWithTag("home_inactive_access_card").assertIsDisplayed()
-        compose.onNodeWithTag("home_subscription_link").assertDoesNotExist()
+        compose.onNodeWithTag("home_renew_plan").assertDoesNotExist()
     }
 
     @Test
@@ -197,14 +194,13 @@ class SubscriptionHomeSectionInstrumentedTest {
                     result = null,
                     onRenew = {},
                     onRedeemCode = {},
-                    onOpenSubscription = {},
                 )
             }
         }
 
         compose.onNodeWithTag("home_subscription_loading").assertExists()
         compose.onNodeWithTag("home_inactive_access_card").assertDoesNotExist()
-        compose.onNodeWithTag("home_subscription_link").assertDoesNotExist()
+        compose.onNodeWithTag("home_renew_plan").assertDoesNotExist()
     }
 
     @Test
@@ -215,13 +211,12 @@ class SubscriptionHomeSectionInstrumentedTest {
                     result = pe.edu.upc.viora.core.domain.AppResult.Failure(pe.edu.upc.viora.core.domain.AppError.Offline),
                     onRenew = {},
                     onRedeemCode = {},
-                    onOpenSubscription = {},
                 )
             }
         }
 
         compose.onNodeWithTag("home_subscription_error").assertExists()
         compose.onNodeWithTag("home_inactive_access_card").assertDoesNotExist()
-        compose.onNodeWithTag("home_subscription_link").assertDoesNotExist()
+        compose.onNodeWithTag("home_renew_plan").assertDoesNotExist()
     }
 }

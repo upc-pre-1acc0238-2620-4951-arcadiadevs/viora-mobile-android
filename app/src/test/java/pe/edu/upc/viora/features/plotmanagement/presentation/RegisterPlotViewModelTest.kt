@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation
 
+import java.math.BigDecimal
 import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,6 +33,13 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.state.MarkingMethod
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.RegisterPlotViewModel
+import java.util.UUID
+import pe.edu.upc.viora.features.subscription.application.usecase.GetCurrentSubscriptionUseCase
+import pe.edu.upc.viora.features.subscription.domain.entity.ProducerSubscription
+import pe.edu.upc.viora.features.subscription.domain.repository.ProducerSubscriptionRepository
+import pe.edu.upc.viora.features.subscription.domain.valueobject.PlanCapacity
+import pe.edu.upc.viora.features.subscription.domain.valueobject.SubscriptionMode
+import pe.edu.upc.viora.features.subscription.domain.valueobject.SubscriptionStatus
 
 private class RegistrationRepository : PlotRepository {
     val plots = MutableStateFlow<List<Plot>>(emptyList())
@@ -78,6 +86,30 @@ class RegisterPlotViewModelTest {
     private fun freshViewModel() = RegisterPlotViewModel(
         observePlots = ObservePlotsUseCase(repository),
         registerPlot = RegisterPlotUseCase(repository),
+        currentSubscription = GetCurrentSubscriptionUseCase(subscriptions),
+    )
+
+    /** What GET subscriptions answers; null is the 204 of a producer without a plan. */
+    private var subscription: ProducerSubscription? = null
+    private val subscriptions = object : ProducerSubscriptionRepository {
+        override suspend fun getCurrent(): AppResult<ProducerSubscription?> = AppResult.Success(subscription)
+        override suspend fun getById(id: String): AppResult<ProducerSubscription> = AppResult.Failure(AppError.NotFound())
+    }
+
+    private fun activePlan(hectares: String, active: Boolean = true) = ProducerSubscription(
+        id = UUID.randomUUID().toString(),
+        mode = SubscriptionMode.INDIVIDUAL,
+        planCode = null,
+        status = if (active) SubscriptionStatus.ACTIVE else SubscriptionStatus.EXPIRED,
+        capacity = PlanCapacity.of(BigDecimal(hectares)),
+        currency = null,
+        baseAmount = null,
+        taxAmount = null,
+        totalAmount = null,
+        startsAt = null,
+        endsAt = null,
+        entitlementActive = active,
+        cooperativeId = null,
     )
 
     /** A view model that already chose to trace on the map, ready to mark corners. */
@@ -410,5 +442,40 @@ class RegisterPlotViewModelTest {
 
         assertEquals(RegisterPlotStep.METHOD, vm.uiState.value.step)
         assertEquals(listOf(a, b, c, d), vm.uiState.value.corners)
+    }
+
+    // ---- plan quota (P25)
+
+    @Test
+    fun `a plot that does not fit what is left of the plan cannot be saved`() {
+        repository.plots.value = listOf(existingPlot())
+        subscription = activePlan("1.5")
+        val vm = readyToSave()
+        repository.registerResult = AppResult.Success(existingPlot())
+
+        assertEquals(0.5, vm.uiState.value.freeHectares!!, 1e-9)
+        assertTrue(vm.uiState.value.exceedsPlan)
+        vm.save()
+        assertTrue(repository.registered.isEmpty())
+
+        vm.adjustOutline()
+        assertEquals(RegisterPlotStep.TRACE, vm.uiState.value.step)
+        assertEquals(4, vm.uiState.value.corners.size)
+    }
+
+    @Test
+    fun `a plot that fits shows the usage and saves`() {
+        subscription = activePlan("20")
+        val vm = readyToSave()
+        assertEquals(20.0, vm.uiState.value.planQuotaHectares!!, 1e-9)
+        assertFalse(vm.uiState.value.exceedsPlan)
+    }
+
+    @Test
+    fun `without an active plan nothing is blocked`() {
+        subscription = activePlan("0.5", active = false)
+        val vm = readyToSave()
+        assertNull(vm.uiState.value.planQuotaHectares)
+        assertFalse(vm.uiState.value.exceedsPlan)
     }
 }

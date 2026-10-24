@@ -33,6 +33,7 @@ class AppMigrationsTest {
     private val v11 = createSqlByTable(11)
     private val v12 = createSqlByTable(12)
     private val v13 = createSqlByTable(13)
+    private val v14 = createSqlByTable(14)
 
     @Test
     fun `new tables are created exactly as the exported v5 schema`() {
@@ -133,6 +134,12 @@ class AppMigrationsTest {
     }
 
     private fun tableOf(createSql: String) = createSql.substringAfter("EXISTS `").substringBefore("`")
+
+    @Test fun `field notes migration matches the exported v14 schema and leaves every other table intact`() {
+        assertEquals(v14.getValue("field_notes"), AppMigrations.MIGRATION_13_14_STATEMENTS.first())
+        assertEquals(v13.keys + "field_notes", v14.keys)
+        v13.keys.forEach { assertEquals(v13[it], v14[it]) }
+    }
 
     @Test fun `purchase journal migration matches its schema and leaves every existing table intact`() {
         assertEquals(v13.getValue("individual_purchase_journal"), AppMigrations.MIGRATION_12_13_SQL)

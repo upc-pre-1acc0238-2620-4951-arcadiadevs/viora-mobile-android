@@ -22,15 +22,17 @@ import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.MarkingMethod
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
-import pe.edu.upc.viora.features.plotmanagement.presentation.state.TracedCorner
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.TracedCorner
+import pe.edu.upc.viora.features.subscription.application.usecase.GetCurrentSubscriptionUseCase
 
 /** Drives the wizard: choose how to mark the outline, mark it, describe the plot, review and save. */
 @HiltViewModel
 class RegisterPlotViewModel @Inject constructor(
     observePlots: ObservePlotsUseCase,
     private val registerPlot: RegisterPlotUseCase,
+    currentSubscription: GetCurrentSubscriptionUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterPlotUiState())
@@ -41,6 +43,16 @@ class RegisterPlotViewModel @Inject constructor(
         viewModelScope.launch {
             val center = observePlots().first().firstNotNullOfOrNull { centerOf(it.outline) }
             _uiState.update { it.copy(mapCenter = center) }
+        }
+        // The plan's hectares and what the active plots already use (P25 "Usarás 4,92 de 5,0 ha").
+        // Only a server-confirmed active plan has a quota; without one the review just skips the line.
+        viewModelScope.launch {
+            val subscription = (currentSubscription() as? AppResult.Success)?.value
+            val quota = subscription?.takeIf { it.entitlementActive }?.capacity?.hectares?.toDouble()
+            _uiState.update { it.copy(planQuotaHectares = quota) }
+        }
+        viewModelScope.launch {
+            observePlots().collect { plots -> _uiState.update { it.copy(usedHectares = plots.sumOf { plot -> plot.areaHectares }) } }
         }
     }
 
@@ -147,7 +159,7 @@ class RegisterPlotViewModel @Inject constructor(
 
     fun save() {
         val current = _uiState.value
-        if (current.isSaving) return
+        if (current.isSaving || current.exceedsPlan) return
         val newPlot = current.toNewPlotOrNull() ?: return
         _uiState.update { it.copy(isSaving = true, saveFailure = null) }
         viewModelScope.launch {
@@ -156,6 +168,11 @@ class RegisterPlotViewModel @Inject constructor(
                 is AppResult.Failure -> _uiState.update { it.afterSaveFailure(result.error) }
             }
         }
+    }
+
+    /** "Ajustar contorno" of P25: back to the outline, keeping the corners and the details. */
+    fun adjustOutline() {
+        _uiState.update { it.copy(step = RegisterPlotStep.TRACE, saveFailure = null) }
     }
 
     fun dismissSaveFailure() {
