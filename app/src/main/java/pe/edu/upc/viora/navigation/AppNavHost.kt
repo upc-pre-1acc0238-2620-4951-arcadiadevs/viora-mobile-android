@@ -143,7 +143,8 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 LaunchedEffect(owner) {
                     owner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { subViewModel.refresh() }
                 }
-                val isAccessPaused = (subState as? AppResult.Success)?.value?.let { !it.entitlementActive } ?: false
+                // Figma P10 · Sin acceso activo: a plan that ended and no plan at all (204) are the same state.
+                val isAccessPaused = (subState as? AppResult.Success)?.let { it.value?.entitlementActive != true } ?: false
                 val phaseViewModel: HomePhaseViewModel = hiltViewModel()
                 val phase by phaseViewModel.uiState.collectAsStateWithLifecycle()
                 HomeScreen(
