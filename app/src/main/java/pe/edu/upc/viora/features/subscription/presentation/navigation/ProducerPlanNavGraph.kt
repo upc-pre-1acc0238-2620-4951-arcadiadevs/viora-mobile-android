@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.BuildConfig
 import pe.edu.upc.viora.features.subscription.presentation.ui.ProducerPlanScreen
@@ -12,9 +13,12 @@ import pe.edu.upc.viora.features.subscription.presentation.ui.ProducerPlanScreen
 val PAYMENT_RETURN_LINK_BASE = "https://${BuildConfig.CHECKOUT_RETURN_HOST}/payments/return"
 val SUBSCRIPTION_RETURN_LINK_BASE = "https://${BuildConfig.CHECKOUT_RETURN_HOST}/subscriptions/return"
 
-/** Independent full-screen commercial offer; the agronomic Plan tab remains unchanged. */
+/**
+ * Independent full-screen commercial offer; the agronomic Plan tab remains unchanged. With [renewal]
+ * it is "Renueva y amplía" (Figma P102 · Por vencer): the next year of a plan in its last 30 days.
+ */
 @Serializable
-data object ProducerPlanRoute
+data class ProducerPlanRoute(val renewal: Boolean = false)
 
 fun NavGraphBuilder.producerPlanComposable(navController: NavController, onLeave: () -> Unit, onRegisterPlot: () -> Unit) {
     composable<ProducerPlanRoute>(
@@ -22,8 +26,9 @@ fun NavGraphBuilder.producerPlanComposable(navController: NavController, onLeave
             navDeepLink<ProducerPlanRoute>(basePath = PAYMENT_RETURN_LINK_BASE),
             navDeepLink<ProducerPlanRoute>(basePath = SUBSCRIPTION_RETURN_LINK_BASE),
         ),
-    ) {
+    ) { entry ->
         ProducerPlanScreen(
+            renewal = entry.toRoute<ProducerPlanRoute>().renewal,
             onBack = { if (!navController.popBackStack()) onLeave() },
             onGoHome = onLeave,
             onRegisterPlot = onRegisterPlot,

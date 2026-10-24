@@ -4,9 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,7 +14,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraConfirmDialog
 import pe.edu.upc.viora.core.designsystem.theme.*
+import androidx.compose.ui.graphics.Color
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.subscription.domain.entity.IndividualCheckout
 import pe.edu.upc.viora.features.subscription.presentation.state.IndividualCheckoutUiState
@@ -57,20 +57,21 @@ internal fun IndividualCheckoutAction(
             val changed = stringResource(R.string.purchase_confirm_changed)
             val continueLabel = stringResource(R.string.purchase_continue)
             val laterLabel = stringResource(R.string.purchase_later)
-            AlertDialog(
-                onDismissRequest = onDismiss,
-                title = { Text(title) },
-                text = {
-                    Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                        Text(terms)
-                        if (purchase.planCode != offer.selectedOffer.code || purchase.capacity != offer.capacity ||
-                            purchase.currency != offer.selectedOffer.currency || purchase.total.compareTo(offer.estimate.total) != 0) {
-                            Text(changed)
-                        }
-                    }
-                },
-                confirmButton = { TextButton(onPay) { Text(continueLabel) } },
-                dismissButton = { TextButton(onDismiss) { Text(laterLabel) } }
+            val termsChanged = purchase.planCode != offer.selectedOffer.code || purchase.capacity != offer.capacity ||
+                purchase.currency != offer.selectedOffer.currency || purchase.total.compareTo(offer.estimate.total) != 0
+            // Figma "Capa · Confirma tu plan anual / abierta".
+            VioraConfirmDialog(
+                icon = R.drawable.ic_isotype,
+                iconBackground = Green200,
+                iconTint = Color.Unspecified,
+                title = title,
+                body = terms,
+                note = changed.takeIf { termsChanged },
+                primaryLabel = continueLabel,
+                onPrimary = onPay,
+                secondaryLabel = laterLabel,
+                onSecondary = onDismiss,
+                onDismiss = onDismiss,
             )
         }
         is IndividualCheckoutUiState.Ready -> LaunchedEffect(state.link) {

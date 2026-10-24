@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -43,15 +44,20 @@ import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.core.presentation.vioraNumberFormat
 import pe.edu.upc.viora.features.subscription.presentation.state.IndividualCheckoutUiState
 import pe.edu.upc.viora.features.subscription.presentation.state.ProducerPlanUiState
+import pe.edu.upc.viora.features.subscription.presentation.state.RenewalInfo
 import pe.edu.upc.viora.features.subscription.presentation.viewmodel.IndividualCheckoutViewModel
 import pe.edu.upc.viora.features.subscription.presentation.viewmodel.ProducerPlanViewModel
 
-/** P02 browsing/selection. Payment is deliberately supplied by the separate checkout feature. */
+/**
+ * P02 browsing/selection. Payment is deliberately supplied by the separate checkout feature. With
+ * [renewal] it is "Renueva y amplía" (Figma P102 · Por vencer): the year after the plan that is ending.
+ */
 @Composable
 fun ProducerPlanScreen(
     onBack: () -> Unit,
     onRedeemCode: () -> Unit,
     modifier: Modifier = Modifier,
+    renewal: Boolean = false,
     viewModel: ProducerPlanViewModel = hiltViewModel(),
     checkoutViewModel: IndividualCheckoutViewModel = hiltViewModel(),
     onRegisterPlot: () -> Unit = onBack,
@@ -66,6 +72,8 @@ fun ProducerPlanScreen(
         onFailed = checkoutViewModel::browserFailed,
     )
 
+    // Set before the resume below runs: in renewal mode it must not recover the year that is ending.
+    checkoutViewModel.renewal = renewal
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         checkoutViewModel.onAppResumed()
     }
@@ -130,13 +138,18 @@ internal fun ProducerPlanContent(
             }
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(top = Spacing.md, bottom = Spacing.lg)) {
+            val renewal = (state as? ProducerPlanUiState.Content)?.renewal
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                Box(Modifier.size(Spacing.xxs).background(Harvest300, CircleShape))
-                Text(stringResource(R.string.producer_plan_eyebrow), style = EditorialEyebrow, color = Neutral700)
+                Box(Modifier.size(Spacing.xxs).background(if (renewal != null) Terracotta500 else Harvest300, CircleShape))
+                Text(if (renewal != null) {
+                    pluralStringResource(R.plurals.producer_plan_renew_eyebrow, renewal.daysLeft, renewal.daysLeft).uppercase()
+                } else stringResource(R.string.producer_plan_eyebrow), style = EditorialEyebrow, color = Neutral700)
             }
             Text(buildAnnotatedString {
-                append(stringResource(R.string.producer_plan_title_lead))
-                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(stringResource(R.string.producer_plan_title_emphasis)) }
+                append(stringResource(if (renewal != null) R.string.producer_plan_renew_title_lead else R.string.producer_plan_title_lead))
+                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                    append(stringResource(if (renewal != null) R.string.producer_plan_renew_title_emphasis else R.string.producer_plan_title_emphasis))
+                }
             }, style = MaterialTheme.typography.displayMedium, color = Neutral900)
             Spacer(Modifier.height(Spacing.xl))
             HorizontalDivider(color = Neutral200)
@@ -167,7 +180,7 @@ internal fun ProducerPlanContent(
                     }
                     PlanCapacitySelector(state, onIncrease, onDecrease)
                     HorizontalDivider(color = Neutral200)
-                    PlanBenefits(state)
+                    if (state.renewal != null) RenewalBenefits(state, state.renewal) else PlanBenefits(state)
                     HorizontalDivider(color = Neutral200)
                     PlanEstimateSummary(state)
                     PlanFreshness(state, onRefresh)
@@ -175,9 +188,11 @@ internal fun ProducerPlanContent(
                 }
             }
             Spacer(Modifier.height(Spacing.lg))
-            TextButton(onRedeemCode, Modifier.fillMaxWidth().heightIn(min = Spacing.minTouchTarget)) {
-                Text(stringResource(R.string.producer_plan_cooperative), style = MaterialTheme.typography.titleMedium,
-                    color = Neutral900)
+            if ((state as? ProducerPlanUiState.Content)?.renewal == null) {
+                TextButton(onRedeemCode, Modifier.fillMaxWidth().heightIn(min = Spacing.minTouchTarget)) {
+                    Text(stringResource(R.string.producer_plan_cooperative), style = MaterialTheme.typography.titleMedium,
+                        color = Neutral900)
+                }
             }
         }
     }
@@ -228,12 +243,35 @@ private fun PlanBenefits(state: ProducerPlanUiState.Content) {
     }
 }
 
+/** "Tu nuevo año": what the renewal keeps and the dates of the year it buys. */
+@Composable
+private fun RenewalBenefits(state: ProducerPlanUiState.Content, renewal: RenewalInfo) {
+    val locale = LocalConfiguration.current.locales[0]
+    val newEnd = renewal.endsAt.atZone(java.time.ZoneOffset.UTC).plusYears(1).toInstant()
+    val items = listOf(
+        stringResource(R.string.producer_plan_renew_item_capacity, formatPlanCapacity(state.capacity.hectares, locale),
+            formatPlanCapacity(renewal.currentQuota, locale)),
+        stringResource(R.string.producer_plan_renew_item_period, planDate(renewal.endsAt).orEmpty(), planDate(newEnd).orEmpty()),
+        stringResource(R.string.producer_plan_renew_item_history),
+        stringResource(R.string.producer_plan_renew_item_alerts),
+    )
+    Column(Modifier.padding(vertical = Spacing.lg), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        Text(stringResource(R.string.producer_plan_renew_includes), style = EditorialEyebrow, color = Neutral600)
+        items.forEach { item ->
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm), verticalAlignment = Alignment.CenterVertically) {
+                HorizontalDivider(Modifier.width(Spacing.md), color = Neutral700)
+                Text(item, style = MaterialTheme.typography.bodyLarge, color = Neutral700)
+            }
+        }
+    }
+}
+
 @Composable
 private fun PlanEstimateSummary(state: ProducerPlanUiState.Content) {
     val locale = LocalConfiguration.current.locales[0]
     val estimate = state.estimate
     val currency = state.selectedOffer.currency
-    Text(stringResource(R.string.producer_plan_total), Modifier.padding(top = Spacing.lg),
+    Text(stringResource(if (state.renewal != null) R.string.producer_plan_renew_total else R.string.producer_plan_total), Modifier.padding(top = Spacing.lg),
         style = EditorialEyebrow, color = Neutral600)
     Text(formatPlanMoney(estimate.total, currency, locale), Modifier.testTag("producer-plan-total").drawBehind {
         drawLine(Harvest300.copy(alpha = 0.55f), Offset(0f, size.height * 0.82f),

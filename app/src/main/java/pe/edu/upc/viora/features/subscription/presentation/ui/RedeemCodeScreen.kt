@@ -95,7 +95,13 @@ internal fun RedeemCodeContent(
     modifier: Modifier = Modifier,
 ) {
     if (state.isRedeeming) {
-        ValidatingCodeContent(code = state.code, modifier = modifier)
+        ValidatingCodeContent(
+            eyebrow = stringResource(R.string.redeem_code_validating_eyebrow, state.code),
+            lead = stringResource(R.string.redeem_code_validating_title_lead),
+            emphasis = stringResource(R.string.redeem_code_validating_title_emphasis),
+            body = stringResource(R.string.redeem_code_validating_body),
+            modifier = modifier,
+        )
         return
     }
     val rejected = state.isCodeRejected
@@ -129,6 +135,8 @@ internal fun RedeemCodeContent(
             Spacer(Modifier.height(4.dp))
             CodeField(
                 code = state.code,
+                label = stringResource(R.string.redeem_code_label),
+                hint = stringResource(R.string.redeem_code_hint),
                 error = state.failure?.let { stringResource(it.messageRes()) },
                 enabled = !state.isRedeeming,
                 onCodeChange = onCodeChange,
@@ -154,9 +162,12 @@ internal fun RedeemCodeContent(
     }
 }
 
-/** P05 · Validando: the code is with the backend; it ends in P06 or in "Este código no funcionó". */
+/**
+ * P05 · Validando and P103 · Validando: the code is with the backend; it ends in the membership (or the
+ * applied extension) or in the rejected variant.
+ */
 @Composable
-private fun ValidatingCodeContent(code: String, modifier: Modifier = Modifier) {
+internal fun ValidatingCodeContent(eyebrow: String, lead: String, emphasis: String, body: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -177,19 +188,16 @@ private fun ValidatingCodeContent(code: String, modifier: Modifier = Modifier) {
             )
         }
         Spacer(Modifier.height(32.dp))
-        StatusHeading(
-            eyebrow = stringResource(R.string.redeem_code_validating_eyebrow, code),
-            lead = stringResource(R.string.redeem_code_validating_title_lead),
-            emphasis = stringResource(R.string.redeem_code_validating_title_emphasis),
-            body = stringResource(R.string.redeem_code_validating_body),
-        )
+        StatusHeading(eyebrow = eyebrow, lead = lead, emphasis = emphasis, body = body)
     }
 }
 
 /** Figma "Editorial/Campo": a label, the typed value on an underline, and a hint that turns into the error. */
 @Composable
-private fun CodeField(
+internal fun CodeField(
     code: String,
+    label: String,
+    hint: String,
     error: String?,
     enabled: Boolean,
     onCodeChange: (String) -> Unit,
@@ -198,7 +206,7 @@ private fun CodeField(
     val accent = if (error != null) Terracotta600 else Neutral900
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = stringResource(R.string.redeem_code_label),
+            text = label,
             style = MaterialTheme.typography.labelMedium,
             color = if (error != null) Terracotta600 else Neutral600,
         )
@@ -226,7 +234,7 @@ private fun CodeField(
                 .padding(bottom = 10.dp),
         )
         Text(
-            text = error ?: stringResource(R.string.redeem_code_hint),
+            text = error ?: hint,
             style = MaterialTheme.typography.bodySmall,
             color = if (error != null) Terracotta600 else Neutral700,
         )

@@ -1758,7 +1758,6 @@
     <string name="my_plan_section_plots">Your plots in the plan</string>
     <string name="my_plan_section_details">Details</string>
     <string name="my_plan_have_code">I have a code</string>
-    <string name="my_plan_other_code">Enter another code</string>
     <string name="my_plan_renew_and_expand">Renew and expand</string>
     <string name="my_plan_expand">Expand my plan</string>
     <string name="my_plan_how_plans_work">See how the plans work</string>
@@ -1799,7 +1798,7 @@
     <string name="my_plan_hero_code">Your code covers %1$s ha until %2$s. Today you use %3$s ha.</string>
     <string name="my_plan_voice_none">When you activate your plan, here you will see how many hectares you have left.</string>
     <string name="my_plan_voice_expiring">When it ends, your plots and history are kept, but you stop receiving alerts.</string>
-    <string name="my_plan_voice_code">Your plan came with a code. If you need more hectares, ask whoever gave it to you for a new one.</string>
+    <string name="my_plan_voice_code">Your plan came with a code. If you need more hectares, ask whoever gave it to you for an extension code.</string>
     <string name="my_plan_voice_active">You have %1$s ha left. If you plant more, expand your plan before registering the plot.</string>
     <string name="account_delete">Delete account</string>
     <string name="account_membership_paused">Access paused</string>
@@ -1861,4 +1860,70 @@
         <item quantity="one">We will delete your %1$d plot and all its history right now. There is no recycle bin and no way to recover it.</item>
         <item quantity="other">We will delete your %1$d plots and all their history right now. There is no recycle bin and no way to recover them.</item>
     </plurals>
+    <!-- Plan extension: P102, P103, P104 and the P04 results (Figma section 22) -->
+    <string name="plan_extension_eyebrow">Extension · same end date</string>
+    <string name="plan_extension_title_lead">"Grow "</string>
+    <string name="plan_extension_title_emphasis">your plan</string>
+    <string name="plan_extension_hectares">NEW HECTARES</string>
+    <string name="plan_extension_added">+%1$s</string>
+    <string name="plan_extension_bar_current">%1$s ha in your plan</string>
+    <string name="plan_extension_bar_new">+%1$s new ha · %2$s ha</string>
+    <string name="plan_extension_includes">YOUR PLAN WITH THE EXTENSION</string>
+    <string name="plan_extension_item_quota">Your quota goes from %1$s ha to %2$s ha</string>
+    <string name="plan_extension_item_end">Same end date: %1$s</string>
+    <plurals name="plan_extension_item_months">
+        <item quantity="one">You only pay the month left</item>
+        <item quantity="other">You only pay the %1$d months left</item>
+    </plurals>
+    <string name="plan_extension_item_history">Your plots and history stay the same</string>
+    <string name="plan_extension_total">YOU PAY TODAY</string>
+    <plurals name="plan_extension_breakdown">
+        <item quantity="one">%2$s ha × %3$s a month × %1$d month · VAT included</item>
+        <item quantity="other">%2$s ha × %3$s a month × %1$d months · VAT included</item>
+    </plurals>
+    <string name="plan_extension_later">Not now</string>
+    <string name="plan_extension_loading">Working out your extension…</string>
+    <string name="plan_extension_error_renewal">Your plan ends soon: renew and grow it in a single payment.</string>
+    <string name="plan_extension_applied_badge">Plan extended</string>
+    <string name="plan_extension_applied_lead">Your plan grew,</string>
+    <string name="plan_extension_applied_lead_alone">Your plan grew.</string>
+    <string name="plan_extension_applied_body">We added %1$s ha to your plan. You can register more plots and your end date stays the same.</string>
+    <string name="plan_extension_quota_change">%1$s ha → %2$s ha</string>
+    <string name="plan_extension_retry">Try again</string>
+    <string name="plan_extension_view_plan">See my plan</string>
+    <string name="extension_code_title_lead">Grow it with</string>
+    <string name="extension_code_title_emphasis">a code.</string>
+    <string name="extension_code_voice">Ask whoever gave you your code. It adds hectares to your plan and the end date does not change.</string>
+    <string name="extension_code_label">Extension code</string>
+    <string name="extension_code_hint">It only adds to your current plan. E.g. AMPL-3R8T</string>
+    <string name="extension_code_back">Back to my plan</string>
+    <string name="extension_code_rejected_title_lead">This code</string>
+    <string name="extension_code_rejected_title_emphasis">adds nothing.</string>
+    <string name="extension_code_rejected_voice">It only adds hectares to the plan your code came from. Ask whoever gave it to you for a new one.</string>
+    <string name="extension_code_error_not_redeemable">It belongs to another plan, you already used it or it ran out of hectares.</string>
+    <string name="extension_code_validating_lead">Adding your</string>
+    <string name="extension_code_validating_emphasis">hectares…</string>
+    <string name="extension_code_validating_body">We check that the code belongs to your plan and still has hectares left.</string>
+    <string name="extension_applied_badge">Quota extended</string>
+    <string name="extension_applied_lead">Your quota</string>
+    <string name="extension_applied_emphasis">grew.</string>
+    <string name="extension_applied_body">We added %1$s ha to your plan with your extension code. Your end date does not change.</string>
+    <string name="extension_applied_activation">Code %1$s</string>
+    <string name="my_plan_expand_with_code">Grow with a code</string>
+    <string name="plots_quota_of">of %1$s ha in your Producer Plan</string>
+    <string name="plots_quota_left">%1$s ha left</string>
+    <string name="plots_quota_over">You are %1$s ha over your quota</string>
+    <string name="plots_quota_expand">Grow my plan ›</string>
+    <plurals name="producer_plan_renew_eyebrow">
+        <item quantity="one">Ends in %1$d day</item>
+        <item quantity="other">Ends in %1$d days</item>
+    </plurals>
+    <string name="producer_plan_renew_title_lead">"Renew "</string>
+    <string name="producer_plan_renew_title_emphasis">and grow</string>
+    <string name="producer_plan_renew_includes">YOUR NEW YEAR</string>
+    <string name="producer_plan_renew_item_capacity">Up to %1$s ha registered (was %2$s ha)</string>
+    <string name="producer_plan_renew_item_period">From %1$s to %2$s</string>
+    <string name="producer_plan_renew_item_history">Your plots and history stay the same</string>
+    <string name="producer_plan_renew_item_alerts">Alerts, sampling and thinning without a pause</string>
+    <string name="producer_plan_renew_total">ANNUAL TOTAL</string>
 </resources>

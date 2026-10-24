@@ -72,7 +72,10 @@ import pe.edu.upc.viora.features.subscription.presentation.navigation.Cooperativ
 import pe.edu.upc.viora.features.subscription.presentation.navigation.RedeemCodeRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.cooperativeCodeNavGraph
 import pe.edu.upc.viora.features.subscription.presentation.navigation.MyPlanRoute
+import pe.edu.upc.viora.features.subscription.presentation.navigation.ExtensionCodeRoute
+import pe.edu.upc.viora.features.subscription.presentation.navigation.PlanExtensionRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.ProducerPlanRoute
+import pe.edu.upc.viora.features.subscription.presentation.navigation.planExtensionGraph
 import pe.edu.upc.viora.features.subscription.presentation.navigation.myPlanComposable
 import pe.edu.upc.viora.features.subscription.presentation.ui.AccountPlanCard
 import pe.edu.upc.viora.features.subscription.presentation.ui.MyPlanActions
@@ -177,7 +180,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     sections = {
                         SubscriptionHomeContent(
                             result = subState,
-                            onRenew = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
+                            onRenew = { navController.navigate(ProducerPlanRoute()) { launchSingleTop = true } },
                             onRedeemCode = { navController.navigate(RedeemCodeRoute()) },
                             modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 22.dp),
                         )
@@ -225,9 +228,19 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             MyPlanActions(
                 onBack = { navController.popBackStack() },
                 onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
-                onOpenPlans = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
+                onOpenPlans = { navController.navigate(ProducerPlanRoute()) { launchSingleTop = true } },
                 onRedeemCode = { navController.navigate(RedeemCodeRoute()) { launchSingleTop = true } },
+                onExpandPlan = { navController.navigate(PlanExtensionRoute) { launchSingleTop = true } },
+                onExpandWithCode = { navController.navigate(ExtensionCodeRoute) { launchSingleTop = true } },
+                onRenew = { navController.navigate(ProducerPlanRoute(renewal = true)) { launchSingleTop = true } },
             ),
+        )
+        planExtensionGraph(
+            navController = navController,
+            onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
+            onViewPlan = { navController.navigate(MyPlanRoute) { launchSingleTop = true } },
+            onRenew = { navController.navigate(ProducerPlanRoute(renewal = true)) { launchSingleTop = true } },
+            onBuyPlan = { navController.navigate(ProducerPlanRoute()) { launchSingleTop = true } },
         )
         // The form is replaced by the P73 receipt (inclusive pop), so Back never returns to it.
         settleHarvestComposable(
@@ -256,7 +269,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         cooperativeCodeNavGraph(
             navController = navController,
             onLeave = { navController.openHome() },
-            onOpenProducerPlan = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
+            onOpenProducerPlan = { navController.navigate(ProducerPlanRoute()) { launchSingleTop = true } },
             onRegisterPlot = {
                 navController.openHome()
                 navController.navigate(RegisterPlotRoute)
@@ -346,7 +359,7 @@ private fun NavHostController.openCampaignReceipt(plotId: String, year: Int, pop
  */
 private fun debugStartDestination(): Any? = when (BuildConfig.DEBUG_START_SCREEN) {
     "home" -> HomeGraph
-    "producer-plan" -> ProducerPlanRoute
+    "producer-plan" -> ProducerPlanRoute()
     "cooperative-code" -> CooperativeCodeGraph
     "account" -> AccountRoute
     "edit-profile" -> EditProfileRoute
