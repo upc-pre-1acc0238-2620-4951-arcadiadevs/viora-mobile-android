@@ -76,66 +76,6 @@ internal fun IndividualCheckoutAction(
         is IndividualCheckoutUiState.Ready -> LaunchedEffect(state.link) {
             onOpen(state.link, state.subscriptionId)
         }
-        is IndividualCheckoutUiState.Verifying -> {
-            AlertDialog(
-                onDismissRequest = {},
-                title = { Text(stringResource(R.string.purchase_verifying)) },
-                text = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
-                    ) {
-                        CircularProgressIndicator(
-                            color = Green900,
-                            modifier = Modifier.size(Spacing.xl)
-                        )
-                        Text(stringResource(R.string.purchase_verifying_hint), style = MaterialTheme.typography.bodyMedium)
-                    }
-                },
-                confirmButton = {},
-            )
-        }
-        is IndividualCheckoutUiState.Confirmed -> {
-            val locale = LocalConfiguration.current.locales[0]
-            val capacityFormatted = formatPlanCapacity(state.subscription.capacity.hectares, locale)
-            AlertDialog(
-                onDismissRequest = onDismiss,
-                title = { Text(stringResource(R.string.purchase_confirmed_title)) },
-                text = {
-                    Text(
-                        stringResource(R.string.purchase_confirmed_message, capacityFormatted),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = onDismiss) {
-                        Text(stringResource(R.string.purchase_close))
-                    }
-                }
-            )
-        }
-        is IndividualCheckoutUiState.Unconfirmed -> {
-            AlertDialog(
-                onDismissRequest = onDismiss,
-                title = { Text(stringResource(R.string.purchase_unconfirmed_title)) },
-                text = {
-                    Text(
-                        stringResource(R.string.purchase_unconfirmed_message),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = onCheckStatus) {
-                        Text(stringResource(R.string.purchase_check_status))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = onDismiss) {
-                        Text(stringResource(R.string.purchase_close))
-                    }
-                }
-            )
-        }
         is IndividualCheckoutUiState.Failed -> Text(
             stringResource(state.error.messageRes()),
             Modifier.padding(top = Spacing.sm),

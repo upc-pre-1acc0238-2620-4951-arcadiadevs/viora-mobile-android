@@ -78,7 +78,7 @@ fun SubscriptionHomeContent(
                     onClick = onOpenSubscription,
                     modifier = modifier.testTag("home_subscription_link"),
                 ) {
-                    Text(stringResource(R.string.subscription_access_title), color = Green800)
+                    Text(stringResource(R.string.home_access_renew), color = Green800)
                 }
             } else {
                 InactiveAccessCard(

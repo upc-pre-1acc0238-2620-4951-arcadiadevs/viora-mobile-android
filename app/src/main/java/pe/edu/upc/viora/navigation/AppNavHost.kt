@@ -165,9 +165,9 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     sections = {
                         SubscriptionHomeContent(
                             result = subState,
-                            onRenew = { navController.navigate(pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionAccessRoute) },
+                            onRenew = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
                             onRedeemCode = { navController.navigate(RedeemCodeRoute()) },
-                            onOpenSubscription = { navController.navigate(pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionAccessRoute) },
+                            onOpenSubscription = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
                             modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 22.dp),
                         )
                         HarvestEntrySection(
@@ -219,12 +219,10 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 navController.navigate(RegisterPlotRoute)
             },
         )
-        composable<pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionAccessRoute> {
-            pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionAccessScreen(
-                onBack = { navController.popBackStack() },
-                onPlan = { navController.navigate(ProducerPlanRoute) })
-        }
-        producerPlanComposable(navController, onLeave = { navController.openHome() })
+        producerPlanComposable(navController, onLeave = { navController.openHome() }, onRegisterPlot = {
+            navController.openHome()
+            navController.navigate(RegisterPlotRoute)
+        })
         plotScreens(navController)
         climateNavGraph(navController)
         alertsNavGraph(

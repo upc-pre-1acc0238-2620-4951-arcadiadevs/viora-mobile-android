@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -52,9 +53,13 @@ fun ProducerPlanScreen(
     modifier: Modifier = Modifier,
     viewModel: ProducerPlanViewModel = hiltViewModel(),
     checkoutViewModel: IndividualCheckoutViewModel = hiltViewModel(),
+    onRegisterPlot: () -> Unit = onBack,
+    onGoHome: () -> Unit = onBack,
+    resultProfileViewModel: pe.edu.upc.viora.features.subscription.presentation.viewmodel.PaymentResultProfileViewModel = hiltViewModel(),
 ) {
     val offer = viewModel.uiState.collectAsStateWithLifecycle().value
     val checkout = checkoutViewModel.uiState.collectAsStateWithLifecycle().value
+    val producerName = resultProfileViewModel.name.collectAsStateWithLifecycle().value
     val openBrowser = rememberCheckoutBrowser(
         onOpened = checkoutViewModel::onBrowserOpened,
         onFailed = checkoutViewModel::browserFailed,
@@ -65,6 +70,19 @@ fun ProducerPlanScreen(
     }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
         checkoutViewModel.onAppPaused()
+    }
+    DisposableEffect(checkoutViewModel) {
+        onDispose { checkoutViewModel.onAppPaused() }
+    }
+
+    if (checkout is IndividualCheckoutUiState.Verifying || checkout is IndividualCheckoutUiState.Confirmed ||
+        checkout is IndividualCheckoutUiState.Rejected || checkout is IndividualCheckoutUiState.Unconfirmed) {
+        PaymentResultScreen(checkout, producerName, checkoutViewModel::checkStatus,
+            checkoutViewModel::retryPayment,
+            onRedeemCode = { checkoutViewModel.dismiss(); onRedeemCode() },
+            onRegisterPlot = { checkoutViewModel.dismiss(); onRegisterPlot() },
+            onGoHome = { checkoutViewModel.dismiss(); onGoHome() }, modifier = modifier)
+        return
     }
 
     ProducerPlanContent(
