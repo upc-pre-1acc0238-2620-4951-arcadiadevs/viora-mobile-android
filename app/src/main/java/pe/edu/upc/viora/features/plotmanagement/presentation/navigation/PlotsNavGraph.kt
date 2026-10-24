@@ -19,6 +19,7 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.Thin
 import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.harvestHistoryComposable
 import pe.edu.upc.viora.features.phenology.presentation.navigation.winterChillComposable
+import pe.edu.upc.viora.features.subscription.presentation.navigation.ProducerPlanRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.configureNodeComposable
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.sensorsComposable
@@ -79,6 +80,8 @@ fun NavGraphBuilder.plotScreens(navController: NavController) {
                     popUpTo<RegisterPlotRoute> { inclusive = true }
                 }
             },
+            // P25 "Ampliar mi plan": the wizard stays below, so back returns to the review.
+            onExpandPlan = { navController.navigate(ProducerPlanRoute) { launchSingleTop = true } },
         )
     }
     composable<PlotDetailRoute> { entry ->

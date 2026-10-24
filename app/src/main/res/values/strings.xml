@@ -1664,4 +1664,11 @@
     <string name="thinning_picker_empty">You have no plots yet. Register one to plan its thinning.</string>
     <string name="thinning_picker_note">A plot without a plan opens its plan, so you can see what is missing before thinning.</string>
     <string name="settle_picker_empty">Every plot already has its %1$d harvest registered.</string>
+
+    <!-- P25 · Plan quota on the plot review -->
+    <string name="review_plan_usage">You will use %1$s of %2$s ha of your plan.</string>
+    <string name="review_over_quota_title">%1$s ha do not fit in your plan</string>
+    <string name="review_over_quota_body">You have %1$s ha left of %2$s ha. Adjust the outline or expand your Plan Productor.</string>
+    <string name="review_adjust_outline">Adjust outline</string>
+    <string name="review_expand_plan">Expand my plan</string>
 </resources>

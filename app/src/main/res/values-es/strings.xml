@@ -1669,4 +1669,11 @@
     <string name="thinning_picker_empty">Aún no tienes lotes. Registra uno para planificar su aclareo.</string>
     <string name="thinning_picker_note">Un lote sin plan abre su plan, para que veas qué falta antes de aclarar.</string>
     <string name="settle_picker_empty">Todos tus lotes ya tienen su cosecha %1$d registrada.</string>
+
+    <!-- P25 · Plan quota on the plot review -->
+    <string name="review_plan_usage">Usarás %1$s de %2$s ha de tu plan.</string>
+    <string name="review_over_quota_title">%1$s ha no caben en tu plan</string>
+    <string name="review_over_quota_body">Te queda %1$s ha de %2$s ha. Ajusta el contorno o amplía tu Plan Productor.</string>
+    <string name="review_adjust_outline">Ajustar contorno</string>
+    <string name="review_expand_plan">Ampliar mi plan</string>
 </resources>

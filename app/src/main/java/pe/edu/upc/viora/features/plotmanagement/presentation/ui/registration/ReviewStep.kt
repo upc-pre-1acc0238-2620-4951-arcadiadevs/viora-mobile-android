@@ -1,16 +1,18 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -22,12 +24,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral200
+import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
@@ -49,6 +55,8 @@ fun ReviewStep(
     onBack: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    onAdjustOutline: () -> Unit = {},
+    onExpandPlan: () -> Unit = {},
 ) {
     Column(modifier = modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
         StepHeader(step = RegisterPlotStep.REVIEW.number, onBack = onBack, onClose = onClose, modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp))
@@ -73,13 +81,35 @@ fun ReviewStep(
             SummaryTable(state)
             state.saveFailure?.let { failure -> SaveFailureMessage(failure) }
         }
-        PrimaryPillButton(
-            text = stringResource(if (state.isSaving) R.string.review_saving else R.string.review_save),
-            onClick = onSave,
-            trailingIcon = R.drawable.ic_check,
-            isLoading = state.isSaving,
-            modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp),
-        )
+        if (state.exceedsPlan) {
+            OverQuotaCard(
+                state = state,
+                onAdjustOutline = onAdjustOutline,
+                onExpandPlan = onExpandPlan,
+                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp),
+            )
+        } else {
+            state.planQuotaHectares?.let { quota ->
+                Text(
+                    text = stringResource(
+                        R.string.review_plan_usage,
+                        formatHectares(state.usedHectares + state.areaHectares),
+                        formatHectares(quota),
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Neutral600,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp),
+                )
+            }
+            PrimaryPillButton(
+                text = stringResource(if (state.isSaving) R.string.review_saving else R.string.review_save),
+                onClick = onSave,
+                trailingIcon = R.drawable.ic_check,
+                isLoading = state.isSaving,
+                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp),
+            )
+        }
     }
 }
 
@@ -143,4 +173,59 @@ private fun SaveFailureMessage(failure: SaveFailure) {
             .background(Terracotta100)
             .padding(horizontal = 16.dp, vertical = 12.dp),
     )
+}
+
+/** P25 · Área mayor al cupo del plan: the plot does not fit; adjust it or expand the plan. */
+@Composable
+private fun OverQuotaCard(
+    state: RegisterPlotUiState,
+    onAdjustOutline: () -> Unit,
+    onExpandPlan: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(28.dp))
+            .background(Terracotta100)
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.review_over_quota_title, formatHectares(state.areaHectares)),
+            style = MaterialTheme.typography.headlineSmall,
+            color = Terracotta700,
+        )
+        Text(
+            text = stringResource(
+                R.string.review_over_quota_body,
+                formatHectares(state.freeHectares ?: 0.0),
+                formatHectares(state.planQuotaHectares ?: 0.0),
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            color = Neutral900,
+        )
+        Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = stringResource(R.string.review_adjust_outline),
+                style = MaterialTheme.typography.labelLarge,
+                color = Neutral50,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Green900)
+                    .clickable(role = Role.Button, onClick = onAdjustOutline)
+                    .padding(horizontal = 18.dp, vertical = 12.dp),
+            )
+            Text(
+                text = stringResource(R.string.review_expand_plan),
+                style = MaterialTheme.typography.labelLarge,
+                color = Neutral900,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Neutral0)
+                    .clickable(role = Role.Button, onClick = onExpandPlan)
+                    .padding(horizontal = 18.dp, vertical = 12.dp),
+            )
+        }
+    }
 }
