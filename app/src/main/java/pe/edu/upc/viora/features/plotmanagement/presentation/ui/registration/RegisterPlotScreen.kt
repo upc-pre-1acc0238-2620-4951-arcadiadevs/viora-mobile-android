@@ -34,6 +34,7 @@ fun RegisterPlotScreen(
     onLeave: () -> Unit,
     onSaved: (PlotId) -> Unit,
     modifier: Modifier = Modifier,
+    onExpandPlan: () -> Unit = {},
     viewModel: RegisterPlotViewModel = hiltViewModel(),
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
@@ -104,6 +105,8 @@ fun RegisterPlotScreen(
             onBack = ::back,
             onClose = ::leave,
             modifier = modifier,
+            onAdjustOutline = viewModel::adjustOutline,
+            onExpandPlan = onExpandPlan,
         )
     }
 

@@ -40,6 +40,7 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.MorphingShapeIndicator
 import pe.edu.upc.viora.core.designsystem.theme.*
 import pe.edu.upc.viora.core.presentation.messageRes
+import pe.edu.upc.viora.core.presentation.vioraNumberFormat
 import pe.edu.upc.viora.features.subscription.presentation.state.IndividualCheckoutUiState
 import pe.edu.upc.viora.features.subscription.presentation.state.ProducerPlanUiState
 import pe.edu.upc.viora.features.subscription.presentation.viewmodel.IndividualCheckoutViewModel
@@ -271,14 +272,23 @@ private fun CatalogUpdatedAt(at: java.time.Instant) {
         style = MaterialTheme.typography.bodySmall, color = Neutral600)
 }
 
-internal fun formatPlanCapacity(value: BigDecimal, locale: Locale): String = NumberFormat.getNumberInstance(locale)
-    .apply { maximumFractionDigits = value.scale().coerceAtLeast(0) }.format(value)
+/** Hectares as the rest of the app writes them ("0,5 ha" in Spanish, see [vioraNumberFormat]). */
+internal fun formatPlanCapacity(value: BigDecimal, locale: Locale): String =
+    vioraNumberFormat(0, value.scale().coerceAtLeast(0), locale).format(value)
 
 internal fun formatPlanMoney(value: BigDecimal, currency: String, locale: Locale): String =
     NumberFormat.getCurrencyInstance(locale).apply {
         this.currency = Currency.getInstance(currency)
         if (currency == "PEN" && this is DecimalFormat) {
-            decimalFormatSymbols = decimalFormatSymbols.apply { currencySymbol = "S/" }
+            decimalFormatSymbols = decimalFormatSymbols.apply {
+                currencySymbol = "S/"
+                // Same separators as every other figure of the app ("S/ 27,5").
+                if (locale.language == "es") {
+                    decimalSeparator = ','
+                    monetaryDecimalSeparator = ','
+                    groupingSeparator = ' '
+                }
+            }
             minimumFractionDigits = 0
             maximumFractionDigits = 2
         }

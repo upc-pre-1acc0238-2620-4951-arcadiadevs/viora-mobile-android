@@ -370,7 +370,6 @@
     </plurals>
     <string name="alert_severity_critical">Critical</string>
     <string name="alert_severity_warning">Warning</string>
-    <string name="alert_time_today">Today</string>
     <string name="alert_action_see_what_to_do">See what to do</string>
     <string name="alert_title_heat_wave">Heat wave in %1$s</string>
     <string name="alert_title_hydric_stress">Water stress in %1$s</string>
@@ -1597,8 +1596,9 @@
     <string name="home_access_inactive_chip">Access inactive</string>
     <string name="home_access_expired_title">Your plan expired on\n%1$s</string>
     <string name="home_access_none_title">You don\'t have\nan active plan yet</string>
-    <string name="home_access_inactive_body">Your plots and history are still saved. Check your subscription or use a code from your cooperative.</string>
-    <string name="home_access_renew">View Producer Plan</string>
+    <string name="home_access_inactive_body">Your plots and history are still saved. Renew the Producer Plan or use a code from your cooperative to receive alerts again.</string>
+    <string name="home_access_renew">Renew Producer Plan</string>
+    <string name="home_access_activate">Activate Producer Plan</string>
     <string name="home_access_redeem_code">I have a cooperative code</string>
     <string name="home_access_date_pattern" translatable="false">MMMM d</string>
 
@@ -1625,4 +1625,50 @@
     <string name="payment_result_until">Until %1$s</string>
     <string name="payment_result_receipt">Receipt</string>
     <string name="payment_result_unavailable">Not available</string>
+
+    <!-- P75 · New logbook note and its logbook row -->
+    <string name="note_title_lead">New</string>
+    <string name="note_title_emphasis">note</string>
+    <string name="note_date_pattern">EEEE, MMMM d</string>
+    <string name="note_today">Today, %1$s</string>
+    <string name="note_plot_label">PLOT</string>
+    <string name="note_type_label">TYPE</string>
+    <string name="note_no_plots">Register a plot first: every note belongs to one.</string>
+    <string name="note_type_irrigation">Irrigation</string>
+    <string name="note_type_pruning">Pruning</string>
+    <string name="note_type_fertilization">Fertilization</string>
+    <string name="note_type_pests">Pests</string>
+    <string name="note_type_other">Other</string>
+    <string name="note_text_label">Note</string>
+    <string name="note_text_hint">What did you do or see in the plot?</string>
+    <string name="note_text_counter">%1$d/%2$d</string>
+    <string name="note_photo_add">Add photo (optional)</string>
+    <string name="note_photo_attached">Photo added · Remove</string>
+    <string name="note_photo_failed">That image could not be read. Try another one.</string>
+    <string name="note_save">Save note</string>
+    <string name="note_saved_toast">Note saved in your Logbook</string>
+    <string name="logbook_note_title">%1$s note</string>
+    <string name="logbook_note_details">%1$s · %2$s</string>
+    <string name="logbook_note_pending">On the phone · it will be sent when there is signal</string>
+    <string name="logbook_note_failed">The server did not accept this note</string>
+    <string name="note_type_irrigation_title">Irrigation</string>
+    <string name="note_type_pruning_title">Pruning</string>
+    <string name="note_type_fertilization_title">Fertilization</string>
+    <string name="note_type_pests_title">Pest</string>
+    <string name="note_type_other_title">Field</string>
+
+    <!-- "+" menu: thinning and harvest pickers -->
+    <string name="thinning_picker_title_lead">Which plot</string>
+    <string name="thinning_picker_title_emphasis">did you thin?</string>
+    <string name="thinning_picker_subtitle">Campaign %1$d · the state of each plan, as in the Plan tab.</string>
+    <string name="thinning_picker_empty">You have no plots yet. Register one to plan its thinning.</string>
+    <string name="thinning_picker_note">A plot without a plan opens its plan, so you can see what is missing before thinning.</string>
+    <string name="settle_picker_empty">Every plot already has its %1$d harvest registered.</string>
+
+    <!-- P25 · Plan quota on the plot review -->
+    <string name="review_plan_usage">You will use %1$s of %2$s ha of your plan.</string>
+    <string name="review_over_quota_title">%1$s ha do not fit in your plan</string>
+    <string name="review_over_quota_body">You have %1$s ha left of %2$s ha. Adjust the outline or expand your Plan Productor.</string>
+    <string name="review_adjust_outline">Adjust outline</string>
+    <string name="review_expand_plan">Expand my plan</string>
 </resources>

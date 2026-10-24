@@ -6,14 +6,23 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -25,27 +34,41 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.delay
 import pe.edu.upc.viora.core.designsystem.component.LocalVioraVoiceAnimated
 import pe.edu.upc.viora.core.designsystem.component.TabBarAction
 import pe.edu.upc.viora.core.designsystem.component.TabBarItem
 import pe.edu.upc.viora.core.designsystem.component.TabBarMode
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBar
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarActionColors
+import pe.edu.upc.viora.core.designsystem.theme.Green900
+import pe.edu.upc.viora.core.designsystem.theme.Harvest300
+import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Spacing
 import pe.edu.upc.viora.core.navigation.AuthRoute
 import pe.edu.upc.viora.core.navigation.HomeGraph
 import pe.edu.upc.viora.core.navigation.HomeRoute
+import pe.edu.upc.viora.core.navigation.LogbookGraph
 import pe.edu.upc.viora.core.navigation.TopLevelDestination
 import pe.edu.upc.viora.core.navigation.WelcomeRoute
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.RegisterThinningRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SelectPlotSamplingRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
+import pe.edu.upc.viora.features.croploadregulation.presentation.ui.ThinningPlotPickerSheet
+import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.SettleHarvestRoute
+import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestPlotPickerSheet
+import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.HarvestEntryViewModel
 import pe.edu.upc.viora.features.home.domain.valueobject.HomeTour
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourOverlay
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
@@ -55,9 +78,10 @@ import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeTourViewModel
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
-import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
-import pe.edu.upc.viora.features.profiles.presentation.viewmodel.VoicePreferenceViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
+import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.NewFieldNoteSheet
+import pe.edu.upc.viora.features.profiles.presentation.viewmodel.VoicePreferenceViewModel
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.TelemetryDetailRoute
@@ -110,6 +134,10 @@ fun VioraApp(modifier: Modifier = Modifier) {
     val actions = recordActions()
 
     var barMode by remember { mutableStateOf(TabBarMode.Rest) }
+    // The sheet the "+" menu opened (thinning, harvest or note), and a counter that shows the
+    // "Nota guardada" pill again every time a note is saved.
+    var recordSheet by rememberSaveable { mutableStateOf<RecordSheet?>(null) }
+    var noteToastKey by remember { mutableIntStateOf(0) }
     LaunchedEffect(selectedIndex, showTabBar) { barMode = TabBarMode.Rest }
     BackHandler(enabled = barMode == TabBarMode.Actions) { barMode = TabBarMode.Rest }
 
@@ -180,8 +208,11 @@ fun VioraApp(modifier: Modifier = Modifier) {
                     },
                     onActionSelected = { index ->
                         barMode = TabBarMode.Rest
-                        if (index == 0) {
-                            navController.navigate(SelectPlotSamplingRoute)
+                        when (index) {
+                            0 -> navController.navigate(SelectPlotSamplingRoute)
+                            1 -> recordSheet = RecordSheet.THINNING
+                            2 -> recordSheet = RecordSheet.HARVEST
+                            3 -> recordSheet = RecordSheet.NOTE
                         }
                     },
                     onCollapsedBarClick = { barMode = TabBarMode.Rest },
@@ -189,6 +220,22 @@ fun VioraApp(modifier: Modifier = Modifier) {
                     modifier = Modifier.navigationBarsPadding().padding(bottom = Spacing.sm),
                 )
             }
+
+            RecordSheets(
+                sheet = recordSheet,
+                navController = navController,
+                onDismiss = { recordSheet = null },
+                onNoteSaved = {
+                    recordSheet = null
+                    navController.navigate(LogbookGraph) {
+                        popUpTo<HomeGraph> { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                    noteToastKey++
+                },
+            )
+            SavedNoteToast(key = noteToastKey, modifier = Modifier.align(Alignment.TopCenter))
 
             val tour = runningTour
             if (tour != null && onHome) {
@@ -239,3 +286,76 @@ private fun recordActions(): List<TabBarAction> = listOf(
         iconTint = VioraTabBarActionColors.NoteTint,
     ),
 )
+
+/** The sheets the "+" menu opens over the current screen. */
+private enum class RecordSheet { THINNING, HARVEST, NOTE }
+
+@Composable
+private fun RecordSheets(
+    sheet: RecordSheet?,
+    navController: NavHostController,
+    onDismiss: () -> Unit,
+    onNoteSaved: () -> Unit,
+) {
+    when (sheet) {
+        RecordSheet.THINNING -> ThinningPlotPickerSheet(
+            onRegister = { plotId, plotName, year ->
+                onDismiss()
+                navController.navigate(RegisterThinningRoute(plotId = plotId, plotName = plotName, campaignYear = year))
+            },
+            onOpenPlan = { plotId, plotName, year ->
+                onDismiss()
+                navController.navigate(ThinningPlanRoute(plotId = plotId, plotName = plotName, campaignYear = year))
+            },
+            onDismiss = onDismiss,
+        )
+        RecordSheet.HARVEST -> {
+            val harvest: HarvestEntryViewModel = hiltViewModel()
+            val state by harvest.uiState.collectAsStateWithLifecycle()
+            HarvestPlotPickerSheet(
+                state = state,
+                onSelect = { plot ->
+                    onDismiss()
+                    navController.navigate(SettleHarvestRoute(plotId = plot.plotId, campaignYear = state.campaignYear))
+                },
+                onDismiss = onDismiss,
+            )
+        }
+        RecordSheet.NOTE -> NewFieldNoteSheet(onSaved = { onNoteSaved() }, onDismiss = onDismiss)
+        null -> Unit
+    }
+}
+
+/** "Nota guardada en tu Bitácora" (Figma P50 · Nota guardada): a pill at the top for a few seconds. */
+@Composable
+private fun SavedNoteToast(key: Int, modifier: Modifier = Modifier) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(key) {
+        if (key == 0) return@LaunchedEffect
+        visible = true
+        delay(TOAST_MILLIS)
+        visible = false
+    }
+    AnimatedVisibility(
+        visible = visible,
+        modifier = modifier.statusBarsPadding().padding(top = 8.dp),
+        enter = slideInVertically { -it } + fadeIn(),
+        exit = slideOutVertically { -it } + fadeOut(),
+    ) {
+        Row(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(Green900)
+                .padding(start = 6.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(Modifier.size(28.dp).clip(CircleShape).background(Harvest300), contentAlignment = Alignment.Center) {
+                Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = Green900, modifier = Modifier.size(16.dp))
+            }
+            Text(stringResource(R.string.note_saved_toast), style = MaterialTheme.typography.labelLarge, color = Neutral50)
+        }
+    }
+}
+
+private const val TOAST_MILLIS = 2_500L

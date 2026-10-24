@@ -90,8 +90,18 @@ fun HarvestPlotPickerSheet(
                 }
                 CircleIconButton(icon = R.drawable.ic_close, contentDescription = stringResource(R.string.action_close), onClick = onDismiss)
             }
-            Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                state.plots.forEach { plot -> PlotRow(plot = plot, onClick = { onSelect(plot) }) }
+            if (state.plots.isEmpty()) {
+                // Opened from the "+" menu when every plot is already registered.
+                Text(
+                    stringResource(R.string.settle_picker_empty, state.campaignYear),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Neutral600,
+                    modifier = Modifier.padding(vertical = 16.dp),
+                )
+            } else {
+                Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    state.plots.forEach { plot -> PlotRow(plot = plot, onClick = { onSelect(plot) }) }
+                }
             }
             Text(stringResource(R.string.settle_picker_note), style = MaterialTheme.typography.bodySmall, color = Neutral600)
         }

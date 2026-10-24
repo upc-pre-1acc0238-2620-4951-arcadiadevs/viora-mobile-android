@@ -131,7 +131,7 @@ fun AlertCard(
                         .padding(horizontal = 10.dp, vertical = 4.dp),
                 ) {
                     Text(
-                        text = stringResource(R.string.alert_time_today),
+                        text = formatResolutionDate(incident),
                         fontFamily = RobotoFamily,
                         fontWeight = FontWeight.Medium,
                         fontSize = 11.sp,
