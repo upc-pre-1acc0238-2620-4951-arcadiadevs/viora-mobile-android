@@ -198,12 +198,17 @@ fun HomeScreenContent(
             when (state) {
                 HomeUiState.Loading -> Centered { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) }
                 is HomeUiState.Error -> ErrorState(error = state.error, onRetry = onRefresh)
-                is HomeUiState.NoPlots -> HomeFirstPlotCard(
-                    onRegisterPlot = onRegisterPlot,
-                    modifier = Modifier
-                        .padding(start = ScreenPadding, end = ScreenPadding, top = 24.dp)
-                        .homeTourTarget(HomeTourTarget.FirstPlot),
-                )
+                is HomeUiState.NoPlots -> {
+                    // Without plots and without access the yellow card still comes first (Figma P10 · Sin acceso activo).
+                    if (isAccessPaused) sections()
+                    HomeFirstPlotCard(
+                        onRegisterPlot = onRegisterPlot,
+                        modifier = Modifier
+                            .padding(start = ScreenPadding, end = ScreenPadding, top = 24.dp)
+                            .then(if (isAccessPaused) Modifier.alpha(0.42f) else Modifier)
+                            .homeTourTarget(HomeTourTarget.FirstPlot),
+                    )
+                }
                 is HomeUiState.Content -> {
                     sections()
                     val subordinateModifier = if (isAccessPaused) Modifier.alpha(0.42f) else Modifier
