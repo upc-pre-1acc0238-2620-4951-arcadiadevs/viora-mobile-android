@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.net.URI
 
 plugins {
     alias(libs.plugins.android.application)
@@ -37,6 +38,13 @@ val releaseStoreFile: String? = signingValue("storeFile", "ANDROID_KEYSTORE_PATH
 // Android emulator alias for the host machine's localhost (backend running locally).
 val defaultDebugApiBaseUrl = "http://10.0.2.2:8080/api/v1/"
 val defaultReleaseApiBaseUrl = "https://viora-platform.onrender.com/api/v1/"
+// One configured host keeps the Android App Link filter and Navigation destinations aligned.
+val checkoutReturnHost = localProperties.getProperty("viora.checkoutReturnHost")
+    ?: System.getenv("VIORA_CHECKOUT_RETURN_HOST")
+    ?: URI(defaultReleaseApiBaseUrl).host
+require(checkoutReturnHost.matches(Regex("[a-zA-Z0-9]+(?:[.-][a-zA-Z0-9]+)*"))) {
+    "viora.checkoutReturnHost must be a host name without a scheme, path or port"
+}
 
 room3 {
     // Exported schemas are committed so migrations can be reviewed and tested.
@@ -53,13 +61,15 @@ android {
         applicationId = "pe.edu.upc.viora"
         minSdk = 26
         targetSdk = 37
-        versionCode = 23
-        versionName = "1.10.0"
+        versionCode = 24
+        versionName = "1.11.0"
 
         // The Maps SDK reads this string resource at startup.
         resValue("string", "mapbox_access_token", mapboxPublicToken)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["checkoutReturnHost"] = checkoutReturnHost
+        buildConfigField("String", "CHECKOUT_RETURN_HOST", "\"$checkoutReturnHost\"")
     }
 
     signingConfigs {

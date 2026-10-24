@@ -29,6 +29,8 @@ class ApiErrorMapper @Inject constructor(private val json: Json) {
             404 -> AppError.NotFound(detail, code)
             409 -> AppError.Conflict(detail, code, extraProperties(raw))
             412 -> AppError.PreconditionFailed(detail, code)
+            429 -> AppError.RateLimited(response.headers()["Retry-After"]?.toLongOrNull()
+                ?.takeIf { it >= 0 && it <= Long.MAX_VALUE / 1_000 }?.times(1_000))
             in 500..599 -> AppError.Server(status, detail)
             else -> AppError.Unknown(HttpException(response))
         }

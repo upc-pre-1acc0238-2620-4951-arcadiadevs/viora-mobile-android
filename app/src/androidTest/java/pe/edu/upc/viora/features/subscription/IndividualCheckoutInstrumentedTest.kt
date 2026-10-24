@@ -48,9 +48,10 @@ class IndividualCheckoutInstrumentedTest {
                     ProducerPlanContent(content, {}, {}, {}, {}, {}, {}, checkoutAction = {
                         IndividualCheckoutAction(it, state, { state = IndividualCheckoutUiState.Confirm(purchase) },
                             { state = IndividualCheckoutUiState.Ready(IndividualCheckout(UUID.randomUUID().toString(),
-                                "https://sandbox.mercadopago.com.pe/checkout/v1/redirect", Instant.MAX)) },
+                                "https://sandbox.mercadopago.com.pe/checkout/v1/redirect", Instant.MAX), purchase.id) },
                             { state = IndividualCheckoutUiState.Idle },
-                            { opened++; state = IndividualCheckoutUiState.Idle })
+                            {},
+                            { _, _ -> opened++; state = IndividualCheckoutUiState.Idle })
                     })
                 }
             }

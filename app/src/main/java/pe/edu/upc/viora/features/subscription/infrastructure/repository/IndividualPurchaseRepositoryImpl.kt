@@ -62,6 +62,24 @@ class IndividualPurchaseRepositoryImpl @Inject constructor(
             caller.call { service.get(json.decodeFromString<IndividualPurchaseDto>(row.contractJson).id) }
         }
         if (owner() != row.owner) return AppResult.Failure(AppError.Unauthorized)
+        val missingHistorical = result is AppResult.Failure && result.error is AppError.NotFound && row.contractJson != null
+        val existingPurchase = result is AppResult.Failure && result.error is AppError.Conflict && row.contractJson == null
+        if (missingHistorical || existingPurchase) {
+            // A missing historical ID is not permission to create another purchase.
+            // Only adopt an existing contract returned for the authenticated account.
+            val current = caller.callOptional { service.current() }
+            if (owner() != row.owner) return AppResult.Failure(AppError.Unauthorized)
+            if (current is AppResult.Failure) return current
+            val recovered = (current as AppResult.Success).value ?: return result
+            if (recovered.mode != "PLAN_PRODUCTOR_INDIVIDUAL") return result
+            val purchase = recovered.toDomain()
+            val updated = row.copy(plan = purchase.planCode.value,
+                quota = purchase.capacity.hectares.toPlainString(),
+                contractJson = json.encodeToString(recovered), checkoutKey = UUID.randomUUID().toString(),
+                intentId = null, checkoutUrl = null, expiresAt = null)
+            if (dao.update(updated) == 0) return AppResult.Failure(AppError.Unauthorized)
+            return AppResult.Success(purchase)
+        }
         if (result is AppResult.Failure) return result
         val dto = (result as AppResult.Success).value
         val purchase = dto.toDomain()
