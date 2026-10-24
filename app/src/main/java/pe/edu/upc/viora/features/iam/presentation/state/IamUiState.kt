@@ -55,6 +55,10 @@ data class IamUiState(
     val authenticated: Boolean = false,
     /** Cooperative code saved in T02c, redeemed right after the email is verified (P05 · Validando). */
     val cooperativeCodeToRedeem: String? = null,
+    /** The producer just verified the email without a code: P02 opens to pay the Plan Productor. */
+    val buysPlan: Boolean = false,
+    /** Hectares of T02d for P02; null for "Aún no lo sé". */
+    val planHectares: Int? = null,
 
     /** From the onboarding answers, for "Guardo lo que elegiste, Teodoro." */
     val firstName: String = "",

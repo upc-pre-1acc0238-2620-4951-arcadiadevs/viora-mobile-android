@@ -207,11 +207,14 @@ class IamViewModel @Inject constructor(
             try {
                 saveSession(service.verifyEmail(VerifyEmailRequest(s.pendingEmail, s.code)))
                 // Onboarding answers live only until the email is verified (guide, section 3.1); the
-                // cooperative code goes on to P05, which redeems it now that there is a session.
-                val cooperativeCode = onboardingStore.answers().cooperativeCode
+                // cooperative code goes on to P05, which redeems it now that there is a session, and
+                // without a code the hectares of T02d go on to P02, the Plan Productor to pay.
+                val answers = onboardingStore.answers()
                 onboardingStore.clear()
                 _uiState.update {
-                    it.copy(authenticated = true, cooperativeCodeToRedeem = cooperativeCode, password = "", confirmPassword = "")
+                    it.copy(authenticated = true, cooperativeCodeToRedeem = answers.cooperativeCode,
+                        buysPlan = answers.cooperativeCode == null, planHectares = answers.hectares,
+                        password = "", confirmPassword = "")
                 }
             } catch (e: Exception) {
                 val failure = e.asFailure()

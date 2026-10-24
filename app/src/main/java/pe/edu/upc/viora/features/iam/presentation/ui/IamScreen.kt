@@ -55,19 +55,24 @@ import pe.edu.upc.viora.features.iam.presentation.viewmodel.IamViewModel
  * or create account) and the recovery link `https://<domain>/password-resets/<token>` opens it
  * straight at the new-password check. [onExit] runs on back from the first screen and
  * [onStartOnboarding] on "¿Aún no tienes cuenta? Empecemos". [onAuthenticated] gets the cooperative
- * code saved in the onboarding when the producer just verified the email with one, so it can be redeemed.
+ * code saved in the onboarding when the producer just verified the email with one, so it can be redeemed;
+ * without a code [onSignedUpForPlan] gets the hectares of T02d instead, to pay the Plan Productor.
  */
 @Composable
 fun IamScreen(
     onAuthenticated: (cooperativeCode: String?) -> Unit,
     onExit: () -> Unit,
     onStartOnboarding: () -> Unit,
+    onSignedUpForPlan: (hectares: Int?) -> Unit = { onAuthenticated(null) },
     viewModel: IamViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val onBack = { if (!viewModel.back()) onExit() }
 
-    LaunchedEffect(state.authenticated) { if (state.authenticated) onAuthenticated(state.cooperativeCodeToRedeem) }
+    LaunchedEffect(state.authenticated) {
+        if (!state.authenticated) return@LaunchedEffect
+        if (state.buysPlan) onSignedUpForPlan(state.planHectares) else onAuthenticated(state.cooperativeCodeToRedeem)
+    }
     BackHandler(onBack = onBack)
 
     when (state.step) {

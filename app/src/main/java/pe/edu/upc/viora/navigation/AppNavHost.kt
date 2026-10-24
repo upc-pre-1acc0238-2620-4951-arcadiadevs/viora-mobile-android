@@ -129,6 +129,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 },
                 onExit = { navController.popBackStack() },
                 onStartOnboarding = { navController.navigate(OnboardingRoute) { launchSingleTop = true } },
+                onSignedUpForPlan = { hectares -> navController.payPlanAfterSignUp(hectares) },
             )
         }
         // The recovery link opens the app here. After saving the new password the producer signs in
@@ -369,6 +370,12 @@ private fun debugStartDestination(): Any? = when (BuildConfig.DEBUG_START_SCREEN
 /** Opens the Home as the only screen: nothing of the splash or the IAM flow stays below it. */
 private fun NavHostController.openHome() {
     navigate(HomeGraph) { popUpTo(graph.id) { inclusive = true } }
+}
+
+/** After the email is verified without a code, P02 opens over the Home with the hectares of T02d. */
+private fun NavHostController.payPlanAfterSignUp(hectares: Int?) {
+    openHome()
+    navigate(ProducerPlanRoute(hectares = hectares))
 }
 
 /** After the email is verified, P05 redeems the code saved in T02c (F04); the IAM flow does not stay below. */
