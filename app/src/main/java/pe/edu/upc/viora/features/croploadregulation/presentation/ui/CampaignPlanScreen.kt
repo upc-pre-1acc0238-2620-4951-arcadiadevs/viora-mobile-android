@@ -236,7 +236,7 @@ private fun WeekCard(state: CampaignPlanUiState, onOpen: (PlanRow) -> Unit, modi
 
 /** One plot: silhouette, name, what its plan says in one line and the pill of its state (Figma "Lote · …"). */
 @Composable
-private fun PlanPlotRow(row: PlanRow, state: CampaignPlanUiState, onClick: () -> Unit) {
+internal fun PlanPlotRow(row: PlanRow, state: CampaignPlanUiState, onClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(Neutral0)
             .clickable(role = Role.Button, onClick = onClick)

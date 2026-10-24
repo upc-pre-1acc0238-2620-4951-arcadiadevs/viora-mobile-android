@@ -1656,4 +1656,12 @@
     <string name="note_type_fertilization_title">Fertilization</string>
     <string name="note_type_pests_title">Pest</string>
     <string name="note_type_other_title">Field</string>
+
+    <!-- "+" menu: thinning and harvest pickers -->
+    <string name="thinning_picker_title_lead">Which plot</string>
+    <string name="thinning_picker_title_emphasis">did you thin?</string>
+    <string name="thinning_picker_subtitle">Campaign %1$d · the state of each plan, as in the Plan tab.</string>
+    <string name="thinning_picker_empty">You have no plots yet. Register one to plan its thinning.</string>
+    <string name="thinning_picker_note">A plot without a plan opens its plan, so you can see what is missing before thinning.</string>
+    <string name="settle_picker_empty">Every plot already has its %1$d harvest registered.</string>
 </resources>
