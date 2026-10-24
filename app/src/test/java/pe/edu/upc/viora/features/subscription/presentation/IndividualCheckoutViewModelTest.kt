@@ -31,9 +31,11 @@ class IndividualCheckoutViewModelTest {
     private var recovered: IndividualPurchase? = null
     private var delayed: CompletableDeferred<Unit>? = null
     private var failure: AppError? = null
+    private var preparedStatus = "PENDING_PAYMENT"
 
     private var subscriptionStatus: SubscriptionStatus = SubscriptionStatus.PENDING_PAYMENT
     private var entitlementActive: Boolean = false
+    private var paymentStatus = IndividualPaymentStatus.UNKNOWN
     private var queryFailure: AppError? = null
     private var queryCount = 0
     private var queryDelayMs = 0L
@@ -45,7 +47,7 @@ class IndividualCheckoutViewModelTest {
         }
         override suspend fun prepare(plan: ProducerPlanCode, capacity: PlanCapacity): AppResult<IndividualPurchase> {
             creates++
-            return failure?.let { AppResult.Failure(it) } ?: AppResult.Success(purchase)
+            return failure?.let { AppResult.Failure(it) } ?: AppResult.Success(purchase.copy(status = preparedStatus))
         }
         override suspend fun checkout(subscriptionId: String): AppResult<IndividualCheckout> {
             checkouts++
@@ -76,6 +78,7 @@ class IndividualCheckoutViewModelTest {
                     endsAt = if (entitlementActive) Instant.parse("2027-10-22T00:00:00Z") else null,
                     entitlementActive = entitlementActive,
                     cooperativeId = null,
+                    paymentStatus = paymentStatus,
                 )
             )
         }
@@ -98,6 +101,7 @@ class IndividualCheckoutViewModelTest {
                     endsAt = if (entitlementActive) Instant.parse("2027-10-22T00:00:00Z") else null,
                     entitlementActive = entitlementActive,
                     cooperativeId = null,
+                    paymentStatus = paymentStatus,
                 )
             )
         }
@@ -114,8 +118,10 @@ class IndividualCheckoutViewModelTest {
         recovered = null
         delayed = null
         failure = null
+        preparedStatus = "PENDING_PAYMENT"
         subscriptionStatus = SubscriptionStatus.PENDING_PAYMENT
         entitlementActive = false
+        paymentStatus = IndividualPaymentStatus.UNKNOWN
         queryFailure = null
     }
 
@@ -123,6 +129,42 @@ class IndividualCheckoutViewModelTest {
     fun teardown() {
         stores.forEach { it.clear() }
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `fresh journal recovers server confirmed individual access without creating a purchase`() = runTest(testDispatcher) {
+        subscriptionStatus = SubscriptionStatus.ACTIVE
+        entitlementActive = true
+        val vm = model()
+        vm.onAppResumed()
+        advanceUntilIdle()
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Confirmed)
+        assertEquals(0, creates)
+        assertEquals(0, checkouts)
+    }
+
+    @Test
+    fun `fresh journal does not grant access from active status alone`() = runTest(testDispatcher) {
+        subscriptionStatus = SubscriptionStatus.ACTIVE
+        entitlementActive = false
+        val vm = model()
+        vm.onAppResumed()
+        advanceUntilIdle()
+        assertEquals(IndividualCheckoutUiState.Idle, vm.uiState.value)
+        assertEquals(0, creates)
+    }
+
+    @Test
+    fun `new local purchase recovering an active contract verifies entitlement before showing success`() = runTest(testDispatcher) {
+        subscriptionStatus = SubscriptionStatus.ACTIVE
+        entitlementActive = true
+        val vm = model()
+        preparedStatus = "ACTIVE"
+        vm.start(plan, quota)
+        advanceUntilIdle()
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Confirmed)
+        assertEquals(1, creates)
+        assertEquals(0, checkouts)
     }
 
     @Test
@@ -432,6 +474,19 @@ class IndividualCheckoutViewModelTest {
     }
 
     @Test
+    fun `reopening unpaid purchase offers confirmation instead of blocking payment with polling`() = runTest(testDispatcher) {
+        recovered = purchase
+        entitlementActive = false
+        val vm = model()
+        vm.onAppResumed()
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, queryCount)
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Confirm)
+        assertEquals(0, creates)
+        assertEquals(0, checkouts)
+    }
+
+    @Test
     fun `polling terminates immediately on 404 NotFound without retrying`() = runTest(testDispatcher) {
         val vm = model()
         queryFailure = AppError.NotFound()
@@ -458,6 +513,50 @@ class IndividualCheckoutViewModelTest {
 
         assertTrue(vm.uiState.value is IndividualCheckoutUiState.Failed)
         assertEquals(AppError.Unauthorized, (vm.uiState.value as IndividualCheckoutUiState.Failed).error)
+    }
+
+    @Test
+    fun `verified rejection selects rejected result without granting access`() = runTest(testDispatcher) {
+        paymentStatus = IndividualPaymentStatus.REJECTED
+        val vm = model()
+        vm.onBrowserOpened(purchase.id)
+        vm.onAppResumed()
+        testScheduler.runCurrent()
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Rejected)
+        assertEquals(1, queryCount)
+    }
+
+    @Test
+    fun `entitlement takes precedence over an older rejection`() = runTest(testDispatcher) {
+        paymentStatus = IndividualPaymentStatus.REJECTED
+        entitlementActive = true
+        val vm = model()
+        vm.onBrowserOpened(purchase.id)
+        vm.onAppResumed()
+        testScheduler.runCurrent()
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Confirmed)
+    }
+
+    @Test
+    fun `retrying rejection reuses existing purchase instead of creating contract`() = runTest(testDispatcher) {
+        recovered = purchase
+        val vm = model()
+        vm.retryPayment()
+        testScheduler.runCurrent()
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Ready)
+        assertEquals(0, creates)
+        assertEquals(1, checkouts)
+    }
+
+    @Test
+    fun `retry after late approval shows active plan without starting another checkout`() = runTest(testDispatcher) {
+        recovered = purchase
+        entitlementActive = true
+        val vm = model()
+        vm.retryPayment()
+        testScheduler.runCurrent()
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Confirmed)
+        assertEquals(0, checkouts)
     }
 
     @Test

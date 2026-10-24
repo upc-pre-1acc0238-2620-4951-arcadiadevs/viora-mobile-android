@@ -13,6 +13,7 @@ sealed interface IndividualCheckoutUiState {
     data class Verifying(val subscriptionId: String) : IndividualCheckoutUiState
     data class Confirmed(val subscription: ProducerSubscription) : IndividualCheckoutUiState
     data class Unconfirmed(val subscriptionId: String) : IndividualCheckoutUiState
+    data class Rejected(val subscriptionId: String) : IndividualCheckoutUiState
     data class Failed(val error: AppError) : IndividualCheckoutUiState
     data object NotPending : IndividualCheckoutUiState
 }

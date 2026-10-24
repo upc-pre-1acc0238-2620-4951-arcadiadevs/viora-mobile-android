@@ -83,6 +83,8 @@ class IndividualCheckoutViewModel @Inject constructor(
                         is AppResult.Success -> {
                             if (check.value.entitlementActive) {
                                 mutableState.value = IndividualCheckoutUiState.Confirmed(check.value)
+                            } else if (check.value.paymentStatus == IndividualPaymentStatus.REJECTED) {
+                                mutableState.value = IndividualCheckoutUiState.Rejected(recovered.id)
                             } else {
                                 confirm(recovered)
                             }
@@ -92,7 +94,14 @@ class IndividualCheckoutViewModel @Inject constructor(
                 } else when (val result = prepare(plan, capacity)) {
                     is AppResult.Success -> {
                         activeSubscriptionId = result.value.id
-                        confirm(result.value)
+                        if (result.value.status != "PENDING_PAYMENT") {
+                            when (val current = getSubscriptionById(result.value.id)) {
+                                is AppResult.Success -> if (current.value.entitlementActive) {
+                                    mutableState.value = IndividualCheckoutUiState.Confirmed(current.value)
+                                } else confirm(result.value)
+                                is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(current.error)
+                            }
+                        } else confirm(result.value)
                     }
                     is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(result.error)
                 }
@@ -132,7 +141,8 @@ class IndividualCheckoutViewModel @Inject constructor(
             val current = mutableState.value
             if (current is IndividualCheckoutUiState.Ready ||
                 current is IndividualCheckoutUiState.Verifying ||
-                current is IndividualCheckoutUiState.Idle
+                current is IndividualCheckoutUiState.Idle || current is IndividualCheckoutUiState.Unconfirmed ||
+                current is IndividualCheckoutUiState.Rejected
             ) {
                 startPolling(id)
             }
@@ -144,7 +154,36 @@ class IndividualCheckoutViewModel @Inject constructor(
                         val recovered = previous.value
                         if (recovered != null && visible && !userDismissed) {
                             activeSubscriptionId = recovered.id
-                            startPolling(recovered.id)
+                            when (val current = getSubscriptionById(recovered.id)) {
+                                is AppResult.Success -> {
+                                    if (visible && !userDismissed) {
+                                        if (current.value.entitlementActive) {
+                                            mutableState.value = IndividualCheckoutUiState.Confirmed(current.value)
+                                        } else if (current.value.paymentStatus == IndividualPaymentStatus.REJECTED) {
+                                            mutableState.value = IndividualCheckoutUiState.Rejected(recovered.id)
+                                        } else confirm(recovered)
+                                    }
+                                }
+                                is AppResult.Failure -> {
+                                    if (visible && !userDismissed) mutableState.value = IndividualCheckoutUiState.Failed(current.error)
+                                }
+                            }
+                        } else if (recovered == null && visible && !userDismissed) {
+                            // A fresh local journal does not imply that the account has no paid access.
+                            when (val current = getCurrentSubscription()) {
+                                is AppResult.Success -> {
+                                    val subscription = current.value
+                                    if (visible && !userDismissed && subscription?.entitlementActive == true &&
+                                        subscription.mode == SubscriptionMode.INDIVIDUAL
+                                    ) {
+                                        activeSubscriptionId = subscription.id
+                                        mutableState.value = IndividualCheckoutUiState.Confirmed(subscription)
+                                    }
+                                }
+                                is AppResult.Failure -> if (visible && !userDismissed) {
+                                    mutableState.value = IndividualCheckoutUiState.Failed(current.error)
+                                }
+                            }
                         }
                     }
                     is AppResult.Failure -> Unit
@@ -167,6 +206,36 @@ class IndividualCheckoutViewModel @Inject constructor(
         startPolling(id)
     }
 
+    /** Reuses the owned durable purchase; never creates a replacement contract. */
+    fun retryPayment() = launchOperation {
+        userDismissed = false
+        when (val previous = resume()) {
+            is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(previous.error)
+            is AppResult.Success -> {
+                val purchase = previous.value
+                if (purchase == null) {
+                    mutableState.value = IndividualCheckoutUiState.Idle
+                } else {
+                    activeSubscriptionId = purchase.id
+                    when (val current = getSubscriptionById(purchase.id)) {
+                        is AppResult.Success -> if (current.value.entitlementActive) {
+                            mutableState.value = IndividualCheckoutUiState.Confirmed(current.value)
+                            return@launchOperation
+                        }
+                        is AppResult.Failure -> {
+                            mutableState.value = IndividualCheckoutUiState.Failed(current.error)
+                            return@launchOperation
+                        }
+                    }
+                    mutableState.value = when (val result = checkout(purchase.id)) {
+                        is AppResult.Success -> IndividualCheckoutUiState.Ready(result.value, purchase.id)
+                        is AppResult.Failure -> IndividualCheckoutUiState.Failed(result.error)
+                    }
+                }
+            }
+        }
+    }
+
     fun startPolling(subscriptionId: String) {
         activeSubscriptionId = subscriptionId
         pollingJob?.cancel()
@@ -185,6 +254,10 @@ class IndividualCheckoutViewModel @Inject constructor(
                             val sub = result.value
                             if (sub.entitlementActive) {
                                 mutableState.value = IndividualCheckoutUiState.Confirmed(sub)
+                                break@loop
+                            }
+                            if (sub.paymentStatus == IndividualPaymentStatus.REJECTED) {
+                                mutableState.value = IndividualCheckoutUiState.Rejected(subscriptionId)
                                 break@loop
                             }
                         }
@@ -247,6 +320,10 @@ class IndividualCheckoutViewModel @Inject constructor(
 
     private fun launchOperation(block: suspend () -> Unit) {
         if (mutableState.value is IndividualCheckoutUiState.Working) return
+        recoveryJob?.cancel()
+        recoveryJob = null
+        pollingJob?.cancel()
+        pollingJob = null
         mutableState.value = IndividualCheckoutUiState.Working
         viewModelScope.launch {
             try { block() }
