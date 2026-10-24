@@ -375,7 +375,6 @@
     </plurals>
     <string name="alert_severity_critical">Crítica</string>
     <string name="alert_severity_warning">Atención</string>
-    <string name="alert_time_today">Hoy</string>
     <string name="alert_action_see_what_to_do">Ver qué hacer</string>
     <string name="alert_title_heat_wave">Golpe de calor en %1$s</string>
     <string name="alert_title_hydric_stress">Estrés hídrico en %1$s</string>

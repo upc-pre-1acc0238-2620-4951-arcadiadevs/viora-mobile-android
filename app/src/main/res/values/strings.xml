@@ -370,7 +370,6 @@
     </plurals>
     <string name="alert_severity_critical">Critical</string>
     <string name="alert_severity_warning">Warning</string>
-    <string name="alert_time_today">Today</string>
     <string name="alert_action_see_what_to_do">See what to do</string>
     <string name="alert_title_heat_wave">Heat wave in %1$s</string>
     <string name="alert_title_hydric_stress">Water stress in %1$s</string>

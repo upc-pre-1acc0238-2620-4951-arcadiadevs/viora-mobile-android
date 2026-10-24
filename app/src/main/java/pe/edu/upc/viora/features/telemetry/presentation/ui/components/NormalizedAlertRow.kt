@@ -111,8 +111,9 @@ fun NormalizedAlertRow(
     }
 }
 
+/** "Hoy", "Ayer" or "12 nov": the day the alert was raised, also the chip of the alert cards. */
 @Composable
-private fun formatResolutionDate(incident: AgroclimaticIncident): String {
+internal fun formatResolutionDate(incident: AgroclimaticIncident): String {
     val dateString = incident.triggeredAt
     if (dateString.isBlank()) return ""
 
