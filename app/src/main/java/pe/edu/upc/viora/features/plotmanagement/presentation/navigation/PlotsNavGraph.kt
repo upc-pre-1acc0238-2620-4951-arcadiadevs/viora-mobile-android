@@ -20,6 +20,7 @@ import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRo
 import pe.edu.upc.viora.features.phenology.presentation.navigation.harvestHistoryComposable
 import pe.edu.upc.viora.features.phenology.presentation.navigation.winterChillComposable
 import pe.edu.upc.viora.features.subscription.presentation.navigation.PlanExtensionRoute
+import pe.edu.upc.viora.features.subscription.presentation.ui.PlanQuotaCard
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.configureNodeComposable
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.sensorsComposable
@@ -55,6 +56,7 @@ fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
                 onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
                 onOpenMap = { navController.navigate(PlotsMapRoute) },
                 onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
+                quotaCard = { PlanQuotaCard(onExpand = { navController.navigate(PlanExtensionRoute) { launchSingleTop = true } }) },
             )
         }
     }

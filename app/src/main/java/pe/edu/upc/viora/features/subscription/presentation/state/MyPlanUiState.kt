@@ -54,6 +54,13 @@ data class MyPlanUiState(
 
     val isOverQuota: Boolean get() = excessHectares > 0.0
 
+    /**
+     * "Tus lotes" (P20) shows the quota card only now: a plan in force with less than
+     * [MyPlanRules.TIGHT_QUOTA_HECTARES] free, or already over its quota. The rest of the time P99 has it.
+     */
+    val isQuotaTight: Boolean
+        get() = standing != PlanStanding.NONE && (isOverQuota || freeHectares < MyPlanRules.TIGHT_QUOTA_HECTARES)
+
     /** How many plots of the average size of the producer's plots still fit, for the "Libre" row. */
     val plotsThatFit: Int
         get() = if (plots.isEmpty()) 0 else (freeHectares / (usedHectares / plots.size)).toInt()
@@ -72,6 +79,9 @@ data class MyPlanUiState(
 object MyPlanRules {
     /** Within this many days of the end the plan asks to be renewed (Figma P99 · Por vencer). */
     const val EXPIRING_DAYS = 30
+
+    /** Below this many free hectares the plots list warns about the quota (Figma P20 · Cupo casi lleno). */
+    const val TIGHT_QUOTA_HECTARES = 1.0
 
     fun state(subscription: ProducerSubscription?, plots: List<Plot>, today: LocalDate, zone: ZoneId): MyPlanUiState {
         val inPlan = plots.filter { it.isActive }.map {
