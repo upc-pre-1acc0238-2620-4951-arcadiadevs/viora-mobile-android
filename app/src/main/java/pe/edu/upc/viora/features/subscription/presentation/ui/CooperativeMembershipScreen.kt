@@ -110,7 +110,7 @@ fun CooperativeMembershipScreen(
 }
 
 @Composable
-private fun MembershipRow(label: String, value: String) {
+internal fun MembershipRow(label: String, value: String) {
     Column {
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),

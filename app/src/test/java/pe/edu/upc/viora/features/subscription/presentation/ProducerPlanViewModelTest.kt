@@ -29,6 +29,7 @@ import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.subscription.application.usecase.*
 import pe.edu.upc.viora.features.subscription.domain.entity.*
 import pe.edu.upc.viora.features.subscription.domain.repository.ProducerPlanRepository
+import pe.edu.upc.viora.features.subscription.domain.repository.ProducerSubscriptionRepository
 import pe.edu.upc.viora.features.subscription.domain.valueobject.*
 import pe.edu.upc.viora.features.subscription.presentation.state.ProducerPlanUiState
 import pe.edu.upc.viora.features.subscription.presentation.viewmodel.ProducerPlanViewModel
@@ -53,6 +54,11 @@ private class FakeCatalogRepository : ProducerPlanRepository {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProducerPlanViewModelTest {
+    /** P02 outside renewal mode never reads the current plan. */
+    private val noSubscription = object : ProducerSubscriptionRepository {
+        override suspend fun getCurrent(): AppResult<ProducerSubscription?> = AppResult.Success(null)
+        override suspend fun getById(id: String): AppResult<ProducerSubscription> = AppResult.Failure(AppError.NotFound())
+    }
     private val repository = FakeCatalogRepository()
     private val stores = mutableListOf<ViewModelStore>()
     private val collectors = mutableListOf<Job>()
@@ -66,7 +72,8 @@ class ProducerPlanViewModelTest {
 
     private fun model(saved: SavedStateHandle = SavedStateHandle(), subscribe: Boolean = true): ProducerPlanViewModel {
         val model = ProducerPlanViewModel(ObserveProducerPlanCatalogUseCase(repository),
-            RefreshProducerPlanCatalogUseCase(repository), saved)
+            RefreshProducerPlanCatalogUseCase(repository), saved, GetCurrentSubscriptionUseCase(noSubscription),
+            java.time.Clock.systemUTC())
         ViewModelStore().also { it.put("plan", model); stores += it }
         if (subscribe) subscribe(model)
         return model

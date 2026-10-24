@@ -94,6 +94,12 @@ class MyPlanActions(
     val onRegisterPlot: () -> Unit,
     val onOpenPlans: () -> Unit,
     val onRedeemCode: () -> Unit,
+    /** P102 · Ampliar mi plan (a paid plan; it hands a code plan over to P103). */
+    val onExpandPlan: () -> Unit,
+    /** P103 · Ampliar con código. */
+    val onExpandWithCode: () -> Unit,
+    /** P02 in renewal mode ("Renueva y amplía"). */
+    val onRenew: () -> Unit,
 )
 
 /**
@@ -159,8 +165,9 @@ private fun MyPlanContent(state: MyPlanUiState, actions: MyPlanActions) {
         EditorialHeadline(lead = stringResource(R.string.my_plan_headline_lead), emphasis = stringResource(R.string.my_plan_headline_emphasis))
         PlanHero(state, progress = t, onAction = {
             when (state.standing) {
-                PlanStanding.ACTIVE -> if (state.isOverQuota) actions.onOpenPlans() else actions.onRegisterPlot()
-                PlanStanding.EXPIRING, PlanStanding.NONE -> actions.onOpenPlans()
+                PlanStanding.ACTIVE -> if (state.isOverQuota) actions.onExpandPlan() else actions.onRegisterPlot()
+                PlanStanding.EXPIRING -> if (state.activatedWithCode) actions.onOpenPlans() else actions.onRenew()
+                PlanStanding.NONE -> actions.onOpenPlans()
             }
         })
         val rise = { index: Int -> Modifier.rise(t, delay = 0.35f + index * 0.08f) }
@@ -177,10 +184,10 @@ private fun MyPlanContent(state: MyPlanUiState, actions: MyPlanActions) {
         Column(rise(4), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             when {
                 state.standing == PlanStanding.NONE -> OutlinedPillButton(stringResource(R.string.my_plan_have_code), actions.onRedeemCode)
-                state.activatedWithCode -> OutlinedPillButton(stringResource(R.string.my_plan_other_code), actions.onRedeemCode)
-                state.standing == PlanStanding.EXPIRING -> OutlinedPillButton(stringResource(R.string.my_plan_renew_and_expand), actions.onOpenPlans)
+                state.activatedWithCode -> OutlinedPillButton(stringResource(R.string.my_plan_expand_with_code), actions.onExpandWithCode)
+                state.standing == PlanStanding.EXPIRING -> OutlinedPillButton(stringResource(R.string.my_plan_renew_and_expand), actions.onRenew)
                 // Over the quota the hero already says "Ampliar mi plan".
-                !state.isOverQuota -> OutlinedPillButton(stringResource(R.string.my_plan_expand), actions.onOpenPlans)
+                !state.isOverQuota -> OutlinedPillButton(stringResource(R.string.my_plan_expand), actions.onExpandPlan)
             }
             Text(
                 stringResource(R.string.my_plan_how_plans_work),

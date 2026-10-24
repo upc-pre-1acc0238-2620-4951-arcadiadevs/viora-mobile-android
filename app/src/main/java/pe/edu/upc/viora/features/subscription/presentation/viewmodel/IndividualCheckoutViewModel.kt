@@ -28,6 +28,7 @@ class IndividualCheckoutViewModel @Inject constructor(
     private val checkout: CreateIndividualCheckoutUseCase,
     private val getSubscriptionById: GetSubscriptionByIdUseCase,
     private val getCurrentSubscription: GetCurrentSubscriptionUseCase,
+    private val prepareRenewal: PrepareRenewalPurchaseUseCase,
     private val clock: Clock,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -38,15 +39,23 @@ class IndividualCheckoutViewModel @Inject constructor(
         checkout: CreateIndividualCheckoutUseCase,
         getSubscriptionById: GetSubscriptionByIdUseCase,
         getCurrentSubscription: GetCurrentSubscriptionUseCase,
+        prepareRenewal: PrepareRenewalPurchaseUseCase,
     ) : this(
         prepare,
         resume,
         checkout,
         getSubscriptionById,
         getCurrentSubscription,
+        prepareRenewal,
         Clock.systemDefaultZone(),
         SavedStateHandle(),
     )
+
+    /**
+     * P02 in renewal mode: the plan in force is not the purchase to show, and the new year is paid
+     * ahead (ACTIVE, with access only from its start).
+     */
+    var renewal: Boolean = false
 
     private val mutableState = MutableStateFlow<IndividualCheckoutUiState>(IndividualCheckoutUiState.Idle)
     val uiState = mutableState.asStateFlow()
@@ -72,6 +81,21 @@ class IndividualCheckoutViewModel @Inject constructor(
 
     fun start(plan: ProducerPlanCode, capacity: PlanCapacity) = launchOperation {
         userDismissed = false
+        if (renewal) {
+            when (val result = prepareRenewal(plan, capacity)) {
+                is AppResult.Success -> {
+                    activeSubscriptionId = result.value.id
+                    if (result.value.status == "ACTIVE") {
+                        when (val current = getSubscriptionById(result.value.id)) {
+                            is AppResult.Success -> mutableState.value = IndividualCheckoutUiState.Confirmed(current.value)
+                            is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(current.error)
+                        }
+                    } else confirm(result.value)
+                }
+                is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(result.error)
+            }
+            return@launchOperation
+        }
         // A durable operation always takes precedence over a new screen selection.
         when (val previous = resume()) {
             is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(previous.error)
@@ -147,6 +171,8 @@ class IndividualCheckoutViewModel @Inject constructor(
                 startPolling(id)
             }
         } else {
+            // The journal and the plan in force belong to the year that is ending, not to the renewal.
+            if (renewal) return
             if (recoveryJob?.isActive == true) return
             recoveryJob = viewModelScope.launch {
                 when (val previous = resume()) {
@@ -252,7 +278,8 @@ class IndividualCheckoutViewModel @Inject constructor(
                     when (val result = getSubscriptionById(subscriptionId)) {
                         is AppResult.Success -> {
                             val sub = result.value
-                            if (sub.entitlementActive) {
+                            // A renewal paid ahead is ACTIVE before its year (and its access) starts.
+                            if (sub.entitlementActive || (renewal && sub.status == SubscriptionStatus.ACTIVE)) {
                                 mutableState.value = IndividualCheckoutUiState.Confirmed(sub)
                                 break@loop
                             }

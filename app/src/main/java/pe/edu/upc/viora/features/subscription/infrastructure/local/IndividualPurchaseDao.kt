@@ -17,4 +17,8 @@ interface IndividualPurchaseDao {
     /** Never recreate a journal removed by an account switch while a request was in flight. */
     @Update
     suspend fun update(row: IndividualPurchaseEntity): Int
+
+    /** Closes the journal of a purchase already paid, so a renewal can open its own. */
+    @Query("DELETE FROM individual_purchase_journal WHERE owner = :owner")
+    suspend fun delete(owner: String)
 }

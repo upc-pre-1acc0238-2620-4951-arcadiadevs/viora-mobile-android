@@ -17,11 +17,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import java.time.Clock
+import java.time.temporal.ChronoUnit
+import pe.edu.upc.viora.features.subscription.application.usecase.GetCurrentSubscriptionUseCase
 import pe.edu.upc.viora.features.subscription.application.usecase.ObserveProducerPlanCatalogUseCase
 import pe.edu.upc.viora.features.subscription.application.usecase.RefreshProducerPlanCatalogUseCase
 import pe.edu.upc.viora.features.subscription.domain.entity.ProducerPlanCatalog
 import pe.edu.upc.viora.features.subscription.domain.valueobject.PlanCapacity
 import pe.edu.upc.viora.features.subscription.presentation.state.ProducerPlanUiState
+import pe.edu.upc.viora.features.subscription.presentation.state.RenewalInfo
 
 /** Restores selection only; server-backed policy remains the source of the displayed estimate. */
 @HiltViewModel
@@ -30,6 +34,8 @@ class ProducerPlanViewModel @Inject constructor(
     private val observe: ObserveProducerPlanCatalogUseCase,
     private val refreshCatalog: RefreshProducerPlanCatalogUseCase,
     private val savedState: SavedStateHandle,
+    private val getCurrentSubscription: GetCurrentSubscriptionUseCase,
+    private val clock: Clock,
 ) : ViewModel() {
     private data class Refresh(val busy: Boolean = false, val succeeded: Boolean = false, val error: AppError? = null)
     private data class Observation(val catalog: ProducerPlanCatalog? = null, val error: AppError? = null)
@@ -45,8 +51,10 @@ class ProducerPlanViewModel @Inject constructor(
     private val refreshState = MutableStateFlow(Refresh())
     private val selectedCode = savedState.getStateFlow<String?>(PLAN_CODE, null)
     private val selectedCapacity = savedState.getStateFlow<String?>(QUOTA_HA, null)
+    /** `ProducerPlanRoute.renewal`: the plan ending is read once, to start from its hectares. */
+    private val renewal = MutableStateFlow<RenewalInfo?>(null)
 
-    val uiState = combine(catalog, refreshState, selectedCode, selectedCapacity) { observation, request, code, quota ->
+    val uiState = combine(catalog, refreshState, selectedCode, selectedCapacity, renewal) { observation, request, code, quota, ending ->
         val data = observation.catalog
         when {
             observation.error != null -> ProducerPlanUiState.Failed(observation.error)
@@ -54,16 +62,26 @@ class ProducerPlanViewModel @Inject constructor(
             data.offers.isEmpty() -> ProducerPlanUiState.Empty(data.fetchedAt, request.busy, request.error)
             else -> {
                 val offer = data.offers.find { it.code.value == code } ?: data.offers.first()
+                val start = ending?.let { runCatching { PlanCapacity.of(it.currentQuota) }.getOrNull() }
                 val capacity = quota?.let { runCatching { PlanCapacity.of(it.toBigDecimal()) }.getOrNull() }
-                    ?.takeIf(offer::accepts) ?: offer.minimumQuota
+                    ?.takeIf(offer::accepts) ?: start?.takeIf(offer::accepts) ?: offer.minimumQuota
                 ProducerPlanUiState.Content(data.offers, offer, capacity, data.fetchedAt, request.busy,
-                    !request.succeeded, request.error)
+                    !request.succeeded, request.error, ending)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ProducerPlanUiState.Loading)
 
     init {
         refresh()
+        if (savedState.get<Boolean>(RENEWAL) == true) loadEndingPlan()
+    }
+
+    private fun loadEndingPlan() = viewModelScope.launch {
+        val current = (getCurrentSubscription() as? AppResult.Success)?.value ?: return@launch
+        val endsAt = current.endsAt ?: return@launch
+        if (!current.entitlementActive) return@launch
+        val days = ChronoUnit.DAYS.between(clock.instant(), endsAt).toInt().coerceAtLeast(0)
+        renewal.value = RenewalInfo(current.capacity.hectares, endsAt, days)
     }
 
     fun refresh() {
@@ -109,5 +127,6 @@ class ProducerPlanViewModel @Inject constructor(
         const val STOP_TIMEOUT_MS = 5_000L
         const val PLAN_CODE = "producer_plan_code"
         const val QUOTA_HA = "producer_plan_quota_ha"
+        const val RENEWAL = "renewal"
     }
 }
