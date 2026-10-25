@@ -477,16 +477,61 @@ class IndividualCheckoutViewModelTest {
     }
 
     @Test
-    fun `reopening unpaid purchase offers confirmation instead of blocking payment with polling`() = runTest(testDispatcher) {
+    fun `reopening an unpaid purchase waits for Pagar instead of opening its confirmation`() = runTest(testDispatcher) {
         recovered = purchase
         entitlementActive = false
         val vm = model()
         vm.onAppResumed()
         testScheduler.advanceUntilIdle()
         assertEquals(1, queryCount)
-        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Confirm)
+        assertEquals(IndividualCheckoutUiState.Idle, vm.uiState.value)
+        vm.onAppPaused()
+        vm.onAppResumed()
+        testScheduler.advanceUntilIdle()
+        assertEquals(IndividualCheckoutUiState.Idle, vm.uiState.value)
         assertEquals(0, creates)
         assertEquals(0, checkouts)
+    }
+
+    @Test
+    fun `reopening a purchase whose payment is under review shows that it is not confirmed yet`() = runTest(testDispatcher) {
+        recovered = purchase
+        paymentStatus = IndividualPaymentStatus.PENDING
+        val vm = model()
+        vm.onAppResumed()
+        testScheduler.advanceUntilIdle()
+        assertEquals(IndividualCheckoutUiState.Unconfirmed(purchase.id), vm.uiState.value)
+    }
+
+    @Test
+    fun `paying other hectares moves the unpaid purchase to them`() = runTest(testDispatcher) {
+        recovered = purchase
+        val vm = model()
+        vm.start(plan, PlanCapacity.of(BigDecimal("2")))
+        testScheduler.advanceUntilIdle()
+        assertEquals(1, creates)
+        assertTrue(vm.uiState.value is IndividualCheckoutUiState.Confirm)
+    }
+
+    @Test
+    fun `paying the same hectares reuses the unpaid purchase`() = runTest(testDispatcher) {
+        recovered = purchase
+        val vm = model()
+        vm.start(plan, quota)
+        testScheduler.advanceUntilIdle()
+        assertEquals(0, creates)
+        assertEquals(IndividualCheckoutUiState.Confirm(purchase), vm.uiState.value)
+    }
+
+    @Test
+    fun `a payment under review keeps its purchase whatever hectares are chosen`() = runTest(testDispatcher) {
+        recovered = purchase
+        paymentStatus = IndividualPaymentStatus.PENDING
+        val vm = model()
+        vm.start(plan, PlanCapacity.of(BigDecimal("2")))
+        testScheduler.runCurrent()
+        assertEquals(0, creates)
+        assertEquals(IndividualCheckoutUiState.Verifying(purchase.id), vm.uiState.value)
     }
 
     @Test

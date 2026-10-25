@@ -136,18 +136,46 @@ class IndividualPurchaseRepositoryTest {
         assertEquals(0, server.requestCount)
     }
 
-    @Test fun `confirmed contract is refreshed by get and changed selection cannot replace it`() = runTest {
+    @Test fun `confirmed contract is refreshed by get`() = runTest {
         server.enqueue(MockResponse().setBody(contract))
         repository().prepare(plan, capacity)
         server.takeRequest()
-        val before = journal.rows.getValue("owner-a")
-        assertTrue(repository().prepare(plan, PlanCapacity.of(BigDecimal.ONE)) is AppResult.Failure)
-        assertEquals(before, journal.rows.getValue("owner-a"))
         server.enqueue(MockResponse().setBody(contract))
         assertTrue(repository().resume() is AppResult.Success)
         val request = server.takeRequest()
         assertEquals("GET", request.method)
         assertEquals("/api/v1/subscriptions/$id", request.path)
+    }
+
+    private val twoHectares get() = contract.replace("\"quotaHa\":0.5", "\"quotaHa\":2")
+        .replace("279.66", "1118.64").replace("50.34", "201.36").replace("330.00", "1320.00")
+
+    @Test fun `a changed selection asks the server to move the unpaid purchase under a new key`() = runTest {
+        server.enqueue(MockResponse().setBody(contract))
+        repository().prepare(plan, capacity)
+        val first = server.takeRequest()
+        server.enqueue(MockResponse().setResponseCode(201).setBody(twoHectares))
+        val moved = repository().prepare(plan, PlanCapacity.of(BigDecimal("2"))) as AppResult.Success
+        assertEquals(id, moved.value.id)
+        assertEquals(BigDecimal("1320.00"), moved.value.total)
+        val request = server.takeRequest()
+        assertEquals("POST", request.method)
+        assertEquals("""{"planCode":"PRODUCER_ANNUAL","requestedQuotaHa":2}""", request.body.readUtf8())
+        assertNotEquals(first.getHeader("Idempotency-Key"), request.getHeader("Idempotency-Key"))
+        assertEquals("2", journal.rows.getValue("owner-a").quota)
+        assertTrue(journal.rows.getValue("owner-a").contractJson!!.contains("1320"))
+    }
+
+    @Test fun `a payment under way keeps the journal of the purchase it pays`() = runTest {
+        server.enqueue(MockResponse().setBody(contract))
+        repository().prepare(plan, capacity)
+        server.takeRequest()
+        val before = journal.rows.getValue("owner-a")
+        server.enqueue(MockResponse().setResponseCode(409)
+            .setBody("""{"code":"SUBSCRIPTION_CONFLICT","reason":"subscription.payment.unresolved"}"""))
+        assertTrue(repository().prepare(plan, PlanCapacity.of(BigDecimal("2"))) is AppResult.Failure)
+        assertEquals(2, server.requestCount)
+        assertEquals(before, journal.rows.getValue("owner-a"))
     }
 
     @Test fun `checkout failure preserves its distinct key and recovers after recreation`() = runTest {

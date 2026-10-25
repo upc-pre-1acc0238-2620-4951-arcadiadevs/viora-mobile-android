@@ -52,14 +52,24 @@ class IndividualPurchaseRepositoryImpl @Inject constructor(
 
     private suspend fun prepareLocked(plan: ProducerPlanCode, capacity: PlanCapacity): AppResult<IndividualPurchase> {
         val owner = owner() ?: return AppResult.Failure(AppError.Unauthorized)
-        dao.insert(IndividualPurchaseEntity(owner, plan.value, capacity.hectares.toPlainString(),
-            UUID.randomUUID().toString(), UUID.randomUUID().toString(), null, null, null, null))
+        dao.insert(journal(owner, plan, capacity))
         val row = requireNotNull(dao.find(owner))
-        if (row.plan != plan.value || row.quota.toBigDecimal().compareTo(capacity.hectares) != 0) {
-            return AppResult.Failure(AppError.Conflict(code = "subscription.purchase.selection_conflict"))
-        }
-        return contract(row)
+        if (row.plan == plan.value && row.quota.toBigDecimal().compareTo(capacity.hectares) == 0) return contract(row)
+        // Another selection: the server moves a purchase that is still unpaid to it, under a new key.
+        val changed = journal(owner, plan, capacity)
+        if (dao.update(changed) == 0) return AppResult.Failure(AppError.Unauthorized)
+        val result = contract(changed)
+        // A payment under way keeps the purchase it pays, so the journal goes back to it.
+        if (result is AppResult.Failure && result.error.isUnresolvedPayment()) dao.update(row)
+        return result
     }
+
+    private fun journal(owner: String, plan: ProducerPlanCode, capacity: PlanCapacity) = IndividualPurchaseEntity(owner,
+        plan.value, capacity.hectares.toPlainString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+        null, null, null, null)
+
+    private fun AppError.isUnresolvedPayment() = this is AppError.Conflict &&
+        properties?.get("reason")?.jsonPrimitive?.contentOrNull == "subscription.payment.unresolved"
 
     override suspend fun resume(): AppResult<IndividualPurchase?> = guarded {
         val owner = owner() ?: return@guarded AppResult.Failure(AppError.Unauthorized)
@@ -79,7 +89,8 @@ class IndividualPurchaseRepositoryImpl @Inject constructor(
         }
         if (owner() != row.owner) return AppResult.Failure(AppError.Unauthorized)
         val missingHistorical = result is AppResult.Failure && result.error is AppError.NotFound && row.contractJson != null
-        val existingPurchase = result is AppResult.Failure && result.error is AppError.Conflict && row.contractJson == null
+        val existingPurchase = result is AppResult.Failure && result.error is AppError.Conflict && row.contractJson == null &&
+            !result.error.isUnresolvedPayment()
         if (missingHistorical || existingPurchase) {
             // A missing historical ID is not permission to create another purchase.
             // Only adopt an existing contract returned for the authenticated account.
