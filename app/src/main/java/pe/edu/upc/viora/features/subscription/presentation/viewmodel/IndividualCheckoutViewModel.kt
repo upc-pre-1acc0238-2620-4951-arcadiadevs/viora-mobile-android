@@ -96,40 +96,46 @@ class IndividualCheckoutViewModel @Inject constructor(
             }
             return@launchOperation
         }
-        // A durable operation always takes precedence over a new screen selection.
         when (val previous = resume()) {
             is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(previous.error)
             is AppResult.Success -> {
                 val recovered = previous.value
                 if (recovered != null) {
                     activeSubscriptionId = recovered.id
+                    val selected = recovered.planCode == plan && recovered.capacity == capacity
                     when (val check = getSubscriptionById(recovered.id)) {
-                        is AppResult.Success -> {
-                            if (check.value.entitlementActive) {
+                        is AppResult.Success -> when {
+                            check.value.entitlementActive ->
                                 mutableState.value = IndividualCheckoutUiState.Confirmed(check.value)
-                            } else if (check.value.paymentStatus == IndividualPaymentStatus.REJECTED) {
+                            // A payment under review keeps its purchase: only its result is shown.
+                            check.value.paymentStatus == IndividualPaymentStatus.PENDING -> startPolling(recovered.id)
+                            selected && check.value.paymentStatus == IndividualPaymentStatus.REJECTED ->
                                 mutableState.value = IndividualCheckoutUiState.Rejected(recovered.id)
-                            } else {
-                                confirm(recovered)
-                            }
+                            selected -> confirm(recovered)
+                            // The unpaid purchase takes the hectares chosen now.
+                            else -> prepareSelection(plan, capacity)
                         }
-                        is AppResult.Failure -> confirm(recovered)
+                        is AppResult.Failure -> if (selected) confirm(recovered) else prepareSelection(plan, capacity)
                     }
-                } else when (val result = prepare(plan, capacity)) {
-                    is AppResult.Success -> {
-                        activeSubscriptionId = result.value.id
-                        if (result.value.status != "PENDING_PAYMENT") {
-                            when (val current = getSubscriptionById(result.value.id)) {
-                                is AppResult.Success -> if (current.value.entitlementActive) {
-                                    mutableState.value = IndividualCheckoutUiState.Confirmed(current.value)
-                                } else confirm(result.value)
-                                is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(current.error)
-                            }
-                        } else confirm(result.value)
-                    }
-                    is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(result.error)
-                }
+                } else prepareSelection(plan, capacity)
             }
+        }
+    }
+
+    private suspend fun prepareSelection(plan: ProducerPlanCode, capacity: PlanCapacity) {
+        when (val result = prepare(plan, capacity)) {
+            is AppResult.Success -> {
+                activeSubscriptionId = result.value.id
+                if (result.value.status != "PENDING_PAYMENT") {
+                    when (val current = getSubscriptionById(result.value.id)) {
+                        is AppResult.Success -> if (current.value.entitlementActive) {
+                            mutableState.value = IndividualCheckoutUiState.Confirmed(current.value)
+                        } else confirm(result.value)
+                        is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(current.error)
+                    }
+                } else confirm(result.value)
+            }
+            is AppResult.Failure -> mutableState.value = IndividualCheckoutUiState.Failed(result.error)
         }
     }
 
@@ -183,11 +189,16 @@ class IndividualCheckoutViewModel @Inject constructor(
                             when (val current = getSubscriptionById(recovered.id)) {
                                 is AppResult.Success -> {
                                     if (visible && !userDismissed) {
+                                        // An unpaid purchase waits for "Pagar": the producer may still change its hectares.
                                         if (current.value.entitlementActive) {
                                             mutableState.value = IndividualCheckoutUiState.Confirmed(current.value)
                                         } else if (current.value.paymentStatus == IndividualPaymentStatus.REJECTED) {
                                             mutableState.value = IndividualCheckoutUiState.Rejected(recovered.id)
-                                        } else confirm(recovered)
+                                        } else if (current.value.paymentStatus == IndividualPaymentStatus.PENDING) {
+                                            mutableState.value = IndividualCheckoutUiState.Unconfirmed(recovered.id)
+                                        } else {
+                                            activeSubscriptionId = null
+                                        }
                                     }
                                 }
                                 is AppResult.Failure -> {
