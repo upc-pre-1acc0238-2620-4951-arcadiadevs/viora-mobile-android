@@ -93,11 +93,15 @@ android {
         }
         release {
             val url = localProperties.getProperty("viora.apiBaseUrl", defaultReleaseApiBaseUrl)
+            // A release only talks to an HTTPS server, whatever local.properties says.
+            require(url.startsWith("https://")) { "viora.apiBaseUrl must be an https URL for a release build: $url" }
             buildConfigField("String", "API_BASE_URL", "\"$url\"")
             buildConfigField("String", "DEBUG_START_SCREEN", "\"\"")
             signingConfig = signingConfigs.findByName("release")
+            // R8 shrinks and obfuscates the release; the libraries bring their own keep rules, and
+            // src/main/keepRules/rules.keep adds the app's.
             optimization {
-                enable = false
+                enable = true
             }
         }
     }
