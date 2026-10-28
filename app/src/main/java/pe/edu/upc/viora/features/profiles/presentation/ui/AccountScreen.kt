@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,8 +39,11 @@ import kotlinx.coroutines.delay
 import pe.edu.upc.viora.BuildConfig
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
+import pe.edu.upc.viora.core.designsystem.component.VioraConfirmDialog
 import pe.edu.upc.viora.core.designsystem.theme.Neutral100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral500
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.locale.AppLanguage
 import pe.edu.upc.viora.features.profiles.presentation.viewmodel.AccountViewModel
 
@@ -198,6 +202,23 @@ fun AccountScreen(
                 }
             },
             onDismiss = viewModel::closeLanguageSheet,
+        )
+    }
+
+    if (state.confirmingSignOut) {
+        // Same confirmation as "¿Descartar este lote?": keeping the records is the main action.
+        VioraConfirmDialog(
+            icon = R.drawable.ic_warning,
+            iconBackground = Terracotta100,
+            iconTint = Terracotta700,
+            title = stringResource(R.string.account_sign_out_unsent_title),
+            body = pluralStringResource(R.plurals.account_sign_out_unsent_body, state.unsentRecords, state.unsentRecords),
+            primaryLabel = stringResource(R.string.account_sign_out_unsent_keep),
+            onPrimary = viewModel::dismissSignOut,
+            secondaryLabel = stringResource(R.string.account_sign_out_unsent_confirm),
+            onSecondary = viewModel::confirmSignOut,
+            onDismiss = viewModel::dismissSignOut,
+            secondaryColor = Terracotta700,
         )
     }
 }

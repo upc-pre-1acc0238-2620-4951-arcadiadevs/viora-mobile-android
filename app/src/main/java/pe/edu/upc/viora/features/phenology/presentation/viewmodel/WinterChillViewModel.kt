@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.isConnectivity
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveChillTrackerUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RefreshChillTrackerUseCase
@@ -66,7 +67,7 @@ class WinterChillViewModel @Inject constructor(
                 tracker = tracker,
                 lastSync = lastSync ?: tracker.syncedAt,
                 isRefreshing = refresh.isRefreshing,
-                offline = refresh.error is AppError.Offline,
+                offline = refresh.error?.isConnectivity == true,
                 warmWinterAlertId = warmWinterAlertId,
             )
             refresh.isRefreshing || !refresh.hasFinishedOnce -> WinterChillUiState.Loading

@@ -10,3 +10,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+# Mapbox looks its Java classes up from native code (JNI): R8 cannot see those uses, so the whole SDK is kept.
+-keep class com.mapbox.** { *; }
+-keep interface com.mapbox.** { *; }
+-dontwarn com.mapbox.**

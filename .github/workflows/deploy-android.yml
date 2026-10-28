@@ -23,6 +23,10 @@ on:
         required: false
         default: ''
 
+# The job only reads the code: the token GitHub hands it cannot write to the repository.
+permissions:
+  contents: read
+
 concurrency:
   group: deploy-android-${{ github.ref }}
   cancel-in-progress: false
@@ -103,7 +107,7 @@ jobs:
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT_KEY" > "$RUNNER_TEMP/firebase-key.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-key.json"
-          npx --yes firebase-tools@latest appdistribution:distribute \
+          npx --yes firebase-tools@15.34.0 appdistribution:distribute \
             app/build/outputs/apk/release/app-release.apk \
             --app "$FIREBASE_APP_ID" \
             --groups "$TESTER_GROUPS" \

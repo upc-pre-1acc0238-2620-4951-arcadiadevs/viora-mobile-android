@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel
 
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.planLimitDetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -123,6 +124,7 @@ class AdjustOutlineViewModel @Inject constructor(
     }
 
     private fun AppError.toFailure(): EditFailure = when (this) {
+        is AppError.Forbidden, is AppError.Conflict -> planLimitDetail()?.let { EditFailure.Rejected(it) } ?: EditFailure.Other(this)
         is AppError.PreconditionFailed -> EditFailure.Outdated
         is AppError.Validation -> EditFailure.Rejected(detail)
         else -> EditFailure.Other(this)

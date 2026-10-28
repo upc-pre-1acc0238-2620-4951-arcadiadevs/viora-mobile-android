@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.iam.presentation.state
 
 import pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers
+import pe.edu.upc.viora.features.subscription.domain.valueobject.InvitationCode
 
 /** The onboarding questions in Figma order ("02 · Preguntas del onboarding"). */
 enum class OnboardingStep(val number: Int?) {
@@ -35,7 +36,8 @@ data class OnboardingUiState(
     val nameValid: Boolean get() = fullName.trim().count(Char::isLetter) >= MIN_NAME_LETTERS
     val phoneValid: Boolean get() = MobileNumbers.isValidMobile(phone, country.iso)
     val showPhoneError: Boolean get() = !phoneValid && (phoneTouched || phone.length >= country.nationalDigits)
-    val cooperativeCodeValid: Boolean get() = cooperativeCode.trim().length >= MIN_CODE_LENGTH
+    /** The same format the redemption screen and the backend accept (COOP-XXXX), so a typo is caught here. */
+    val cooperativeCodeValid: Boolean get() = InvitationCode.isWellFormed(cooperativeCode)
 
     val phoneInternational: String get() = MobileNumbers.international(phone, country.iso)
 
@@ -52,7 +54,6 @@ data class OnboardingUiState(
         /** Soles per hectare and month, the reference price shown in Figma (12 ha = S/ 660 al mes). */
         const val PRICE_PER_HECTARE_MONTH = 55
         const val MIN_NAME_LETTERS = 2
-        const val MIN_CODE_LENGTH = 4
         const val MAX_CODE_LENGTH = 16
     }
 }

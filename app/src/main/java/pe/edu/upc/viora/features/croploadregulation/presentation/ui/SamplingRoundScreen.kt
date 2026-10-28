@@ -151,6 +151,21 @@ fun SamplingRoundScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = ScreenPadding),
         ) {
+            // Trees the server refused for good (e.g. the prescription was already issued): they were dropped
+            state.rejectedMessage?.let { message ->
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Terracotta700,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Terracotta100)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                )
+            }
+
             // Connectivity Banner
             if (state.isOffline) {
                 Spacer(Modifier.height(16.dp))

@@ -129,7 +129,8 @@ internal fun ClimateErrorCard(error: AppError, onRetry: () -> Unit, modifier: Mo
             .padding(16.dp),
     ) {
         Text(
-            text = stringResource(error.messageRes()),
+            // Without a real forecast the server answers 503 with its own, already translated explanation
+            text = (error as? AppError.Server)?.takeIf { it.status == 503 }?.detail ?: stringResource(error.messageRes()),
             style = MaterialTheme.typography.bodyMedium,
             color = Terracotta700,
         )

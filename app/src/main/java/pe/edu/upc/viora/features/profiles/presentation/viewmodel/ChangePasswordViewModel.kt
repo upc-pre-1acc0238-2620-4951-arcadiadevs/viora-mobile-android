@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.profiles.presentation.viewmodel
 
+import pe.edu.upc.viora.core.domain.isConnectivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -55,7 +56,7 @@ class ChangePasswordViewModel @Inject constructor(
                 idle.copy(currentPasswordIncorrect = true)
             // The local rules passed, so the server refused it for one of its own (e.g. a recent password).
             error is AppError.Validation -> idle.copy(newPasswordRejection = error.detail)
-            error is AppError.Offline || error is AppError.Timeout -> idle.copy(error = ChangePasswordError.OFFLINE)
+            error.isConnectivity -> idle.copy(error = ChangePasswordError.OFFLINE)
             else -> idle.copy(error = ChangePasswordError.GENERIC)
         }
     }

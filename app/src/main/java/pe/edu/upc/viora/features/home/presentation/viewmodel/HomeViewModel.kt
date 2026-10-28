@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.isConnectivity
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.home.application.usecase.ChoosePlotUseCase
 import pe.edu.upc.viora.features.home.application.usecase.ObserveChosenPlotUseCase
@@ -104,7 +105,7 @@ class HomeViewModel @Inject constructor(
         refreshState,
         focusAndAlternation,
     ) { plots, lastRefresh, activeCount, refresh, (focused, alternation) ->
-        val offline = refresh.error == AppError.Offline
+        val offline = refresh.error?.isConnectivity == true
 
         when {
             plots.isNotEmpty() -> HomeUiState.Content(

@@ -61,8 +61,8 @@ android {
         applicationId = "pe.edu.upc.viora"
         minSdk = 26
         targetSdk = 37
-        versionCode = 30
-        versionName = "1.15.2"
+        versionCode = 31
+        versionName = "1.16.0"
 
         // The Maps SDK reads this string resource at startup.
         resValue("string", "mapbox_access_token", mapboxPublicToken)
@@ -93,11 +93,15 @@ android {
         }
         release {
             val url = localProperties.getProperty("viora.apiBaseUrl", defaultReleaseApiBaseUrl)
+            // A release only talks to an HTTPS server, whatever local.properties says.
+            require(url.startsWith("https://")) { "viora.apiBaseUrl must be an https URL for a release build: $url" }
             buildConfigField("String", "API_BASE_URL", "\"$url\"")
             buildConfigField("String", "DEBUG_START_SCREEN", "\"\"")
             signingConfig = signingConfigs.findByName("release")
+            // R8 shrinks and obfuscates the release; the libraries bring their own keep rules, and
+            // src/main/keepRules/rules.keep adds the app's.
             optimization {
-                enable = false
+                enable = true
             }
         }
     }

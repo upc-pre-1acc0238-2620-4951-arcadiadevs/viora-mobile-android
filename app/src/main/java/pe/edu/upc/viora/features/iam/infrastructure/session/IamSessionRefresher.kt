@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.iam.infrastructure.session
 
+import kotlin.coroutines.cancellation.CancellationException
 import java.io.IOException
 import java.time.Clock
 import javax.inject.Inject
@@ -56,6 +57,12 @@ class IamSessionRefresher @Inject constructor(
         }
     } catch (e: IOException) {
         // Offline or the server is waking up: keep the current token and try again next time.
+        session.accessToken
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        // An unexpected answer (a body that does not parse, a proxy page): this runs inside OkHttp, where an uncaught
+        // exception would crash the app, so it is treated like a passing failure and retried next time.
         session.accessToken
     }
 

@@ -128,7 +128,10 @@ class AppMigrationsTest {
 
     @Test
     fun `every version from 1 to the current one has a migration`() {
-        (1 until 13).forEach { from ->
+        // Up to the newest exported schema, so a version added without its migration fails here
+        val newest = java.io.File("schemas/pe.edu.upc.viora.core.database.AppDatabase").listFiles()!!
+            .maxOf { it.nameWithoutExtension.toInt() }
+        (1 until newest).forEach { from ->
             assertTrue("missing $from -> ${from + 1}", AppMigrations.ALL.any { it.startVersion == from && it.endVersion == from + 1 })
         }
     }
@@ -165,5 +168,13 @@ class AppMigrationsTest {
         assertEquals(v11.getValue("producer_plan_offers").replace(", PRIMARY KEY(`code`))", ", $column, PRIMARY KEY(`code`))"),
             v12.getValue("producer_plan_offers"))
         (v11.keys - "producer_plan_offers").forEach { assertEquals(v11[it], v12[it]) }
+    }
+
+    @Test fun `draft batch id migration matches the exported v15 schema and leaves every other table intact`() {
+        val v15 = createSqlByTable(15)
+        val column = AppMigrations.MIGRATION_14_15_SQL.substringAfter("ADD COLUMN ")
+        assertTrue(v15.getValue("draft_tree_samples").contains(column))
+        assertEquals(v14.keys, v15.keys)
+        (v14.keys - "draft_tree_samples").forEach { assertEquals(v14[it], v15[it]) }
     }
 }

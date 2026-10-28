@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import pe.edu.upc.viora.core.di.SessionFree
 import pe.edu.upc.viora.features.profiles.domain.repository.AccountPreferencesRepository
 import pe.edu.upc.viora.features.profiles.domain.repository.ProfileRepository
 import pe.edu.upc.viora.features.profiles.infrastructure.remote.ProfileService
@@ -29,6 +30,12 @@ abstract class ProfilesModule {
         @Provides
         @Singleton
         fun provideProfileService(retrofit: Retrofit): ProfileService =
+            retrofit.create(ProfileService::class.java)
+
+        @Provides
+        @Singleton
+        @SessionFree
+        fun provideSessionFreeProfileService(@SessionFree retrofit: Retrofit): ProfileService =
             retrofit.create(ProfileService::class.java)
     }
 }

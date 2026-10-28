@@ -19,6 +19,7 @@ import org.junit.Before
 import org.junit.Test
 import pe.edu.upc.viora.core.database.LocalDataOwner
 import pe.edu.upc.viora.core.datastore.SessionStore
+import pe.edu.upc.viora.core.datastore.TokenCipher
 import pe.edu.upc.viora.core.datastore.StoredSession
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
@@ -40,7 +41,7 @@ class ProfileRepositoryImplTest {
     private val server = MockWebServer()
     private val json = Json { ignoreUnknownKeys = true }
     private val preferences = InMemoryPreferences()
-    private val sessionStore = SessionStore(preferences)
+    private val sessionStore = SessionStore(preferences, TokenCipher.PLAIN)
     private val profileStore = ProfileStore(preferences)
     private lateinit var repository: ProfileRepositoryImpl
     private var wipes = 0
@@ -57,6 +58,7 @@ class ProfileRepositoryImplTest {
             .create(ProfileService::class.java)
         repository = ProfileRepositoryImpl(
             service = service,
+            sessionFreeService = service,
             apiCaller = ApiCaller(ApiErrorMapper(json), UnconfinedTestDispatcher()),
             profileStore = profileStore,
             sessionStore = sessionStore,
@@ -117,6 +119,8 @@ class ProfileRepositoryImplTest {
         assertEquals("""{"refreshToken":"old-refresh"}""", server.takeRequest().body.readUtf8())
         assertNull(sessionStore.session())
         assertNull(profileStore.getProfile())
+        // Nothing of the farm stays on the phone
+        assertEquals(1, wipes)
     }
 
     @Test

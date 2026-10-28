@@ -19,6 +19,7 @@ import org.junit.Before
 import org.junit.Test
 import pe.edu.upc.viora.core.database.LocalDataOwner
 import pe.edu.upc.viora.core.datastore.SessionStore
+import pe.edu.upc.viora.core.datastore.TokenCipher
 import pe.edu.upc.viora.features.iam.InMemoryPreferences
 import pe.edu.upc.viora.features.iam.domain.valueobject.OnboardingAnswers
 import pe.edu.upc.viora.features.iam.infrastructure.local.OnboardingStore
@@ -69,7 +70,7 @@ class IamViewModelTest {
         runBlocking { onboardingStore.save(OnboardingAnswers(fullName = "Teodoro Mamani", cooperativeCode = cooperativeCode, hectares = hectares)) }
         viewModel = IamViewModel(
             service = VerifyingIamService(),
-            sessionStore = SessionStore(InMemoryPreferences()),
+            sessionStore = SessionStore(InMemoryPreferences(), TokenCipher.PLAIN),
             localDataOwner = LocalDataOwner(InMemoryPreferences()) {},
             onboardingStore = onboardingStore,
             clock = Clock.fixed(Instant.parse("2026-10-21T12:00:00Z"), ZoneOffset.UTC),
