@@ -168,7 +168,14 @@ class HarvestSettlementRepositoryImpl @Inject constructor(
             update(row) { it.copy(status = PendingStatus.FAILED.name, lastErrorCode = permanentCode) }
             return true
         }
-        update(row) { it.copy(attemptCount = it.attemptCount + 1, lastErrorCode = transientCodeOf(error)) }
+        // A row that keeps failing for a reason the network does not explain stops being retried for ever
+        val attempts = row.attemptCount + 1
+        if (!error.isConnectivity && attempts >= MAX_ATTEMPTS) {
+            update(row) { it.copy(attemptCount = attempts, status = PendingStatus.FAILED.name,
+                lastErrorCode = transientCodeOf(error)) }
+            return true
+        }
+        update(row) { it.copy(attemptCount = attempts, lastErrorCode = transientCodeOf(error)) }
         return false
     }
 
@@ -181,11 +188,15 @@ class HarvestSettlementRepositoryImpl @Inject constructor(
         if (current != null && current.updatedAt == row.updatedAt) pendingDao.upsert(change(current))
     }
 
-    /** 400/422 (rejected data), 403 (not the owner) and 404 (plot gone) will not succeed on retry. */
+    /**
+     * 400/422 (rejected data), 403 (not the owner), 404 (plot gone) and an answer that cannot be read will not
+     * succeed on retry.
+     */
     private fun permanentCodeOf(error: AppError): String? = when (error) {
         is AppError.Validation -> error.code ?: "VALIDATION_ERROR"
         is AppError.Forbidden -> "FORBIDDEN"
         is AppError.NotFound -> error.code ?: "NOT_FOUND"
+        is AppError.Unknown -> "UNREADABLE_RESPONSE"
         else -> null
     }
 
@@ -238,6 +249,8 @@ class HarvestSettlementRepositoryImpl @Inject constructor(
     }
 
     private companion object {
+        /** Failures not explained by the connection (server errors, an expired session) a row gets before FAILED. */
+        const val MAX_ATTEMPTS = 8
         const val EXISTING_SETTLEMENT = "existingSettlement"
         const val CONFLICT_CODE = "HARVESTSETTLEMENT_CONFLICT"
         const val CORRUPT_ROW = "CORRUPT_ROW"
