@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel
 
+import pe.edu.upc.viora.core.domain.isConnectivity
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -126,8 +127,7 @@ class SamplingSessionViewModel @Inject constructor(
                                 }
                             },
                             onFailure = { error ->
-                                val isOffline = error is pe.edu.upc.viora.core.domain.AppError.Offline ||
-                                    error is pe.edu.upc.viora.core.domain.AppError.Timeout
+                                val isOffline = error.isConnectivity
                                 _uiState.update {
                                     it.copy(
                                         isLoading = false,
@@ -227,8 +227,7 @@ class SamplingSessionViewModel @Inject constructor(
                     }
                 },
                 onFailure = { error ->
-                    val isOffline = error is pe.edu.upc.viora.core.domain.AppError.Offline ||
-                        error is pe.edu.upc.viora.core.domain.AppError.Timeout
+                    val isOffline = error.isConnectivity
                     if (isOffline) {
                         _uiState.update { it.copy(isOffline = true, hasRecoveredConnection = false) }
                     }
@@ -272,8 +271,7 @@ class SamplingSessionViewModel @Inject constructor(
                     onSuccess(summary)
                 },
                 onFailure = { error ->
-                    val isOfflineError = error == pe.edu.upc.viora.core.domain.AppError.Offline ||
-                        error is pe.edu.upc.viora.core.domain.AppError.Timeout
+                    val isOfflineError = error.isConnectivity
                     _uiState.update {
                         it.copy(
                             isSubmitting = false,

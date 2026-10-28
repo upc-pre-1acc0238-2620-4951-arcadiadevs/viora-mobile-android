@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.harvestsettlement.infrastructure.repository
 
+import pe.edu.upc.viora.core.domain.isConnectivity
 import java.time.Clock
 import java.time.format.DateTimeParseException
 import java.util.UUID
@@ -66,7 +67,7 @@ class HarvestSettlementRepositoryImpl @Inject constructor(
             return remote
         }
         val error = (remote as AppResult.Failure).error
-        return if (error is AppError.Offline || error is AppError.Timeout) queue(draft, key, pending) else remote
+        return if (error.isConnectivity) queue(draft, key, pending) else remote
     }
 
     /** Sends the settlement without touching the pending queue; 409 becomes [SettleOutcome.AlreadySettled]. */

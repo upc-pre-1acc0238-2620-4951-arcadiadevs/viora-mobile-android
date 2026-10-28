@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.home.presentation.state
 
 import java.time.Instant
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.isConnectivity
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 
 /**
@@ -29,7 +30,7 @@ sealed interface HomeUiState {
 
     /** Nothing cached and the download failed: offer a retry. */
     data class Error(val error: AppError) : HomeUiState {
-        override val isOffline get() = error == AppError.Offline
+        override val isOffline get() = error?.isConnectivity == true
         override val lastRefresh: Instant? = null
     }
 

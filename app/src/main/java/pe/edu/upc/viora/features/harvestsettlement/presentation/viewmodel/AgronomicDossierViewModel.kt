@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.isConnectivity
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.DownloadDossierPdfUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.FindLatestDossierCampaignUseCase
@@ -108,7 +109,7 @@ class AgronomicDossierViewModel @Inject constructor(
             val result = sealDossier(plotId, year)
             val error = (result as? AppResult.Failure)?.error
             status.update {
-                it.copy(resolving = false, error = error, offline = error == AppError.Offline || error == AppError.Timeout)
+                it.copy(resolving = false, error = error, offline = error.isConnectivity)
             }
         }
     }
@@ -129,7 +130,7 @@ class AgronomicDossierViewModel @Inject constructor(
                     it.copy(
                         downloading = false,
                         downloadFailed = true,
-                        offline = it.offline || result.error == AppError.Offline || result.error == AppError.Timeout,
+                        offline = it.offline || result.error.isConnectivity,
                     )
                 }
             }
