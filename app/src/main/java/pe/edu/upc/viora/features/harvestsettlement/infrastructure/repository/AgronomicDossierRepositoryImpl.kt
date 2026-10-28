@@ -62,7 +62,7 @@ class AgronomicDossierRepositoryImpl @Inject constructor(
         }
         return try {
             val file = withContext(dispatcher) {
-                write(body, File(directory, cached.dossier.fileName), cached.dossier.verificationHash)
+                write(body, File(directory, safeFileName(cached.dossier.fileName)), cached.dossier.verificationHash)
             }
             dao.updatePdf(plotId, campaignYear, file.absolutePath, clock.millis())
             AppResult.Success(file)
@@ -131,3 +131,11 @@ class AgronomicDossierRepositoryImpl @Inject constructor(
         private const val BUFFER_SIZE = 8 * 1024
     }
 }
+
+/**
+ * The file name the server sent, reduced to plain characters: a name with "../" or a folder could otherwise write
+ * outside the dossiers folder.
+ */
+internal fun safeFileName(name: String): String =
+    name.substringAfterLast('/').substringAfterLast('\\').replace(Regex("[^A-Za-z0-9._-]"), "_")
+        .trimStart('.').ifBlank { "dossier.pdf" }
