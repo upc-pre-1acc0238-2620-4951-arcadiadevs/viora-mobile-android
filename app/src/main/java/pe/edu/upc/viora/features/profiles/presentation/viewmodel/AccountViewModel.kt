@@ -7,11 +7,16 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.locale.AppLanguage
+import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObservePendingDraftSamplesCountUseCase
+import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePendingSettlementsUseCase
 import pe.edu.upc.viora.features.home.application.usecase.RestartHomeTourUseCase
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveFieldNotesUseCase
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteSyncState
 import pe.edu.upc.viora.features.profiles.application.usecase.CheckMembershipUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveAnimatedVoiceUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveProfileUseCase
@@ -33,6 +38,9 @@ class AccountViewModel @Inject constructor(
     private val signOut: SignOutUseCase,
     observeAnimatedVoice: ObserveAnimatedVoiceUseCase,
     private val setAnimatedVoice: SetAnimatedVoiceUseCase,
+    observePendingSamples: ObservePendingDraftSamplesCountUseCase,
+    observePendingSettlements: ObservePendingSettlementsUseCase,
+    observeFieldNotes: ObserveFieldNotesUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AccountUiState())
@@ -44,6 +52,11 @@ class AccountViewModel @Inject constructor(
         }
         viewModelScope.launch {
             observeAnimatedVoice().collect { on -> _uiState.update { it.copy(animatedVoice = on) } }
+        }
+        viewModelScope.launch {
+            combine(observePendingSamples(), observePendingSettlements(), observeFieldNotes()) { samples, settlements, notes ->
+                samples + settlements.size + notes.count { it.syncState != FieldNoteSyncState.SYNCED }
+            }.collect { unsent -> _uiState.update { it.copy(unsentRecords = unsent) } }
         }
         viewModelScope.launch { refreshProfile() }
         viewModelScope.launch {
@@ -75,9 +88,21 @@ class AccountViewModel @Inject constructor(
         }
     }
 
+    /** Signs out at once, or first asks when records still waiting to be sent would be lost with the session. */
     fun signOut() {
+        if (_uiState.value.unsentRecords > 0) {
+            _uiState.update { it.copy(confirmingSignOut = true) }
+            return
+        }
+        confirmSignOut()
+    }
+
+    fun dismissSignOut() = _uiState.update { it.copy(confirmingSignOut = false) }
+
+    /** Signing out forgets the session and every record of the account on the phone. */
+    fun confirmSignOut() {
         if (_uiState.value.isSigningOut) return
-        _uiState.update { it.copy(isSigningOut = true) }
+        _uiState.update { it.copy(isSigningOut = true, confirmingSignOut = false) }
         viewModelScope.launch {
             signOut.invoke()
             _uiState.update { it.copy(isSigningOut = false, isSignedOut = true) }

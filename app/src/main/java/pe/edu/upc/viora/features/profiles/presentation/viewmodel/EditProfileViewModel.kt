@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.profiles.presentation.viewmodel
 
+import pe.edu.upc.viora.core.domain.isConnectivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -69,7 +70,7 @@ class EditProfileViewModel @Inject constructor(
                     is AppResult.Success -> it.copy(isLoading = false, isSaved = true)
                     is AppResult.Failure -> it.copy(
                         isLoading = false,
-                        error = if (result.error is AppError.Offline || result.error is AppError.Timeout) {
+                        error = if (result.error.isConnectivity) {
                             SaveProfileError.OFFLINE
                         } else {
                             SaveProfileError.GENERIC

@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.profiles.presentation.viewmodel
 
+import pe.edu.upc.viora.core.domain.isConnectivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -78,7 +79,7 @@ class DeleteAccountViewModel @Inject constructor(
     private fun AppError.toDeleteError(): DeleteAccountError = when {
         this is AppError.Validation && code == ProfileRepository.WRONG_CURRENT_PASSWORD -> DeleteAccountError.WRONG_PASSWORD
         this is AppError.Forbidden -> DeleteAccountError.PROTECTED_ACCOUNT
-        this is AppError.Offline || this is AppError.Timeout -> DeleteAccountError.OFFLINE
+        this.isConnectivity -> DeleteAccountError.OFFLINE
         else -> DeleteAccountError.GENERIC
     }
 }

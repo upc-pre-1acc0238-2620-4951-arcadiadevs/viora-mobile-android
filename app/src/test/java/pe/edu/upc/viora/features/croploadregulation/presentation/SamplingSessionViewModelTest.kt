@@ -58,6 +58,17 @@ private class FakeDraftDao : DraftTreeSampleDao {
     override suspend fun clearSamples(plotId: String, campaignYear: Int) {
         items.removeAll { it.plotId == plotId && it.campaignYear == campaignYear }
     }
+
+    override suspend fun setBatchId(sampleId: String, batchId: String) {
+        val index = items.indexOfFirst { it.id == sampleId }
+        if (index != -1) {
+            items[index] = items[index].copy(batchId = batchId)
+        }
+    }
+
+    override suspend fun deleteSample(sampleId: String) {
+        items.removeAll { it.id == sampleId }
+    }
 }
 
 private class FakeThinningRepo : ThinningRepository {
@@ -89,6 +100,7 @@ private class FakeThinningRepo : ThinningRepository {
         ),
     )
     val submittedBatches = mutableListOf<List<TreeSample>>()
+    val submittedBatchIds = mutableListOf<String>()
 
     override suspend fun getPlotSamplingOverview(campaignYear: Int?): AppResult<List<PlotSamplingOverview>> =
         AppResult.Success(emptyList())
@@ -106,6 +118,7 @@ private class FakeThinningRepo : ThinningRepository {
         samples: List<TreeSample>,
     ): AppResult<SamplingSummary> {
         submittedBatches.add(samples)
+        submittedBatchIds.add(batchId)
         return submitResult
     }
 
@@ -135,6 +148,7 @@ class SamplingSessionViewModelTest {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         fakeDao.items.clear()
         fakeRepo.submittedBatches.clear()
+        fakeRepo.submittedBatchIds.clear()
         fakeRepo.submitResult = AppResult.Success(
             SamplingSummary(
                 plotId = "1",
@@ -316,5 +330,50 @@ class SamplingSessionViewModelTest {
         assertEquals(1, fakeRepo.submittedBatches.size)
         assertEquals(1, fakeDao.items.size)
         assertTrue(fakeDao.items[0].isSynced)
+    }
+
+    private fun draft(id: String, tree: String, synced: Boolean = false, batchId: String? = null) = DraftTreeSampleEntity(
+        id = id, plotId = "plot-1", plotName = "Lote Norte", campaignYear = 2026, treeIdentifier = tree,
+        shootsCount = 40, fruitSetCount = 20, isSynced = synced, batchId = batchId,
+    )
+
+    @Test
+    fun `a draft is always sent again with the batch id it keeps`() = runTest {
+        fakeDao.insertSample(draft("sample-1", "A-01", batchId = "batch-original"))
+        fakeRepo.submitResult = AppResult.Failure(AppError.Server(500))
+        val viewModel = SamplingSessionViewModel(useCase, fakeRepo, fakeDao, fakeContext)
+
+        viewModel.initSession("plot-1", "Lote Norte", 2026)
+        fakeRepo.submitResult = AppResult.Success(fakeRepo.detailedResult.let { (it as AppResult.Success).value.summary })
+        viewModel.initSession("plot-1", "Lote Norte", 2026)
+
+        assertEquals(listOf("batch-original", "batch-original"), fakeRepo.submittedBatchIds)
+        assertTrue(fakeDao.items.single().isSynced)
+    }
+
+    @Test
+    fun `a draft the server refuses for good is dropped and its reason shown`() = runTest {
+        fakeDao.insertSample(draft("sample-1", "A-01", batchId = "batch-1"))
+        fakeRepo.submitResult = AppResult.Failure(AppError.Conflict("La prescripcion ya fue emitida"))
+        val viewModel = SamplingSessionViewModel(useCase, fakeRepo, fakeDao, fakeContext)
+
+        viewModel.initSession("plot-1", "Lote Norte", 2026)
+
+        assertTrue(fakeDao.items.isEmpty())
+        assertTrue(viewModel.uiState.value.samples.isEmpty())
+        assertEquals("La prescripcion ya fue emitida", viewModel.uiState.value.rejectedMessage)
+    }
+
+    @Test
+    fun `finishing with every tree already synced sends nothing again`() = runTest {
+        fakeDao.insertSample(draft("sample-1", "A-01", synced = true, batchId = "batch-1"))
+        val viewModel = SamplingSessionViewModel(useCase, fakeRepo, fakeDao, fakeContext)
+        viewModel.initSession("plot-1", "Lote Norte", 2026)
+        var finished: SamplingSummary? = null
+
+        viewModel.submitCurrentBatch(onSuccess = { finished = it })
+
+        assertTrue(fakeRepo.submittedBatchIds.isEmpty())
+        assertTrue(finished != null)
     }
 }

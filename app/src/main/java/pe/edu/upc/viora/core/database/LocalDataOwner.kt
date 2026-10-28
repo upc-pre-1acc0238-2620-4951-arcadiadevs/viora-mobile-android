@@ -40,6 +40,12 @@ class LocalDataOwner @Inject constructor(
     }
 
     /**
+     * Called when the producer signs out: everything of the account leaves the phone, so whoever uses it next sees
+     * nothing of the farm. The onboarding answers stay, like on [claimFor].
+     */
+    suspend fun release() = claimFor(null)
+
+    /**
      * A session saved before the owner was recorded adopts the data on the phone instead of losing
      * it, so records still waiting to sync survive the update.
      */

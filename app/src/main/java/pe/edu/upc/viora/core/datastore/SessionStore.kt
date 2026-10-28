@@ -21,31 +21,33 @@ data class StoredSession(
 )
 
 /**
- * Persists the session of the signed-in producer.
- *
- * Known gap: values are stored unencrypted in app-private DataStore. Encrypt them with an
- * Android Keystore key (report: AES-256-GCM).
+ * Persists the session of the signed-in producer. Both tokens are encrypted with [cipher] (an Android Keystore key)
+ * before they reach the app-private DataStore.
  */
 @Singleton
-class SessionStore @Inject constructor(private val dataStore: DataStore<Preferences>) {
+class SessionStore @Inject constructor(
+    private val dataStore: DataStore<Preferences>,
+    private val cipher: TokenCipher,
+) {
 
     val isSignedIn: Flow<Boolean> = dataStore.data.map { !it[ACCESS_TOKEN].isNullOrBlank() }
 
-    suspend fun accessToken(): String? = dataStore.data.first()[ACCESS_TOKEN]
+    suspend fun accessToken(): String? = dataStore.data.first()[ACCESS_TOKEN]?.let(cipher::decrypt)
 
-    suspend fun refreshToken(): String? = dataStore.data.first()[REFRESH_TOKEN]
+    suspend fun refreshToken(): String? = dataStore.data.first()[REFRESH_TOKEN]?.let(cipher::decrypt)
 
     suspend fun session(): StoredSession? {
         val prefs = dataStore.data.first()
-        val access = prefs[ACCESS_TOKEN]?.takeIf { it.isNotBlank() } ?: return null
-        val refresh = prefs[REFRESH_TOKEN]?.takeIf { it.isNotBlank() } ?: return null
+        // A token that cannot be decrypted (the key was lost) means signing in again
+        val access = prefs[ACCESS_TOKEN]?.takeIf { it.isNotBlank() }?.let(cipher::decrypt) ?: return null
+        val refresh = prefs[REFRESH_TOKEN]?.takeIf { it.isNotBlank() }?.let(cipher::decrypt) ?: return null
         return StoredSession(access, refresh, prefs[EXPIRES_AT] ?: 0L, prefs[USER_ID])
     }
 
     suspend fun save(session: StoredSession) {
         dataStore.edit {
-            it[ACCESS_TOKEN] = session.accessToken
-            it[REFRESH_TOKEN] = session.refreshToken
+            it[ACCESS_TOKEN] = cipher.encrypt(session.accessToken)
+            it[REFRESH_TOKEN] = cipher.encrypt(session.refreshToken)
             it[EXPIRES_AT] = session.expiresAtMillis
             if (session.userId != null) it[USER_ID] = session.userId else it.remove(USER_ID)
         }

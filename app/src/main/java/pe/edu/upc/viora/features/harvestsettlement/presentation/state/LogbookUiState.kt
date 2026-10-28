@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.harvestsettlement.presentation.state
 
+import pe.edu.upc.viora.core.domain.isConnectivity
 import java.time.Instant
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementStatus
@@ -62,7 +63,7 @@ sealed interface LogbookUiState {
         val lastPlotRefresh: Instant?,
         val isRefreshing: Boolean,
     ) : LogbookUiState {
-        val offline: Boolean get() = refreshError is AppError.Offline || refreshError is AppError.Timeout
+        val offline: Boolean get() = refreshError.isConnectivity
         val isEmpty: Boolean get() = groups.isEmpty() && activeSampling == null
     }
 }

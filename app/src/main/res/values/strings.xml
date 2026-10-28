@@ -1493,6 +1493,13 @@
     <string name="account_home_tour_replay">Replay</string>
     <string name="account_animated_voice_label">Animated Viora voice</string>
     <string name="account_sign_out">Log out</string>
+    <string name="account_sign_out_unsent_title">Records not sent yet</string>
+    <plurals name="account_sign_out_unsent_body">
+        <item quantity="one">%1$d record is still only on this phone. If you log out now it will be lost.</item>
+        <item quantity="other">%1$d records are still only on this phone. If you log out now they will be lost.</item>
+    </plurals>
+    <string name="account_sign_out_unsent_keep">Stay signed in</string>
+    <string name="account_sign_out_unsent_confirm">Log out anyway</string>
     <string name="account_version_footer">Viora %1$s · Android</string>
     <string name="account_language_notice">Language: English</string>
 
@@ -1877,6 +1884,14 @@
     </plurals>
     <string name="plan_extension_item_history">Your plots and history stay the same</string>
     <string name="plan_extension_total">YOU PAY TODAY</string>
+    <plurals name="plan_extension_item_days">
+        <item quantity="one">You only pay the day left</item>
+        <item quantity="other">You only pay the %1$d days left</item>
+    </plurals>
+    <plurals name="plan_extension_breakdown_days">
+        <item quantity="one">%2$s ha × %3$s per ha for %1$d day · VAT included</item>
+        <item quantity="other">%2$s ha × %3$s per ha for %1$d days · VAT included</item>
+    </plurals>
     <plurals name="plan_extension_breakdown">
         <item quantity="one">%2$s ha × %3$s a month × %1$d month · VAT included</item>
         <item quantity="other">%2$s ha × %3$s a month × %1$d months · VAT included</item>

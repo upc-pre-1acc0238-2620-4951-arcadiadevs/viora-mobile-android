@@ -26,6 +26,12 @@ interface DraftTreeSampleDao {
     @Query("UPDATE draft_tree_samples SET is_synced = 1 WHERE id = :sampleId")
     suspend fun markSampleAsSynced(sampleId: String)
 
+    @Query("UPDATE draft_tree_samples SET batch_id = :batchId WHERE id = :sampleId")
+    suspend fun setBatchId(sampleId: String, batchId: String)
+
+    @Query("DELETE FROM draft_tree_samples WHERE id = :sampleId")
+    suspend fun deleteSample(sampleId: String)
+
     @Query("DELETE FROM draft_tree_samples WHERE plot_id = :plotId AND campaign_year = :campaignYear")
     suspend fun clearSamples(plotId: String, campaignYear: Int)
 }

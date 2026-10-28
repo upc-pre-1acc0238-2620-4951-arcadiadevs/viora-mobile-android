@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel
 
+import pe.edu.upc.viora.core.domain.isConnectivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -75,7 +76,7 @@ class CampaignPlanViewModel @Inject constructor(
             // Nothing on the phone yet: wait for the first answer before saying there are no plots.
             isLoading = plots.isEmpty() && !refresh.hasFinishedOnce,
             isRefreshing = refresh.isRefreshing,
-            isOffline = refresh.error is AppError.Offline || refresh.error is AppError.Timeout,
+            isOffline = refresh.error.isConnectivity,
             error = refresh.error,
             lastRefresh = lastRefresh,
             hasUnreadAlerts = unread,

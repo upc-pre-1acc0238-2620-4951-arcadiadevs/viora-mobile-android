@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.phenology.presentation.viewmodel
 
+import pe.edu.upc.viora.core.domain.isConnectivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -140,7 +141,7 @@ class HarvestHistoryViewModel @Inject constructor(
             missingYears = HarvestPresenter.missingYears(summary.missing, suggestedYear),
             summary = summary,
             suggestedYear = suggestedYear,
-            offline = refresh.error is AppError.Offline || refresh.error is AppError.Timeout,
+            offline = refresh.error.isConnectivity,
             lastRefresh = cache.lastRefresh,
             isRefreshing = refresh.isRefreshing,
             newRecordId = extra.newRecordId,

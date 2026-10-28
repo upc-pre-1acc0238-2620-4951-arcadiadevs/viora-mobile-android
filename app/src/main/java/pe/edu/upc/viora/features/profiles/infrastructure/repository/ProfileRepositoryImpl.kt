@@ -6,6 +6,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import pe.edu.upc.viora.core.datastore.SessionStore
+import pe.edu.upc.viora.core.di.SessionFree
 import pe.edu.upc.viora.core.database.LocalDataOwner
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
@@ -27,6 +28,8 @@ import pe.edu.upc.viora.features.profiles.infrastructure.remote.UpdateProfileReq
 @Singleton
 class ProfileRepositoryImpl @Inject constructor(
     private val service: ProfileService,
+    /** The same routes without the session interceptors: signing out must not renew the token it revokes. */
+    @SessionFree private val sessionFreeService: ProfileService,
     private val apiCaller: ApiCaller,
     private val profileStore: ProfileStore,
     private val sessionStore: SessionStore,
@@ -99,12 +102,15 @@ class ProfileRepositoryImpl @Inject constructor(
         }
 
     override suspend fun signOut() {
-        // The server forgets the refresh token; offline it simply expires. Either way the phone forgets it.
+        // The server forgets the refresh token; offline it simply expires. Either way the phone forgets it. The call
+        // goes without a session, so it never renews (and rotates) the token it is about to send.
         sessionStore.refreshToken()?.let { refreshToken ->
-            apiCaller.callUnit { service.signOut(RefreshTokenRequest(refreshToken)) }
+            apiCaller.callUnit { sessionFreeService.signOut(RefreshTokenRequest(refreshToken)) }
         }
         sessionStore.clear()
         profileStore.clear()
+        // Nothing of the farm stays on the phone for whoever uses it next.
+        localDataOwner.release()
     }
 
     override suspend fun deleteAccount(password: String): AppResult<Unit> =

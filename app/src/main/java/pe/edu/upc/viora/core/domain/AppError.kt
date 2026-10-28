@@ -48,3 +48,10 @@ sealed interface AppError {
     /** Anything else, including malformed responses. Keep the cause for logging. */
     data class Unknown(val cause: Throwable? = null) : AppError
 }
+
+/**
+ * Whether the error means the server could not be reached in time: no connection or a timeout (a cold start, a weak
+ * signal in the field). Screens show their "offline, data saved" notice for both.
+ */
+val AppError?.isConnectivity: Boolean
+    get() = this == AppError.Offline || this == AppError.Timeout

@@ -82,7 +82,11 @@ object NetworkModule {
                 // Never log bearer tokens, even in debug builds.
                 redactHeader("Authorization")
             }
-            addInterceptor(logging)
+            // The auth routes carry passwords, tokens and reset links in their bodies and paths: never logged.
+            addInterceptor { chain ->
+                if (chain.request().url.encodedPath.contains("/auth/")) chain.proceed(chain.request())
+                else logging.intercept(chain)
+            }
         }
     }
 

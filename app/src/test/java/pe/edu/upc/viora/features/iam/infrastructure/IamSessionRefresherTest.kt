@@ -23,6 +23,7 @@ import org.junit.Test
 import pe.edu.upc.viora.features.iam.InMemoryPreferences
 import pe.edu.upc.viora.core.datastore.SessionEvents
 import pe.edu.upc.viora.core.datastore.SessionStore
+import pe.edu.upc.viora.core.datastore.TokenCipher
 import pe.edu.upc.viora.core.datastore.StoredSession
 import pe.edu.upc.viora.features.iam.infrastructure.remote.IamService
 import pe.edu.upc.viora.features.iam.infrastructure.session.IamSessionRefresher
@@ -42,7 +43,7 @@ class IamSessionRefresherTest {
     fun setUp() {
         server.start()
         val dataStore = InMemoryPreferences()
-        store = SessionStore(dataStore)
+        store = SessionStore(dataStore, TokenCipher.PLAIN)
         val json = Json { ignoreUnknownKeys = true }
         val service = Retrofit.Builder()
             .baseUrl(server.url("/api/v1/"))
@@ -127,6 +128,15 @@ class IamSessionRefresherTest {
     fun `offline keeps the current token and the session`() {
         saveSession(expiresInMillis = 0)
         server.shutdown()
+
+        assertEquals("old-access", refresher.freshAccessToken())
+        assertEquals("old-refresh", runBlocking { store.session() }!!.refreshToken)
+    }
+
+    @Test
+    fun `an unexpected 200 body keeps the current token instead of crashing`() {
+        saveSession(expiresInMillis = 0)
+        server.enqueue(MockResponse().setBody("<html>proxy page</html>"))
 
         assertEquals("old-access", refresher.freshAccessToken())
         assertEquals("old-refresh", runBlocking { store.session() }!!.refreshToken)

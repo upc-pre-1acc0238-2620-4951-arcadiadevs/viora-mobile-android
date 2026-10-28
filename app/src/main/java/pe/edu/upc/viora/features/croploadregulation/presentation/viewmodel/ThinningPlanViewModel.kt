@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel
 
+import pe.edu.upc.viora.core.domain.isConnectivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -75,7 +76,7 @@ class ThinningPlanViewModel @Inject constructor(
                 today = LocalDate.now(clock),
                 syncedAt = cached.syncedAt,
                 isRefreshing = refresh.isRefreshing,
-                offline = refresh.error is AppError.Offline || refresh.error is AppError.Timeout,
+                offline = refresh.error.isConnectivity,
             )
             refresh.isRefreshing || !refresh.hasFinishedOnce -> ThinningPlanUiState.Loading
             else -> ThinningPlanUiState.Error(refresh.error ?: AppError.Unknown())
