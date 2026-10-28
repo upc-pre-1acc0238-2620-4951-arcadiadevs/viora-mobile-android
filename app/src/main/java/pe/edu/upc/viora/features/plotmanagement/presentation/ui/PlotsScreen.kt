@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.ui
 
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.planLimitDetail
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -252,7 +253,8 @@ private fun ArchivedPlot(plot: Plot, isRestoring: Boolean, canRestore: Boolean, 
 @Composable
 private fun RestoreError(error: AppError) {
     Text(
-        text = stringResource(R.string.plots_restore_failed, stringResource(error.messageRes())),
+        // A plot that does not fit in the plan gets the server's own explanation
+        text = stringResource(R.string.plots_restore_failed, error.planLimitDetail() ?: stringResource(error.messageRes())),
         style = MaterialTheme.typography.bodyMedium,
         color = Terracotta700,
         modifier = Modifier

@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel
 
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.planLimitDetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -82,7 +83,13 @@ class EditPlotViewModel @Inject constructor(
         }
     }
 
-    private fun AppError.toFailure(): EditFailure = when (this) {
+    private fun AppError.toFailure(): EditFailure = when {
+        // Enlarging the plot beyond the plan: the server explains it
+        planLimitDetail() != null -> EditFailure.Rejected(planLimitDetail())
+        else -> toOtherFailure()
+    }
+
+    private fun AppError.toOtherFailure(): EditFailure = when (this) {
         is AppError.Conflict -> EditFailure.NameTaken
         is AppError.PreconditionFailed -> EditFailure.Outdated
         is AppError.Validation -> EditFailure.Rejected(detail)

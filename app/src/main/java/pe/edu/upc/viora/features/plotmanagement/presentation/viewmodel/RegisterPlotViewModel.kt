@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel
 
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.planLimitDetail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -196,7 +197,13 @@ class RegisterPlotViewModel @Inject constructor(
         return true
     }
 
-    private fun RegisterPlotUiState.afterSaveFailure(error: AppError): RegisterPlotUiState = when (error) {
+    private fun RegisterPlotUiState.afterSaveFailure(error: AppError): RegisterPlotUiState = when {
+        // No plan in force, or the plots would not fit in its hectares: the server explains it
+        error.planLimitDetail() != null -> copy(isSaving = false, saveFailure = SaveFailure.Rejected(error.planLimitDetail()))
+        else -> afterOtherSaveFailure(error)
+    }
+
+    private fun RegisterPlotUiState.afterOtherSaveFailure(error: AppError): RegisterPlotUiState = when (error) {
         // A taken name is fixed in the details step, so take the producer there.
         is AppError.Conflict -> copy(isSaving = false, saveFailure = SaveFailure.NameTaken, step = RegisterPlotStep.DETAILS)
         is AppError.Validation -> copy(isSaving = false, saveFailure = SaveFailure.Rejected(error.detail))
