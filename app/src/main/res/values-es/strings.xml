@@ -1498,6 +1498,14 @@
     <string name="account_home_tour_replay">Ver de nuevo</string>
     <string name="account_animated_voice_label">Voz de Viora animada</string>
     <string name="account_sign_out">Cerrar sesión</string>
+    <string name="account_sign_out_unsent_title">Registros sin enviar</string>
+    <plurals name="account_sign_out_unsent_body">
+        <item quantity="one">%1$d registro sigue solo en este teléfono. Si cierras sesión ahora, se perderá.</item>
+        <item quantity="many">%1$d registros siguen solo en este teléfono. Si cierras sesión ahora, se perderán.</item>
+        <item quantity="other">%1$d registros siguen solo en este teléfono. Si cierras sesión ahora, se perderán.</item>
+    </plurals>
+    <string name="account_sign_out_unsent_keep">Seguir conectado</string>
+    <string name="account_sign_out_unsent_confirm">Cerrar sesión igual</string>
     <string name="account_version_footer">Viora %1$s · Android</string>
     <string name="account_language_notice">Idioma: Español</string>
 

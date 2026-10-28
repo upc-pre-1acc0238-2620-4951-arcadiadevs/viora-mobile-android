@@ -15,4 +15,8 @@ data class AccountUiState(
     val animatedVoice: Boolean = true,
     val isSigningOut: Boolean = false,
     val isSignedOut: Boolean = false,
+    /** Samples, settlements and notes still on the phone only: signing out would lose them. */
+    val unsentRecords: Int = 0,
+    /** The producer tapped "Cerrar sesión" with [unsentRecords] waiting: ask before losing them. */
+    val confirmingSignOut: Boolean = false,
 )

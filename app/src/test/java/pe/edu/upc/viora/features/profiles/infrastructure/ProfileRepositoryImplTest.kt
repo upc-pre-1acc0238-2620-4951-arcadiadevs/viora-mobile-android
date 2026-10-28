@@ -57,6 +57,7 @@ class ProfileRepositoryImplTest {
             .create(ProfileService::class.java)
         repository = ProfileRepositoryImpl(
             service = service,
+            sessionFreeService = service,
             apiCaller = ApiCaller(ApiErrorMapper(json), UnconfinedTestDispatcher()),
             profileStore = profileStore,
             sessionStore = sessionStore,
@@ -117,6 +118,8 @@ class ProfileRepositoryImplTest {
         assertEquals("""{"refreshToken":"old-refresh"}""", server.takeRequest().body.readUtf8())
         assertNull(sessionStore.session())
         assertNull(profileStore.getProfile())
+        // Nothing of the farm stays on the phone
+        assertEquals(1, wipes)
     }
 
     @Test
