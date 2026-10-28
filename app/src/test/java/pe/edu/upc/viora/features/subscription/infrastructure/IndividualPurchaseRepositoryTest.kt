@@ -49,7 +49,7 @@ private class PurchaseJournalFake : IndividualPurchaseDao {
 class IndividualPurchaseRepositoryTest {
     private val server = MockWebServer()
     private val journal = PurchaseJournalFake()
-    private val sessions = SessionStore(InMemoryPreferences())
+    private val sessions = SessionStore(InMemoryPreferences(), TokenCipher.PLAIN)
     private val json = Json { ignoreUnknownKeys = true }
     private val id = UUID.randomUUID().toString()
     private val intent = UUID.randomUUID().toString()
