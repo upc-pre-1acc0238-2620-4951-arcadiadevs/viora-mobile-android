@@ -1877,6 +1877,14 @@
     </plurals>
     <string name="plan_extension_item_history">Your plots and history stay the same</string>
     <string name="plan_extension_total">YOU PAY TODAY</string>
+    <plurals name="plan_extension_item_days">
+        <item quantity="one">You only pay the day left</item>
+        <item quantity="other">You only pay the %1$d days left</item>
+    </plurals>
+    <plurals name="plan_extension_breakdown_days">
+        <item quantity="one">%2$s ha × %3$s per ha for %1$d day · VAT included</item>
+        <item quantity="other">%2$s ha × %3$s per ha for %1$d days · VAT included</item>
+    </plurals>
     <plurals name="plan_extension_breakdown">
         <item quantity="one">%2$s ha × %3$s a month × %1$d month · VAT included</item>
         <item quantity="other">%2$s ha × %3$s a month × %1$d months · VAT included</item>

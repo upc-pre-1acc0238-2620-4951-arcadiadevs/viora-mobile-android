@@ -23,6 +23,10 @@ data class ExtensionTermsDto(
     val currency: String? = null,
     @Serializable(with = ProducerPlanDecimalSerializer::class) val minimumHa: BigDecimal? = null,
     @Serializable(with = ProducerPlanDecimalSerializer::class) val incrementHa: BigDecimal? = null,
+    /** Days the extension bills (backend 0.59.0 on); null on older backends. */
+    val billableDays: Int? = null,
+    /** Price of one hectare for those days, IGV included; total = hectares × rate, rounded to cents. */
+    @Serializable(with = ProducerPlanDecimalSerializer::class) val extensionRatePerHa: BigDecimal? = null,
 )
 
 @Serializable

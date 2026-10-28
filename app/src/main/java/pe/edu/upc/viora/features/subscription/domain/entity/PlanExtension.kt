@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.subscription.domain.entity
 
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.Instant
 
 /** How the plan in force can grow now, as the backend decides it (GET extension-terms). */
@@ -19,8 +20,10 @@ enum class ExtensionAction {
 }
 
 /**
- * The terms of a paid extension. [monthlyRatePerHa] already includes the tax, so the total is
- * hectares × rate × [billableMonths], the same product the backend charges.
+ * The terms of a paid extension. The backend prorates it by the days left of the plan and publishes the price of one
+ * hectare for those days, IGV included, as [ratePerHa]: the total is hectares × [ratePerHa] rounded to cents, the
+ * same product the backend charges. [billableDays] is null against a backend older than 0.59.0, which billed whole
+ * months; [ratePerHa] is then the monthly rate × [billableMonths].
  */
 data class ExtensionPricing(
     val billableMonths: Int,
@@ -28,9 +31,11 @@ data class ExtensionPricing(
     val currency: String,
     val minimum: BigDecimal,
     val increment: BigDecimal,
+    val billableDays: Int? = null,
+    val ratePerHa: BigDecimal = monthlyRatePerHa.multiply(BigDecimal(billableMonths)),
 ) {
     fun total(addedHectares: BigDecimal): BigDecimal =
-        addedHectares.multiply(monthlyRatePerHa).multiply(BigDecimal(billableMonths))
+        addedHectares.multiply(ratePerHa).setScale(2, RoundingMode.HALF_UP)
 }
 
 data class PlanExtensionTerms(

@@ -1883,6 +1883,16 @@
     </plurals>
     <string name="plan_extension_item_history">Tus lotes y tu historial siguen igual</string>
     <string name="plan_extension_total">PAGAS HOY</string>
+    <plurals name="plan_extension_item_days">
+        <item quantity="one">Pagas solo el día que queda</item>
+        <item quantity="many">Pagas solo los %1$d días que quedan</item>
+        <item quantity="other">Pagas solo los %1$d días que quedan</item>
+    </plurals>
+    <plurals name="plan_extension_breakdown_days">
+        <item quantity="one">%2$s ha × %3$s por ha por %1$d día · Incluye IGV</item>
+        <item quantity="many">%2$s ha × %3$s por ha por %1$d días · Incluye IGV</item>
+        <item quantity="other">%2$s ha × %3$s por ha por %1$d días · Incluye IGV</item>
+    </plurals>
     <plurals name="plan_extension_breakdown">
         <item quantity="one">%2$s ha × %3$s al mes × %1$d mes · Incluye IGV</item>
         <item quantity="many">%2$s ha × %3$s al mes × %1$d meses · Incluye IGV</item>

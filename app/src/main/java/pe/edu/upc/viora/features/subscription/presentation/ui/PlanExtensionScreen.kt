@@ -244,11 +244,13 @@ private fun QuotaGrowthBar(state: PlanExtensionUiState.Selecting) {
 private fun ExtensionSummary(state: PlanExtensionUiState.Selecting) {
     val locale = LocalConfiguration.current.locales[0]
     val months = state.pricing.billableMonths
+    val days = state.pricing.billableDays
     val items = listOf(
         stringResource(R.string.plan_extension_item_quota, formatPlanCapacity(state.quotaHectares, locale),
             formatPlanCapacity(state.newQuota, locale)),
         stringResource(R.string.plan_extension_item_end, planDate(state.endsAt) ?: "—"),
-        pluralStringResource(R.plurals.plan_extension_item_months, months, months),
+        if (days != null) pluralStringResource(R.plurals.plan_extension_item_days, days, days)
+        else pluralStringResource(R.plurals.plan_extension_item_months, months, months),
         stringResource(R.string.plan_extension_item_history),
     )
     Column(Modifier.padding(vertical = Spacing.lg), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
@@ -267,15 +269,21 @@ private fun ExtensionPrice(state: PlanExtensionUiState.Selecting) {
     val locale = LocalConfiguration.current.locales[0]
     val currency = state.pricing.currency
     val months = state.pricing.billableMonths
+    val days = state.pricing.billableDays
     Text(stringResource(R.string.plan_extension_total), Modifier.padding(top = Spacing.lg),
         style = EditorialEyebrow, color = Neutral600)
     Text(formatPlanMoney(state.total, currency, locale), Modifier.testTag("plan-extension-total").drawBehind {
         drawLine(Harvest300.copy(alpha = 0.55f), Offset(0f, size.height * 0.82f),
             Offset(size.width, size.height * 0.82f), strokeWidth = size.height * 0.16f)
     }, style = EditorialPrice, color = Neutral900)
-    Text(pluralStringResource(R.plurals.plan_extension_breakdown, months, months,
-        formatPlanCapacity(state.addedHectares, locale), formatPlanMoney(state.pricing.monthlyRatePerHa, currency, locale)),
-        style = MaterialTheme.typography.bodySmall, color = Neutral700)
+    val breakdown = if (days != null) {
+        pluralStringResource(R.plurals.plan_extension_breakdown_days, days, days,
+            formatPlanCapacity(state.addedHectares, locale), formatPlanMoney(state.pricing.ratePerHa, currency, locale))
+    } else {
+        pluralStringResource(R.plurals.plan_extension_breakdown, months, months,
+            formatPlanCapacity(state.addedHectares, locale), formatPlanMoney(state.pricing.monthlyRatePerHa, currency, locale))
+    }
+    Text(breakdown, style = MaterialTheme.typography.bodySmall, color = Neutral700)
 }
 
 /** P04 for an extension: confirming, approved ("Tu plan creció"), rejected or not confirmed yet. */
