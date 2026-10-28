@@ -133,6 +133,15 @@ class IamSessionRefresherTest {
     }
 
     @Test
+    fun `an unexpected 200 body keeps the current token instead of crashing`() {
+        saveSession(expiresInMillis = 0)
+        server.enqueue(MockResponse().setBody("<html>proxy page</html>"))
+
+        assertEquals("old-access", refresher.freshAccessToken())
+        assertEquals("old-refresh", runBlocking { store.session() }!!.refreshToken)
+    }
+
+    @Test
     fun `no session means no token`() {
         assertNull(refresher.freshAccessToken())
     }
