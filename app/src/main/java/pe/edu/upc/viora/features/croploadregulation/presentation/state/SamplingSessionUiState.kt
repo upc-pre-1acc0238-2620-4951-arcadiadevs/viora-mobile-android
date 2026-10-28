@@ -18,6 +18,8 @@ data class SamplingSessionUiState(
     val hasRecoveredConnection: Boolean = false,
     val syncedOnResumeCount: Int = 0,
     val error: AppError? = null,
+    /** Why the server refused trees for good (for example, the prescription was already issued); they were dropped. */
+    val rejectedMessage: String? = null,
 ) {
     val evaluatedTreesCount: Int
         get() = submissionSummary?.evaluatedTreesCount ?: samples.size

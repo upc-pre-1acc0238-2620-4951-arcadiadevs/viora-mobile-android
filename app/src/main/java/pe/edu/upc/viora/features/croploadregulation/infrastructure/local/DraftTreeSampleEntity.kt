@@ -30,4 +30,10 @@ data class DraftTreeSampleEntity(
     val isSynced: Boolean = false,
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),
+    /**
+     * The client batch id this draft is sent with, every time: a retry of a batch the server already took is then a
+     * replay it ignores, never a second round. Null only for drafts saved before version 15 of the database.
+     */
+    @ColumnInfo(name = "batch_id")
+    val batchId: String? = null,
 )

@@ -18,6 +18,7 @@ fun TreeSample.toEntity(
     plotId: String,
     plotName: String,
     campaignYear: Int,
+    batchId: String? = null,
 ): DraftTreeSampleEntity = DraftTreeSampleEntity(
     id = "$plotId-$treeIdentifier",
     plotId = plotId,
@@ -30,4 +31,5 @@ fun TreeSample.toEntity(
     trunkDiameterMm = trunkDiameterMm,
     observedOn = observedOn.toString(),
     isSynced = isSynced,
+    batchId = batchId,
 )

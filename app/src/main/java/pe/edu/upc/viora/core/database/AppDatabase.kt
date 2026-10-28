@@ -70,7 +70,7 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
         AgronomicDossierEntity::class,
         FieldNoteEntity::class,
     ],
-    version = 14,
+    version = 15,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
