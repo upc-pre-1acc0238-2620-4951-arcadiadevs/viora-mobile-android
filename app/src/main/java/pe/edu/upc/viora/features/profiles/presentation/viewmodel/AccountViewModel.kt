@@ -15,15 +15,15 @@ import pe.edu.upc.viora.core.locale.AppLanguage
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObservePendingDraftSamplesCountUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePendingSettlementsUseCase
 import pe.edu.upc.viora.features.home.application.usecase.RestartHomeTourUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.SignOutUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveFieldNotesUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteSyncState
-import pe.edu.upc.viora.features.profiles.application.usecase.CheckMembershipUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveAnimatedVoiceUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveProfileUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.RefreshProfileUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.SetAnimatedVoiceUseCase
-import pe.edu.upc.viora.features.profiles.application.usecase.SignOutUseCase
 import pe.edu.upc.viora.features.profiles.presentation.state.AccountUiState
+import pe.edu.upc.viora.features.subscription.application.usecase.GetCurrentSubscriptionUseCase
 
 /**
  * P95 · Mi cuenta. The language itself is switched by the screen (it needs the activity); this
@@ -33,7 +33,7 @@ import pe.edu.upc.viora.features.profiles.presentation.state.AccountUiState
 class AccountViewModel @Inject constructor(
     observeProfile: ObserveProfileUseCase,
     private val refreshProfile: RefreshProfileUseCase,
-    private val checkMembership: CheckMembershipUseCase,
+    private val getCurrentSubscription: GetCurrentSubscriptionUseCase,
     private val restartHomeTour: RestartHomeTourUseCase,
     private val signOut: SignOutUseCase,
     observeAnimatedVoice: ObserveAnimatedVoiceUseCase,
@@ -60,8 +60,8 @@ class AccountViewModel @Inject constructor(
         }
         viewModelScope.launch { refreshProfile() }
         viewModelScope.launch {
-            val membership = checkMembership()
-            if (membership is AppResult.Success) _uiState.update { it.copy(isMember = membership.value) }
+            val subscription = getCurrentSubscription()
+            if (subscription is AppResult.Success) _uiState.update { it.copy(isMember = subscription.value?.entitlementActive == true) }
         }
     }
 

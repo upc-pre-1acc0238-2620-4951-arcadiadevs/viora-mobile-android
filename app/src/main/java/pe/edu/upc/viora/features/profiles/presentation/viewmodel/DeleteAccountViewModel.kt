@@ -1,6 +1,5 @@
 package pe.edu.upc.viora.features.profiles.presentation.viewmodel
 
-import pe.edu.upc.viora.core.domain.isConnectivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,13 +11,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.isConnectivity
+import pe.edu.upc.viora.features.iam.application.usecase.DeleteAccountUseCase
+import pe.edu.upc.viora.features.iam.domain.repository.AuthRepository
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
-import pe.edu.upc.viora.features.profiles.application.usecase.CheckMembershipUseCase
-import pe.edu.upc.viora.features.profiles.application.usecase.DeleteAccountUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveProfileUseCase
-import pe.edu.upc.viora.features.profiles.domain.repository.ProfileRepository
 import pe.edu.upc.viora.features.profiles.presentation.state.DeleteAccountError
 import pe.edu.upc.viora.features.profiles.presentation.state.DeleteAccountUiState
+import pe.edu.upc.viora.features.subscription.application.usecase.GetCurrentSubscriptionUseCase
 
 /**
  * P100 · Eliminar cuenta: the producer types the password, ticks "Entiendo", confirms in the sheet, and the account
@@ -27,7 +27,7 @@ import pe.edu.upc.viora.features.profiles.presentation.state.DeleteAccountUiStat
 @HiltViewModel
 class DeleteAccountViewModel @Inject constructor(
     private val deleteAccount: DeleteAccountUseCase,
-    private val checkMembership: CheckMembershipUseCase,
+    private val getCurrentSubscription: GetCurrentSubscriptionUseCase,
     observePlots: ObservePlotsUseCase,
     observeProfile: ObserveProfileUseCase,
 ) : ViewModel() {
@@ -47,8 +47,8 @@ class DeleteAccountViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            val membership = checkMembership()
-            if (membership is AppResult.Success) _uiState.update { it.copy(hasActivePlan = membership.value) }
+            val subscription = getCurrentSubscription()
+            if (subscription is AppResult.Success) _uiState.update { it.copy(hasActivePlan = subscription.value?.entitlementActive == true) }
         }
     }
 
@@ -77,7 +77,7 @@ class DeleteAccountViewModel @Inject constructor(
     }
 
     private fun AppError.toDeleteError(): DeleteAccountError = when {
-        this is AppError.Validation && code == ProfileRepository.WRONG_CURRENT_PASSWORD -> DeleteAccountError.WRONG_PASSWORD
+        this is AppError.Validation && code == AuthRepository.WRONG_CURRENT_PASSWORD -> DeleteAccountError.WRONG_PASSWORD
         this is AppError.Forbidden -> DeleteAccountError.PROTECTED_ACCOUNT
         this.isConnectivity -> DeleteAccountError.OFFLINE
         else -> DeleteAccountError.GENERIC

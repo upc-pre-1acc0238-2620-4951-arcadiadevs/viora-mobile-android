@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.features.iam.domain.valueobject.OnboardingAnswers
-import pe.edu.upc.viora.features.iam.infrastructure.local.OnboardingStore
+import pe.edu.upc.viora.features.iam.domain.repository.OnboardingAnswersRepository
 import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
 import pe.edu.upc.viora.features.iam.presentation.state.OnboardingStep
 import pe.edu.upc.viora.features.iam.presentation.state.OnboardingUiState
@@ -21,7 +21,7 @@ import pe.edu.upc.viora.features.iam.presentation.state.OnboardingUiState
  * producer moves on, and an earlier run is picked up where its answers left off.
  */
 @HiltViewModel
-class OnboardingViewModel @Inject constructor(private val store: OnboardingStore) : ViewModel() {
+class OnboardingViewModel @Inject constructor(private val store: OnboardingAnswersRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()

@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.iam.infrastructure.remote
 
 import kotlinx.serialization.Serializable
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -83,4 +84,11 @@ interface IamService {
     /** 204 on success. The token identifies the account, so no email is sent. */
     @PUT("auth/password-reset-tokens/{token}")
     suspend fun resetPassword(@Path("token") token: String, @Body request: NewPasswordRequest)
+
+    /**
+     * Forgets [request]'s refresh token on the server. It goes out without the session interceptors, so
+     * it never renews (and rotates) the token it is about to revoke.
+     */
+    @POST("auth/sign-out")
+    suspend fun signOut(@Body request: RefreshTokenRequest): Response<Unit>
 }

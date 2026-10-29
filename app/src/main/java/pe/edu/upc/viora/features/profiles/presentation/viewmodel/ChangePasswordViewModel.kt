@@ -1,6 +1,5 @@
 package pe.edu.upc.viora.features.profiles.presentation.viewmodel
 
-import pe.edu.upc.viora.core.domain.isConnectivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,8 +11,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
-import pe.edu.upc.viora.features.profiles.application.usecase.ChangePasswordUseCase
-import pe.edu.upc.viora.features.profiles.domain.repository.ProfileRepository
+import pe.edu.upc.viora.core.domain.isConnectivity
+import pe.edu.upc.viora.features.iam.application.usecase.ChangePasswordUseCase
+import pe.edu.upc.viora.features.iam.domain.repository.AuthRepository
 import pe.edu.upc.viora.features.profiles.presentation.state.ChangePasswordError
 import pe.edu.upc.viora.features.profiles.presentation.state.ChangePasswordUiState
 
@@ -52,7 +52,7 @@ class ChangePasswordViewModel @Inject constructor(
     private fun failed(state: ChangePasswordUiState, error: AppError): ChangePasswordUiState {
         val idle = state.copy(isLoading = false)
         return when {
-            error is AppError.Validation && error.code == ProfileRepository.WRONG_CURRENT_PASSWORD ->
+            error is AppError.Validation && error.code == AuthRepository.WRONG_CURRENT_PASSWORD ->
                 idle.copy(currentPasswordIncorrect = true)
             // The local rules passed, so the server refused it for one of its own (e.g. a recent password).
             error is AppError.Validation -> idle.copy(newPasswordRejection = error.detail)

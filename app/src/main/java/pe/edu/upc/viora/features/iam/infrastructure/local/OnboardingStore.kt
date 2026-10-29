@@ -10,16 +10,14 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.first
+import pe.edu.upc.viora.features.iam.domain.repository.OnboardingAnswersRepository
 import pe.edu.upc.viora.features.iam.domain.valueobject.OnboardingAnswers
 
-/**
- * Keeps the onboarding answers on the phone, so closing the app in the middle does not lose them
- * (guide 02, section 3.1). Cleared once the email is verified.
- */
+/** The onboarding answers in DataStore. Cleared once the email is verified. */
 @Singleton
-class OnboardingStore @Inject constructor(private val dataStore: DataStore<Preferences>) {
+class OnboardingStore @Inject constructor(private val dataStore: DataStore<Preferences>) : OnboardingAnswersRepository {
 
-    suspend fun answers(): OnboardingAnswers {
+    override suspend fun answers(): OnboardingAnswers {
         val prefs = dataStore.data.first()
         return OnboardingAnswers(
             fullName = prefs[FULL_NAME].orEmpty(),
@@ -32,7 +30,7 @@ class OnboardingStore @Inject constructor(private val dataStore: DataStore<Prefe
         )
     }
 
-    suspend fun save(answers: OnboardingAnswers) {
+    override suspend fun save(answers: OnboardingAnswers) {
         dataStore.edit {
             it[FULL_NAME] = answers.fullName
             it[COUNTRY] = answers.countryIso
@@ -44,7 +42,7 @@ class OnboardingStore @Inject constructor(private val dataStore: DataStore<Prefe
         }
     }
 
-    suspend fun clear() {
+    override suspend fun clear() {
         dataStore.edit { prefs -> ALL_KEYS.forEach { prefs.remove(it) } }
     }
 

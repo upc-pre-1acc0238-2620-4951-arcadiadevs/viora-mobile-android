@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,56 +12,35 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import java.time.Clock
-import pe.edu.upc.viora.core.database.LocalDataOwner
-import pe.edu.upc.viora.core.datastore.SessionStore
-import pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers
-import pe.edu.upc.viora.features.iam.infrastructure.local.OnboardingStore
-import pe.edu.upc.viora.features.iam.infrastructure.remote.AuthSession
-import pe.edu.upc.viora.features.iam.infrastructure.remote.IamService
-import pe.edu.upc.viora.features.iam.infrastructure.remote.NewPasswordRequest
-import pe.edu.upc.viora.features.iam.infrastructure.remote.PasswordResetRequest
-import pe.edu.upc.viora.features.iam.infrastructure.remote.ResendCodeRequest
-import pe.edu.upc.viora.features.iam.infrastructure.remote.SignInRequest
-import pe.edu.upc.viora.features.iam.infrastructure.remote.SignUpProfile
-import pe.edu.upc.viora.features.iam.infrastructure.remote.SignUpRequest
-import pe.edu.upc.viora.features.iam.infrastructure.remote.VerifyEmailRequest
-import pe.edu.upc.viora.features.iam.infrastructure.session.toStoredSession
+import pe.edu.upc.viora.features.iam.application.usecase.CheckPasswordResetLinkUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.RequestPasswordResetUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.ResendCodeUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.ResetPasswordUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.SignInUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.SignUpUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.VerifyEmailUseCase
+import pe.edu.upc.viora.features.iam.domain.model.AuthError
+import pe.edu.upc.viora.features.iam.domain.model.AuthResult
+import pe.edu.upc.viora.features.iam.domain.model.Registration
+import pe.edu.upc.viora.features.iam.domain.repository.OnboardingAnswersRepository
 import pe.edu.upc.viora.features.iam.presentation.state.CodeError
 import pe.edu.upc.viora.features.iam.presentation.state.IamError
 import pe.edu.upc.viora.features.iam.presentation.state.IamStep
 import pe.edu.upc.viora.features.iam.presentation.state.IamUiState
-import retrofit2.HttpException
 
 private const val RESEND_COOLDOWN_SECONDS = 45
 private const val CODE_LENGTH = 6
 
-/** Extra members of the RFC 7807 body that the guide tells the app to branch on (section 3.4). */
-@Serializable
-private data class IamProblem(
-    val code: String? = null,
-    val reason: String? = null,
-    val remainingAttempts: Int? = null,
-    val retryAfterSeconds: Int? = null,
-    val violations: List<String> = emptyList(),
-)
-
-private class Failure(val status: Int?, val problem: IamProblem?, val retryAfterHeader: Int?) {
-    val isOffline: Boolean get() = status == null
-    val retryAfter: Int? get() = problem?.retryAfterSeconds ?: retryAfterHeader
-    fun mentions(prefix: String): Boolean =
-        problem?.reason?.startsWith(prefix) == true || problem?.violations.orEmpty().any { it.startsWith(prefix) }
-}
-
 @HiltViewModel
 class IamViewModel @Inject constructor(
-    private val service: IamService,
-    private val sessionStore: SessionStore,
-    private val localDataOwner: LocalDataOwner,
-    private val onboardingStore: OnboardingStore,
-    private val clock: Clock,
+    private val signInUseCase: SignInUseCase,
+    private val signUpUseCase: SignUpUseCase,
+    private val verifyEmailUseCase: VerifyEmailUseCase,
+    private val resendCodeUseCase: ResendCodeUseCase,
+    private val requestPasswordReset: RequestPasswordResetUseCase,
+    private val checkPasswordResetLink: CheckPasswordResetLinkUseCase,
+    private val resetPassword: ResetPasswordUseCase,
+    private val onboardingStore: OnboardingAnswersRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -76,7 +54,6 @@ class IamViewModel @Inject constructor(
     )
     val uiState: StateFlow<IamUiState> = _uiState.asStateFlow()
 
-    private val lenientJson = Json { ignoreUnknownKeys = true }
     private var countdownJob: Job? = null
     private var resetToken: String? = null
 
@@ -136,21 +113,18 @@ class IamViewModel @Inject constructor(
         val s = _uiState.value
         if (!s.canSignIn || s.loading) return
         request {
-            try {
-                saveSession(service.signIn(SignInRequest(s.email.trim(), s.password)))
-                _uiState.update { it.copy(authenticated = true) }
-            } catch (e: Exception) {
-                val failure = e.asFailure()
-                when {
-                    failure.status == 403 && failure.problem?.code == "EMAIL_VERIFICATION_FORBIDDEN" -> {
+            when (val result = signInUseCase(s.email, s.password)) {
+                is AuthResult.Success -> _uiState.update { it.copy(authenticated = true) }
+                is AuthResult.Failure -> when (result.error) {
+                    AuthError.EmailNotVerified -> {
                         // Right password, unverified email: continue at T04a and send a fresh code.
                         _uiState.update {
                             it.copy(step = IamStep.VERIFY, pendingEmail = s.email.trim(), code = "", codeError = null)
                         }
                         resend()
                     }
-                    failure.status == 403 -> _uiState.update { it.copy(credentialsError = true) }
-                    else -> _uiState.update { it.copy(error = failure.toError()) }
+                    AuthError.InvalidCredentials -> _uiState.update { it.copy(credentialsError = true) }
+                    else -> _uiState.update { it.copy(error = result.error.toIamError()) }
                 }
             }
         }
@@ -162,39 +136,31 @@ class IamViewModel @Inject constructor(
         val s = _uiState.value
         if (!s.canCreateAccount || s.loading) return
         request {
-            try {
-                // The terms were accepted on the onboarding summary ("Al continuar aceptas...").
-                val answers = onboardingStore.answers()
-                val response = service.signUp(
-                    SignUpRequest(
-                        email = s.email.trim(),
-                        password = s.password,
-                        role = PRODUCER_ROLE,
-                        termsAccepted = true,
-                        profile = SignUpProfile(
-                            fullName = answers.fullName.trim(),
-                            country = answers.countryIso,
-                            phoneNumber = MobileNumbers.e164(answers.nationalPhone, answers.countryIso),
-                        ),
-                    ),
-                )
-                _uiState.update {
-                    it.copy(step = IamStep.VERIFY, pendingEmail = response.email, code = "", codeError = null, notice = null)
+            val answers = onboardingStore.answers()
+            val registration = Registration(
+                email = s.email,
+                password = s.password,
+                fullName = answers.fullName,
+                countryIso = answers.countryIso,
+                nationalPhone = answers.nationalPhone,
+            )
+            when (val result = signUpUseCase(registration)) {
+                is AuthResult.Success -> {
+                    _uiState.update {
+                        it.copy(step = IamStep.VERIFY, pendingEmail = result.value, code = "", codeError = null, notice = null)
+                    }
+                    startCountdown(RESEND_COOLDOWN_SECONDS)
                 }
-                startCountdown(RESEND_COOLDOWN_SECONDS)
-            } catch (e: Exception) {
-                val failure = e.asFailure()
-                when {
-                    failure.status == 409 -> _uiState.update { it.copy(emailTaken = true) }
-                    failure.status == 400 && failure.mentions("profile.") ->
-                        _uiState.update { it.copy(error = IamError.PHONE_REJECTED) }
-                    failure.status == 400 -> _uiState.update { it.copy(passwordWeak = true) }
-                    failure.status == 429 -> {
+                is AuthResult.Failure -> when (val error = result.error) {
+                    AuthError.EmailTaken -> _uiState.update { it.copy(emailTaken = true) }
+                    AuthError.PhoneRejected -> _uiState.update { it.copy(error = IamError.PHONE_REJECTED) }
+                    AuthError.WeakPassword -> _uiState.update { it.copy(passwordWeak = true) }
+                    is AuthError.CodeNotYetResendable -> {
                         // The pending account already got a code less than 45 s ago: wait for it.
                         _uiState.update { it.copy(step = IamStep.VERIFY, pendingEmail = s.email.trim(), code = "") }
-                        startCountdown(failure.retryAfter ?: RESEND_COOLDOWN_SECONDS)
+                        startCountdown(error.retryAfterSeconds ?: RESEND_COOLDOWN_SECONDS)
                     }
-                    else -> _uiState.update { it.copy(error = failure.toError()) }
+                    else -> _uiState.update { it.copy(error = error.toIamError()) }
                 }
             }
         }
@@ -204,33 +170,34 @@ class IamViewModel @Inject constructor(
         val s = _uiState.value
         if (s.code.length != CODE_LENGTH || s.loading) return
         request {
-            try {
-                saveSession(service.verifyEmail(VerifyEmailRequest(s.pendingEmail, s.code)))
-                // Onboarding answers live only until the email is verified (guide, section 3.1); the
-                // cooperative code goes on to P05, which redeems it now that there is a session, and
-                // without a code the hectares of T02d go on to P02, the Plan Productor to pay.
-                val answers = onboardingStore.answers()
-                onboardingStore.clear()
-                _uiState.update {
-                    it.copy(authenticated = true, cooperativeCodeToRedeem = answers.cooperativeCode,
-                        buysPlan = answers.cooperativeCode == null, planHectares = answers.hectares,
-                        password = "", confirmPassword = "")
-                }
-            } catch (e: Exception) {
-                val failure = e.asFailure()
-                if (failure.status == 422) {
-                    val codeError = when (failure.problem?.reason) {
-                        "user.email_verification.invalid_code" -> CodeError.Wrong(failure.problem?.remainingAttempts)
-                        "user.email_verification.attempts_exceeded" -> CodeError.Blocked
-                        "user.email_verification.code_expired" -> CodeError.Expired
-                        "user.email_verification.no_active_code" -> CodeError.Missing
-                        else -> CodeError.Wrong(null)
+            when (val result = verifyEmailUseCase(s.pendingEmail, s.code)) {
+                is AuthResult.Success -> {
+                    // Onboarding answers live only until the email is verified (guide, section 3.1); the
+                    // cooperative code goes on to P05, which redeems it now that there is a session, and
+                    // without a code the hectares of T02d go on to P02, the Plan Productor to pay.
+                    val answers = onboardingStore.answers()
+                    onboardingStore.clear()
+                    _uiState.update {
+                        it.copy(authenticated = true, cooperativeCodeToRedeem = answers.cooperativeCode,
+                            buysPlan = answers.cooperativeCode == null, planHectares = answers.hectares,
+                            password = "", confirmPassword = "")
                     }
-                    // A dead code can be replaced right away, no need to wait out the 45 s.
-                    if (codeError !is CodeError.Wrong) stopCountdown()
-                    _uiState.update { it.copy(codeError = codeError) }
-                } else {
-                    _uiState.update { it.copy(error = failure.toError()) }
+                }
+                is AuthResult.Failure -> {
+                    val codeError = when (val error = result.error) {
+                        is AuthError.InvalidCode -> CodeError.Wrong(error.remainingAttempts)
+                        AuthError.CodeAttemptsExceeded -> CodeError.Blocked
+                        AuthError.CodeExpired -> CodeError.Expired
+                        AuthError.NoActiveCode -> CodeError.Missing
+                        else -> null
+                    }
+                    if (codeError != null) {
+                        // A dead code can be replaced right away, no need to wait out the 45 s.
+                        if (codeError !is CodeError.Wrong) stopCountdown()
+                        _uiState.update { it.copy(codeError = codeError) }
+                    } else {
+                        _uiState.update { it.copy(error = result.error.toIamError()) }
+                    }
                 }
             }
         }
@@ -241,17 +208,14 @@ class IamViewModel @Inject constructor(
         val target = s.pendingEmail.ifBlank { s.email.trim() }
         if (target.isBlank() || s.resendSeconds > 0) return
         viewModelScope.launch {
-            try {
-                service.resendCode(ResendCodeRequest(target))
-                _uiState.update { it.copy(code = "", codeError = null, error = null, notice = IamUiState.Notice.CODE_RESENT) }
-                startCountdown(RESEND_COOLDOWN_SECONDS)
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                val failure = e.asFailure()
-                if (failure.status == 429) {
-                    startCountdown(failure.retryAfter ?: RESEND_COOLDOWN_SECONDS)
-                } else {
-                    _uiState.update { it.copy(error = failure.toError()) }
+            when (val result = resendCodeUseCase(target)) {
+                is AuthResult.Success -> {
+                    _uiState.update { it.copy(code = "", codeError = null, error = null, notice = IamUiState.Notice.CODE_RESENT) }
+                    startCountdown(RESEND_COOLDOWN_SECONDS)
+                }
+                is AuthResult.Failure -> when (val error = result.error) {
+                    is AuthError.CodeNotYetResendable -> startCountdown(error.retryAfterSeconds ?: RESEND_COOLDOWN_SECONDS)
+                    else -> _uiState.update { it.copy(error = error.toIamError()) }
                 }
             }
         }
@@ -263,13 +227,11 @@ class IamViewModel @Inject constructor(
         val s = _uiState.value
         if (!s.emailValid || s.loading) return
         request {
-            try {
-                service.requestPasswordReset(PasswordResetRequest(s.email.trim()))
-                _uiState.update {
+            when (val result = requestPasswordReset(s.email)) {
+                is AuthResult.Success -> _uiState.update {
                     it.copy(step = IamStep.LINK_SENT, notice = if (isResend) IamUiState.Notice.LINK_RESENT else null)
                 }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.asFailure().toError()) }
+                is AuthResult.Failure -> _uiState.update { it.copy(error = result.error.toIamError()) }
             }
         }
     }
@@ -286,15 +248,12 @@ class IamViewModel @Inject constructor(
     fun checkResetLink() {
         val token = resetToken ?: return _uiState.update { it.copy(step = IamStep.LINK_EXPIRED) }
         request {
-            try {
-                service.checkPasswordResetToken(token)
-                _uiState.update { it.copy(step = IamStep.NEW_PASSWORD, error = null) }
-            } catch (e: Exception) {
-                val failure = e.asFailure()
-                if (failure.status == 404) {
+            when (val result = checkPasswordResetLink(token)) {
+                is AuthResult.Success -> _uiState.update { it.copy(step = IamStep.NEW_PASSWORD, error = null) }
+                is AuthResult.Failure -> if (result.error == AuthError.ResetLinkExpired) {
                     _uiState.update { it.copy(step = IamStep.LINK_EXPIRED) }
                 } else {
-                    _uiState.update { it.copy(error = failure.toError()) }
+                    _uiState.update { it.copy(error = result.error.toIamError()) }
                 }
             }
         }
@@ -305,19 +264,17 @@ class IamViewModel @Inject constructor(
         val token = resetToken
         if (!s.newPasswordOk || s.loading || token == null) return
         request {
-            try {
-                service.resetPassword(token, NewPasswordRequest(s.password))
-                // The account's sessions are closed server-side: back to sign in.
-                resetToken = null
-                _uiState.update { it.copy(step = IamStep.RESET_DONE, password = "", confirmPassword = "") }
-            } catch (e: Exception) {
-                val failure = e.asFailure()
-                when {
-                    failure.status == 404 -> _uiState.update { it.copy(step = IamStep.LINK_EXPIRED) }
-                    failure.status == 422 && failure.problem?.reason == "user.password.reused" ->
-                        _uiState.update { it.copy(passwordReused = true) }
-                    failure.status == 400 -> _uiState.update { it.copy(passwordWeak = true) }
-                    else -> _uiState.update { it.copy(error = failure.toError()) }
+            when (val result = resetPassword(token, s.password)) {
+                is AuthResult.Success -> {
+                    // The account's sessions are closed server-side: back to sign in.
+                    resetToken = null
+                    _uiState.update { it.copy(step = IamStep.RESET_DONE, password = "", confirmPassword = "") }
+                }
+                is AuthResult.Failure -> when (result.error) {
+                    AuthError.ResetLinkExpired -> _uiState.update { it.copy(step = IamStep.LINK_EXPIRED) }
+                    AuthError.PasswordReused -> _uiState.update { it.copy(passwordReused = true) }
+                    AuthError.WeakPassword -> _uiState.update { it.copy(passwordWeak = true) }
+                    else -> _uiState.update { it.copy(error = result.error.toIamError()) }
                 }
             }
         }
@@ -334,12 +291,6 @@ class IamViewModel @Inject constructor(
                 _uiState.update { it.copy(loading = false) }
             }
         }
-    }
-
-    /** Another account signing in first wipes the data the phone kept for the previous one. */
-    private suspend fun saveSession(session: AuthSession) {
-        localDataOwner.claimFor(session.userId)
-        sessionStore.save(session.toStoredSession(clock))
     }
 
     private fun startCountdown(seconds: Int) {
@@ -360,27 +311,9 @@ class IamViewModel @Inject constructor(
         _uiState.update { it.copy(resendSeconds = 0) }
     }
 
-    private fun Failure.toError(): IamError = when {
-        isOffline -> IamError.OFFLINE
-        status == 429 -> IamError.WAIT
+    private fun AuthError.toIamError(): IamError = when (this) {
+        AuthError.Offline -> IamError.OFFLINE
+        AuthError.TooManyRequests -> IamError.WAIT
         else -> IamError.GENERIC
-    }
-
-    private fun Throwable.asFailure(): Failure {
-        if (this is CancellationException) throw this
-        if (this is HttpException) {
-            val raw = runCatching { response()?.errorBody()?.string() }.getOrNull()
-            val problem = raw?.takeIf { it.isNotBlank() }?.let {
-                runCatching { lenientJson.decodeFromString<IamProblem>(it) }.getOrNull()
-            }
-            val header = response()?.headers()?.get("Retry-After")?.toIntOrNull()
-            return Failure(code(), problem, header)
-        }
-        // Not an HTTP answer: no connection, timeout... (IOException) or an unexpected body.
-        return Failure(null, null, null)
-    }
-
-    private companion object {
-        const val PRODUCER_ROLE = "ROLE_PRODUCER"
     }
 }

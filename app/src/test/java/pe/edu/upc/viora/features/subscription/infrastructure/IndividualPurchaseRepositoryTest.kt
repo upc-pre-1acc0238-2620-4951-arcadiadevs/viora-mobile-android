@@ -71,11 +71,11 @@ class IndividualPurchaseRepositoryTest {
     @After fun tearDown() { server.shutdown() }
 
     private fun repository(at: Instant = now): IndividualPurchaseRepositoryImpl {
-        val service = Retrofit.Builder().baseUrl(server.url("/api/v1/"))
+        val retrofit = Retrofit.Builder().baseUrl(server.url("/api/v1/"))
             .client(OkHttpClient.Builder().readTimeout(500, TimeUnit.MILLISECONDS).build())
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType())).build()
-            .create(IndividualPurchaseService::class.java)
-        return IndividualPurchaseRepositoryImpl(service, journal, ApiCaller(ApiErrorMapper(json), UnconfinedTestDispatcher()),
+        return IndividualPurchaseRepositoryImpl(retrofit.create(IndividualPurchaseService::class.java),
+            retrofit.create(ProducerSubscriptionService::class.java), journal, ApiCaller(ApiErrorMapper(json), UnconfinedTestDispatcher()),
             sessions, json, Clock.fixed(at, ZoneOffset.UTC))
     }
 

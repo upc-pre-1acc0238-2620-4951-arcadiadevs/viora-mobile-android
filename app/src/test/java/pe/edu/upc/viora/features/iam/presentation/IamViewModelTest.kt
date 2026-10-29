@@ -1,9 +1,6 @@
 package pe.edu.upc.viora.features.iam.presentation
 
 import androidx.lifecycle.SavedStateHandle
-import java.time.Clock
-import java.time.Instant
-import java.time.ZoneOffset
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -17,36 +14,35 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import pe.edu.upc.viora.core.database.LocalDataOwner
-import pe.edu.upc.viora.core.datastore.SessionStore
-import pe.edu.upc.viora.core.datastore.TokenCipher
+import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.iam.InMemoryPreferences
+import pe.edu.upc.viora.features.iam.application.usecase.CheckPasswordResetLinkUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.RequestPasswordResetUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.ResendCodeUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.ResetPasswordUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.SignInUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.SignUpUseCase
+import pe.edu.upc.viora.features.iam.application.usecase.VerifyEmailUseCase
+import pe.edu.upc.viora.features.iam.domain.model.AuthResult
+import pe.edu.upc.viora.features.iam.domain.model.Registration
+import pe.edu.upc.viora.features.iam.domain.repository.AuthRepository
 import pe.edu.upc.viora.features.iam.domain.valueobject.OnboardingAnswers
 import pe.edu.upc.viora.features.iam.infrastructure.local.OnboardingStore
-import pe.edu.upc.viora.features.iam.infrastructure.remote.AuthSession
-import pe.edu.upc.viora.features.iam.infrastructure.remote.IamService
-import pe.edu.upc.viora.features.iam.infrastructure.remote.NewPasswordRequest
-import pe.edu.upc.viora.features.iam.infrastructure.remote.PasswordResetRequest
-import pe.edu.upc.viora.features.iam.infrastructure.remote.RefreshTokenRequest
-import pe.edu.upc.viora.features.iam.infrastructure.remote.ResendCodeRequest
-import pe.edu.upc.viora.features.iam.infrastructure.remote.SignInRequest
-import pe.edu.upc.viora.features.iam.infrastructure.remote.SignUpRequest
-import pe.edu.upc.viora.features.iam.infrastructure.remote.SignUpResponse
-import pe.edu.upc.viora.features.iam.infrastructure.remote.VerifyEmailRequest
 import pe.edu.upc.viora.features.iam.presentation.viewmodel.IamViewModel
 
 /** Only verifying the email answers; the other calls are not part of these tests. */
-private class VerifyingIamService : IamService {
-    override suspend fun verifyEmail(request: VerifyEmailRequest) =
-        AuthSession(accessToken = "access", refreshToken = "refresh", userId = "producer-1", role = "ROLE_PRODUCER")
+private class VerifyingAuthRepository : AuthRepository {
+    override suspend fun verifyEmail(email: String, code: String): AuthResult<Unit> = AuthResult.Success(Unit)
 
-    override suspend fun signIn(request: SignInRequest): AuthSession = error("not used")
-    override suspend fun signUp(request: SignUpRequest): SignUpResponse = error("not used")
-    override suspend fun resendCode(request: ResendCodeRequest) = error("not used")
-    override suspend fun requestPasswordReset(request: PasswordResetRequest) = error("not used")
-    override suspend fun checkPasswordResetToken(token: String) = error("not used")
-    override suspend fun refresh(request: RefreshTokenRequest): AuthSession = error("not used")
-    override suspend fun resetPassword(token: String, request: NewPasswordRequest) = error("not used")
+    override suspend fun signIn(email: String, password: String): AuthResult<Unit> = error("not used")
+    override suspend fun signUp(registration: Registration): AuthResult<String> = error("not used")
+    override suspend fun resendCode(email: String): AuthResult<Unit> = error("not used")
+    override suspend fun requestPasswordReset(email: String): AuthResult<Unit> = error("not used")
+    override suspend fun checkPasswordResetLink(token: String): AuthResult<Unit> = error("not used")
+    override suspend fun resetPassword(token: String, newPassword: String): AuthResult<Unit> = error("not used")
+    override suspend fun changePassword(currentPassword: String, newPassword: String): AppResult<Unit> = error("not used")
+    override suspend fun signOut() = error("not used")
+    override suspend fun deleteAccount(password: String): AppResult<Unit> = error("not used")
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -68,12 +64,16 @@ class IamViewModelTest {
 
     private fun verifyEmailAfterOnboarding(cooperativeCode: String?, hectares: Int? = null) {
         runBlocking { onboardingStore.save(OnboardingAnswers(fullName = "Teodoro Mamani", cooperativeCode = cooperativeCode, hectares = hectares)) }
+        val auth = VerifyingAuthRepository()
         viewModel = IamViewModel(
-            service = VerifyingIamService(),
-            sessionStore = SessionStore(InMemoryPreferences(), TokenCipher.PLAIN),
-            localDataOwner = LocalDataOwner(InMemoryPreferences()) {},
+            signInUseCase = SignInUseCase(auth),
+            signUpUseCase = SignUpUseCase(auth),
+            verifyEmailUseCase = VerifyEmailUseCase(auth),
+            resendCodeUseCase = ResendCodeUseCase(auth),
+            requestPasswordReset = RequestPasswordResetUseCase(auth),
+            checkPasswordResetLink = CheckPasswordResetLinkUseCase(auth),
+            resetPassword = ResetPasswordUseCase(auth),
             onboardingStore = onboardingStore,
-            clock = Clock.fixed(Instant.parse("2026-10-21T12:00:00Z"), ZoneOffset.UTC),
             savedStateHandle = SavedStateHandle(),
         )
         viewModel.onCode("123456")
