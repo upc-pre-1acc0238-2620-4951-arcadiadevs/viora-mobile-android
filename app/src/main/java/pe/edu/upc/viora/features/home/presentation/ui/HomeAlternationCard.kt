@@ -37,12 +37,12 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral200
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
+import pe.edu.upc.viora.core.presentation.formatTonnesPerHectare
 import pe.edu.upc.viora.features.home.presentation.state.HomeAlternation
 import pe.edu.upc.viora.features.phenology.domain.entity.BearingYear
 import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
 import pe.edu.upc.viora.features.phenology.presentation.ui.BearingTag
 import pe.edu.upc.viora.features.phenology.presentation.ui.barColor
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatTonnesPerHectare
 import pe.edu.upc.viora.features.phenology.presentation.ui.tonnesPerHectare
 import pe.edu.upc.viora.features.phenology.presentation.ui.voiceText
 

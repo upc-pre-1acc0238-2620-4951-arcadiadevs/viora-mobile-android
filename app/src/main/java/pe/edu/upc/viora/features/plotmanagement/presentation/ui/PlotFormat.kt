@@ -6,9 +6,6 @@ import pe.edu.upc.viora.core.presentation.formatWhole
 import pe.edu.upc.viora.core.presentation.vioraNumberFormat
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 
-/** "2,5" or "117,82": one to two decimals, with the app's separators. */
-fun formatHectares(hectares: Double): String = vioraNumberFormat(1, 2).format(hectares)
-
 /** "7" or "6,5": spacings move in half metres, so one decimal at most. */
 fun formatMeters(meters: Double): String = vioraNumberFormat(0, 1).format(meters)
 

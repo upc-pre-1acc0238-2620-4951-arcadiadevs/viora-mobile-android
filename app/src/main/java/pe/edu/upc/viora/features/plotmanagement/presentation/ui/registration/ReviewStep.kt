@@ -38,12 +38,12 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatMeters
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 

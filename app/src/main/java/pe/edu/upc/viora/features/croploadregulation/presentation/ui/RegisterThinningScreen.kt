@@ -57,9 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green200
@@ -75,6 +73,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.presentation.formatWhole
 import pe.edu.upc.viora.core.presentation.messageRes
+import pe.edu.upc.viora.core.presentation.pickerMillisToLocalDate
+import pe.edu.upc.viora.core.presentation.toPickerMillis
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.RegisterThinningUiState
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.WindowCheck
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.RegisterThinningViewModel
@@ -380,7 +380,7 @@ private fun ThinningDatePicker(selected: LocalDate, min: LocalDate, max: LocalDa
         confirmButton = {
             TextButton(
                 onClick = {
-                    pickerState.selectedDateMillis?.let { onPick(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()) } ?: onDismiss()
+                    pickerState.selectedDateMillis?.let { onPick(pickerMillisToLocalDate(it)) } ?: onDismiss()
                 },
             ) { Text(stringResource(R.string.settle_date_ok)) }
         },
@@ -389,6 +389,3 @@ private fun ThinningDatePicker(selected: LocalDate, min: LocalDate, max: LocalDa
         DatePicker(state = pickerState)
     }
 }
-
-/** The Material picker works in UTC midnight milliseconds. */
-private fun LocalDate.toPickerMillis(): Long = atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()

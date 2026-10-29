@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import java.time.ZoneId
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -58,7 +57,13 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatDayMonth
+import pe.edu.upc.viora.core.presentation.formatDayRange
 import pe.edu.upc.viora.core.presentation.formatDecimal
+import pe.edu.upc.viora.core.presentation.formatHectares
+import pe.edu.upc.viora.core.presentation.formatKg
+import pe.edu.upc.viora.core.presentation.formatPercent
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.newsreader
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.roboto
@@ -66,8 +71,6 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.ui.robotoMedium
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.AgronomicDossier
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.AgronomicDossierUiState
 import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.AgronomicDossierViewModel
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatKg
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
@@ -154,7 +157,7 @@ private fun DossierContent(
             modifier = Modifier.padding(top = 16.dp),
         )
         val locale = LocalConfiguration.current.locales[0]
-        val lastPdfDay = state.lastPdfSavedAt?.let { formatDay(it.atZone(ZoneId.systemDefault()).toLocalDate(), locale) }
+        val lastPdfDay = state.lastPdfSavedAt?.let { formatDayMonth(it.atZone(LocalAppZone.current).toLocalDate(), locale) }
         when {
             !state.offline -> WhitePillButton(R.drawable.ic_share, stringResource(R.string.dossier_share), onOpenPdf, Modifier.padding(top = 10.dp))
             state.lastPdf != null && lastPdfDay != null ->
@@ -253,13 +256,13 @@ private fun summaryRows(dossier: AgronomicDossier): List<Pair<String, String>> {
         val opens = dossier.prescription.windowOpensOn
         val closes = dossier.prescription.windowClosesOn
         listOfNotNull(
-            stringResource(R.string.dossier_prescription_value, formatShare(share)),
-            if (opens != null && closes != null) formatWindow(opens, closes, locale) else null,
+            stringResource(R.string.dossier_prescription_value, formatPercent(share)),
+            if (opens != null && closes != null) formatDayRange(opens, closes, locale) else null,
         ).joinToString(separator)
     } ?: none
 
     val thinning = dossier.thinning?.takeIf { it.recorded }?.let { done ->
-        listOfNotNull(done.actualRemovalPercentage?.let { formatShare(it) }, done.executedOn?.let { formatDay(it, locale) })
+        listOfNotNull(done.actualRemovalPercentage?.let { formatPercent(it) }, done.executedOn?.let { formatDayMonth(it, locale) })
             .joinToString(separator).ifEmpty { null }
     } ?: none
 

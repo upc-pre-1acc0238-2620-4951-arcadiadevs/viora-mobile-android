@@ -37,13 +37,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Instant
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.MorphingShapeIndicator
 import pe.edu.upc.viora.core.designsystem.theme.*
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 import pe.edu.upc.viora.features.subscription.domain.entity.ExtensionAction
@@ -398,7 +398,7 @@ private fun ResultRow(label: String, value: String) {
 internal fun planDate(at: Instant?): String? {
     val pattern = stringResource(R.string.my_plan_date_pattern)
     val locale: Locale = LocalConfiguration.current.locales[0]
-    return at?.atZone(ZoneId.systemDefault())?.toLocalDate()?.format(DateTimeFormatter.ofPattern(pattern, locale))
+    return at?.atZone(LocalAppZone.current)?.toLocalDate()?.format(DateTimeFormatter.ofPattern(pattern, locale))
 }
 
 /** The renewal window has its own message; anything else uses the app's generic one. */

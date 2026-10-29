@@ -45,6 +45,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.presentation.messageRes
+import pe.edu.upc.viora.core.presentation.pickerMillisToLocalDate
+import pe.edu.upc.viora.core.presentation.toPickerMillis
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleDialog
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestRules
@@ -236,7 +238,7 @@ private fun FormHeader(state: SettleHarvestUiState, onClose: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WeighingDatePicker(selected: LocalDate, max: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: () -> Unit) {
-    val maxMillis = remember(max) { SettleHarvestRules.toPickerMillis(max) }
+    val maxMillis = remember(max) { max.toPickerMillis() }
     val selectable = remember(max) {
         object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis <= maxMillis
@@ -244,14 +246,14 @@ private fun WeighingDatePicker(selected: LocalDate, max: LocalDate, onPick: (Loc
         }
     }
     val pickerState = rememberDatePickerState(
-        initialSelectedDateMillis = SettleHarvestRules.toPickerMillis(selected),
+        initialSelectedDateMillis = selected.toPickerMillis(),
         selectableDates = selectable,
     )
     DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
-                onClick = { pickerState.selectedDateMillis?.let { onPick(SettleHarvestRules.fromPickerMillis(it)) } ?: onDismiss() },
+                onClick = { pickerState.selectedDateMillis?.let { onPick(pickerMillisToLocalDate(it)) } ?: onDismiss() },
             ) { Text(stringResource(R.string.settle_date_ok)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settle_date_cancel)) } },

@@ -45,7 +45,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.Locale
 import kotlin.math.floor
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
@@ -67,6 +66,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
+import pe.edu.upc.viora.core.presentation.formatDayMonth
+import pe.edu.upc.viora.core.presentation.formatMonthShort
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillProjection
 import pe.edu.upc.viora.features.phenology.domain.entity.ThermalAnomaly
@@ -600,7 +601,7 @@ private fun AsymmetricMetricsRow(
         state.seasonState == WinterSeasonState.OFF_SEASON ->
             stringResource(R.string.winter_chill_card_total_portions, state.accumulatedPortions)
         previousCompletion != null ->
-            stringResource(R.string.winter_chill_card_past_winter_date, formatDateShort(previousCompletion, locale))
+            stringResource(R.string.winter_chill_card_past_winter_date, formatDayMonth(previousCompletion, locale))
         previous != null ->
             stringResource(R.string.winter_chill_card_past_winter_portions, floor(previous.accumulatedPortions).toInt())
         else -> null
@@ -895,9 +896,3 @@ private fun MessageBody(
 /** Days from [date] to August 31, the budbreak that closes the count. */
 private fun daysBeforeBudbreak(date: LocalDate): Int =
     ChronoUnit.DAYS.between(date, LocalDate.of(date.year, 8, 31)).coerceAtLeast(0).toInt()
-
-private fun formatDateShort(date: LocalDate, locale: Locale): String =
-    DateTimeFormatter.ofPattern("d MMM", locale).format(date).replace(".", "")
-
-private fun formatMonthShort(date: LocalDate, locale: Locale): String =
-    DateTimeFormatter.ofPattern("MMM", locale).format(date).replace(".", "")

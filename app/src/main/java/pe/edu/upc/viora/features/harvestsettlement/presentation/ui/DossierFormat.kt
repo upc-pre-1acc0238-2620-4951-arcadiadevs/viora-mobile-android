@@ -4,12 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatDecimal
+import pe.edu.upc.viora.core.presentation.formatPercent
 import pe.edu.upc.viora.core.presentation.formatWhole
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
@@ -21,32 +20,15 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 internal fun formatHash(hash: String): String =
     hash.chunked(4).chunked(4).joinToString("\n") { it.joinToString(" ") }
 
-/** "30 %" for a share already in percent (the dossier sends 30.0, not 0.30). */
-internal fun formatShare(percent: Double): String = formatWhole(percent) + " %"
-
 /** "+43 %": how far above the target the load was. */
-internal fun formatOverTarget(percent: Double): String = (if (percent > 0) "+" else "") + formatShare(percent)
-
-/** "3–30 nov" within one month, "28 oct – 5 nov" across two. */
-internal fun formatWindow(opens: LocalDate, closes: LocalDate, locale: Locale): String {
-    val short = DateTimeFormatter.ofPattern("d MMM", locale)
-    return if (opens.month == closes.month && opens.year == closes.year) {
-        "${opens.dayOfMonth}–${short.format(closes)}"
-    } else {
-        "${short.format(opens)} – ${short.format(closes)}"
-    }.replace(".", "")
-}
-
-/** "14 nov": the day of a recorded labor. */
-internal fun formatDay(date: LocalDate, locale: Locale): String =
-    DateTimeFormatter.ofPattern("d MMM", locale).format(date).replace(".", "")
+internal fun formatOverTarget(percent: Double): String = (if (percent > 0) "+" else "") + formatPercent(percent)
 
 /** "14 may 2026, 10:40": when the dossier was sealed, in the phone's zone. */
 @Composable
 internal fun formatSealedAt(instant: Instant): String {
     val locale = LocalConfiguration.current.locales[0]
     return DateTimeFormatter.ofPattern(stringResource(R.string.dossier_pattern_sealed), locale)
-        .format(instant.atZone(ZoneId.systemDefault())).replace(".", "")
+        .format(instant.atZone(LocalAppZone.current)).replace(".", "")
 }
 
 /** "1,2 MB" or "480 KB". */

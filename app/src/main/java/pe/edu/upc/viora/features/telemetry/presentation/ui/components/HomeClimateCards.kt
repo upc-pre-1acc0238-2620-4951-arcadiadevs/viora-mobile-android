@@ -48,6 +48,8 @@ import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.formatPercent
+import pe.edu.upc.viora.core.presentation.shortWeekday
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.SkyCondition
 import pe.edu.upc.viora.features.telemetry.presentation.state.HomeSoil
 import pe.edu.upc.viora.features.telemetry.presentation.state.HomeWeather
@@ -169,7 +171,7 @@ internal fun SoilCardContent(soil: HomeSoil?, onClick: () -> Unit, modifier: Mod
             .padding(start = 18.dp, end = 18.dp, top = 14.dp),
     ) {
         Text(
-            text = soil?.let { formatPercent(locale, it.percent) } ?: "—",
+            text = soil?.let { formatPercent(it.percent, locale) } ?: "—",
             style = TextStyle(fontFamily = NewsreaderFamily, fontSize = 40.sp, lineHeight = 44.sp, letterSpacing = (-0.8).sp),
             color = Green900,
         )

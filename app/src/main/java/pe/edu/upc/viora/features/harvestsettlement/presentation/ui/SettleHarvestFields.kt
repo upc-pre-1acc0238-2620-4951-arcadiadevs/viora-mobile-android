@@ -60,12 +60,12 @@ import pe.edu.upc.viora.core.designsystem.theme.Spacing
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.presentation.ThousandsVisualTransformation
+import pe.edu.upc.viora.core.presentation.formatKg
+import pe.edu.upc.viora.core.presentation.formatPercentOf
+import pe.edu.upc.viora.core.presentation.formatTonnesPerHectare
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestRules
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestUiState
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatKg
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatPercent
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatTonnesPerHectare
 
 /**
  * "Fecha de pesaje" (Figma P71): the chosen day with the calendar button that opens the picker. P62 reuses it with
@@ -238,7 +238,7 @@ private fun TotalBlock(state: SettleHarvestUiState) {
 /** Green / black split of the total as two rounded segments; both neutral and empty without a [greenShare]. */
 @Composable
 internal fun SplitBar(greenShare: Double?, modifier: Modifier = Modifier) {
-    val description = greenShare?.let { stringResource(R.string.settle_split_caption, formatPercent(it), formatPercent(1 - it)) }.orEmpty()
+    val description = greenShare?.let { stringResource(R.string.settle_split_caption, formatPercentOf(it), formatPercentOf(1 - it)) }.orEmpty()
     Row(
         modifier = modifier.fillMaxWidth().height(10.dp).semantics { contentDescription = description },
         horizontalArrangement = Arrangement.spacedBy(4.dp),

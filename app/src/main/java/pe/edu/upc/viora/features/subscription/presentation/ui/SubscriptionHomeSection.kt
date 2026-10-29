@@ -26,12 +26,11 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import java.time.Instant
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.*
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.features.subscription.presentation.viewmodel.SubscriptionAccessViewModel
 
 /**
@@ -98,7 +97,7 @@ fun InactiveAccessCard(
 ) {
     val title = if (endsAt != null) {
         val date = DateTimeFormatter.ofPattern(stringResource(R.string.home_access_date_pattern), androidx.compose.ui.platform.LocalConfiguration.current.locales[0])
-            .withZone(ZoneId.systemDefault()).format(endsAt)
+            .withZone(LocalAppZone.current).format(endsAt)
         stringResource(R.string.home_access_expired_title, date)
     } else {
         stringResource(R.string.home_access_none_title)

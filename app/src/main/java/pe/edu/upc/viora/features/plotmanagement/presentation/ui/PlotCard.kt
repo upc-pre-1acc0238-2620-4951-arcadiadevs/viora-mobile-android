@@ -26,6 +26,7 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 
 /**

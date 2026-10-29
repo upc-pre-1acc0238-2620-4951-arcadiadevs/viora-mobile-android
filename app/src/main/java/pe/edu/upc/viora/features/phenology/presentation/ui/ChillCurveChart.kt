@@ -35,9 +35,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.Locale
 import kotlin.math.floor
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -51,6 +49,7 @@ import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.formatDayMonth
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillCurvePoint
 import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
 
@@ -124,13 +123,13 @@ fun ChillCurveChart(
     } else {
         stringResource(R.string.winter_chill_chart_threshold_variety, threshold.toInt(), varietyName)
     }
-    val projDateLabel = projectedCompletionDate?.let { formatChartDate(it, locale) }
+    val projDateLabel = projectedCompletionDate?.let { formatDayMonth(it, locale) }
 
     val noteText = when (seasonState) {
         WinterSeasonState.ACCUMULATING -> stringResource(R.string.winter_chill_chart_note_accumulating)
         WinterSeasonState.CHILL_HALTED -> stringResource(R.string.winter_chill_chart_note_halted, currentWarmStreakDays)
         WinterSeasonState.COMPLETED -> if (completionDate != null && varietyName.isNotBlank()) {
-            stringResource(R.string.winter_chill_chart_note_completed, varietyName, formatChartDate(completionDate, locale))
+            stringResource(R.string.winter_chill_chart_note_completed, varietyName, formatDayMonth(completionDate, locale))
         } else {
             stringResource(R.string.winter_chill_chart_note_accumulating)
         }
@@ -385,6 +384,3 @@ private fun ChartLegendItem(
         )
     }
 }
-
-private fun formatChartDate(date: LocalDate, locale: Locale): String =
-    DateTimeFormatter.ofPattern("d MMM", locale).format(date).replace(".", "")

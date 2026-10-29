@@ -4,21 +4,22 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Clock
+import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
-import java.time.Clock
-import java.time.temporal.ChronoUnit
+import pe.edu.upc.viora.core.presentation.daysUntil
 import pe.edu.upc.viora.features.subscription.application.usecase.GetCurrentSubscriptionUseCase
 import pe.edu.upc.viora.features.subscription.application.usecase.ObserveProducerPlanCatalogUseCase
 import pe.edu.upc.viora.features.subscription.application.usecase.RefreshProducerPlanCatalogUseCase
@@ -82,7 +83,7 @@ class ProducerPlanViewModel @Inject constructor(
         val current = (getCurrentSubscription() as? AppResult.Success)?.value ?: return@launch
         val endsAt = current.endsAt ?: return@launch
         if (!current.entitlementActive) return@launch
-        val days = ChronoUnit.DAYS.between(clock.instant(), endsAt).toInt().coerceAtLeast(0)
+        val days = daysUntil(LocalDate.now(clock), endsAt.atZone(clock.zone).toLocalDate())
         renewal.value = RenewalInfo(current.capacity.hectares, endsAt, days)
     }
 

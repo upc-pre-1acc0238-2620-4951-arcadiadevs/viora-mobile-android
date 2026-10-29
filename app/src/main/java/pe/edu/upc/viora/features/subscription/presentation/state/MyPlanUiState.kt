@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.presentation.daysUntil
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.subscription.domain.entity.ProducerSubscription
@@ -89,7 +90,7 @@ object MyPlanRules {
         }
         val active = subscription?.entitlementActive == true
         val endsOn = subscription?.endsAt?.atZone(zone)?.toLocalDate()
-        val daysLeft = if (active && endsOn != null) ChronoUnit.DAYS.between(today, endsOn).toInt().coerceAtLeast(0) else 0
+        val daysLeft = if (active && endsOn != null) daysUntil(today, endsOn) else 0
         val standing = when {
             !active -> PlanStanding.NONE
             endsOn != null && daysLeft <= EXPIRING_DAYS -> PlanStanding.EXPIRING

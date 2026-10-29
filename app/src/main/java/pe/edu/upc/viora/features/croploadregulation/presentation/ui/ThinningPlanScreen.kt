@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,7 +55,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -78,7 +77,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatDecimal
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.formatWhole
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CurrentLoad
@@ -97,7 +98,6 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.removalFr
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.ThinningPlanViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
@@ -284,7 +284,7 @@ private fun PlanBody(
 private fun OfflineBanner(syncedAt: Instant) {
     val locale = LocalConfiguration.current.locales[0]
     val computedAt = DateTimeFormatter.ofPattern(stringResource(R.string.thinning_pattern_synced), locale)
-        .format(syncedAt.atZone(ZoneId.systemDefault())).replace(".,", ",")
+        .format(syncedAt.atZone(LocalAppZone.current)).replace(".,", ",")
     Row(
         modifier = Modifier.fillMaxWidth().clip(CircleShape).background(Terracotta100).padding(6.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),

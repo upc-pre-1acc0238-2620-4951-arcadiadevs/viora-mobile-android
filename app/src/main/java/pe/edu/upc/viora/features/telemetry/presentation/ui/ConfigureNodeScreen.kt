@@ -68,11 +68,11 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.presentation.formatPercent
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorNode
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorType
 import pe.edu.upc.viora.features.telemetry.presentation.state.ConfigureNodeUiState
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatPercent
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.ConfigureNodeViewModel
 
 @Composable
@@ -247,7 +247,7 @@ private fun ReadingCard(node: SensorNode) {
             Column {
                 Text(stringResource(R.string.sensors_config_last_reading), style = MaterialTheme.typography.labelSmall, color = Neutral600)
                 Text(
-                    text = node.lastHumidityPercent?.let { formatPercent(LocalConfiguration.current.locales[0], it) } ?: "—",
+                    text = node.lastHumidityPercent?.let { formatPercent(it, LocalConfiguration.current.locales[0]) } ?: "—",
                     style = MaterialTheme.typography.displaySmall.copy(fontSize = 48.sp, lineHeight = 52.sp),
                     color = Neutral900,
                 )

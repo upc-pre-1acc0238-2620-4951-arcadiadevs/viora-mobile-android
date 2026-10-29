@@ -58,12 +58,12 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.formatKg
+import pe.edu.upc.viora.core.presentation.formatPercentOf
+import pe.edu.upc.viora.core.presentation.formatTonnesPerHectare
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CampaignClosedUiState
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettlementReceipt
 import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.CampaignClosedViewModel
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatKg
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatPercent
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatTonnesPerHectare
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
@@ -362,7 +362,7 @@ private fun QualityKilos(label: Int, dot: Color, kilos: Double, share: Double?, 
             Text(stringResource(label), style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp), color = Neutral900)
             Text(
                 text = if (share != null) {
-                    stringResource(R.string.settle_receipt_part, formatKg(kilos), formatPercent(share))
+                    stringResource(R.string.settle_receipt_part, formatKg(kilos), formatPercentOf(share))
                 } else {
                     stringResource(R.string.settle_total_value, formatKg(kilos))
                 },

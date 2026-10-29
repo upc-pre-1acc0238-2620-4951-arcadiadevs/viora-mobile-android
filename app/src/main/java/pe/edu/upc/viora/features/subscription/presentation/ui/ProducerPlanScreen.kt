@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -25,6 +24,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -32,7 +32,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.NumberFormat
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Currency
@@ -40,6 +39,7 @@ import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.MorphingShapeIndicator
 import pe.edu.upc.viora.core.designsystem.theme.*
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.core.presentation.vioraNumberFormat
 import pe.edu.upc.viora.features.subscription.presentation.state.IndividualCheckoutUiState
@@ -305,7 +305,7 @@ private fun PlanFreshness(state: ProducerPlanUiState.Content, onRefresh: () -> U
 private fun CatalogUpdatedAt(at: java.time.Instant) {
     val locale = LocalConfiguration.current.locales[0]
     val timestamp = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(locale)
-        .withZone(ZoneId.systemDefault()).format(at)
+        .withZone(LocalAppZone.current).format(at)
     Text(stringResource(R.string.producer_plan_updated, timestamp), Modifier.padding(top = Spacing.lg),
         style = MaterialTheme.typography.bodySmall, color = Neutral600)
 }

@@ -57,12 +57,12 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.newsreader
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.roboto
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.robotoMedium
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.AgronomicDossier
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.DossierVerificationState
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 

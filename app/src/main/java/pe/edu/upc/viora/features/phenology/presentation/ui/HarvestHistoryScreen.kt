@@ -69,6 +69,13 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatDayMonth
+import pe.edu.upc.viora.core.presentation.formatHectares
+import pe.edu.upc.viora.core.presentation.formatKg
+import pe.edu.upc.viora.core.presentation.formatMediumDate
+import pe.edu.upc.viora.core.presentation.formatPercentOf
+import pe.edu.upc.viora.core.presentation.formatTonnesPerHectare
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
 import pe.edu.upc.viora.features.phenology.domain.entity.HoblynBbi
@@ -85,7 +92,6 @@ import pe.edu.upc.viora.features.phenology.presentation.viewmodel.HarvestHistory
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
@@ -427,7 +433,7 @@ fun voiceText(voice: Voice): String = when (voice) {
 
 @Composable
 private fun OfflineBanner(state: HarvestHistoryUiState.Content, onRetry: () -> Unit) {
-    val date = state.lastRefresh?.let { formatShortDate(it) }
+    val date = state.lastRefresh?.let { formatDayMonth(it.atZone(LocalAppZone.current).toLocalDate()) }
     Row(
         modifier = Modifier
             .clip(CircleShape)
@@ -532,7 +538,7 @@ private fun AfterOnCard(ratio: Double, fromKg: Double, afterKg: Double, modifier
             }
         }
         Text(
-            text = formatPercent(ratio),
+            text = formatPercentOf(ratio),
             style = MaterialTheme.typography.displayLarge.copy(fontSize = 56.sp, lineHeight = 60.sp, letterSpacing = (-1.5).sp),
             color = Terracotta700,
             modifier = Modifier.padding(vertical = 12.dp),
@@ -659,7 +665,7 @@ private fun CampaignRow(record: HarvestRecord, areaHectares: Double?, isNew: Boo
                         R.string.harvest_row_per_ha,
                         formatTonnesPerHectare(tonnesPerHectare(record.totalYieldKg, areaHectares)),
                     )
-                    else -> stringResource(R.string.harvest_row_recorded, formatRecordDate(record.recordedAt))
+                    else -> stringResource(R.string.harvest_row_recorded, formatMediumDate(record.recordedAt, LocalAppZone.current))
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = Neutral600,

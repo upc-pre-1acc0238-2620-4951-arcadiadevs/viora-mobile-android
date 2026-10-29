@@ -78,6 +78,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.core.presentation.vioraNumberFormat
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
@@ -295,7 +296,7 @@ private fun HectareRing(state: MyPlanUiState, progress: Float, modifier: Modifie
                 else -> state.freeHectares
             } * progress
             Text(
-                vioraNumberFormat(1, 1).format(shown),
+                formatHectares(shown),
                 style = MaterialTheme.typography.displayLarge.copy(fontFamily = NewsreaderFamily, fontSize = 72.sp, lineHeight = 72.sp),
                 color = Neutral50,
             )
@@ -524,7 +525,7 @@ fun AccountPlanCard(onOpen: () -> Unit, modifier: Modifier = Modifier, viewModel
                 } else {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
                         Text(
-                            vioraNumberFormat(1, 1).format(if (state.isOverQuota) state.excessHectares else state.freeHectares),
+                            formatHectares(if (state.isOverQuota) state.excessHectares else state.freeHectares),
                             style = MaterialTheme.typography.displaySmall.copy(fontFamily = NewsreaderFamily, fontSize = 52.sp, lineHeight = 52.sp),
                             color = Neutral50,
                         )
@@ -569,7 +570,7 @@ private val PlotPalette = listOf(Harvest300, Harvest100, Green200, Terracotta100
 private fun plotColor(index: Int): Color = PlotPalette[index % PlotPalette.size]
 
 @Composable
-private fun hectares(value: Double): String = vioraNumberFormat(0, 1).format(value)
+private fun hectares(value: Double): String = formatHectares(value)
 
 @Composable
 private fun date(value: LocalDate): String =

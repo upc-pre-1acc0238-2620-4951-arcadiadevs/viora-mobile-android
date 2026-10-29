@@ -61,6 +61,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.presentation.formatDecimal
+import pe.edu.upc.viora.core.presentation.formatKg
 import pe.edu.upc.viora.core.presentation.formatWhole
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.component.ActiveSamplingCard
@@ -74,7 +75,6 @@ import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettledHar
 import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.LogbookViewModel
 import pe.edu.upc.viora.features.home.presentation.ui.HomeHeader
 import pe.edu.upc.viora.features.home.presentation.ui.HomeHeadline
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatKg
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteSyncState
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteType
 

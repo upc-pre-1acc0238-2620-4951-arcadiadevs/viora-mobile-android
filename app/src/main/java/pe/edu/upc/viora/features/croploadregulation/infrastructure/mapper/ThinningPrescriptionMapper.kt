@@ -1,11 +1,11 @@
 package pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper
 
 import java.time.Instant
-import java.time.LocalDate
 import kotlinx.serialization.json.Json
+import pe.edu.upc.viora.core.network.toLocalDateOrNull
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CachedPrescription
-import pe.edu.upc.viora.features.croploadregulation.domain.entity.CampaignPlan
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CaliberProjection
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.CampaignPlan
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CurrentLoad
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.LoadBalance
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningExecution
@@ -35,15 +35,15 @@ fun PrescriptionResponseDto.toDomain(): ThinningPrescription = ThinningPrescript
     status = PrescriptionStatus.from(status),
     percentageToRemove = percentageToRemove,
     targetFruitsPerShoot = targetFruitsPerShoot,
-    fullBloomOn = fullBloomOn.toLocalDate(),
-    windowOpensOn = windowOpensOn.toLocalDate(),
-    windowClosesOn = windowClosesOn.toLocalDate(),
+    fullBloomOn = fullBloomOn.toLocalDateOrNull(),
+    windowOpensOn = windowOpensOn.toLocalDateOrNull(),
+    windowClosesOn = windowClosesOn.toLocalDateOrNull(),
     profileStatus = ThinningProfileStatus.from(profileStatus),
     blockers = blockers.mapNotNull(PrescriptionBlocker::from).toSet(),
     currentLoad = currentLoad?.toDomain(),
     sampledTrees = sampledTrees ?: 0,
     treesNeeded = treesNeeded ?: (ThinningPrescription.SAMPLE_SIZE - (sampledTrees ?: 0)).coerceAtLeast(0),
-    lastSampledOn = lastSampledOn.toLocalDate(),
+    lastSampledOn = lastSampledOn.toLocalDateOrNull(),
     windowOpensDaysAfterBloom = windowOpensDaysAfterBloom,
     windowClosesDaysAfterBloom = windowClosesDaysAfterBloom,
     yieldEstimate = yieldEstimate?.toDomain(),
@@ -86,7 +86,7 @@ fun ThinningPrescriptionEntity.toCached(): CachedPrescription? {
 }
 
 fun ExecutionConfirmationResponseDto.toDomain(): ThinningExecution? {
-    val executedOn = executedDate.toLocalDate() ?: return null
+    val executedOn = executedDate.toLocalDateOrNull() ?: return null
     return ThinningExecution(
         prescriptionId = prescriptionId,
         executedOn = executedOn,
@@ -132,5 +132,3 @@ fun ThinningPrescriptionEntity.toCampaignPlan(): CampaignPlan =
 fun ThinningPrescriptionEntity.toExecution(): ThinningExecution? = executionJson?.let { json ->
     runCatching { prescriptionJson.decodeFromString(ExecutionConfirmationResponseDto.serializer(), json) }.getOrNull()?.toDomain()
 }
-
-private fun String?.toLocalDate(): LocalDate? = this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }

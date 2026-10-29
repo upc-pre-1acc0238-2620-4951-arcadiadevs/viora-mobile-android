@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.sp
 import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -44,7 +43,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
+import pe.edu.upc.viora.core.presentation.formatHectares
 
 /**
  * Greeting row of the Home: avatar, "Hola, name" with the date and sync state, and the alerts

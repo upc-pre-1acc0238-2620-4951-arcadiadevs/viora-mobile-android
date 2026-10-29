@@ -58,6 +58,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
@@ -65,7 +66,6 @@ import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.EditFailure
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.EditPlotUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.EditPlotViewModel
 

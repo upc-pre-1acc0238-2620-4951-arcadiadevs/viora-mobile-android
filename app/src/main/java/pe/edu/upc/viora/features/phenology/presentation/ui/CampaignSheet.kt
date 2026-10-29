@@ -52,6 +52,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatKg
+import pe.edu.upc.viora.core.presentation.formatMediumDate
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.phenology.domain.entity.HoblynBbi
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignEditorUiState
@@ -234,7 +237,7 @@ private fun CorrectedYearCard(mode: CampaignMode.Correct, state: CampaignEditorU
             Text(state.year.toString(), style = MaterialTheme.typography.displayMedium.copy(fontSize = 34.sp, lineHeight = 40.sp), color = Neutral900)
             BearingTag(mode.record.bearing, large = true)
             Text(
-                stringResource(R.string.harvest_row_recorded, formatRecordDate(mode.record.recordedAt)),
+                stringResource(R.string.harvest_row_recorded, formatMediumDate(mode.record.recordedAt, LocalAppZone.current)),
                 style = MaterialTheme.typography.bodySmall,
                 color = Neutral700,
             )

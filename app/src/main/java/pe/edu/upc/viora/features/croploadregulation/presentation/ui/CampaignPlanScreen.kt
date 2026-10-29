@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 import pe.edu.upc.viora.R
@@ -67,6 +66,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatWhole
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningPrescription
@@ -316,7 +316,7 @@ private fun rowDetail(row: PlanRow, state: CampaignPlanUiState): String {
         PlanRowStatus.NO_BLOOM -> stringResource(R.string.plan_detail_no_bloom)
         PlanRowStatus.NO_PROFILE -> stringResource(R.string.plan_detail_no_profile)
         PlanRowStatus.NO_SAMPLING -> row.plot.registeredAt?.takeIf { state.isCurrentCampaign }?.let {
-            val day = it.atZone(ZoneId.systemDefault()).toLocalDate()
+            val day = it.atZone(LocalAppZone.current).toLocalDate()
             stringResource(R.string.plan_detail_registered, DateTimeFormatter.ofPattern(stringResource(R.string.thinning_pattern_day_month), locale).format(day))
         } ?: stringResource(R.string.plan_detail_no_sampling, state.campaignYear)
     }

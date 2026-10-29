@@ -36,10 +36,10 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral200
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 
 /**

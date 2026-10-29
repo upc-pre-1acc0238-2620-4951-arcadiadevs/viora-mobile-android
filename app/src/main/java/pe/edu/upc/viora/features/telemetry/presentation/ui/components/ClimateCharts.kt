@@ -42,6 +42,7 @@ import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.shortWeekday
 import pe.edu.upc.viora.features.telemetry.domain.entity.DailyThermalSummary
 
 /** A small trend line without axes: the cards of the plot sensors (Figma P90). */

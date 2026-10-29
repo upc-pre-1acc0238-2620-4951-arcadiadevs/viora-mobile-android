@@ -43,9 +43,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.HarvestEntryUiState
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.PlotToSettle
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 

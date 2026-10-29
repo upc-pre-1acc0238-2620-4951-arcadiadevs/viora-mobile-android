@@ -38,6 +38,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.formatKg
 import pe.edu.upc.viora.features.phenology.domain.entity.BbiClass
 import pe.edu.upc.viora.features.phenology.presentation.state.BbiExample
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton

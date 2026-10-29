@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -64,6 +64,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.AlertsViewModel
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 
 @Composable
 fun AlertsCenterScreen(
@@ -297,7 +298,7 @@ private fun AlertsCenterContent(
                 }
 
                 val locale = LocalConfiguration.current.locales[0]
-                val formattedTime = latestTriggeredAt?.let { formatAlertTriggerTime(it, locale) }
+                val formattedTime = latestTriggeredAt?.let { formatAlertTriggerTime(it, locale, LocalAppZone.current) }
 
                 val contextualSubtitle = when {
                     affectedPlotsText.isNotBlank() && !formattedTime.isNullOrBlank() -> {
@@ -441,12 +442,12 @@ private fun PlotFilterButton(state: PlotFilterButtonState, modifier: Modifier = 
     }
 }
 
-private fun formatAlertTriggerTime(triggerIso: String, locale: Locale): String? {
+private fun formatAlertTriggerTime(triggerIso: String, locale: Locale, zone: ZoneId): String? {
     return runCatching {
         val instant = Instant.parse(triggerIso)
         val isSpanish = locale.language.equals("es", ignoreCase = true)
         val formatter = DateTimeFormatter.ofPattern("h:mm a", locale)
-        var formatted = instant.atZone(ZoneId.systemDefault()).format(formatter)
+        var formatted = instant.atZone(zone).format(formatter)
         if (isSpanish) {
             formatted = formatted
                 .replace("AM", "a. m.")

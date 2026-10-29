@@ -1,8 +1,6 @@
 package pe.edu.upc.viora.features.harvestsettlement.presentation.state
 
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneOffset
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignRules
 
 /** What the "Calibre de venta" field resolves to. */
@@ -57,9 +55,4 @@ object SettleHarvestRules {
         val count = typed.trim().replace(',', '.').toDoubleOrNull()
         return if (count != null && count > 0.0 && count <= MAX_FRUITS_PER_KG) CalibreReading.Value(count) else CalibreReading.Invalid
     }
-
-    /** The Material date picker works in UTC midnight milliseconds. */
-    fun toPickerMillis(date: LocalDate): Long = date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-
-    fun fromPickerMillis(millis: Long): LocalDate = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
 }
