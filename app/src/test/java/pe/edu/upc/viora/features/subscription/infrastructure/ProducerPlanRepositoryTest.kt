@@ -33,6 +33,8 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 /** The fake publishes one immutable transaction result, matching Room's snapshot contract. */
 private class FakePlanDao : ProducerPlanDao {
+    override suspend fun wipeAll() = Unit
+
     val snapshot = MutableStateFlow<CachedProducerPlanCatalog?>(null)
     var failWith: Exception? = null
     override fun observeCatalog(key: String) = snapshot

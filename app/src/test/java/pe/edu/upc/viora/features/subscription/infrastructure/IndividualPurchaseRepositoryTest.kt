@@ -28,6 +28,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 private class PurchaseJournalFake : IndividualPurchaseDao {
+    override suspend fun wipeAll() = Unit
+
     val rows = mutableMapOf<String, IndividualPurchaseEntity>()
     var failInsert = false
     override suspend fun find(owner: String) = rows[owner]

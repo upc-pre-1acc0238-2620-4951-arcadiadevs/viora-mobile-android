@@ -40,6 +40,8 @@ import pe.edu.upc.viora.features.phenology.infrastructure.repository.HarvestReco
 import retrofit2.Response
 
 private class FakeHarvestRecordDao : HarvestRecordDao {
+    override suspend fun wipeAll() = Unit
+
     val rows = MutableStateFlow<List<HarvestRecordEntity>>(emptyList())
 
     override fun observeByPlot(plotId: String): Flow<List<HarvestRecordEntity>> =
@@ -61,6 +63,8 @@ private class FakeHarvestRecordDao : HarvestRecordDao {
 }
 
 private class FakeBearingIndexDao : BearingIndexDao {
+    override suspend fun wipeAll() = Unit
+
     val rows = MutableStateFlow<Map<String, BearingIndexEntity>>(emptyMap())
 
     override fun observeByPlot(plotId: String): Flow<BearingIndexEntity?> = rows.map { it[plotId] }
@@ -74,6 +78,8 @@ private class FakeBearingIndexDao : BearingIndexDao {
 }
 
 private class FakeCacheMetadataDao : CacheMetadataDao {
+    override suspend fun wipeAll() = Unit
+
     val values = MutableStateFlow<Map<String, Long>>(emptyMap())
 
     override suspend fun fetchedAt(resourceKey: String): Long? = values.value[resourceKey]

@@ -43,6 +43,8 @@ import pe.edu.upc.viora.features.plotmanagement.infrastructure.repository.PlotRe
 import retrofit2.Response
 
 private class FakePlotDao : PlotDao {
+    override suspend fun wipeAll() = Unit
+
     val rows = MutableStateFlow<List<PlotEntity>>(emptyList())
 
     override fun observeActive(): Flow<List<PlotEntity>> =
@@ -73,6 +75,8 @@ private class FakePlotDao : PlotDao {
 }
 
 private class FakeCacheMetadataDao : CacheMetadataDao {
+    override suspend fun wipeAll() = Unit
+
     val values = MutableStateFlow<Map<String, Long>>(emptyMap())
 
     override suspend fun fetchedAt(resourceKey: String): Long? = values.value[resourceKey]

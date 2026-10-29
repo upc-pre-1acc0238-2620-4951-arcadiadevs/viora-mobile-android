@@ -39,7 +39,7 @@ class HomeTourRepositoryImpl @Inject constructor(
             HomeTour.FIRST_STEPS -> FIRST_STEPS_TOUR_SEEN
         }
 
-    private companion object {
+    internal companion object {
         val HOME_TOUR_SEEN = booleanPreferencesKey("home_tour_seen")
         val FIRST_STEPS_TOUR_SEEN = booleanPreferencesKey("home_tour_first_steps_seen")
     }

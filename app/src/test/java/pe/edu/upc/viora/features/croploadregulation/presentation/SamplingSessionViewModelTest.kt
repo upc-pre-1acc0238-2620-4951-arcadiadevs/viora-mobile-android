@@ -32,6 +32,8 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.Sampl
 private class FakeDraftDao : DraftTreeSampleDao {
     val items = mutableListOf<DraftTreeSampleEntity>()
 
+    override suspend fun wipeAll() = items.clear()
+
     override suspend fun getSamples(plotId: String, campaignYear: Int): List<DraftTreeSampleEntity> =
         items.filter { it.plotId == plotId && it.campaignYear == campaignYear }
 

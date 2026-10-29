@@ -40,6 +40,8 @@ import pe.edu.upc.viora.features.phenology.infrastructure.repository.ChillReposi
 import retrofit2.Response
 
 private class FakeChillTrackerDao : ChillTrackerDao {
+    override suspend fun wipeAll() = Unit
+
     val row = MutableStateFlow<ChillTrackerEntity?>(null)
 
     override fun observeByPlot(plotId: String): Flow<ChillTrackerEntity?> =
@@ -55,6 +57,8 @@ private class FakeChillTrackerDao : ChillTrackerDao {
 }
 
 private class FakeChillCacheMetadataDao : CacheMetadataDao {
+    override suspend fun wipeAll() = Unit
+
     val values = MutableStateFlow<Map<String, Long>>(emptyMap())
 
     override suspend fun fetchedAt(resourceKey: String): Long? = values.value[resourceKey]

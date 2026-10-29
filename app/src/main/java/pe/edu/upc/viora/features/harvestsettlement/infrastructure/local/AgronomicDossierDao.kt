@@ -22,4 +22,8 @@ interface AgronomicDossierDao {
             "WHERE plot_id = :plotId AND campaign_year = :campaignYear",
     )
     suspend fun updatePdf(plotId: String, campaignYear: Int, pdfPath: String, savedAtEpochMs: Long)
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM agronomic_dossiers")
+    suspend fun wipeAll()
 }

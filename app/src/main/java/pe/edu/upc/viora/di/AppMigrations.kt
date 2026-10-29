@@ -1,4 +1,4 @@
-package pe.edu.upc.viora.core.database
+package pe.edu.upc.viora.di
 
 import androidx.room3.migration.Migration
 import androidx.sqlite.execSQL

@@ -24,4 +24,8 @@ interface ForecastDayDao {
         deleteByPlot(plotId)
         upsertAll(entities)
     }
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM forecast_days")
+    suspend fun wipeAll()
 }

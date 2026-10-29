@@ -25,4 +25,8 @@ interface ThinningPrescriptionDao {
             "WHERE plot_id = :plotId AND campaign_year = :campaignYear",
     )
     suspend fun updateExecution(plotId: String, campaignYear: Int, executionJson: String?)
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM thinning_prescriptions")
+    suspend fun wipeAll()
 }

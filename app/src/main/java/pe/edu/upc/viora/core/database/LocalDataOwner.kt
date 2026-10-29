@@ -2,14 +2,16 @@ package pe.edu.upc.viora.core.database
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.first
 
-/** Wipes what the phone keeps for an account: every Room table (plots, alerts, records, caches). */
+/**
+ * Wipes part of what the phone keeps for an account. Each bounded context adds its own with `@IntoSet`:
+ * its tables, files and preferences. The app provides the one [LocalDataOwner] runs, which calls them all.
+ */
 fun interface AccountDataWiper {
     suspend fun wipe()
 }
@@ -33,10 +35,7 @@ class LocalDataOwner @Inject constructor(
         val owner = dataStore.data.first()[OWNER]
         if (owner != null && owner == userId) return
         wiper.wipe()
-        dataStore.edit { prefs ->
-            ACCOUNT_KEYS.forEach { prefs.remove(it) }
-            if (userId != null) prefs[OWNER] = userId else prefs.remove(OWNER)
-        }
+        dataStore.edit { prefs -> if (userId != null) prefs[OWNER] = userId else prefs.remove(OWNER) }
     }
 
     /**
@@ -56,17 +55,5 @@ class LocalDataOwner @Inject constructor(
 
     private companion object {
         val OWNER = stringPreferencesKey("local_data_owner")
-
-        /**
-         * Preferences that belong to one account: the plot chosen in the Home, the tours it saw and
-         * the plan extension it went to pay.
-         */
-        val ACCOUNT_KEYS = listOf(
-            stringPreferencesKey("home_focused_plot"),
-            booleanPreferencesKey("home_tour_seen"),
-            booleanPreferencesKey("home_tour_first_steps_seen"),
-            stringPreferencesKey("plan_extension_pending_subscription"),
-            stringPreferencesKey("plan_extension_pending_id"),
-        )
     }
 }

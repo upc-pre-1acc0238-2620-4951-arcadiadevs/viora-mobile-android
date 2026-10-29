@@ -7,7 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import retrofit2.Retrofit
-import pe.edu.upc.viora.core.database.AppDatabase
+import pe.edu.upc.viora.di.AppDatabase
 import pe.edu.upc.viora.features.subscription.domain.repository.IndividualPurchaseRepository
 import pe.edu.upc.viora.features.subscription.infrastructure.repository.IndividualPurchaseRepositoryImpl
 import pe.edu.upc.viora.features.subscription.infrastructure.remote.IndividualPurchaseService

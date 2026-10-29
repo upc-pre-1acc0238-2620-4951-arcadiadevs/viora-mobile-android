@@ -22,4 +22,8 @@ interface PendingSettlementDao {
 
     @Query("DELETE FROM pending_settlements WHERE plot_id = :plotId AND campaign_year = :campaignYear")
     suspend fun delete(plotId: String, campaignYear: Int)
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM pending_settlements")
+    suspend fun wipeAll()
 }

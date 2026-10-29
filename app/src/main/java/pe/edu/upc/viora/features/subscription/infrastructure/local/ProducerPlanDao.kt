@@ -39,4 +39,8 @@ interface ProducerPlanDao {
         upsertOffers(offers)
         stamp(PRODUCER_PLAN_CATALOG_KEY, fetchedAt)
     }
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM producer_plan_offers")
+    suspend fun wipeAll()
 }

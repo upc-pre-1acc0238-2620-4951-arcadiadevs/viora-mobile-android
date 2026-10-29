@@ -34,4 +34,8 @@ interface FieldNoteDao {
         val unsent = findUnsent().map { it.id }.toSet()
         upsertAll(notes.filter { it.id !in unsent })
     }
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM field_notes")
+    suspend fun wipeAll()
 }

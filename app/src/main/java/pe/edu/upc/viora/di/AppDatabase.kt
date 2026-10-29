@@ -1,11 +1,15 @@
-package pe.edu.upc.viora.core.database
+package pe.edu.upc.viora.di
 
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
-import pe.edu.upc.viora.features.subscription.infrastructure.local.IndividualPurchaseDao
-import pe.edu.upc.viora.features.subscription.infrastructure.local.IndividualPurchaseEntity
-import pe.edu.upc.viora.features.subscription.infrastructure.local.ProducerPlanDao
-import pe.edu.upc.viora.features.subscription.infrastructure.local.ProducerPlanEntity
+import pe.edu.upc.viora.core.database.CacheMetadataDao
+import pe.edu.upc.viora.core.database.CacheMetadataEntity
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleEntity
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventEntity
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningPrescriptionDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningPrescriptionEntity
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.AgronomicDossierDao
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.AgronomicDossierEntity
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.HarvestSettlementDao
@@ -22,23 +26,22 @@ import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.FieldNoteDa
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.FieldNoteEntity
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotEntity
+import pe.edu.upc.viora.features.subscription.infrastructure.local.IndividualPurchaseDao
+import pe.edu.upc.viora.features.subscription.infrastructure.local.IndividualPurchaseEntity
+import pe.edu.upc.viora.features.subscription.infrastructure.local.ProducerPlanDao
+import pe.edu.upc.viora.features.subscription.infrastructure.local.ProducerPlanEntity
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.ForecastDayDao
+import pe.edu.upc.viora.features.telemetry.infrastructure.local.ForecastDayEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.IncidentDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.IncidentEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeEntity
-import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
-import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleEntity
-import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventDao
-import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventEntity
-import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningPrescriptionDao
-import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningPrescriptionEntity
-import pe.edu.upc.viora.features.telemetry.infrastructure.local.ForecastDayDao
-import pe.edu.upc.viora.features.telemetry.infrastructure.local.ForecastDayEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReadingDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReadingEntity
 
 /**
- * The single Room database of the app. Every bounded context contributes its entities and DAOs
+ * The single Room database of the app. It lives with the app's wiring, not in core, because it
+ * names the entities of every context. Every bounded context contributes its entities and DAOs
  * here (one line each in [entities] and one `abstract fun xDao()`), then provides the DAO from
  * its own `infrastructure/di` module.
  *

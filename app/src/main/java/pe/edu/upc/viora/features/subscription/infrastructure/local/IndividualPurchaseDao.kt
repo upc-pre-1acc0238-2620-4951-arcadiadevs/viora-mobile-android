@@ -21,4 +21,8 @@ interface IndividualPurchaseDao {
     /** Closes the journal of a purchase already paid, so a renewal can open its own. */
     @Query("DELETE FROM individual_purchase_journal WHERE owner = :owner")
     suspend fun delete(owner: String)
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM individual_purchase_journal")
+    suspend fun wipeAll()
 }

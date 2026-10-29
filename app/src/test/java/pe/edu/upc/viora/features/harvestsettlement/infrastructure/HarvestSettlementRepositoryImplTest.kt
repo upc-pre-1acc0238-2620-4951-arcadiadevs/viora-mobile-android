@@ -28,6 +28,8 @@ import pe.edu.upc.viora.features.harvestsettlement.infrastructure.repository.Har
 import retrofit2.Response
 
 private class FakeHarvestSettlementDao : HarvestSettlementDao {
+    override suspend fun wipeAll() = Unit
+
     val rows = MutableStateFlow<List<HarvestSettlementEntity>>(emptyList())
 
     override fun observeAll(): Flow<List<HarvestSettlementEntity>> = rows

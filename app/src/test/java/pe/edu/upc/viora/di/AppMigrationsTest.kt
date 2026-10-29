@@ -1,4 +1,4 @@
-package pe.edu.upc.viora.core.database
+package pe.edu.upc.viora.di
 
 import java.io.File
 import kotlinx.serialization.json.Json
@@ -14,7 +14,7 @@ import org.junit.Test
 class AppMigrationsTest {
 
     private fun createSqlByTable(version: Int): Map<String, String> {
-        val file = File("schemas/pe.edu.upc.viora.core.database.AppDatabase/$version.json")
+        val file = File("schemas/pe.edu.upc.viora.di.AppDatabase/$version.json")
         assertTrue("missing exported schema ${file.absolutePath}", file.exists())
         val entities = Json.parseToJsonElement(file.readText()).jsonObject
             .getValue("database").jsonObject.getValue("entities").jsonArray
@@ -129,7 +129,7 @@ class AppMigrationsTest {
     @Test
     fun `every version from 1 to the current one has a migration`() {
         // Up to the newest exported schema, so a version added without its migration fails here
-        val newest = java.io.File("schemas/pe.edu.upc.viora.core.database.AppDatabase").listFiles()!!
+        val newest = java.io.File("schemas/pe.edu.upc.viora.di.AppDatabase").listFiles()!!
             .maxOf { it.nameWithoutExtension.toInt() }
         (1 until newest).forEach { from ->
             assertTrue("missing $from -> ${from + 1}", AppMigrations.ALL.any { it.startVersion == from && it.endVersion == from + 1 })
