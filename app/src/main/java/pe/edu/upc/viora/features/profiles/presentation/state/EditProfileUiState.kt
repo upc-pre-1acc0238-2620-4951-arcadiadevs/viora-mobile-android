@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.profiles.presentation.state
 
 import pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers
 import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
+import pe.edu.upc.viora.core.domain.validation.PersonName
 
 /** Why saving failed, beyond the fields (P96). */
 enum class SaveProfileError { OFFLINE, GENERIC }
@@ -21,8 +22,9 @@ data class EditProfileUiState(
     val attemptedSave: Boolean = false,
     val error: SaveProfileError? = null,
 ) {
-    val nameEmpty: Boolean get() = fullName.isBlank()
-    val showNameError: Boolean get() = (fullNameTouched || attemptedSave) && nameEmpty
+    /** The same rule as the onboarding: at least two letters, so a lone initial is not saved as a name. */
+    val nameInvalid: Boolean get() = !PersonName.isValid(fullName)
+    val showNameError: Boolean get() = (fullNameTouched || attemptedSave) && nameInvalid
 
     val phoneValid: Boolean get() = MobileNumbers.isValidMobile(phone, country.iso)
 
@@ -31,7 +33,7 @@ data class EditProfileUiState(
 
     val isModified: Boolean get() = fullName.trim() != initialFullName.trim() || phone != initialPhone
 
-    val canSave: Boolean get() = !nameEmpty && phoneValid && isModified && !isLoading
+    val canSave: Boolean get() = !nameInvalid && phoneValid && isModified && !isLoading
 
     /** How the number reads abroad, under the field (`+51 952 184 337`). */
     val internationalPhone: String get() = MobileNumbers.international(phone, country.iso)

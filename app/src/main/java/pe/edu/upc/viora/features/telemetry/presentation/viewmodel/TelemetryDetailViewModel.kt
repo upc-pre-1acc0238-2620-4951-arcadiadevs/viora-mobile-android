@@ -28,6 +28,7 @@ import pe.edu.upc.viora.features.telemetry.domain.entity.TelemetrySeries
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryRange
 import pe.edu.upc.viora.features.telemetry.presentation.state.TelemetryDetailUiState
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /**
  * View model of the metric detail screen (Figma P91): the curve of one metric over 24 hours,
@@ -43,7 +44,7 @@ class TelemetryDetailViewModel @Inject constructor(
     private val clock: Clock,
 ) : ViewModel() {
 
-    val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "TelemetryDetailRoute needs a plotId" }
+    val plotId: String = savedStateHandle.requirePlotId().value
     private val routePlotName: String = savedStateHandle.get<String>("plotName").orEmpty()
 
     private val metric = MutableStateFlow(

@@ -26,6 +26,7 @@ import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 @HiltViewModel
 class WinterChillViewModel @Inject constructor(
@@ -37,7 +38,7 @@ class WinterChillViewModel @Inject constructor(
     observeIncidents: ObserveIncidentsUseCase,
 ) : ViewModel() {
 
-    val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "WinterChillRoute requires plotId" }
+    val plotId: String = savedStateHandle.requirePlotId().value
     private val initialPlotName: String = savedStateHandle.get<String>("plotName").orEmpty()
 
     private data class RefreshState(

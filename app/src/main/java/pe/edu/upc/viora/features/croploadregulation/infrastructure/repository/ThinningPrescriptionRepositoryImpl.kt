@@ -26,6 +26,7 @@ import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.Execut
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.PrescriptionResponseDto
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.RecordFullBloomRequestDto
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.ThinningPrescriptionService
+import pe.edu.upc.viora.core.domain.appResultOf
 
 class ThinningPrescriptionRepositoryImpl @Inject constructor(
     private val service: ThinningPrescriptionService,
@@ -45,7 +46,7 @@ class ThinningPrescriptionRepositoryImpl @Inject constructor(
             is AppResult.Success -> result.value
             is AppResult.Failure -> return result
         }
-        val saved = guarded { plans.forEach { save(it, it.plotId, campaignYear) } }
+        val saved = appResultOf<Unit> { plans.forEach { save(it, it.plotId, campaignYear) } }
         if (saved is AppResult.Failure) return saved
         // Thinnings recorded elsewhere are fetched too, so the list shows the real share. Best effort.
         plans.filter { it.status == EXECUTED && dao.find(it.plotId, campaignYear)?.executionJson == null }
@@ -59,7 +60,7 @@ class ThinningPrescriptionRepositoryImpl @Inject constructor(
             is AppResult.Success -> result.value
             is AppResult.Failure -> if (result.error is AppError.NotFound) null else return result
         }
-        val saved = guarded { save(remote, plotId, campaignYear) }
+        val saved = appResultOf<Unit> { save(remote, plotId, campaignYear) }
         // Recorded elsewhere (another phone, a reinstall): fetch it so P61 shows the real share. Best effort.
         if (saved is AppResult.Success && remote?.status == EXECUTED && dao.find(plotId, campaignYear)?.executionJson == null) {
             refreshExecution(plotId, campaignYear, remote.id)
@@ -76,7 +77,7 @@ class ThinningPrescriptionRepositoryImpl @Inject constructor(
         return when (val result = apiCaller.call { service.recordFullBloom(plotId, request) }) {
             is AppResult.Failure -> result
             is AppResult.Success -> {
-                val saved = guarded { save(result.value, plotId, campaignYear) }
+                val saved = appResultOf<Unit> { save(result.value, plotId, campaignYear) }
                 if (saved is AppResult.Failure) saved else AppResult.Success(result.value.toDomain())
             }
         }
@@ -111,7 +112,7 @@ class ThinningPrescriptionRepositoryImpl @Inject constructor(
             }
         }
         val execution = remote.toDomain() ?: return AppResult.Failure(AppError.Unknown())
-        val saved = guarded { saveExecution(remote, plotId, campaignYear) }
+        val saved = appResultOf<Unit> { saveExecution(remote, plotId, campaignYear) }
         if (saved is AppResult.Failure) return saved
         // Best effort: the plan turns EXECUTED; without signal P61 catches up on its next refresh.
         refreshPrescription(plotId, campaignYear)
@@ -120,7 +121,7 @@ class ThinningPrescriptionRepositoryImpl @Inject constructor(
 
     override suspend fun refreshExecution(plotId: String, campaignYear: Int, prescriptionId: String): AppResult<Unit> =
         when (val result = apiCaller.call { service.getExecution(prescriptionId) }) {
-            is AppResult.Success -> guarded { saveExecution(result.value, plotId, campaignYear) }
+            is AppResult.Success -> appResultOf<Unit> { saveExecution(result.value, plotId, campaignYear) }
             is AppResult.Failure -> if (result.error is AppError.NotFound) AppResult.Success(Unit) else result
         }
 
@@ -137,15 +138,6 @@ class ThinningPrescriptionRepositoryImpl @Inject constructor(
         } else {
             dao.updateExecution(plotId, campaignYear, remote.toJson())
         }
-    }
-
-    private suspend fun guarded(block: suspend () -> Unit): AppResult<Unit> = try {
-        block()
-        AppResult.Success(Unit)
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (throwable: Throwable) {
-        AppResult.Failure(AppError.Unknown(throwable))
     }
 
     private companion object {

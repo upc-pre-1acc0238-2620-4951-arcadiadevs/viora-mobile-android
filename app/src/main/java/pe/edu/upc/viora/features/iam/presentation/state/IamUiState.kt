@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.iam.presentation.state
 
 import androidx.annotation.StringRes
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.domain.validation.PasswordPolicy
 
 /** The screens of the IAM flow, in Figma order (frames 03 and 05). */
 enum class IamStep {
@@ -86,18 +87,17 @@ data class IamUiState(
 
     val emailValid: Boolean get() = EMAIL_REGEX.matches(email.trim())
 
-    val passwordLongEnough: Boolean get() = password.length >= MIN_PASSWORD
-    val passwordHasLettersAndDigits: Boolean get() = password.any(Char::isLetter) && password.any(Char::isDigit)
+    val passwordLongEnough: Boolean get() = PasswordPolicy.isLongEnough(password)
+    val passwordHasLettersAndDigits: Boolean get() = PasswordPolicy.hasLettersAndDigits(password)
     val passwordOk: Boolean get() = passwordLongEnough && passwordHasLettersAndDigits
 
-    val confirmOk: Boolean get() = confirmPassword.isNotEmpty() && confirmPassword == password
+    val confirmOk: Boolean get() = PasswordPolicy.isConfirmed(password, confirmPassword)
     val newPasswordOk: Boolean get() = passwordOk && confirmOk
 
     val canSignIn: Boolean get() = emailValid && password.isNotEmpty()
     val canCreateAccount: Boolean get() = emailValid && passwordOk
 
     private companion object {
-        const val MIN_PASSWORD = 8
         val EMAIL_REGEX = Regex("^[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}$")
     }
 }

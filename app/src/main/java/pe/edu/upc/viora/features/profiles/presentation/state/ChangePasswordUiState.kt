@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.profiles.presentation.state
 
+import pe.edu.upc.viora.core.domain.validation.PasswordPolicy
 /** Why the change failed, beyond the fields (P97). */
 enum class ChangePasswordError { OFFLINE, GENERIC }
 
@@ -15,9 +16,9 @@ data class ChangePasswordUiState(
     val isChanged: Boolean = false,
     val error: ChangePasswordError? = null,
 ) {
-    val ruleLengthMet: Boolean get() = newPassword.length >= 8
-    val ruleAlphanumericMet: Boolean get() = newPassword.any(Char::isLetter) && newPassword.any(Char::isDigit)
-    val ruleDifferentMet: Boolean get() = newPassword.isNotEmpty() && newPassword != currentPassword
+    val ruleLengthMet: Boolean get() = PasswordPolicy.isLongEnough(newPassword)
+    val ruleAlphanumericMet: Boolean get() = PasswordPolicy.hasLettersAndDigits(newPassword)
+    val ruleDifferentMet: Boolean get() = PasswordPolicy.differsFromCurrent(newPassword, currentPassword)
 
     val newPasswordValid: Boolean get() = ruleLengthMet && ruleAlphanumericMet && ruleDifferentMet
 
@@ -29,7 +30,7 @@ data class ChangePasswordUiState(
     }
 
     /** The rules are judged once the new password reaches the minimum length, not on the first key. */
-    val showRuleErrors: Boolean get() = newPassword.length >= 8 || (newPassword.isNotEmpty() && !ruleDifferentMet)
+    val showRuleErrors: Boolean get() = newPassword.length >= PasswordPolicy.MIN_LENGTH || (newPassword.isNotEmpty() && !ruleDifferentMet)
 
     val confirmMismatch: Boolean get() = confirmPassword.isNotEmpty() && confirmPassword != newPassword &&
         confirmPassword.length >= newPassword.length

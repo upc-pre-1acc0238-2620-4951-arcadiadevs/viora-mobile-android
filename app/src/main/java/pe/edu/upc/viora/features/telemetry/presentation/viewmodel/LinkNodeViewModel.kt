@@ -17,6 +17,7 @@ import pe.edu.upc.viora.features.telemetry.domain.entity.NewSensorNode
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorType
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.state.LinkNodeUiState
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 @HiltViewModel
 class LinkNodeViewModel @Inject constructor(
@@ -24,7 +25,7 @@ class LinkNodeViewModel @Inject constructor(
     private val linkSensorNode: LinkSensorNodeUseCase,
 ) : ViewModel() {
 
-    private val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "SensorsRoute needs a plotId" }
+    private val plotId: String = savedStateHandle.requirePlotId().value
 
     private val _uiState = MutableStateFlow(LinkNodeUiState())
     val uiState: StateFlow<LinkNodeUiState> = _uiState.asStateFlow()

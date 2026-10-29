@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import pe.edu.upc.viora.core.database.CacheMetadataDao
 import pe.edu.upc.viora.core.database.CacheMetadataEntity
-import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.features.telemetry.domain.entity.HourlyReading
@@ -19,6 +18,7 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
 import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toDomain
 import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.TelemetryService
+import pe.edu.upc.viora.core.domain.appResultOf
 
 class TelemetryRepositoryImpl @Inject constructor(
     private val service: TelemetryService,
@@ -40,20 +40,11 @@ class TelemetryRepositoryImpl @Inject constructor(
         val remote = apiCaller.call { service.getTelemetries(plotId, start.toString(), end.toString()) }
         if (remote is AppResult.Failure) return remote
         val entities = (remote as AppResult.Success).value.mapNotNull { it.toEntity(plotId) }
-        return guarded {
+        return appResultOf<Unit> {
             readingDao.upsertAll(entities)
             readingDao.deleteBefore(plotId, end.minus(Duration.ofHours(TelemetryRange.LAST_30_DAYS.hours)).toEpochMilli())
             cacheMetadataDao.upsert(CacheMetadataEntity(cacheKey(plotId), clock.millis()))
         }
-    }
-
-    private suspend fun guarded(block: suspend () -> Unit): AppResult<Unit> = try {
-        block()
-        AppResult.Success(Unit)
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (throwable: Throwable) {
-        AppResult.Failure(AppError.Unknown(throwable))
     }
 
     private fun cacheKey(plotId: String) = "telemetry:$plotId"

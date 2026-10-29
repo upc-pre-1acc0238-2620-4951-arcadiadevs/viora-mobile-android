@@ -24,6 +24,7 @@ import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.toRequestD
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.toUpdateRequestDto
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.PlotDto
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.PlotService
+import pe.edu.upc.viora.core.domain.appResultOf
 
 class PlotRepositoryImpl @Inject constructor(
     private val service: PlotService,
@@ -65,7 +66,7 @@ class PlotRepositoryImpl @Inject constructor(
         val remote = apiCaller.call { service.getArchivedPlots() }
         if (remote is AppResult.Failure) return remote
         val entities = (remote as AppResult.Success).value.map { it.toEntity() }
-        return guarded {
+        return appResultOf<Unit> {
             plotDao.upsertAll(entities)
             plotDao.deleteArchivedExcept(entities.map { it.id })
         }
@@ -85,7 +86,7 @@ class PlotRepositoryImpl @Inject constructor(
     override suspend fun archive(id: PlotId): AppResult<Unit> {
         val result = apiCaller.callUnit { service.archivePlot(id.value) }
         if (result is AppResult.Failure) return result
-        return guarded { plotDao.markArchived(id.value) }
+        return appResultOf<Unit> { plotDao.markArchived(id.value) }
     }
 
     override suspend fun restore(id: PlotId): AppResult<Plot> = apiCaller.call { service.restorePlot(id.value) }.cached()
@@ -96,18 +97,9 @@ class PlotRepositoryImpl @Inject constructor(
         val entity = (this as AppResult.Success).value.toEntity()
         val plot = entity.toDomainOrNull()
             ?: return AppResult.Failure(AppError.Unknown(IllegalStateException("Server returned an unreadable plot")))
-        return guarded { plotDao.upsertAll(listOf(entity)) }.let { stored ->
+        return appResultOf<Unit> { plotDao.upsertAll(listOf(entity)) }.let { stored ->
             if (stored is AppResult.Failure) stored else AppResult.Success(plot)
         }
-    }
-
-    private suspend fun guarded(block: suspend () -> Unit): AppResult<Unit> = try {
-        block()
-        AppResult.Success(Unit)
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (throwable: Throwable) {
-        AppResult.Failure(AppError.Unknown(throwable))
     }
 
     private companion object {

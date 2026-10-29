@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import pe.edu.upc.viora.core.database.CacheMetadataDao
 import pe.edu.upc.viora.core.database.CacheMetadataEntity
-import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.features.telemetry.domain.entity.AgroclimaticIncident
@@ -21,6 +20,7 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toDomain
 import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.IncidentService
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.PostponeIncidentRequestDto
+import pe.edu.upc.viora.core.domain.appResultOf
 
 class IncidentRepositoryImpl @Inject constructor(
     private val service: IncidentService,
@@ -56,7 +56,7 @@ class IncidentRepositoryImpl @Inject constructor(
         val summaryDto = (remote as AppResult.Success).value
         val entities = summaryDto.incidents.map { it.toEntity() }
 
-        val cacheResult = guarded {
+        val cacheResult = appResultOf<Unit> {
             if (plotId != null) {
                 incidentDao.upsertAll(entities)
                 incidentDao.deleteExceptForPlot(plotId, entities.map { it.id })
@@ -106,7 +106,7 @@ class IncidentRepositoryImpl @Inject constructor(
         }
         return when (remote) {
             is AppResult.Failure -> remote
-            is AppResult.Success -> guarded {
+            is AppResult.Success -> appResultOf<Unit> {
                 incidentDao.updatePostponed(
                     incidentId = incidentId,
                     status = IncidentStatus.SNOOZED.name,
@@ -135,13 +135,4 @@ class IncidentRepositoryImpl @Inject constructor(
     }
 
     private fun cacheKey(plotId: String?) = if (plotId == null) "incidents" else "incidents:$plotId"
-
-    private suspend fun guarded(block: suspend () -> Unit): AppResult<Unit> = try {
-        block()
-        AppResult.Success(Unit)
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (throwable: Throwable) {
-        AppResult.Failure(AppError.Unknown(throwable))
-    }
 }

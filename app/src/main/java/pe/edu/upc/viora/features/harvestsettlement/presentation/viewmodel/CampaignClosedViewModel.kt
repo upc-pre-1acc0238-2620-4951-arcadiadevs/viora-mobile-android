@@ -30,6 +30,7 @@ import pe.edu.upc.viora.features.phenology.presentation.ui.tonnesPerHectare
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /**
  * Logic of P73: the receipt of a plot's campaign, from the server settlement (closed) or from the
@@ -52,7 +53,7 @@ class CampaignClosedViewModel @Inject constructor(
     private val clock: Clock,
 ) : ViewModel() {
 
-    private val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "CampaignClosedRoute needs a plotId" }
+    private val plotId: String = savedStateHandle.requirePlotId().value
     private val campaignYear: Int = checkNotNull(savedStateHandle.get<Int>("campaignYear")) { "CampaignClosedRoute needs a campaignYear" }
 
     private val searching = MutableStateFlow(true)

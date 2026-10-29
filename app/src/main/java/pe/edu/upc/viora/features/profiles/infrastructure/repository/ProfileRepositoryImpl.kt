@@ -133,7 +133,7 @@ class ProfileRepositoryImpl @Inject constructor(
         }
 
     private fun ProfileResource.toDomain(userId: String, email: String?): UserProfile = UserProfile(
-        id = ProfileId(id ?: userId),
+        id = ProfileId(id?.takeIf(String::isNotBlank) ?: userId),
         userId = this.userId ?: userId,
         fullName = fullName,
         country = country,

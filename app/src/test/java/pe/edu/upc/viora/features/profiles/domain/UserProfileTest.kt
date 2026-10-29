@@ -29,4 +29,11 @@ class UserProfileTest {
         assertEquals("912345678", chile.nationalNumber)
         assertEquals("+56 912345678", chile.formattedPhoneNumber)
     }
+
+    @Test
+    fun `a profile id is never blank, like a plot id`() {
+        org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
+            pe.edu.upc.viora.features.profiles.domain.valueobject.ProfileId(" ")
+        }
+    }
 }

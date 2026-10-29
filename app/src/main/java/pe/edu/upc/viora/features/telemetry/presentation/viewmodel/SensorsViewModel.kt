@@ -21,6 +21,7 @@ import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveSensorNode
 import pe.edu.upc.viora.features.telemetry.application.usecase.RefreshSensorNodesUseCase
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.state.SensorsUiState
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 @HiltViewModel
 class SensorsViewModel @Inject constructor(
@@ -30,7 +31,7 @@ class SensorsViewModel @Inject constructor(
     private val refreshNodes: RefreshSensorNodesUseCase,
 ) : ViewModel() {
 
-    val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "SensorsRoute needs a plotId" }
+    val plotId: String = savedStateHandle.requirePlotId().value
     private val plotName: String = savedStateHandle.get<String>("plotName").orEmpty()
 
     private data class RefreshState(

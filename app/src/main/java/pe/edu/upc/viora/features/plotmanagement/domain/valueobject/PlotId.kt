@@ -1,9 +1,4 @@
 package pe.edu.upc.viora.features.plotmanagement.domain.valueobject
 
-/** Identifier of a plot (a UUID string issued by the backend). */
-@JvmInline
-value class PlotId(val value: String) {
-    init {
-        require(value.isNotBlank()) { "PlotId must not be blank" }
-    }
-}
+/** Temporary alias while the contexts move to the shared kernel's [pe.edu.upc.viora.core.domain.PlotId]. */
+typealias PlotId = pe.edu.upc.viora.core.domain.PlotId

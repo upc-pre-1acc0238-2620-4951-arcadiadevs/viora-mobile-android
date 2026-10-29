@@ -26,6 +26,7 @@ import pe.edu.upc.viora.features.harvestsettlement.infrastructure.mapper.toEntit
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.AgronomicDossierDto
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.AgronomicDossierService
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.SealDossierRequestDto
+import pe.edu.upc.viora.core.domain.appResultOf
 
 class AgronomicDossierRepositoryImpl @Inject constructor(
     private val service: AgronomicDossierService,
@@ -41,7 +42,7 @@ class AgronomicDossierRepositoryImpl @Inject constructor(
 
     override suspend fun seal(plotId: String, campaignYear: Int): AppResult<Unit> =
         when (val result = apiCaller.call { service.seal(plotId, SealDossierRequestDto(campaignYear)) }) {
-            is AppResult.Success -> guarded { save(result.value) }
+            is AppResult.Success -> appResultOf<Unit> { save(result.value) }
             is AppResult.Failure -> result
         }
 
@@ -49,7 +50,7 @@ class AgronomicDossierRepositoryImpl @Inject constructor(
         when (val result = apiCaller.call { service.getDossiers(plotId) }) {
             is AppResult.Failure -> result
             is AppResult.Success -> {
-                val saved = guarded { result.value.forEach { save(it) } }
+                val saved = appResultOf<Unit> { result.value.forEach { save(it) } }
                 if (saved is AppResult.Failure) saved else AppResult.Success(result.value.maxOfOrNull { it.campaignYear })
             }
         }
@@ -114,15 +115,6 @@ class AgronomicDossierRepositoryImpl @Inject constructor(
         if (target.exists()) target.delete()
         if (!partial.renameTo(target)) throw IOException("Could not keep the downloaded PDF")
         return target
-    }
-
-    private suspend fun guarded(block: suspend () -> Unit): AppResult<Unit> = try {
-        block()
-        AppResult.Success(Unit)
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (throwable: Throwable) {
-        AppResult.Failure(AppError.Unknown(throwable))
     }
 
     companion object {

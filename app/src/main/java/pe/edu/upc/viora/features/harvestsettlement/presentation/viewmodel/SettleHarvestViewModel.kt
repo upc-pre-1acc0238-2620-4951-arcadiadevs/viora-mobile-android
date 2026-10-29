@@ -35,6 +35,7 @@ import pe.edu.upc.viora.features.phenology.presentation.ui.tonnesPerHectare
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /**
  * Logic of the settle harvest form (P71) and its confirm / already-settled dialogs (P72): the
@@ -58,7 +59,7 @@ class SettleHarvestViewModel @Inject constructor(
     private val clock: Clock,
 ) : ViewModel() {
 
-    private val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "SettleHarvestRoute needs a plotId" }
+    private val plotId: String = savedStateHandle.requirePlotId().value
     private val campaignYear: Int = checkNotNull(savedStateHandle.get<Int>("campaignYear")) { "SettleHarvestRoute needs a campaignYear" }
     private val idempotencyKey: String = UUID.randomUUID().toString()
 

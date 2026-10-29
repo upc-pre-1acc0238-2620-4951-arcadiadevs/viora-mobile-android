@@ -31,6 +31,7 @@ import pe.edu.upc.viora.features.phenology.presentation.state.CampaignMode
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignResult
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignRules
 import pe.edu.upc.viora.features.phenology.presentation.state.HarvestPresenter
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /**
  * Logic of the campaign sheet: the year and kilos the producer is typing, their validation, the
@@ -47,7 +48,7 @@ class CampaignEditorViewModel @Inject constructor(
     private val clock: Clock,
 ) : ViewModel() {
 
-    private val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "HarvestHistoryRoute needs a plotId" }
+    private val plotId: String = savedStateHandle.requirePlotId().value
 
     private data class Draft(
         val mode: CampaignMode,

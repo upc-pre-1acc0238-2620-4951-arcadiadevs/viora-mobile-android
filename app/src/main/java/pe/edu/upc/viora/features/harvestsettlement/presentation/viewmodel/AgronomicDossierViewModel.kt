@@ -29,6 +29,7 @@ import pe.edu.upc.viora.features.harvestsettlement.application.usecase.SealAgron
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.VerifyDossierUseCase
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.AgronomicDossierUiState
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.DossierVerificationState
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /**
  * P76 · Expediente del lote with its P77 and P78 sheets. Opening it seals the dossier of the campaign (the backend
@@ -47,7 +48,7 @@ class AgronomicDossierViewModel @Inject constructor(
     private val verifyDossier: VerifyDossierUseCase,
 ) : ViewModel() {
 
-    val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "AgronomicDossierRoute requires plotId" }
+    val plotId: String = savedStateHandle.requirePlotId().value
     private val plotName: String = savedStateHandle.get<String>("plotName").orEmpty()
     private val requestedYear: Int? = savedStateHandle.get<Int>("campaignYear")?.takeIf { it > 0 }
 

@@ -21,6 +21,7 @@ import pe.edu.upc.viora.features.croploadregulation.application.usecase.RefreshT
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.ThinningResultUiState
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /**
  * P63 · Aclareo registrado. Right after P62 the thinning is already cached; opened later from P61 it is downloaded
@@ -35,7 +36,7 @@ class ThinningResultViewModel @Inject constructor(
     clock: Clock,
 ) : ViewModel() {
 
-    val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "ThinningResultRoute requires plotId" }
+    val plotId: String = savedStateHandle.requirePlotId().value
     private val prescriptionId: String = savedStateHandle.get<String>("prescriptionId").orEmpty()
     private val initialPlotName: String = savedStateHandle.get<String>("plotName").orEmpty()
     val campaignYear: Int = savedStateHandle.get<Int>("campaignYear")?.takeIf { it > 0 } ?: LocalDate.now(clock).year

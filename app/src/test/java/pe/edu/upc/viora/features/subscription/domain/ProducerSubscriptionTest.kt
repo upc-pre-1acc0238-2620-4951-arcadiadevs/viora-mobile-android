@@ -170,4 +170,16 @@ class ProducerSubscriptionTest {
         assertEquals(SubscriptionStatus.UNKNOWN, SubscriptionStatus.from("OTHER"))
         assertEquals(SubscriptionStatus.UNKNOWN, SubscriptionStatus.from(null))
     }
+
+    @Test
+    fun `the id follows the shared kernel uuid, not any text java accepts`() {
+        fun subscription(id: String) = ProducerSubscription(
+            id = id, mode = SubscriptionMode.INDIVIDUAL, planCode = ProducerPlanCode("PRODUCER_ANNUAL"),
+            status = SubscriptionStatus.ACTIVE, capacity = validCapacity, currency = "PEN", baseAmount = null,
+            taxAmount = null, totalAmount = null, startsAt = null, endsAt = null, entitlementActive = true, cooperativeId = null,
+        )
+        // java.util.UUID.fromString takes "1-1-1-1-1"; the backend never issues it.
+        assertThrows(IllegalArgumentException::class.java) { subscription("1-1-1-1-1") }
+        subscription(validId.uppercase())
+    }
 }

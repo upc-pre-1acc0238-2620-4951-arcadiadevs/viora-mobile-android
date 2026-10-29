@@ -27,6 +27,7 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.FullBloom
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.ThinningPlanUiState
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /** P61 · Plan del lote and its P64 full bloom sheet. */
 @HiltViewModel
@@ -40,7 +41,7 @@ class ThinningPlanViewModel @Inject constructor(
     private val clock: Clock,
 ) : ViewModel() {
 
-    val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "ThinningPlanRoute requires plotId" }
+    val plotId: String = savedStateHandle.requirePlotId().value
     private val initialPlotName: String = savedStateHandle.get<String>("plotName").orEmpty()
 
     /** The campaign of the plan: the one the route names, or the current year. */

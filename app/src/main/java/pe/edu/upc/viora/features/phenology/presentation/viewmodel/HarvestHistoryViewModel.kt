@@ -34,6 +34,7 @@ import pe.edu.upc.viora.features.phenology.presentation.state.PlotSubtitle
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 @HiltViewModel
 class HarvestHistoryViewModel @Inject constructor(
@@ -46,7 +47,7 @@ class HarvestHistoryViewModel @Inject constructor(
     private val clock: Clock,
 ) : ViewModel() {
 
-    val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "HarvestHistoryRoute needs a plotId" }
+    val plotId: String = savedStateHandle.requirePlotId().value
     private val plotName: String = savedStateHandle.get<String>("plotName").orEmpty()
 
     private data class RefreshState(

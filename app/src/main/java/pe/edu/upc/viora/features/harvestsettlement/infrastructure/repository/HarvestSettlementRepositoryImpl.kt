@@ -36,6 +36,7 @@ import pe.edu.upc.viora.features.harvestsettlement.infrastructure.mapper.toEntit
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.mapper.toRequestDto
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.ExistingSettlementDto
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.remote.HarvestSettlementService
+import pe.edu.upc.viora.core.domain.appResultOf
 
 class HarvestSettlementRepositoryImpl @Inject constructor(
     private val service: HarvestSettlementService,
@@ -54,16 +55,16 @@ class HarvestSettlementRepositoryImpl @Inject constructor(
         val remote = apiCaller.call { service.getSettlements(plotId) }
         if (remote is AppResult.Failure) return remote
         val entities = (remote as AppResult.Success).value.map { it.toEntity() }
-        return guarded { dao.replaceForPlot(plotId, entities) }
+        return appResultOf { dao.replaceForPlot(plotId, entities) }
     }
 
     override suspend fun settle(draft: SettleHarvestDraft, idempotencyKey: String?): AppResult<SettleOutcome> {
-        val existing = guarded { pendingDao.find(draft.plotId, draft.campaignYear) }
+        val existing = appResultOf { pendingDao.find(draft.plotId, draft.campaignYear) }
         val pending = (existing as? AppResult.Success)?.value
         val key = pending?.idempotencyKey ?: idempotencyKey ?: UUID.randomUUID().toString()
         val remote = settleRemote(draft, key)
         if (remote is AppResult.Success) {
-            if (pending != null) guarded { pendingDao.delete(draft.plotId, draft.campaignYear) }
+            if (pending != null) appResultOf { pendingDao.delete(draft.plotId, draft.campaignYear) }
             return remote
         }
         val error = (remote as AppResult.Failure).error
@@ -78,7 +79,7 @@ class HarvestSettlementRepositoryImpl @Inject constructor(
             return if (error is AppError.Conflict) alreadySettled(draft, error) else remote
         }
         val dto = (remote as AppResult.Success).value
-        val stored = guarded { dao.upsertAll(listOf(dto.toEntity())) }
+        val stored = appResultOf { dao.upsertAll(listOf(dto.toEntity())) }
         if (stored is AppResult.Failure) return stored
         return AppResult.Success(SettleOutcome.Settled(dto.toDomain()))
     }
@@ -91,7 +92,7 @@ class HarvestSettlementRepositoryImpl @Inject constructor(
     ): AppResult<SettleOutcome> {
         val now = clock.millis()
         val entity = draft.toPendingEntity(key, createdAt = previous?.createdAt ?: now, updatedAt = now)
-        val saved = guarded { pendingDao.upsert(entity) }
+        val saved = appResultOf { pendingDao.upsert(entity) }
         if (saved is AppResult.Failure) return saved
         scheduler.schedule()
         return AppResult.Success(SettleOutcome.Queued(entity.toDomain()))
@@ -101,19 +102,19 @@ class HarvestSettlementRepositoryImpl @Inject constructor(
         pendingDao.observeAll().map { rows -> rows.map { it.toDomain() } }
 
     override suspend fun updatePending(draft: SettleHarvestDraft): AppResult<Unit> {
-        val found = guarded { pendingDao.find(draft.plotId, draft.campaignYear) }
+        val found = appResultOf { pendingDao.find(draft.plotId, draft.campaignYear) }
         if (found is AppResult.Failure) return found
         val previous = (found as AppResult.Success).value
             ?: return AppResult.Failure(AppError.NotFound("No pending settlement for the campaign"))
         val entity = draft.toPendingEntity(previous.idempotencyKey, previous.createdAt, clock.millis())
-        val saved = guarded { pendingDao.upsert(entity) }
+        val saved = appResultOf { pendingDao.upsert(entity) }
         if (saved is AppResult.Failure) return saved
         scheduler.schedule()
         return saved
     }
 
     override suspend fun discardPending(plotId: String, campaignYear: Int): AppResult<Unit> =
-        guarded { pendingDao.delete(plotId, campaignYear) }
+        appResultOf { pendingDao.delete(plotId, campaignYear) }
 
     override suspend fun syncPending(): SettlementSyncResult {
         val rows = try {
@@ -232,14 +233,6 @@ class HarvestSettlementRepositoryImpl @Inject constructor(
             null
         }
         return AppResult.Success(SettleOutcome.AlreadySettled(summary))
-    }
-
-    private suspend fun <T> guarded(block: suspend () -> T): AppResult<T> = try {
-        AppResult.Success(block())
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (throwable: Throwable) {
-        AppResult.Failure(AppError.Unknown(throwable))
     }
 
     /** One request per plot, all at the same time; the first failure (if any) is reported. */
