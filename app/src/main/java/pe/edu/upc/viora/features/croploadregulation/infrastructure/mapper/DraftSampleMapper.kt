@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper
 
 import java.time.LocalDate
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.DraftSample
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleEntity
 
@@ -31,5 +32,14 @@ fun TreeSample.toEntity(
     trunkDiameterMm = trunkDiameterMm,
     observedOn = observedOn.toString(),
     isSynced = isSynced,
+    batchId = batchId,
+)
+
+fun DraftTreeSampleEntity.toDraft(): DraftSample = DraftSample(
+    id = id,
+    plotId = plotId,
+    plotName = plotName,
+    campaignYear = campaignYear,
+    sample = toDomain(),
     batchId = batchId,
 )

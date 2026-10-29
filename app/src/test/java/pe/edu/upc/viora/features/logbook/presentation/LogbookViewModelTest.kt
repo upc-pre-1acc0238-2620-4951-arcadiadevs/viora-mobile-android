@@ -27,6 +27,7 @@ import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.GetThinningEventsUseCase
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObserveThinningEventsUseCase
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.DraftSample
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.PlotSamplingOverview
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingDetailedReport
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingSummary
@@ -338,6 +339,14 @@ private class FakeTimeline(cached: List<ThinningEvent>?) : ThinningRepository {
     ): AppResult<SamplingSummary> = error("not used")
     override fun observeActiveSampling(): Flow<PlotSamplingOverview?> = error("not used")
     override fun observePendingDraftSamplesCount(): Flow<Int> = error("not used")
+
+    override suspend fun saveDraftSample(plotId: String, plotName: String, campaignYear: Int, sample: TreeSample, batchId: String): DraftSample = error("not used")
+    override fun observeDrafts(plotId: String, campaignYear: Int): Flow<List<DraftSample>> = error("not used")
+    override suspend fun unsyncedDrafts(): List<DraftSample> = error("not used")
+    override suspend fun assignBatchId(draftId: String, batchId: String) = error("not used")
+    override suspend fun markSynced(draftId: String) = error("not used")
+    override suspend fun deleteDraft(draftId: String) = error("not used")
+    override suspend fun clearDrafts(plotId: String, campaignYear: Int) = error("not used")
 }
 
 private class FakeSettlements : HarvestSettlementRepository {
