@@ -152,6 +152,7 @@ class SamplingSessionViewModelTest {
         clearDraftSamples = ClearDraftSamplesUseCase(fakeRepo),
         thinningRepository = fakeRepo,
         connectivity = ConnectivityObserver { true },
+        clock = java.time.Clock.systemUTC(),
     )
 
     @Before

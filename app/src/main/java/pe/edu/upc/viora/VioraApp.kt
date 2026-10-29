@@ -1,6 +1,9 @@
 package pe.edu.upc.viora
 
+import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -25,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -38,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.util.Consumer
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -92,6 +97,15 @@ import pe.edu.upc.viora.navigation.AppNavHost
 fun VioraApp(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+
+    // MainActivity is singleTop: the return from Mercado Pago (or a recovery link) reaches the running
+    // activity as a new intent, which the graph only sees if it is handed over here.
+    val activity = LocalActivity.current as? ComponentActivity
+    DisposableEffect(activity, navController) {
+        val listener = Consumer<Intent> { intent -> navController.handleDeepLink(intent) }
+        activity?.addOnNewIntentListener(listener)
+        onDispose { activity?.removeOnNewIntentListener(listener) }
+    }
 
     // An expired session sends the producer to sign in, with the welcome below so back still works.
     val sessionViewModel: AppSessionViewModel = hiltViewModel()

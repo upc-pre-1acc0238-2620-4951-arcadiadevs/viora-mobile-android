@@ -3,6 +3,8 @@ package pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Clock
+import java.time.Year
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,9 +19,10 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.SelectPlo
 @HiltViewModel
 class SelectPlotSamplingViewModel @Inject constructor(
     private val getPlotSamplingOverview: GetPlotSamplingOverviewUseCase,
+    clock: Clock,
 ) : ViewModel() {
 
-    private val currentYear = java.time.Year.now().value
+    private val currentYear = Year.now(clock).value
     private val _uiState = MutableStateFlow<SelectPlotSamplingUiState>(SelectPlotSamplingUiState.Loading)
     val uiState: StateFlow<SelectPlotSamplingUiState> = _uiState.asStateFlow()
 

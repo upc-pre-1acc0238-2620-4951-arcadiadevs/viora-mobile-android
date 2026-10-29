@@ -135,7 +135,7 @@ fun MyPlanScreen(actions: MyPlanActions, modifier: Modifier = Modifier, viewMode
             ) {
                 Text(stringResource(state.error!!.messageRes()), textAlign = TextAlign.Center, color = Neutral900)
                 Spacer(Modifier.height(16.dp))
-                PrimaryPillButton(text = stringResource(R.string.my_plan_retry), onClick = viewModel::refresh)
+                PrimaryPillButton(text = stringResource(R.string.common_retry), onClick = viewModel::refresh)
             }
             else -> MyPlanContent(state, actions)
         }

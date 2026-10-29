@@ -1,8 +1,10 @@
 package pe.edu.upc.viora.core.presentation
 
+import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
+import java.util.Currency
 import java.util.Locale
 
 /**
@@ -68,3 +70,25 @@ fun formatTonnesPerHectare(value: Double, locale: Locale = Locale.getDefault()):
 private const val SMALL_YIELD = 0.1
 private const val SPANISH = "es"
 private const val NO_BREAK_SPACE = '\u00A0'
+
+/**
+ * An amount in [currency] as every price of the app writes it: soles as "S/" with the app's separators
+ * ("S/ 27,5" in Spanish), whole amounts without decimals and at most two otherwise.
+ */
+fun formatMoney(value: BigDecimal, currency: String, locale: Locale = Locale.getDefault()): String =
+    NumberFormat.getCurrencyInstance(locale).apply {
+        this.currency = Currency.getInstance(currency)
+        if (currency == "PEN" && this is DecimalFormat) {
+            decimalFormatSymbols = decimalFormatSymbols.apply {
+                currencySymbol = "S/"
+                // Same separators as every other figure of the app ("S/ 27,5").
+                if (locale.language == "es") {
+                    decimalSeparator = ','
+                    monetaryDecimalSeparator = ','
+                    groupingSeparator = ' '
+                }
+            }
+            minimumFractionDigits = 0
+            maximumFractionDigits = 2
+        }
+    }.format(value)

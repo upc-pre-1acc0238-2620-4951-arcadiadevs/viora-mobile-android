@@ -118,7 +118,7 @@ fun CampaignPlanScreen(
             state.isLoading -> VioraLoadingState(modifier = Modifier.fillMaxWidth().padding(top = 80.dp))
             !state.hasPlots && state.error != null -> Message(
                 text = stringResource(checkNotNull(state.error).messageRes()),
-                action = stringResource(R.string.harvest_retry),
+                action = stringResource(R.string.common_retry),
                 onAction = viewModel::refresh,
             )
             !state.hasPlots -> Message(

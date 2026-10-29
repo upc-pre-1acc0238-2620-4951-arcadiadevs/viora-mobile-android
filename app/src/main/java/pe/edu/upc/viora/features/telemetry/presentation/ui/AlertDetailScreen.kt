@@ -162,7 +162,7 @@ fun AlertDetailScreen(
                             .padding(horizontal = 24.dp, vertical = 12.dp),
                     ) {
                         Text(
-                            text = stringResource(R.string.alerts_action_retry),
+                            text = stringResource(R.string.common_retry),
                             fontFamily = RobotoFamily,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
@@ -260,7 +260,7 @@ fun AlertDetailScreen(
                                     scope.launch {
                                         // Without the image (not drawn yet) the text still goes out.
                                         val panel = runCatching { panelLayer.toImageBitmap() }.getOrNull()
-                                        AlertShare.share(context, panel, shareText, detail.id)
+                                        AlertShare.share(context, panel, shareText, detail.id, viewModel.ioDispatcher)
                                     }
                                 },
                             contentAlignment = Alignment.Center,

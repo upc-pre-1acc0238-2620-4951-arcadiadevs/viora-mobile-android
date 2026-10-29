@@ -26,10 +26,11 @@ class OnboardingStore @Inject constructor(private val dataStore: DataStore<Prefe
             cooperativeCode = prefs[COOPERATIVE_CODE],
             hectares = prefs[HECTARES],
             alertsEnabled = prefs[ALERTS],
-            locationGranted = prefs[LOCATION],
+            termsAccepted = prefs[TERMS_ACCEPTED] == true,
         )
     }
 
+    /** The answers typed so far; the acceptance of the terms is only written by [acceptTerms]. */
     override suspend fun save(answers: OnboardingAnswers) {
         dataStore.edit {
             it[FULL_NAME] = answers.fullName
@@ -38,8 +39,13 @@ class OnboardingStore @Inject constructor(private val dataStore: DataStore<Prefe
             it.setOrRemove(COOPERATIVE_CODE, answers.cooperativeCode)
             it.setOrRemove(HECTARES, answers.hectares)
             it.setOrRemove(ALERTS, answers.alertsEnabled)
-            it.setOrRemove(LOCATION, answers.locationGranted)
+            it.remove(LEGACY_LOCATION)
         }
+    }
+
+    /** One edit of its own, so it never writes back answers read before a save still in progress. */
+    override suspend fun acceptTerms() {
+        dataStore.edit { it[TERMS_ACCEPTED] = true }
     }
 
     override suspend fun clear() {
@@ -56,8 +62,10 @@ class OnboardingStore @Inject constructor(private val dataStore: DataStore<Prefe
         val PHONE = stringPreferencesKey("onboarding_phone")
         val COOPERATIVE_CODE = stringPreferencesKey("onboarding_cooperative_code")
         val HECTARES = intPreferencesKey("onboarding_hectares")
+        val TERMS_ACCEPTED = booleanPreferencesKey("onboarding_terms_accepted")
         val ALERTS = booleanPreferencesKey("onboarding_alerts")
-        val LOCATION = booleanPreferencesKey("onboarding_location")
-        val ALL_KEYS = listOf(FULL_NAME, COUNTRY, PHONE, COOPERATIVE_CODE, HECTARES, ALERTS, LOCATION)
+        /** The location question left the onboarding; the key is still cleared for installs that saved it. */
+        val LEGACY_LOCATION = booleanPreferencesKey("onboarding_location")
+        val ALL_KEYS = listOf(TERMS_ACCEPTED, FULL_NAME, COUNTRY, PHONE, COOPERATIVE_CODE, HECTARES, ALERTS, LEGACY_LOCATION)
     }
 }

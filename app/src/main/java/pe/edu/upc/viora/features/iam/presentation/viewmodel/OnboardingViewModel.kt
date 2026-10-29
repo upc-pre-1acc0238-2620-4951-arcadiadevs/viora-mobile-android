@@ -14,6 +14,8 @@ import pe.edu.upc.viora.features.iam.domain.valueobject.OnboardingAnswers
 import pe.edu.upc.viora.features.iam.domain.repository.OnboardingAnswersRepository
 import pe.edu.upc.viora.features.iam.presentation.state.OnboardingStep
 import pe.edu.upc.viora.features.iam.presentation.state.OnboardingUiState
+import pe.edu.upc.viora.features.subscription.application.usecase.ObserveProducerPlanCatalogUseCase
+import pe.edu.upc.viora.features.subscription.application.usecase.RefreshProducerPlanCatalogUseCase
 
 /**
  * The onboarding questions T02b-T02f. Order: name, mobile, cooperative code, hectares (skipped when
@@ -21,12 +23,24 @@ import pe.edu.upc.viora.features.iam.presentation.state.OnboardingUiState
  * producer moves on, and an earlier run is picked up where its answers left off.
  */
 @HiltViewModel
-class OnboardingViewModel @Inject constructor(private val store: OnboardingAnswersRepository) : ViewModel() {
+class OnboardingViewModel @Inject constructor(
+    private val store: OnboardingAnswersRepository,
+    observePlanCatalog: ObserveProducerPlanCatalogUseCase,
+    refreshPlanCatalog: RefreshProducerPlanCatalogUseCase,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
 
     init {
+        // The estimate of T02d uses the price of the plan catalog (public, cached once downloaded).
+        viewModelScope.launch { refreshPlanCatalog() }
+        viewModelScope.launch {
+            observePlanCatalog().collect { catalog ->
+                val offer = catalog.offers.firstOrNull() ?: return@collect
+                _uiState.update { it.copy(referenceRatePerHa = offer.monthlyRatePerHa, currency = offer.currency) }
+            }
+        }
         viewModelScope.launch {
             val answers = store.answers()
             _uiState.update {
@@ -43,9 +57,16 @@ class OnboardingViewModel @Inject constructor(private val store: OnboardingAnswe
                     hectaresUnknown = answers.hectares == null && answers.cooperativeCode == null &&
                         answers.alertsEnabled != null,
                     alertsEnabled = answers.alertsEnabled == true,
-                    locationGranted = answers.locationGranted == true,
                 )
             }
+        }
+    }
+
+    /** Continuing below the legal notice records acceptance before opening registration. */
+    fun acceptTermsAndContinue(onContinue: () -> Unit) {
+        viewModelScope.launch {
+            store.acceptTerms()
+            onContinue()
         }
     }
 
@@ -109,12 +130,6 @@ class OnboardingViewModel @Inject constructor(private val store: OnboardingAnswe
     /** After the system dialog of "Activar alertas", or "Ahora no" (false). */
     fun onAlertsAnswered(enabled: Boolean) {
         _uiState.update { it.copy(alertsEnabled = enabled) }
-        advance(OnboardingStep.LOCATION)
-    }
-
-    /** After the system dialog of "Permitir ubicación", or "Ahora no" (false). */
-    fun onLocationAnswered(granted: Boolean) {
-        _uiState.update { it.copy(locationGranted = granted) }
         advance(OnboardingStep.SUMMARY)
     }
 
@@ -135,8 +150,7 @@ class OnboardingViewModel @Inject constructor(private val store: OnboardingAnswe
             OnboardingStep.HECTARES -> OnboardingStep.COOPERATIVE_CODE
             OnboardingStep.ALERTS ->
                 if (s.savedCooperativeCode != null) OnboardingStep.COOPERATIVE_CODE else OnboardingStep.HECTARES
-            OnboardingStep.LOCATION -> OnboardingStep.ALERTS
-            OnboardingStep.SUMMARY -> OnboardingStep.LOCATION
+            OnboardingStep.SUMMARY -> OnboardingStep.ALERTS
         }
         goTo(previous, editing = false)
         return true
@@ -163,7 +177,6 @@ class OnboardingViewModel @Inject constructor(private val store: OnboardingAnswe
             cooperativeCode = s.savedCooperativeCode,
             hectares = s.hectares.takeUnless { s.hectaresUnknown || s.savedCooperativeCode != null },
             alertsEnabled = s.alertsEnabled.takeIf { s.step.ordinal > OnboardingStep.ALERTS.ordinal },
-            locationGranted = s.locationGranted.takeIf { s.step == OnboardingStep.SUMMARY },
         )
         viewModelScope.launch { store.save(answers) }
     }

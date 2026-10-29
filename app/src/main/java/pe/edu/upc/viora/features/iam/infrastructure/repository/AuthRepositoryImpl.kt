@@ -72,9 +72,7 @@ class AuthRepositoryImpl @Inject constructor(
                         email = registration.email.trim(),
                         password = registration.password,
                         role = PRODUCER_ROLE,
-                        // The terms are accepted on the onboarding summary ("Al continuar aceptas..."), the
-                        // only way to reach the sign-up, so there is no second checkbox to read here.
-                        termsAccepted = true,
+                        termsAccepted = registration.termsAccepted,
                         profile = SignUpProfile(
                             fullName = registration.fullName.trim(),
                             country = registration.countryIso,

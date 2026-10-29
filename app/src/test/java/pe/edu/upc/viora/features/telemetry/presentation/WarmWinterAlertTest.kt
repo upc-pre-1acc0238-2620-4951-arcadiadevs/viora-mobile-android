@@ -68,6 +68,7 @@ class WarmWinterAlertTest {
         completeMitigationStepUseCase = CompleteMitigationStepUseCase(incidents),
         observeChillTracker = ObserveChillTrackerUseCase(chill),
         refreshChillTracker = RefreshChillTrackerUseCase(chill),
+        ioDispatcher = Dispatchers.Unconfined,
     )
 
     private fun AlertDetailViewModel.content() = uiState.value as AlertDetailUiState.Content

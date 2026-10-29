@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper
 
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
@@ -63,7 +64,8 @@ fun PlotSamplingStateResponseDto.toDomain(): PlotSamplingOverview = PlotSampling
 )
 
 
-fun ThinningEventItemDto.toDomain(): ThinningEvent = ThinningEvent(
+/** [clock] dates an event whose timestamp the server sent unreadable. */
+fun ThinningEventItemDto.toDomain(clock: Clock): ThinningEvent = ThinningEvent(
     id = id,
     eventType = when (eventType) {
         "THINNING_EXECUTED" -> ThinningEventType.THINNING_EXECUTED
@@ -74,7 +76,7 @@ fun ThinningEventItemDto.toDomain(): ThinningEvent = ThinningEvent(
     plotId = plotId,
     plotName = plotName,
     campaignYear = campaignYear,
-    occurredAt = parseInstantOrNow(occurredAt),
+    occurredAt = parseInstantOrNow(occurredAt, clock),
     evaluatedTreesCount = evaluatedTreesCount,
     totalShootsCount = totalShootsCount,
     totalFruitsCount = totalFruitsCount,
@@ -91,7 +93,7 @@ fun ThinningEventItemDto.toDomain(): ThinningEvent = ThinningEvent(
     },
 )
 
-fun SamplingDetailedResponseDto.toDomain(): SamplingDetailedReport = SamplingDetailedReport(
+fun SamplingDetailedResponseDto.toDomain(clock: Clock): SamplingDetailedReport = SamplingDetailedReport(
     summary = SamplingSummary(
         plotId = plotId,
         campaignYear = campaignYear,
@@ -103,23 +105,23 @@ fun SamplingDetailedResponseDto.toDomain(): SamplingDetailedReport = SamplingDet
         treesNeeded = treesNeeded,
         loadUnit = loadUnit,
     ),
-    trees = trees.map { it.toDomain() },
+    trees = trees.map { it.toDomain(clock) },
 )
 
-fun SamplingTreeItemDto.toDomain(): TreeSample = TreeSample(
+fun SamplingTreeItemDto.toDomain(clock: Clock): TreeSample = TreeSample(
     treeIdentifier = treeTag,
     shootsCount = shootCount,
     fruitSetCount = fruitSetCount,
     trunkDiameterMm = trunkDiameterMm,
     trunkCircumferenceCm = trunkDiameterMm?.let { (it * PI) / 10.0 },
-    observedOn = parseLocalDateOrNull(samplingDate) ?: LocalDate.now(),
+    observedOn = parseLocalDateOrNull(samplingDate) ?: LocalDate.now(clock),
     isSynced = true,
 )
 
-private fun parseInstantOrNow(iso: String): Instant = try {
+private fun parseInstantOrNow(iso: String, clock: Clock): Instant = try {
     Instant.parse(iso)
 } catch (_: DateTimeParseException) {
-    Instant.now()
+    Instant.now(clock)
 }
 
 private fun parseLocalDateOrNull(iso: String): LocalDate? = try {

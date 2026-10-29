@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -398,14 +399,23 @@ internal fun ValidatedFieldCard(
                 )
             }
             if (isSecret) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_visibility),
-                    contentDescription = null,
-                    tint = Neutral500,
+                // The eye stays 22 dp as drawn; the touch target around it is the 48 dp minimum.
+                Box(
                     modifier = Modifier
-                        .size(22.dp)
+                        .minimumInteractiveComponentSize()
+                        .clip(CircleShape)
                         .clickable(role = Role.Switch) { revealed = !revealed },
-                )
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_visibility),
+                        contentDescription = stringResource(
+                            if (revealed) R.string.account_password_hide else R.string.account_password_show,
+                        ),
+                        tint = Neutral500,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
             }
         }
         FieldNote(text = errorText ?: helperText, isError = isError)

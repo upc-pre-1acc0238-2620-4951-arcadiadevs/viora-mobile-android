@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.core.content.FileProvider
 import java.io.File
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 /**
@@ -19,8 +19,14 @@ internal object AlertShare {
 
     private const val SHARED_DIR = "shared"
 
-    suspend fun share(context: Context, panel: ImageBitmap?, text: String, incidentId: String) {
-        val image = panel?.let { runCatching { writePng(context, it, incidentId) }.getOrNull() }
+    suspend fun share(
+        context: Context,
+        panel: ImageBitmap?,
+        text: String,
+        incidentId: String,
+        ioDispatcher: CoroutineDispatcher,
+    ) {
+        val image = panel?.let { runCatching { writePng(context, it, incidentId, ioDispatcher) }.getOrNull() }
         val intent = Intent(Intent.ACTION_SEND).putExtra(Intent.EXTRA_TEXT, text)
         if (image == null) {
             intent.type = "text/plain"
@@ -32,7 +38,12 @@ internal object AlertShare {
         context.startActivity(Intent.createChooser(intent, null))
     }
 
-    private suspend fun writePng(context: Context, panel: ImageBitmap, incidentId: String): File = withContext(Dispatchers.IO) {
+    private suspend fun writePng(
+        context: Context,
+        panel: ImageBitmap,
+        incidentId: String,
+        ioDispatcher: CoroutineDispatcher,
+    ): File = withContext(ioDispatcher) {
         val directory = File(context.cacheDir, SHARED_DIR).apply { mkdirs() }
         File(directory, "alerta-$incidentId.png").also { file ->
             file.outputStream().use { panel.asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it) }

@@ -17,6 +17,7 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraConfirmDialog
 import pe.edu.upc.viora.core.designsystem.theme.*
 import androidx.compose.ui.graphics.Color
+import pe.edu.upc.viora.core.presentation.formatMoney
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.subscription.domain.entity.IndividualCheckout
 import pe.edu.upc.viora.features.subscription.presentation.state.IndividualCheckoutUiState
@@ -52,7 +53,7 @@ internal fun IndividualCheckoutAction(
             val terms = stringResource(
                 R.string.purchase_confirm_terms,
                 formatPlanCapacity(purchase.capacity.hectares, locale),
-                formatPlanMoney(purchase.total, purchase.currency, locale)
+                formatMoney(purchase.total, purchase.currency, locale)
             )
             val changed = stringResource(R.string.purchase_confirm_changed)
             val continueLabel = stringResource(R.string.purchase_continue)

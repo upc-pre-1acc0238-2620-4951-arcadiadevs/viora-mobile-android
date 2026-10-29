@@ -856,7 +856,7 @@ private fun MessageBody(
         )
         Spacer(modifier = Modifier.height(16.dp))
         PrimaryPillButton(
-            text = stringResource(R.string.harvest_retry),
+            text = stringResource(R.string.common_retry),
             onClick = onRetry,
         )
     }

@@ -112,7 +112,7 @@ class AuthRepositoryImplTest {
     fun `signing up sends the onboarding profile and answers the email the code went to`() = runTest {
         server.enqueue(MockResponse().setBody("""{"userId":"u-1","email":"teodoro@viora.ag","status":"PENDING"}"""))
 
-        val result = repository.signUp(Registration(" teodoro@viora.ag ", "Olivo2025", " Teodoro Mamani ", "PE", "952184337"))
+        val result = repository.signUp(Registration(" teodoro@viora.ag ", "Olivo2025", " Teodoro Mamani ", "PE", "952184337", termsAccepted = true))
 
         assertEquals(AuthResult.Success("teodoro@viora.ag"), result)
         val body = server.takeRequest().body.readUtf8()

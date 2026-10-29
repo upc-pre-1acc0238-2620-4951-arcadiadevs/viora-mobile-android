@@ -3,7 +3,9 @@ package pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Clock
 import java.time.LocalDate
+import java.time.Year
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +39,7 @@ class SamplingSessionViewModel @Inject constructor(
     private val clearDraftSamples: ClearDraftSamplesUseCase,
     private val thinningRepository: ThinningRepository,
     private val connectivity: ConnectivityObserver,
+    private val clock: Clock,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SamplingSessionUiState())
@@ -120,7 +123,7 @@ class SamplingSessionViewModel @Inject constructor(
         }
     }
 
-    fun initSession(plotId: String, plotName: String, campaignYear: Int = java.time.Year.now().value) {
+    fun initSession(plotId: String, plotName: String, campaignYear: Int = Year.now(clock).value) {
         val currentlyOffline = isDeviceOffline()
         val isNewPlot = _uiState.value.plotId != plotId
         val wasOffline = if (isNewPlot) currentlyOffline else (_uiState.value.isOffline || currentlyOffline)
@@ -238,7 +241,7 @@ class SamplingSessionViewModel @Inject constructor(
             shootsCount = shootsCount,
             fruitSetCount = fruitSetCount,
             trunkCircumferenceCm = trunkCircumferenceCm,
-            observedOn = LocalDate.now(),
+            observedOn = LocalDate.now(clock),
             isSynced = false,
         )
         _uiState.update { current ->

@@ -2,6 +2,9 @@ package pe.edu.upc.viora.features.subscription
 
 import android.content.res.Configuration
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -21,7 +24,7 @@ import pe.edu.upc.viora.features.subscription.domain.valueobject.ProducerPlanCod
 import pe.edu.upc.viora.features.subscription.domain.valueobject.SubscriptionMode
 import pe.edu.upc.viora.features.subscription.domain.valueobject.SubscriptionStatus
 import pe.edu.upc.viora.features.subscription.presentation.ui.InactiveAccessCard
-import pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionHomeSection
+import pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionHomeContent
 
 class SubscriptionHomeSectionInstrumentedTest {
 
@@ -133,10 +136,12 @@ class SubscriptionHomeSectionInstrumentedTest {
 
         compose.setContent {
             VioraTheme {
-                SubscriptionHomeSection(
+                val state by vm.uiState.collectAsState()
+                LaunchedEffect(Unit) { vm.refresh() }
+                SubscriptionHomeContent(
+                    result = state,
                     onRenew = {},
                     onRedeemCode = {},
-                    viewModel = vm,
                 )
             }
         }
@@ -174,10 +179,12 @@ class SubscriptionHomeSectionInstrumentedTest {
 
         compose.setContent {
             VioraTheme {
-                SubscriptionHomeSection(
+                val state by vm.uiState.collectAsState()
+                LaunchedEffect(Unit) { vm.refresh() }
+                SubscriptionHomeContent(
+                    result = state,
                     onRenew = {},
                     onRedeemCode = {},
-                    viewModel = vm,
                 )
             }
         }

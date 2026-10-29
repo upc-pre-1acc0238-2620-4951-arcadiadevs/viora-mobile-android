@@ -75,7 +75,9 @@ class IamViewModel @Inject constructor(
     fun back(): Boolean {
         val target = when (_uiState.value.step) {
             IamStep.SIGN_IN, IamStep.CREATE_ACCOUNT -> return false
-            IamStep.VERIFY -> IamStep.CREATE_ACCOUNT
+            // The account already exists and waits for its code: going back to "Crea tu cuenta" would
+            // only end in "correo ya registrado", so back leaves to sign-in with the email still filled in.
+            IamStep.VERIFY -> IamStep.SIGN_IN
             IamStep.FORGOT -> IamStep.SIGN_IN
             IamStep.LINK_SENT -> IamStep.FORGOT
             IamStep.NEW_PASSWORD, IamStep.CHECKING_LINK, IamStep.LINK_EXPIRED, IamStep.RESET_DONE -> IamStep.SIGN_IN
@@ -143,6 +145,7 @@ class IamViewModel @Inject constructor(
                 fullName = answers.fullName,
                 countryIso = answers.countryIso,
                 nationalPhone = answers.nationalPhone,
+                termsAccepted = answers.termsAccepted,
             )
             when (val result = signUpUseCase(registration)) {
                 is AuthResult.Success -> {

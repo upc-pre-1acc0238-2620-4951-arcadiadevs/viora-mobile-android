@@ -295,7 +295,7 @@ private fun ErrorBody(state: HarvestHistoryUiState.Error, onRetry: () -> Unit, m
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Terracotta100).padding(16.dp),
         )
-        PillAction(stringResource(R.string.harvest_retry), onClick = onRetry, enabled = true)
+        PillAction(stringResource(R.string.common_retry), onClick = onRetry, enabled = true)
     }
 }
 

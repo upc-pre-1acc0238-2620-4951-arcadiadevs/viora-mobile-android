@@ -354,7 +354,7 @@ private fun CheckingLinkStep(state: IamUiState, vm: IamViewModel) {
                 Text(stringResource(R.string.iam_checking_link), style = MaterialTheme.typography.bodyMedium, color = Neutral600)
             } else {
                 ErrorLine(state.error)
-                PillButton(text = stringResource(R.string.iam_retry), onClick = vm::checkResetLink)
+                PillButton(text = stringResource(R.string.common_retry), onClick = vm::checkResetLink)
                 UnderlinedLink(stringResource(R.string.iam_back_to_sign_in), onClick = { vm.goTo(IamStep.SIGN_IN) })
             }
         }

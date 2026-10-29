@@ -39,6 +39,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
@@ -245,7 +247,7 @@ private fun SpacingCard(
             style = MaterialTheme.typography.headlineMedium,
             color = if (hasError) Terracotta700 else Neutral900,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
+        Row(modifier = Modifier.padding(top = 4.dp)) {
             StepperButton(isPlus = false, contentDescription = stringResource(R.string.details_decrease)) { onChange(-1) }
             StepperButton(isPlus = true, contentDescription = stringResource(R.string.details_increase)) { onChange(1) }
         }
@@ -255,24 +257,39 @@ private fun SpacingCard(
 /** The round minus/plus button; the minus is a plain bar exactly as the design draws it. */
 @Composable
 private fun StepperButton(isPlus: Boolean, contentDescription: String, onClick: () -> Unit) {
+    // The circle stays 36 dp as drawn; the 48 dp box around it is the touch target and carries the label,
+    // so the minus (a plain bar, no icon) is announced too.
     Box(
         modifier = Modifier
-            .size(36.dp)
+            .size(48.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .clickable(role = Role.Button, onClick = onClick),
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
-        if (isPlus) {
-            Icon(painter = painterResource(R.drawable.ic_add), contentDescription = contentDescription, tint = Neutral900)
-        } else {
-            Box(
-                modifier = Modifier
-                    .size(width = 14.dp, height = 2.2.dp)
-                    .clip(RoundedCornerShape(1.dp))
-                    .background(Neutral900),
-            )
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            StepperGlyph(isPlus)
         }
+    }
+}
+
+@Composable
+private fun StepperGlyph(isPlus: Boolean) {
+    if (isPlus) {
+        Icon(painter = painterResource(R.drawable.ic_add), contentDescription = null, tint = Neutral900)
+    } else {
+        Box(
+            modifier = Modifier
+                .size(width = 14.dp, height = 2.2.dp)
+                .clip(RoundedCornerShape(1.dp))
+                .background(Neutral900),
+        )
     }
 }
 

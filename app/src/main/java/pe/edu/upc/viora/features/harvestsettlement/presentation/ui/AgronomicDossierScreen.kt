@@ -403,7 +403,7 @@ private fun MessageScreen(
             Spacer(Modifier.weight(1f))
             Text(body, style = MaterialTheme.typography.bodyLarge, color = Neutral700, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             if (onRetry != null) {
-                PrimaryPillButton(text = stringResource(R.string.dossier_retry), onClick = onRetry, modifier = Modifier.padding(top = 16.dp))
+                PrimaryPillButton(text = stringResource(R.string.common_retry), onClick = onRetry, modifier = Modifier.padding(top = 16.dp))
             }
             Spacer(Modifier.weight(1f))
         }

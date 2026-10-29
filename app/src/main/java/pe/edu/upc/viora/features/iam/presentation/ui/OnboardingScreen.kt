@@ -62,7 +62,6 @@ fun OnboardingScreen(
         OnboardingStep.COOPERATIVE_CODE -> CooperativeCodeStep(state, viewModel, onBack)
         OnboardingStep.HECTARES -> HectaresStep(state, viewModel, onBack)
         OnboardingStep.ALERTS -> AlertsStep(viewModel, onBack)
-        OnboardingStep.LOCATION -> LocationStep(viewModel, onBack)
         OnboardingStep.SUMMARY -> SummaryStep(state, viewModel, onBack, onCreateAccount)
     }
 }
@@ -258,43 +257,6 @@ private fun AlertsStep(vm: OnboardingViewModel, onBack: () -> Unit) {
     }
 }
 
-// ---- T02e2 · Location -----------------------------------------------------------------------
-
-@Composable
-private fun LocationStep(vm: OnboardingViewModel, onBack: () -> Unit) {
-    // "Mientras la app está en uso" or "Solo esta vez" both count; denied, the lot is drawn by hand.
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-        vm.onLocationAnswered(result.values.any { it })
-    }
-    QuestionFrame(
-        step = OnboardingStep.LOCATION,
-        title = stringResource(R.string.onboarding_location_title),
-        voice = stringResource(R.string.onboarding_location_voice),
-        onBack = onBack,
-        footer = {
-            PillButton(
-                text = stringResource(R.string.onboarding_location_allow),
-                onClick = {
-                    launcher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
-                },
-            )
-            TextPillButton(text = stringResource(R.string.onboarding_not_now), onClick = { vm.onLocationAnswered(false) })
-        },
-    ) {
-        Column {
-            GpsTraceIllustration(Modifier)
-            Spacer(Modifier.height(24.dp))
-            DashList(
-                listOf(
-                    stringResource(R.string.onboarding_location_item_corners),
-                    stringResource(R.string.onboarding_location_item_area),
-                    stringResource(R.string.onboarding_location_item_climate),
-                ),
-            )
-        }
-    }
-}
-
 // ---- T02f · Summary -------------------------------------------------------------------------
 
 @Composable
@@ -311,7 +273,7 @@ private fun SummaryStep(state: OnboardingUiState, vm: OnboardingViewModel, onBac
         onBack = onBack,
         contentGap = 24.dp,
         footer = {
-            PillButton(text = stringResource(R.string.onboarding_summary_create), onClick = onCreateAccount)
+            PillButton(text = stringResource(R.string.onboarding_summary_create), onClick = { vm.acceptTermsAndContinue(onCreateAccount) })
             Spacer(Modifier.height(6.dp))
             LegalNotice()
         },
@@ -326,11 +288,6 @@ private fun SummaryStep(state: OnboardingUiState, vm: OnboardingViewModel, onBac
                 stringResource(if (state.alertsEnabled) R.string.onboarding_summary_alerts_on else R.string.onboarding_summary_alerts_off),
                 { vm.edit(OnboardingStep.ALERTS) },
             )
-            SummaryRow(
-                stringResource(R.string.onboarding_summary_location),
-                stringResource(if (state.locationGranted) R.string.onboarding_summary_location_on else R.string.onboarding_summary_location_off),
-                { vm.edit(OnboardingStep.LOCATION) },
-            )
         }
     }
 }
@@ -340,4 +297,4 @@ private fun SummaryDivider() {
     Box(Modifier.fillMaxWidth().height(1.dp).background(Neutral200))
 }
 
-private const val STEP_COUNT = 6
+private const val STEP_COUNT = 5

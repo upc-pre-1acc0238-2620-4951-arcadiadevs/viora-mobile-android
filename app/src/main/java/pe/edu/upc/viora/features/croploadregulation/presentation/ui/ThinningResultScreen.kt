@@ -119,7 +119,7 @@ fun ThinningResultScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(16.dp))
-                PrimaryPillButton(text = stringResource(R.string.harvest_retry), onClick = viewModel::refresh)
+                PrimaryPillButton(text = stringResource(R.string.common_retry), onClick = viewModel::refresh)
                 Spacer(Modifier.weight(1f))
             }
             is ThinningResultUiState.Content -> ResultBody(

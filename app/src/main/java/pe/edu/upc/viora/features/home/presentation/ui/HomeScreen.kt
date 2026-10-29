@@ -1,11 +1,9 @@
 package pe.edu.upc.viora.features.home.presentation.ui
 
 import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -19,8 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -40,13 +36,12 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.Year
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraErrorState
 import pe.edu.upc.viora.core.designsystem.component.VioraGreetingHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraHeadline
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
-import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
-import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.core.presentation.messageRes
@@ -202,7 +197,12 @@ fun HomeScreenContent(
             }
             when (state) {
                 HomeUiState.Loading -> Centered { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) }
-                is HomeUiState.Error -> ErrorState(error = state.error, onRetry = onRefresh)
+                is HomeUiState.Error -> VioraErrorState(
+                    message = stringResource(state.error.messageRes()),
+                    onRetry = onRefresh,
+                    modifier = Modifier.padding(horizontal = ScreenPadding, vertical = 32.dp),
+                    title = stringResource(R.string.home_loading_error),
+                )
                 is HomeUiState.NoPlots -> {
                     // Without plots and without access the yellow card still comes first (Figma P10 · Sin acceso activo).
                     if (isAccessPaused) sections()
@@ -277,18 +277,6 @@ private fun FocusPicker(state: HomeUiState.Content, onSelect: (PlotId) -> Unit, 
 @Composable
 private fun Centered(content: @Composable () -> Unit) {
     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp), contentAlignment = Alignment.Center) { content() }
-}
-
-@Composable
-private fun ErrorState(error: AppError, onRetry: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenPadding, vertical = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(text = stringResource(R.string.home_loading_error), style = MaterialTheme.typography.headlineSmall)
-        Text(text = stringResource(error.messageRes()), style = MaterialTheme.typography.bodyMedium, color = Neutral600)
-        TextButton(onClick = onRetry) { Text(stringResource(R.string.plots_retry)) }
-    }
 }
 
 private fun samplePlot(id: String, name: String, variety: OliveVariety, hectares: Double, treesPerHectare: Int) = Plot(

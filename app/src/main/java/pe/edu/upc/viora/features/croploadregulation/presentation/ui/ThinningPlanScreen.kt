@@ -708,6 +708,6 @@ private fun MessageBody(message: String, onRetry: () -> Unit, modifier: Modifier
     ) {
         Text(message, style = MaterialTheme.typography.bodyLarge, color = Neutral700, textAlign = TextAlign.Center)
         Spacer(Modifier.height(16.dp))
-        PrimaryPillButton(text = stringResource(R.string.harvest_retry), onClick = onRetry)
+        PrimaryPillButton(text = stringResource(R.string.common_retry), onClick = onRetry)
     }
 }

@@ -11,5 +11,8 @@ interface OnboardingAnswersRepository {
 
     suspend fun save(answers: OnboardingAnswers)
 
+    /** "Crear mi cuenta" under the legal notice of the summary: the terms the sign-up will send as accepted. */
+    suspend fun acceptTerms()
+
     suspend fun clear()
 }

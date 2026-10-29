@@ -1,7 +1,6 @@
 package pe.edu.upc.viora.features.iam.presentation.ui
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,14 +8,11 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,14 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -75,7 +64,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Shadow
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.presentation.PhoneCountry
-import pe.edu.upc.viora.core.presentation.formatWhole
+import pe.edu.upc.viora.core.presentation.formatMoney
 import pe.edu.upc.viora.features.iam.presentation.state.OnboardingUiState
 
 /**
@@ -238,9 +227,13 @@ internal fun HectareRuler(hectares: Int, onChange: (Int) -> Unit, modifier: Modi
     }
 }
 
-/** "PLAN ESTIMADO · S/ 7,920 al año" and its two explanation lines. */
+/** "PLAN ESTIMADO · S/ 7 920 al año" and its two explanation lines, at the plan catalog's price. */
 @Composable
 internal fun PlanEstimate(state: OnboardingUiState, modifier: Modifier = Modifier) {
+    // Without the plan catalog (first run offline) there is no price to estimate with.
+    val rate = state.referenceRatePerHa ?: return
+    val monthly = state.monthlyPrice ?: return
+    val yearly = state.yearlyPrice ?: return
     Column(modifier.fillMaxWidth()) {
         Box(Modifier.fillMaxWidth().height(1.dp).background(Neutral200))
         Spacer(Modifier.height(24.dp))
@@ -248,7 +241,7 @@ internal fun PlanEstimate(state: OnboardingUiState, modifier: Modifier = Modifie
         Spacer(Modifier.height(6.dp))
         Text(
             text = buildAnnotatedString {
-                append(stringResource(R.string.onboarding_plan_price, formatWhole(state.yearlyPrice)))
+                append(formatMoney(yearly, state.currency))
                 append(' ')
                 withStyle(SpanStyle(fontSize = 22.sp, fontStyle = FontStyle.Italic, color = Neutral600)) {
                     append(stringResource(R.string.onboarding_plan_per_year))
@@ -261,8 +254,8 @@ internal fun PlanEstimate(state: OnboardingUiState, modifier: Modifier = Modifie
         Text(
             text = stringResource(
                 R.string.onboarding_plan_detail,
-                formatWhole(state.monthlyPrice),
-                OnboardingUiState.PRICE_PER_HECTARE_MONTH,
+                formatMoney(monthly, state.currency),
+                formatMoney(rate, state.currency),
             ),
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 19.sp, letterSpacing = 0.sp),
             color = Neutral700,
@@ -326,82 +319,6 @@ internal fun DashList(items: List<String>, modifier: Modifier = Modifier) {
             }
         }
     }
-}
-
-// ---- T02e2 · Location -----------------------------------------------------------------------
-
-/**
- * "Ilustración · Trazado GPS": the field map with the corners already walked, the estimated area,
- * the producer's position and the two chips. Drawn over the exported map on the 354 × 200 Figma box.
- */
-@Composable
-internal fun GpsTraceIllustration(modifier: Modifier = Modifier) {
-    BoxWithConstraints(modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(22.dp))) {
-        val scale = maxWidth / 354.dp
-        Image(
-            painter = painterResource(R.drawable.ill_onboarding_field_map),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier.fillMaxSize(),
-        )
-        Canvas(Modifier.fillMaxSize()) {
-            val sx = size.width / 354f
-            val sy = size.height / 200f
-            fun p(x: Float, y: Float) = Offset(x * sx, y * sy)
-            val area = Path().apply {
-                moveTo(p(66f, 58f).x, p(66f, 58f).y)
-                lineTo(p(236f, 40f).x, p(236f, 40f).y)
-                lineTo(p(270f, 140f).x, p(270f, 140f).y)
-                lineTo(p(92f, 160f).x, p(92f, 160f).y)
-                close()
-            }
-            drawPath(area, Harvest.copy(alpha = 0.22f))
-            drawPath(
-                area,
-                Shadow.copy(alpha = 0.5f),
-                style = Stroke(width = 1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 5.dp.toPx()))),
-            )
-            val walked = Path().apply {
-                moveTo(p(66f, 58f).x, p(66f, 58f).y)
-                lineTo(p(236f, 40f).x, p(236f, 40f).y)
-                lineTo(p(270f, 140f).x, p(270f, 140f).y)
-                lineTo(p(186f, 150f).x, p(186f, 150f).y)
-            }
-            drawPath(walked, Shadow, style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
-            listOf(p(66f, 58f), p(236f, 40f), p(270f, 140f)).forEach { corner ->
-                drawCircle(Neutral0, radius = 7.dp.toPx(), center = corner)
-                drawCircle(Shadow, radius = 6.dp.toPx(), center = corner, style = Stroke(width = 2.dp.toPx()))
-            }
-            val position = p(186f, 150f)
-            drawCircle(Shadow.copy(alpha = 0.16f), radius = 23.dp.toPx(), center = position)
-            drawCircle(Neutral0, radius = 9.dp.toPx(), center = position)
-            drawCircle(Harvest, radius = 6.5.dp.toPx(), center = position)
-        }
-        MapChip(Modifier.offset(x = 14.dp * scale, y = 14.dp * scale)) {
-            Box(Modifier.size(6.dp).clip(CircleShape).background(Terracotta500))
-            Caps(stringResource(R.string.onboarding_location_example_corner), letterSpacing = 1.3)
-        }
-        MapChip(Modifier.align(Alignment.BottomEnd).padding(end = 14.dp * scale, bottom = 14.dp * scale)) {
-            Text(
-                stringResource(R.string.onboarding_location_example_area),
-                style = MaterialTheme.typography.headlineSmall.copy(fontSize = 20.sp, lineHeight = 20.sp),
-                color = Neutral900,
-            )
-        }
-    }
-}
-
-@Composable
-private fun MapChip(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Row(
-        modifier = modifier
-            .shadow(8.dp, RoundedCornerShape(20.dp), ambientColor = Color.Black.copy(alpha = 0.08f), spotColor = Color.Black.copy(alpha = 0.08f))
-            .clip(RoundedCornerShape(20.dp))
-            .background(Neutral0)
-            .padding(start = 12.dp, end = 14.dp, top = 7.dp, bottom = 7.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) { content() }
 }
 
 // ---- T02f · Summary -------------------------------------------------------------------------

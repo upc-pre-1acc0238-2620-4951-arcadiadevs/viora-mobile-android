@@ -30,16 +30,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.math.BigDecimal
-import java.text.DecimalFormat
-import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.util.Currency
 import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.MorphingShapeIndicator
 import pe.edu.upc.viora.core.designsystem.theme.*
 import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatMoney
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.core.presentation.vioraNumberFormat
 import pe.edu.upc.viora.features.subscription.presentation.state.IndividualCheckoutUiState
@@ -163,13 +161,13 @@ internal fun ProducerPlanContent(
                 is ProducerPlanUiState.Failed -> {
                     Text(stringResource(state.error.messageRes()), Modifier.padding(vertical = Spacing.lg),
                         style = MaterialTheme.typography.bodyLarge, color = Terracotta600)
-                    TextButton(onRefresh) { Text(stringResource(R.string.producer_plan_retry)) }
+                    TextButton(onRefresh) { Text(stringResource(R.string.common_retry)) }
                 }
                 is ProducerPlanUiState.Empty -> {
                     Text(stringResource(R.string.producer_plan_empty), Modifier.padding(vertical = Spacing.lg),
                         style = MaterialTheme.typography.bodyLarge, color = Neutral700)
                     state.error?.let { Text(stringResource(it.messageRes()), color = Terracotta600) }
-                    TextButton(onRefresh, enabled = !state.isRefreshing) { Text(stringResource(R.string.producer_plan_retry)) }
+                    TextButton(onRefresh, enabled = !state.isRefreshing) { Text(stringResource(R.string.common_retry)) }
                 }
                 is ProducerPlanUiState.Content -> {
                     if (state.offers.size > 1) {
@@ -273,14 +271,14 @@ private fun PlanEstimateSummary(state: ProducerPlanUiState.Content) {
     val currency = state.selectedOffer.currency
     Text(stringResource(if (state.renewal != null) R.string.producer_plan_renew_total else R.string.producer_plan_total), Modifier.padding(top = Spacing.lg),
         style = EditorialEyebrow, color = Neutral600)
-    Text(formatPlanMoney(estimate.total, currency, locale), Modifier.testTag("producer-plan-total").drawBehind {
+    Text(formatMoney(estimate.total, currency, locale), Modifier.testTag("producer-plan-total").drawBehind {
         drawLine(Harvest300.copy(alpha = 0.55f), Offset(0f, size.height * 0.82f),
             Offset(size.width, size.height * 0.82f), strokeWidth = size.height * 0.16f)
     }, style = EditorialPrice, color = Neutral900)
     Text(stringResource(R.string.producer_plan_tax_included),
         style = MaterialTheme.typography.bodySmall, color = Neutral700)
     Column(Modifier.padding(top = Spacing.sm), verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
-        Text(stringResource(R.string.producer_plan_monthly, formatPlanMoney(estimate.monthlyTotal, currency, locale)),
+        Text(stringResource(R.string.producer_plan_monthly, formatMoney(estimate.monthlyTotal, currency, locale)),
             style = MaterialTheme.typography.bodySmall, color = Neutral700)
     }
 }
@@ -297,7 +295,7 @@ private fun PlanFreshness(state: ProducerPlanUiState.Content, onRefresh: () -> U
     state.error?.let { Text(stringResource(it.messageRes()), Modifier.padding(top = Spacing.xs),
         style = MaterialTheme.typography.bodySmall, color = Terracotta600) }
     if (state.error != null) {
-        TextButton(onRefresh, enabled = !state.isRefreshing) { Text(stringResource(R.string.producer_plan_retry)) }
+        TextButton(onRefresh, enabled = !state.isRefreshing) { Text(stringResource(R.string.common_retry)) }
     }
 }
 
@@ -314,20 +312,3 @@ private fun CatalogUpdatedAt(at: java.time.Instant) {
 internal fun formatPlanCapacity(value: BigDecimal, locale: Locale): String =
     vioraNumberFormat(0, value.scale().coerceAtLeast(0), locale).format(value)
 
-internal fun formatPlanMoney(value: BigDecimal, currency: String, locale: Locale): String =
-    NumberFormat.getCurrencyInstance(locale).apply {
-        this.currency = Currency.getInstance(currency)
-        if (currency == "PEN" && this is DecimalFormat) {
-            decimalFormatSymbols = decimalFormatSymbols.apply {
-                currencySymbol = "S/"
-                // Same separators as every other figure of the app ("S/ 27,5").
-                if (locale.language == "es") {
-                    decimalSeparator = ','
-                    monetaryDecimalSeparator = ','
-                    groupingSeparator = ' '
-                }
-            }
-            minimumFractionDigits = 0
-            maximumFractionDigits = 2
-        }
-    }.format(value)

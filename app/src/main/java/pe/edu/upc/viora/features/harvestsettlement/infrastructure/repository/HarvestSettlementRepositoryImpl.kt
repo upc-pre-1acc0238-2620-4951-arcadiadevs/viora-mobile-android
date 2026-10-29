@@ -95,11 +95,11 @@ class HarvestSettlementRepositoryImpl @Inject constructor(
         val saved = appResultOf { pendingDao.upsert(entity) }
         if (saved is AppResult.Failure) return saved
         scheduler.schedule()
-        return AppResult.Success(SettleOutcome.Queued(entity.toDomain()))
+        return AppResult.Success(SettleOutcome.Queued(entity.toDomain(clock)))
     }
 
     override fun observePending(): Flow<List<PendingSettlement>> =
-        pendingDao.observeAll().map { rows -> rows.map { it.toDomain() } }
+        pendingDao.observeAll().map { rows -> rows.map { it.toDomain(clock) } }
 
     override suspend fun updatePending(draft: SettleHarvestDraft): AppResult<Unit> {
         val found = appResultOf { pendingDao.find(draft.plotId, draft.campaignYear) }

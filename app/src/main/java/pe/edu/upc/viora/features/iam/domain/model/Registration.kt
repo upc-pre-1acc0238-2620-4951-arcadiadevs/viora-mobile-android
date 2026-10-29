@@ -10,4 +10,5 @@ data class Registration(
     val fullName: String,
     val countryIso: String,
     val nationalPhone: String,
+    val termsAccepted: Boolean = false,
 )

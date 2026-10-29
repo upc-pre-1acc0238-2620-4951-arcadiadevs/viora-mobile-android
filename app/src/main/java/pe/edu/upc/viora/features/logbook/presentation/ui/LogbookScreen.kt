@@ -20,7 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Instant
 import java.time.LocalDate
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraEmptyState
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
@@ -49,7 +49,6 @@ import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
-import pe.edu.upc.viora.core.designsystem.theme.Harvest300
 import pe.edu.upc.viora.core.designsystem.theme.Harvest800
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral100
@@ -273,13 +272,11 @@ private fun EmptyState(filter: LogbookFilter) {
         LogbookFilter.THINNINGS -> R.string.logbook_empty_thinnings_title to R.string.logbook_empty_thinnings_body
         LogbookFilter.ALL, LogbookFilter.HARVESTS -> R.string.logbook_empty_harvests_title to R.string.logbook_empty_harvests_body
     }
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenPadding, vertical = 40.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(text = stringResource(title), style = MaterialTheme.typography.headlineMedium)
-        Text(text = stringResource(body), style = MaterialTheme.typography.bodyLarge, color = Neutral600)
-    }
+    VioraEmptyState(
+        title = stringResource(title),
+        body = stringResource(body),
+        modifier = Modifier.padding(horizontal = ScreenPadding, vertical = 40.dp),
+    )
 }
 
 @Composable

@@ -72,7 +72,7 @@ class ThinningRepositoryImpl @Inject constructor(
 
     override suspend fun getSamplingDetailed(plotId: String, campaignYear: Int?): AppResult<SamplingDetailedReport> =
         apiCaller.call { service.getSamplingDetailed(plotId, campaignYear) }
-            .map { it.toDomain() }
+            .map { it.toDomain(clock) }
 
     override suspend fun submitSamplingBatch(
         plotId: String,
@@ -100,7 +100,7 @@ class ThinningRepositoryImpl @Inject constructor(
                     eventDao.replaceAll(envelope.events.map { it.toEntity() })
                     cacheMetadataDao.upsert(CacheMetadataEntity(EVENTS_CACHE_KEY, clock.millis()))
                 }
-                val events = envelope.events.map { it.toDomain() }
+                val events = envelope.events.map { it.toDomain(clock) }
                 events.filter { it.eventType == ThinningEventType.SAMPLING_COMPLETED }
                     .forEach { completed ->
                         draftDao.clearSamples(completed.plotId, completed.campaignYear)
@@ -110,7 +110,7 @@ class ThinningRepositoryImpl @Inject constructor(
 
     override fun observeThinningEvents(): Flow<List<ThinningEvent>?> =
         combine(eventDao.observeAll(), cacheMetadataDao.observeFetchedAt(EVENTS_CACHE_KEY)) { rows, fetchedAt ->
-            if (fetchedAt == null) null else rows.map { it.toDomain() }
+            if (fetchedAt == null) null else rows.map { it.toDomain(clock) }
         }
 
     override fun observeActiveSampling(): Flow<PlotSamplingOverview?> =
@@ -150,18 +150,18 @@ class ThinningRepositoryImpl @Inject constructor(
         sample: TreeSample,
         batchId: String,
     ): DraftSample {
-        val entity = sample.toEntity(plotId, plotName, campaignYear, batchId = batchId)
+        val entity = sample.toEntity(plotId, plotName, campaignYear, createdAt = clock.millis(), batchId = batchId)
         draftDao.insertSample(entity)
-        return entity.toDraft()
+        return entity.toDraft(clock)
     }
 
     override fun observeDrafts(plotId: String, campaignYear: Int): Flow<List<DraftSample>> =
         draftDao.observeAllSamples().map { drafts ->
-            drafts.filter { it.plotId == plotId && it.campaignYear == campaignYear }.map { it.toDraft() }
+            drafts.filter { it.plotId == plotId && it.campaignYear == campaignYear }.map { it.toDraft(clock) }
         }
 
     override suspend fun unsyncedDrafts(): List<DraftSample> =
-        draftDao.getAllSamples().filter { !it.isSynced }.map { it.toDraft() }
+        draftDao.getAllSamples().filter { !it.isSynced }.map { it.toDraft(clock) }
 
     override suspend fun assignBatchId(draftId: String, batchId: String) = draftDao.setBatchId(draftId, batchId)
 

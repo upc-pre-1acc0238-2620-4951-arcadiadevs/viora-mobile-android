@@ -112,7 +112,7 @@ internal fun ClimateErrorCard(error: AppError, onRetry: () -> Unit, modifier: Mo
             color = Terracotta700,
         )
         TextButton(onClick = onRetry) {
-            Text(text = stringResource(R.string.climate_retry), color = Terracotta700)
+            Text(text = stringResource(R.string.common_retry), color = Terracotta700)
         }
     }
 }

@@ -71,7 +71,7 @@ app/src/main/java/pe/edu/upc/viora/
 ├── navigation/                         # AppNavHost: composition root, the only code that knows every feature
 ├── core/
 │   ├── designsystem/{theme,component}  # colors, Newsreader/Roboto, spacing, shapes, VioraTabBar
-│   ├── navigation/                     # shared route objects (…Graph/…Route), TopLevelDestination, PlaceholderScreen
+│   ├── navigation/                     # shared route objects (…Graph/…Route), TopLevelDestination
 │   ├── network/                        # ApiCaller, ApiErrorMapper, interceptors, di/NetworkModule
 │   ├── database/                       # AppDatabase (Room 3), shared DAOs
 │   ├── datastore/                      # SessionStore (tokens)
@@ -90,7 +90,7 @@ Bounded contexts (package → report name): `iam` IAM · `profiles` User Profile
 `subscription` Subscription & Cooperative Membership · `plotmanagement` Orchard ·
 `telemetry` Agroclimatic Telemetry · `phenology` Phenology & Historical Bearing ·
 `croploadregulation` Thinning (core) · `harvestsettlement` Harvest ·
-`cooperativeoperations` Territory (Gestor — **not built in this app**).
+Territory (`cooperativeoperations`) belongs to the Gestor app and has no package here.
 
 ### Rules
 
