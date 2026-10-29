@@ -41,6 +41,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalDate
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraDatePicker
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
@@ -52,8 +55,6 @@ import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleDial
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestRules
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestUiState
 import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.SettleHarvestViewModel
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * Settle harvest (Figma P71 form, P72 confirm and already-settled dialogs). [onSettled], [onQueued]
@@ -155,7 +156,7 @@ internal fun SettleHarvestContent(
         }
     }
     if (pickingDate) {
-        WeighingDatePicker(
+        VioraDatePicker(
             selected = state.weighedOn,
             max = state.maxDate,
             onPick = {
@@ -235,29 +236,3 @@ private fun FormHeader(state: SettleHarvestUiState, onClose: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun WeighingDatePicker(selected: LocalDate, max: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: () -> Unit) {
-    val maxMillis = remember(max) { max.toPickerMillis() }
-    val selectable = remember(max) {
-        object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis <= maxMillis
-            override fun isSelectableYear(year: Int): Boolean = year <= max.year
-        }
-    }
-    val pickerState = rememberDatePickerState(
-        initialSelectedDateMillis = selected.toPickerMillis(),
-        selectableDates = selectable,
-    )
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = { pickerState.selectedDateMillis?.let { onPick(pickerMillisToLocalDate(it)) } ?: onDismiss() },
-            ) { Text(stringResource(R.string.settle_date_ok)) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settle_date_cancel)) } },
-    ) {
-        DatePicker(state = pickerState)
-    }
-}

@@ -50,6 +50,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.format.DateTimeFormatter
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraBottomSheet
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
@@ -61,8 +64,6 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNote
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteType
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.NewFieldNoteUiState
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.NewFieldNoteViewModel
 
 /**
@@ -85,13 +86,7 @@ fun NewFieldNoteSheet(
         viewModel.discardDraft()
         onDismiss()
     }
-    ModalBottomSheet(
-        onDismissRequest = close,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        dragHandle = { Box(Modifier.padding(top = 12.dp).size(width = 36.dp, height = 4.dp).clip(CircleShape).background(Neutral300)) },
-    ) {
+    VioraBottomSheet(onDismissRequest = close) {
         NewFieldNoteContent(
             state = state,
             onSelectPlot = viewModel::selectPlot,

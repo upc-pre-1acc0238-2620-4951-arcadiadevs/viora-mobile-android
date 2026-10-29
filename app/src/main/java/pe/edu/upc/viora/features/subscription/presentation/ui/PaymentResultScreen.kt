@@ -20,9 +20,9 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import java.time.format.DateTimeFormatter
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.theme.*
 import pe.edu.upc.viora.core.presentation.LocalAppZone
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 import pe.edu.upc.viora.features.subscription.presentation.state.IndividualCheckoutUiState
 
 /** P04: native full-screen results; entitlement and rejection come only from server evidence. */

@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Instant
 import java.time.LocalDate
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green200
@@ -190,9 +191,7 @@ fun LogbookContent(
                 }
             }
             if (content == null) {
-                Box(Modifier.fillMaxWidth().padding(vertical = 48.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Green900)
-                }
+                VioraLoadingState(modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp))
             } else {
                 FilterRow(selected = content.filter, onSelect = onSelectFilter, modifier = Modifier.padding(top = 20.dp))
                 content.refreshError?.let { RefreshNotice(it, onRetry = onRefresh) }

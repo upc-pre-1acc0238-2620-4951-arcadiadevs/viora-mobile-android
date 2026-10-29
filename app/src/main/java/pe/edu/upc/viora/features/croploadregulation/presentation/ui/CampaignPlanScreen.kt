@@ -49,6 +49,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -66,6 +68,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.designsystem.theme.newsreader
+import pe.edu.upc.viora.core.designsystem.theme.roboto
+import pe.edu.upc.viora.core.designsystem.theme.robotoMedium
 import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatWhole
 import pe.edu.upc.viora.core.presentation.messageRes
@@ -77,7 +82,6 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.PlanRowSt
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.CampaignPlanViewModel
 import pe.edu.upc.viora.features.home.presentation.ui.HomeHeader
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouette
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * P60 · Plan, the Plan tab: the plots that need thinning this week in one block, then every plot with the state of
@@ -111,9 +115,7 @@ fun CampaignPlanScreen(
         )
         Headline(state, onSelectCampaign = viewModel::selectCampaign, modifier = Modifier.padding(top = 28.dp))
         when {
-            state.isLoading -> Box(Modifier.fillMaxWidth().padding(top = 80.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Green900)
-            }
+            state.isLoading -> VioraLoadingState(modifier = Modifier.fillMaxWidth().padding(top = 80.dp))
             !state.hasPlots && state.error != null -> Message(
                 text = stringResource(checkNotNull(state.error).messageRes()),
                 action = stringResource(R.string.harvest_retry),

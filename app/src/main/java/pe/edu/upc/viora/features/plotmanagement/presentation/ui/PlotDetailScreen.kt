@@ -58,8 +58,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBar
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -84,7 +87,6 @@ import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.LotHarvest
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotDetailUiState
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.PlotDetailViewModel
 
 /** Distance from the top of the screen to the sheet when it is open: the map shows above it. */
@@ -147,9 +149,7 @@ fun PlotDetailContent(
     onDismissArchiveFailure: () -> Unit = {},
 ) {
     when (state) {
-        PlotDetailUiState.Loading -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
+        PlotDetailUiState.Loading -> VioraLoadingState(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.primary)
         PlotDetailUiState.NotFound -> PlotNotFound(onBack = onBack, modifier = modifier)
         is PlotDetailUiState.Content -> PlotDetailBody(
             plot = state.plot,
@@ -268,21 +268,12 @@ private fun PlotDetailBody(
 /** Back button on the left and, for a moment after registering, the "plot saved" notice centred. */
 @Composable
 private fun TopBar(showSavedNotice: Boolean, onBack: () -> Unit, onMore: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 24.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    VioraTopBar(
+        onBack = onBack,
+        onMore = onMore,
+        modifier = Modifier.statusBarsPadding().padding(horizontal = 24.dp, vertical = 12.dp),
     ) {
-        CircleIconButton(
-            icon = R.drawable.ic_arrow_back,
-            contentDescription = stringResource(R.string.action_back),
-            onClick = onBack,
-        )
         SavedNoticeSlot(visible = showSavedNotice, modifier = Modifier.weight(1f))
-        CircleIconButton(
-            icon = R.drawable.ic_more_vert,
-            contentDescription = stringResource(R.string.plot_menu_more),
-            onClick = onMore,
-        )
     }
 }
 

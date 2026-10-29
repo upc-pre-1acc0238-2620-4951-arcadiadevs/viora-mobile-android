@@ -33,6 +33,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraOfflineBanner
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -255,31 +256,5 @@ private fun ContextChip(
 /** "No signal" notice (Figma "Aviso · sin conexión"): what is recorded stays on the phone. */
 @Composable
 fun HomeOfflineNotice(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(CircleShape)
-            .background(Terracotta100)
-            .padding(start = 10.dp, end = 18.dp, top = 10.dp, bottom = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier.size(40.dp).clip(CircleShape).background(Neutral0),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_cloud_sync),
-                contentDescription = null,
-                tint = Terracotta700,
-                modifier = Modifier.size(24.dp),
-            )
-        }
-        Text(
-            text = stringResource(R.string.home_offline_notice),
-            style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, lineHeight = 18.sp, letterSpacing = 0.sp),
-            color = Terracotta700,
-            modifier = Modifier.weight(1f),
-        )
-    }
+    VioraOfflineBanner(text = stringResource(R.string.home_offline_notice), modifier = modifier)
 }

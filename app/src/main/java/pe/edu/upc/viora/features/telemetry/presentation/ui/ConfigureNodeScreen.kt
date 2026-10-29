@@ -52,6 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Duration
 import java.time.Instant
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -479,30 +480,6 @@ private fun ConfigureNodePreview() {
             ),
             plotName = "La Yarada 02",
             onBack = {}, onNameChange = {}, onDepthChange = {}, onTransmitReadingsChange = {}, onUnlink = {}, onSave = {},
-        )
-    }
-}
-
-@Composable
-private fun CircleIconButton(
-    icon: Int,
-    contentDescription: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .background(Neutral0)
-            .clickable(role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = contentDescription,
-            tint = Neutral900,
-            modifier = Modifier.size(22.dp),
         )
     }
 }

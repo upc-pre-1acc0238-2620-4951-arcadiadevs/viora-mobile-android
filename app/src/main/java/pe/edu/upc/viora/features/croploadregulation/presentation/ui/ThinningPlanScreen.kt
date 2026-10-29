@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -59,7 +60,13 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
+import pe.edu.upc.viora.core.designsystem.component.VioraOfflineBanner
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBar
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBarTitle
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green700
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -77,6 +84,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.designsystem.theme.newsreader
+import pe.edu.upc.viora.core.designsystem.theme.roboto
+import pe.edu.upc.viora.core.designsystem.theme.robotoMedium
 import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatDecimal
 import pe.edu.upc.viora.core.presentation.formatHectares
@@ -99,8 +109,6 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.Thinn
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * P61 · Plan del lote (US26-US28): the fruit load the sampling measured against the sustainable target, and the
@@ -137,9 +145,7 @@ fun ThinningPlanScreen(
             onMore = { showMore = true },
         )
         when (val s = state) {
-            ThinningPlanUiState.Loading -> Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Green900)
-            }
+            ThinningPlanUiState.Loading -> VioraLoadingState(modifier = Modifier.weight(1f).fillMaxWidth())
             is ThinningPlanUiState.Error -> MessageBody(
                 message = stringResource(s.error.messageRes()),
                 onRetry = viewModel::refresh,
@@ -198,17 +204,12 @@ private fun subtitle(state: ThinningPlanUiState.Content): String {
 
 @Composable
 private fun TopBar(title: String, subtitle: String, onBack: () -> Unit, onMore: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+    VioraTopBar(
+        onBack = onBack,
+        onMore = onMore,
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 8.dp),
     ) {
-        CircleIconButton(icon = R.drawable.ic_arrow_back, contentDescription = stringResource(R.string.action_back), onClick = onBack)
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f).padding(horizontal = 8.dp)) {
-            Text(title, style = robotoMedium(15.sp, 20.sp), color = Neutral900, maxLines = 1)
-            Text(subtitle, style = roboto(12.sp, 16.sp), color = Neutral600, maxLines = 1)
-        }
-        CircleIconButton(icon = R.drawable.ic_more_vert, contentDescription = stringResource(R.string.plot_menu_more), onClick = onMore)
+        VioraTopBarTitle(title, subtitle, titleStyle = robotoMedium(15.sp, 20.sp), subtitleStyle = roboto(12.sp, 16.sp))
     }
 }
 
@@ -285,16 +286,13 @@ private fun OfflineBanner(syncedAt: Instant) {
     val locale = LocalConfiguration.current.locales[0]
     val computedAt = DateTimeFormatter.ofPattern(stringResource(R.string.thinning_pattern_synced), locale)
         .format(syncedAt.atZone(LocalAppZone.current)).replace(".,", ",")
-    Row(
-        modifier = Modifier.fillMaxWidth().clip(CircleShape).background(Terracotta100).padding(6.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(Modifier.size(36.dp).clip(CircleShape).background(Neutral0), contentAlignment = Alignment.Center) {
-            Icon(painterResource(R.drawable.ic_cloud_sync), contentDescription = null, tint = Terracotta700, modifier = Modifier.size(24.dp))
-        }
-        Text(stringResource(R.string.thinning_offline, computedAt), style = robotoMedium(13.sp, 18.sp), color = Terracotta700)
-    }
+    VioraOfflineBanner(
+        text = stringResource(R.string.thinning_offline, computedAt),
+        iconCircle = 36.dp,
+        spacing = 10.dp,
+        contentPadding = PaddingValues(6.dp),
+        textStyle = robotoMedium(13.sp, 18.sp),
+    )
 }
 
 /** The yellow card that says which input is missing, with the trees sampled out of five and the way to give it. */

@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -55,6 +55,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBar
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBarTitle
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -70,7 +73,6 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.profiles.domain.entity.UserProfile
 
 /** Top bar of the account screens: round back (or close) button and a centered title over a subtitle, or [notice]. */
@@ -83,34 +85,24 @@ internal fun AccountTopBar(
     isClose: Boolean = false,
     notice: String? = null,
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+    VioraTopBar(
+        onBack = onBack,
+        modifier = modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+        navigationIcon = if (isClose) R.drawable.ic_close else R.drawable.ic_arrow_back,
+        navigationDescription = stringResource(if (isClose) R.string.action_close else R.string.action_back),
     ) {
-        CircleIconButton(
-            icon = if (isClose) R.drawable.ic_close else R.drawable.ic_arrow_back,
-            contentDescription = stringResource(if (isClose) R.string.action_close else R.string.action_back),
-            onClick = onBack,
-        )
         if (notice != null) {
             // The confirmation of a language switch takes the place of the title (P95 · English).
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { LanguageNotice(text = notice) }
-        } else Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
-                color = Neutral900,
-                maxLines = 1,
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
-                color = Neutral600,
-                maxLines = 1,
+        } else {
+            VioraTopBarTitle(
+                title = title,
+                subtitle = subtitle,
+                titleStyle = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
+                subtitleStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
+                horizontalPadding = 0.dp,
             )
         }
-        Spacer(Modifier.size(48.dp))
     }
 }
 

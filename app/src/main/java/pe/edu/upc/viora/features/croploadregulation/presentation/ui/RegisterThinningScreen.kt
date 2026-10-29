@@ -60,6 +60,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraDatePicker
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -71,6 +75,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.designsystem.theme.newsreader
+import pe.edu.upc.viora.core.designsystem.theme.roboto
+import pe.edu.upc.viora.core.designsystem.theme.robotoMedium
 import pe.edu.upc.viora.core.presentation.formatWhole
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.core.presentation.pickerMillisToLocalDate
@@ -80,8 +87,6 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.WindowChe
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.RegisterThinningViewModel
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.TextFieldCard
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.WeighingDateField
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * P62 · Registrar aclareo (US27): the day, the share of fruit removed (preloaded with the prescription) and a note.
@@ -138,9 +143,7 @@ internal fun RegisterThinningContent(
         ) {
             Headline()
             if (state.isLoading) {
-                Box(Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Green900)
-                }
+                VioraLoadingState(modifier = Modifier.fillMaxWidth().padding(top = 40.dp))
             } else {
                 WeighingDateField(
                     dateText = thinningDateText(state.executedOn, state.today),
@@ -174,7 +177,7 @@ internal fun RegisterThinningContent(
     }
 
     if (pickingDate) {
-        ThinningDatePicker(
+        VioraDatePicker(
             selected = state.executedOn,
             min = state.earliest,
             max = state.today,
@@ -362,30 +365,3 @@ private fun Warning(text: String) {
     }
 }
 
-/** Only the days between the opening of the window and today can be picked. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ThinningDatePicker(selected: LocalDate, min: LocalDate, max: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: () -> Unit) {
-    val minMillis = remember(min) { min.toPickerMillis() }
-    val maxMillis = remember(max) { max.toPickerMillis() }
-    val selectable = remember(min, max) {
-        object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis in minMillis..maxMillis
-            override fun isSelectableYear(year: Int): Boolean = year in min.year..max.year
-        }
-    }
-    val pickerState = rememberDatePickerState(initialSelectedDateMillis = selected.toPickerMillis(), selectableDates = selectable)
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    pickerState.selectedDateMillis?.let { onPick(pickerMillisToLocalDate(it)) } ?: onDismiss()
-                },
-            ) { Text(stringResource(R.string.settle_date_ok)) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settle_date_cancel)) } },
-    ) {
-        DatePicker(state = pickerState)
-    }
-}

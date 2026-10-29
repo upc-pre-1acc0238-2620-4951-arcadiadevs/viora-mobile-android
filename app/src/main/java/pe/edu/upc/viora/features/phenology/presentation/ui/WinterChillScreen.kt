@@ -47,8 +47,13 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.math.floor
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBar
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBarTitle
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green100
 import pe.edu.upc.viora.core.designsystem.theme.Green200
@@ -76,8 +81,6 @@ import pe.edu.upc.viora.features.phenology.presentation.state.WinterChillUiState
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.WinterChillViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * Screen P80: "Frío invernal" (US22)
@@ -121,9 +124,7 @@ fun WinterChillScreen(
 
         when (val s = state) {
             WinterChillUiState.Loading -> {
-                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Green900)
-                }
+                VioraLoadingState(modifier = Modifier.weight(1f).fillMaxWidth())
             }
             is WinterChillUiState.Error -> {
                 MessageBody(
@@ -194,47 +195,15 @@ private fun TopBar(
     onBack: () -> Unit,
     onMore: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        CircleIconButton(
-            icon = R.drawable.ic_arrow_back,
-            contentDescription = stringResource(R.string.action_back),
-            onClick = onBack,
-        )
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
-        ) {
-            Text(
-                text = plotName.ifBlank { stringResource(R.string.winter_chill_title) },
-                style = MaterialTheme.typography.titleMedium,
-                color = Neutral900,
-                maxLines = 1,
-            )
-            Text(
-                text = if (varietyName.isBlank()) {
-                    stringResource(R.string.winter_chill_title)
-                } else {
-                    stringResource(R.string.winter_chill_subtitle, varietyName)
-                },
-                style = MaterialTheme.typography.labelSmall,
-                color = Neutral600,
-                maxLines = 1,
-            )
-        }
-
-        CircleIconButton(
-            icon = R.drawable.ic_more_vert,
-            contentDescription = stringResource(R.string.plot_menu_more),
-            onClick = onMore,
+    VioraTopBar(onBack = onBack, onMore = onMore, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
+        VioraTopBarTitle(
+            title = plotName.ifBlank { stringResource(R.string.winter_chill_title) },
+            subtitle = if (varietyName.isBlank()) {
+                stringResource(R.string.winter_chill_title)
+            } else {
+                stringResource(R.string.winter_chill_subtitle, varietyName)
+            },
+            subtitleStyle = MaterialTheme.typography.labelSmall,
         )
     }
 }

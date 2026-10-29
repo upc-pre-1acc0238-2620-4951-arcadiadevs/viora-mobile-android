@@ -46,6 +46,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.Locale
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -149,10 +150,7 @@ fun TelemetryDetailContent(
                 MetricChips(selected = state.metric, onSelect = onSelectMetric)
                 Spacer(Modifier.height(20.dp))
                 when (state) {
-                    is TelemetryDetailUiState.Loading -> Box(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
-                        contentAlignment = Alignment.Center,
-                    ) { CircularProgressIndicator(color = Green900) }
+                    is TelemetryDetailUiState.Loading -> VioraLoadingState(modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp))
                     is TelemetryDetailUiState.Error -> ClimateErrorCard(error = state.error, onRetry = onRefresh)
                     is TelemetryDetailUiState.Content -> DetailBody(state, onSelectRange)
                 }

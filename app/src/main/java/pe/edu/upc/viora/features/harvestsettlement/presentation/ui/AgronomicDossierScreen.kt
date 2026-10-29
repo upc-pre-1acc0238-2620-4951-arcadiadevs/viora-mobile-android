@@ -47,6 +47,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBar
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBarTitle
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest400
@@ -57,6 +62,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.designsystem.theme.newsreader
+import pe.edu.upc.viora.core.designsystem.theme.roboto
+import pe.edu.upc.viora.core.designsystem.theme.robotoMedium
 import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatDayMonth
 import pe.edu.upc.viora.core.presentation.formatDayRange
@@ -65,14 +73,9 @@ import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.formatKg
 import pe.edu.upc.viora.core.presentation.formatPercent
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.newsreader
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.roboto
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.robotoMedium
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.AgronomicDossier
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.AgronomicDossierUiState
 import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.AgronomicDossierViewModel
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * P76 · Expediente del lote (US30): the sealed dossier of a settled campaign, its SHA-256 and the way to its PDF.
@@ -91,9 +94,7 @@ fun AgronomicDossierScreen(
 
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerLow)) {
         when (val s = state) {
-            AgronomicDossierUiState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Green900)
-            }
+            AgronomicDossierUiState.Loading -> VioraLoadingState(modifier = Modifier.fillMaxSize())
             is AgronomicDossierUiState.NoDossier -> MessageScreen(
                 onBack = onBack,
                 lead = stringResource(R.string.dossier_empty_lead),
@@ -178,14 +179,14 @@ private fun DossierContent(
 /** Back on the left and the title centred over the plot and campaign, as every lot screen. */
 @Composable
 private fun TopBar(title: String, subtitle: String, onBack: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        CircleIconButton(icon = R.drawable.ic_arrow_back, contentDescription = stringResource(R.string.action_back), onClick = onBack)
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f).padding(horizontal = 8.dp)) {
-            Text(title, style = robotoMedium(15.sp, 20.sp), color = Neutral900, maxLines = 1)
-            Text(subtitle, style = roboto(12.sp, 16.sp), color = Neutral600, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
-        // Keeps the title centred on the screen, as the 48 dp back button does on the left.
-        Spacer(Modifier.size(48.dp))
+    VioraTopBar(onBack = onBack) {
+        VioraTopBarTitle(
+            title,
+            subtitle,
+            titleStyle = robotoMedium(15.sp, 20.sp),
+            subtitleStyle = roboto(12.sp, 16.sp),
+            subtitleOverflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

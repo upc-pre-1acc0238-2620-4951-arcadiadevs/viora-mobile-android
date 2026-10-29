@@ -20,10 +20,10 @@ import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportS
 import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotation
 import com.mapbox.maps.extension.compose.style.MapStyle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotsUiState
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.OutlineAnnotations
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.frameOutline
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.PlotsViewModel

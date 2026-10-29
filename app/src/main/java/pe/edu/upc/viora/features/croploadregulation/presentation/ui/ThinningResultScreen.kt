@@ -52,6 +52,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -68,6 +71,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.designsystem.theme.newsreader
+import pe.edu.upc.viora.core.designsystem.theme.roboto
+import pe.edu.upc.viora.core.designsystem.theme.robotoMedium
 import pe.edu.upc.viora.core.presentation.formatDecimal
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CaliberProjection
@@ -81,8 +87,6 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.ResultVoi
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.ThinningResultUiState
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.ThinningResultViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * P63 · Aclareo registrado (US27/US28): the caliber expected at harvest in one of its four Figma variants, the load
@@ -101,9 +105,7 @@ fun ThinningResultScreen(
 
     Box(modifier.fillMaxSize().background(Neutral100)) {
         when (val s = state) {
-            ThinningResultUiState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Green900)
-            }
+            ThinningResultUiState.Loading -> VioraLoadingState(modifier = Modifier.fillMaxSize())
             is ThinningResultUiState.Error -> Column(
                 Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars).padding(24.dp),
             ) {

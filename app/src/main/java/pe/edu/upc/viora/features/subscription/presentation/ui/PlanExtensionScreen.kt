@@ -41,11 +41,11 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.MorphingShapeIndicator
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.theme.*
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 import pe.edu.upc.viora.features.subscription.domain.entity.ExtensionAction
 import pe.edu.upc.viora.features.subscription.presentation.state.PlanExtensionUiState
 import pe.edu.upc.viora.features.subscription.presentation.viewmodel.PaymentResultProfileViewModel

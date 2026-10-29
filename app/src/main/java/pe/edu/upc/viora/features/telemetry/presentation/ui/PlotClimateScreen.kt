@@ -59,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Duration
 import java.util.Locale
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green200
@@ -204,10 +205,7 @@ fun PlotClimateContent(
                 )
                 Spacer(Modifier.height(16.dp))
                 when (state) {
-                    PlotClimateUiState.Loading -> Box(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
-                        contentAlignment = Alignment.Center,
-                    ) { CircularProgressIndicator(color = Green900) }
+                    PlotClimateUiState.Loading -> VioraLoadingState(modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp))
                     is PlotClimateUiState.Error -> ClimateErrorCard(error = state.error, onRetry = onRefresh)
                     is PlotClimateUiState.Content -> ClimateSections(state, onSelectPlot, onOpenMetric)
                 }

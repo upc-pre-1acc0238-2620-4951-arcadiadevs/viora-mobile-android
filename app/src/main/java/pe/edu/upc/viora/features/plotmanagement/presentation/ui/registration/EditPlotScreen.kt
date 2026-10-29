@@ -49,6 +49,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
@@ -78,9 +81,7 @@ fun EditPlotScreen(
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     when (state) {
-        EditPlotUiState.Loading -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
+        EditPlotUiState.Loading -> VioraLoadingState(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.primary)
         EditPlotUiState.NotFound -> EditPlotNotFound(onBack = onBack, modifier = modifier)
         is EditPlotUiState.Editing -> {
             // Saved: the detail behind this form already shows the new data (it observes the cache).

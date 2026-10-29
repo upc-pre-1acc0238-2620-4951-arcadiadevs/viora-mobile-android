@@ -45,6 +45,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green700
@@ -65,8 +68,6 @@ import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CampaignCl
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettlementReceipt
 import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.CampaignClosedViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * P73: the receipt of a campaign. "Campaña cerrada" when the server stored the settlement, "Cosecha
@@ -112,9 +113,7 @@ internal fun CampaignClosedContent(
 ) {
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerLow)) {
         when (state) {
-            CampaignClosedUiState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Green900)
-            }
+            CampaignClosedUiState.Loading -> VioraLoadingState(modifier = Modifier.fillMaxSize())
             CampaignClosedUiState.Missing -> MissingReceipt(onDone)
             is CampaignClosedUiState.Closed -> ReceiptScreen(
                 receipt = state.receipt,

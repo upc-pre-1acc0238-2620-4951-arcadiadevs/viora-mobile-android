@@ -47,6 +47,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.component.MorphingShapeIndicator
+import pe.edu.upc.viora.core.designsystem.component.OutlinedPillButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Neutral100
@@ -56,7 +58,6 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 import pe.edu.upc.viora.features.subscription.domain.entity.CooperativeMembership
 import pe.edu.upc.viora.features.subscription.presentation.state.RedeemCodeUiState
 import pe.edu.upc.viora.features.subscription.presentation.state.RedeemFailure
@@ -238,22 +239,6 @@ internal fun CodeField(
             style = MaterialTheme.typography.bodySmall,
             color = if (error != null) Terracotta600 else Neutral700,
         )
-    }
-}
-
-/** The light pill under the main button (Figma "Botón", secondary). */
-@Composable
-internal fun OutlinedPillButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .clip(CircleShape)
-            .border(1.dp, Neutral300, CircleShape)
-            .clickable(role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text = text, style = MaterialTheme.typography.titleMedium, color = Neutral900)
     }
 }
 
