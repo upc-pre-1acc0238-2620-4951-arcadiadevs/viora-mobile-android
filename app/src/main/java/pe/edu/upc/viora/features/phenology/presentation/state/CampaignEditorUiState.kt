@@ -1,6 +1,10 @@
 package pe.edu.upc.viora.features.phenology.presentation.state
 
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.features.phenology.domain.CampaignRules
+import pe.edu.upc.viora.features.phenology.domain.IndexPreview
+import pe.edu.upc.viora.features.phenology.domain.YearCaption
+import pe.edu.upc.viora.features.phenology.domain.YearError
 import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
 
 /** Which campaign sheet is open. */

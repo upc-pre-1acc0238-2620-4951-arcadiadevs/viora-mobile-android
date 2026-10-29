@@ -3,8 +3,8 @@ package pe.edu.upc.viora.features.plotmanagement.presentation
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.normalizeOutline
+import pe.edu.upc.viora.core.domain.GeoPoint
+import pe.edu.upc.viora.core.designsystem.component.normalizeOutline
 
 class OutlineProjectionTest {
 

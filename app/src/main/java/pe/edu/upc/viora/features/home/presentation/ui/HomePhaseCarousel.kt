@@ -61,7 +61,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
-import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestPlotPickerSheet
+import pe.edu.upc.viora.features.home.presentation.state.HarvestProgress
 import pe.edu.upc.viora.features.home.presentation.state.HomePhase
 import pe.edu.upc.viora.features.home.presentation.state.HomePhaseUiState
 import pe.edu.upc.viora.features.home.presentation.state.PhaseAction
@@ -71,7 +71,10 @@ import pe.edu.upc.viora.features.home.presentation.state.PhaseMessage
 import pe.edu.upc.viora.features.home.presentation.state.PhaseMilestone
 import pe.edu.upc.viora.features.home.presentation.state.PhaseTiming
 
-/** Where each pill of the carousel leads; every one but the harvest acts on the plot in focus. */
+/**
+ * Where each pill of the carousel leads; every one but the harvest acts on the plot in focus. The harvest pill opens
+ * [harvestPicker], the plot picker (P70) harvest settlement draws for the plots still to register; [onDone] closes it.
+ */
 class HomePhaseActions(
     val onOpenChill: (plotId: String, plotName: String) -> Unit,
     val onOpenForecast: (plotId: String, plotName: String) -> Unit,
@@ -80,7 +83,7 @@ class HomePhaseActions(
     val onSample: (plotId: String, plotName: String) -> Unit,
     val onOpenThinningPlan: (plotId: String, plotName: String) -> Unit,
     val onOpenAlternation: (plotId: String, plotName: String) -> Unit,
-    val onSettle: (plotId: String, campaignYear: Int) -> Unit,
+    val harvestPicker: @Composable (harvest: HarvestProgress, onDone: () -> Unit) -> Unit,
 )
 
 /**
@@ -141,14 +144,7 @@ fun HomePhaseCarousel(
 
     val harvest = state.harvest
     if (picking && harvest != null) {
-        HarvestPlotPickerSheet(
-            state = harvest,
-            onSelect = {
-                picking = false
-                actions.onSettle(it.plotId, harvest.campaignYear)
-            },
-            onDismiss = { picking = false },
-        )
+        actions.harvestPicker(harvest) { picking = false }
     }
 }
 

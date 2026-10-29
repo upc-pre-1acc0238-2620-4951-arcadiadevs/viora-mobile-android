@@ -50,7 +50,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GpsFix
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.GpsReading
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.TracedCorner

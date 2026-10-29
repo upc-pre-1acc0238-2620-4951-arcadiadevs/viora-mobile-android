@@ -86,7 +86,7 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.CaliberCa
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.ResultVoice
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.ThinningResultUiState
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.ThinningResultViewModel
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
+import pe.edu.upc.viora.core.presentation.labelRes
 
 /**
  * P63 · Aclareo registrado (US27/US28): the caliber expected at harvest in one of its four Figma variants, the load

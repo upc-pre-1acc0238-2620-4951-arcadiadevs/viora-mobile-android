@@ -1,8 +1,9 @@
 package pe.edu.upc.viora.features.iam.presentation.state
 
-import pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers
-import pe.edu.upc.viora.features.subscription.domain.valueobject.InvitationCode
+import pe.edu.upc.viora.core.domain.MobileNumbers
 import pe.edu.upc.viora.core.domain.validation.PersonName
+import pe.edu.upc.viora.core.presentation.PhoneCountry
+import pe.edu.upc.viora.features.subscription.application.published.InvitationCode
 
 /** The onboarding questions in Figma order ("02 · Preguntas del onboarding"). */
 enum class OnboardingStep(val number: Int?) {
@@ -21,7 +22,7 @@ data class OnboardingUiState(
     val editing: Boolean = false,
 
     val fullName: String = "",
-    val country: IamCountry = IamCountry.PE,
+    val country: PhoneCountry = PhoneCountry.PE,
     val phone: String = "",
     /** The phone field was left or submitted, so an invalid number may show its error. */
     val phoneTouched: Boolean = false,

@@ -3,9 +3,9 @@ package pe.edu.upc.viora.features.plotmanagement.domain.entity
 import java.time.Instant
 import java.time.LocalDate
 import kotlin.math.roundToInt
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.core.domain.GeoPoint
 
 /**
  * An olive orchard plot ("lote" in the UI). [areaHectares] and [treesPerHectare] are computed

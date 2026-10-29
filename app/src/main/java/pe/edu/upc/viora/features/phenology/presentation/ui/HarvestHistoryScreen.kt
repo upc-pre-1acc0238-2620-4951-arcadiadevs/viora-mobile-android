@@ -74,6 +74,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.domain.tonnesPerHectare
+import pe.edu.upc.viora.core.navigation.LotSection
+import pe.edu.upc.viora.core.navigation.LotSectionsSheet
 import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatDayMonth
 import pe.edu.upc.viora.core.presentation.formatHectares
@@ -94,10 +97,8 @@ import pe.edu.upc.viora.features.phenology.presentation.state.Outlook
 import pe.edu.upc.viora.features.phenology.presentation.state.Voice
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.CampaignEditorViewModel
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.HarvestHistoryViewModel
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
+import pe.edu.upc.viora.core.presentation.formatCount
+import pe.edu.upc.viora.core.presentation.labelRes
 
 private const val NOTICE_MILLIS = 3_500L
 

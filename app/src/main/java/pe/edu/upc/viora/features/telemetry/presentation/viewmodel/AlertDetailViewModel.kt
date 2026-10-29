@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveChillTrackerUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RefreshChillTrackerUseCase
-import pe.edu.upc.viora.features.phenology.domain.entity.ChillTracker
+import pe.edu.upc.viora.features.phenology.application.published.ChillTracker
 import pe.edu.upc.viora.features.telemetry.application.usecase.CompleteMitigationStepUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.GetIncidentDetailUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.PostponeIncidentUseCase

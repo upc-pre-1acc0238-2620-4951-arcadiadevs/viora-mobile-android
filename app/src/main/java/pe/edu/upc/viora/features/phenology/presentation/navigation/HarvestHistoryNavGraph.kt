@@ -5,10 +5,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.features.phenology.presentation.ui.HarvestHistoryScreen
-import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
-import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
-import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 
 /**
  * Route to the alternation screen (harvest history and bearing index) of a plot.
@@ -17,15 +15,19 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.Thin
 @Serializable
 data class HarvestHistoryRoute(val plotId: String, val plotName: String = "")
 
-fun NavGraphBuilder.harvestHistoryComposable(navController: NavController) {
+/** [onOpenSection] opens another section of the plot; the app shell knows where each one lives. */
+fun NavGraphBuilder.harvestHistoryComposable(
+    navController: NavController,
+    onOpenSection: (section: LotSection, plotId: String, plotName: String) -> Unit,
+) {
     composable<HarvestHistoryRoute> { entry ->
         val route = entry.toRoute<HarvestHistoryRoute>()
         HarvestHistoryScreen(
             onBack = { navController.popBackStack() },
-            onSensors = { navController.navigate(SensorsRoute(plotId = route.plotId, plotName = route.plotName)) },
-            onClimate = { navController.navigate(PlotClimateRoute(plotId = route.plotId, plotName = route.plotName)) },
-            onWinterChill = { navController.navigate(WinterChillRoute(plotId = route.plotId, plotName = route.plotName)) },
-            onThinning = { navController.navigate(ThinningPlanRoute(plotId = route.plotId, plotName = route.plotName)) },
+            onSensors = { onOpenSection(LotSection.SENSORS, route.plotId, route.plotName) },
+            onClimate = { onOpenSection(LotSection.CLIMATE, route.plotId, route.plotName) },
+            onWinterChill = { onOpenSection(LotSection.WINTER_CHILL, route.plotId, route.plotName) },
+            onThinning = { onOpenSection(LotSection.THINNING, route.plotId, route.plotName) },
         )
     }
 }

@@ -13,13 +13,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveArchivedPlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsLastRefreshUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RefreshArchivedPlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RefreshPlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RestorePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotsFilter
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotsUiState
 

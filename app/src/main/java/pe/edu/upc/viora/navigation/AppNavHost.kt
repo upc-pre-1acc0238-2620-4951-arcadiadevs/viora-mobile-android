@@ -15,77 +15,89 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import pe.edu.upc.viora.BuildConfig
 import androidx.navigation.navDeepLink
+import pe.edu.upc.viora.BuildConfig
 import pe.edu.upc.viora.core.domain.AppResult
-import pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionHomeContent
-import pe.edu.upc.viora.features.subscription.presentation.viewmodel.SubscriptionAccessViewModel
 import pe.edu.upc.viora.core.navigation.AuthRoute
-import pe.edu.upc.viora.core.navigation.OnboardingRoute
-import pe.edu.upc.viora.core.navigation.SplashRoute
-import pe.edu.upc.viora.core.navigation.WelcomeRoute
-import pe.edu.upc.viora.core.navigation.PASSWORD_RESET_LINK_BASE
-import pe.edu.upc.viora.core.navigation.ResetPasswordRoute
 import pe.edu.upc.viora.core.navigation.HomeGraph
 import pe.edu.upc.viora.core.navigation.HomeRoute
 import pe.edu.upc.viora.core.navigation.LogbookGraph
 import pe.edu.upc.viora.core.navigation.LogbookRoute
+import pe.edu.upc.viora.core.navigation.LotSection
+import pe.edu.upc.viora.core.navigation.OnboardingRoute
+import pe.edu.upc.viora.core.navigation.PASSWORD_RESET_LINK_BASE
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.core.navigation.PlanRoute
 import pe.edu.upc.viora.core.navigation.PlotsGraph
+import pe.edu.upc.viora.core.navigation.ResetPasswordRoute
+import pe.edu.upc.viora.core.navigation.SplashRoute
+import pe.edu.upc.viora.core.navigation.WelcomeRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRoundRoute
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.CampaignPlanScreen
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
-import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.thinningPlanComposable
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.thinningPlanComposable
+import pe.edu.upc.viora.features.croploadregulation.presentation.ui.CampaignPlanScreen
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.AgronomicDossierRoute
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.CampaignClosedRoute
-import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.agronomicDossierComposable
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.SettleHarvestRoute
+import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.agronomicDossierComposable
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.campaignClosedComposable
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.settleHarvestComposable
-import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.LogbookScreen
+import pe.edu.upc.viora.features.harvestsettlement.presentation.state.HarvestEntryUiState
+import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.HarvestPlotPickerSheet
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
 import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
 import pe.edu.upc.viora.features.home.presentation.ui.HomePhaseActions
 import pe.edu.upc.viora.features.home.presentation.ui.HomePhaseCarousel
 import pe.edu.upc.viora.features.home.presentation.ui.HomeScreen
+import pe.edu.upc.viora.features.home.presentation.ui.HomeWidgets
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomePhaseViewModel
 import pe.edu.upc.viora.features.iam.presentation.ui.IamScreen
 import pe.edu.upc.viora.features.iam.presentation.ui.OnboardingScreen
 import pe.edu.upc.viora.features.iam.presentation.ui.SplashScreen
 import pe.edu.upc.viora.features.iam.presentation.ui.WelcomeScreen
 import pe.edu.upc.viora.features.iam.presentation.viewmodel.SplashDestination
+import pe.edu.upc.viora.features.logbook.presentation.ui.LogbookScreen
 import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
 import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
+import pe.edu.upc.viora.features.phenology.presentation.navigation.harvestHistoryComposable
+import pe.edu.upc.viora.features.phenology.presentation.navigation.winterChillComposable
+import pe.edu.upc.viora.features.phenology.presentation.ui.PlotAlternationCard
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotScreens
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNavGraph
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
-import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
 import pe.edu.upc.viora.features.profiles.presentation.navigation.AccountRoute
 import pe.edu.upc.viora.features.profiles.presentation.navigation.EditProfileRoute
 import pe.edu.upc.viora.features.profiles.presentation.navigation.profilesNavGraph
 import pe.edu.upc.viora.features.subscription.presentation.navigation.CooperativeCodeGraph
-import pe.edu.upc.viora.features.subscription.presentation.navigation.RedeemCodeRoute
-import pe.edu.upc.viora.features.subscription.presentation.navigation.cooperativeCodeNavGraph
-import pe.edu.upc.viora.features.subscription.presentation.navigation.MyPlanRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.ExtensionCodeRoute
+import pe.edu.upc.viora.features.subscription.presentation.navigation.MyPlanRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.PlanExtensionRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.ProducerPlanRoute
-import pe.edu.upc.viora.features.subscription.presentation.navigation.planExtensionGraph
+import pe.edu.upc.viora.features.subscription.presentation.navigation.RedeemCodeRoute
+import pe.edu.upc.viora.features.subscription.presentation.navigation.cooperativeCodeNavGraph
 import pe.edu.upc.viora.features.subscription.presentation.navigation.myPlanComposable
+import pe.edu.upc.viora.features.subscription.presentation.navigation.planExtensionGraph
+import pe.edu.upc.viora.features.subscription.presentation.navigation.producerPlanComposable
 import pe.edu.upc.viora.features.subscription.presentation.ui.AccountPlanCard
 import pe.edu.upc.viora.features.subscription.presentation.ui.MyPlanActions
-import pe.edu.upc.viora.features.subscription.presentation.navigation.producerPlanComposable
+import pe.edu.upc.viora.features.subscription.presentation.ui.PlanQuotaCard
+import pe.edu.upc.viora.features.subscription.presentation.ui.SubscriptionHomeContent
+import pe.edu.upc.viora.features.subscription.presentation.viewmodel.SubscriptionAccessViewModel
+import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertDetailRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.AlertsCenterRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.PlotClimateRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.TelemetryDetailRoute
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.alertsNavGraph
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.climateNavGraph
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.configureNodeComposable
+import pe.edu.upc.viora.features.telemetry.presentation.navigation.sensorsComposable
+import pe.edu.upc.viora.features.telemetry.presentation.ui.components.HomeSoilMoistureCard
+import pe.edu.upc.viora.features.telemetry.presentation.ui.components.HomeWeatherCard
 
 /**
  * Composition root of navigation. It lives outside `core/` on purpose: this is the one place
@@ -178,6 +190,15 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                         )
                     },
                     onOpenAccount = { navController.navigate(AccountRoute) },
+                    widgets = HomeWidgets(
+                        weather = { plotId, onClick, modifier -> HomeWeatherCard(plotId = plotId, onClick = onClick, modifier = modifier) },
+                        soilMoisture = { plotId, onClick, modifier ->
+                            HomeSoilMoistureCard(plotId = plotId, onClick = onClick, modifier = modifier)
+                        },
+                        alternation = { plotId, plotName, areaHectares, onOpen, modifier ->
+                            PlotAlternationCard(plotId, plotName, areaHectares, onOpen, modifier)
+                        },
+                    ),
                     sections = {
                         SubscriptionHomeContent(
                             result = subState,
@@ -198,7 +219,16 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                                     onSample = { id, name -> navController.navigate(SamplingRoundRoute(plotId = id, plotName = name)) },
                                     onOpenThinningPlan = { id, name -> navController.navigate(ThinningPlanRoute(plotId = id, plotName = name)) },
                                     onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id, plotName = name)) },
-                                    onSettle = { plotId, year -> navController.navigate(SettleHarvestRoute(plotId = plotId, campaignYear = year)) },
+                                    harvestPicker = { harvest, onDone ->
+                                        HarvestPlotPickerSheet(
+                                            state = HarvestEntryUiState(harvest.campaignYear, harvest.plots, harvest.totalPlots),
+                                            onSelect = { plot ->
+                                                onDone()
+                                                navController.navigate(SettleHarvestRoute(plotId = plot.plotId, campaignYear = harvest.campaignYear))
+                                            },
+                                            onDismiss = onDone,
+                                        )
+                                    },
                                 ),
                                 modifier = Modifier.padding(top = 24.dp).homeTourTarget(HomeTourTarget.Phase),
                             )
@@ -266,7 +296,10 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             },
         )
         agronomicDossierComposable(navController)
-        plotsNavGraph(navController)
+        plotsNavGraph(
+            navController,
+            quotaCard = { PlanQuotaCard(onExpand = { navController.navigate(PlanExtensionRoute) { launchSingleTop = true } }) },
+        )
         cooperativeCodeNavGraph(
             navController = navController,
             onLeave = { navController.openHome() },
@@ -280,8 +313,29 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             navController.openHome()
             navController.navigate(RegisterPlotRoute)
         })
-        plotScreens(navController)
-        climateNavGraph(navController)
+        plotScreens(
+            navController,
+            onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
+            onExpandPlan = { navController.navigate(PlanExtensionRoute) { launchSingleTop = true } },
+        )
+        sensorsComposable(
+            navController,
+            onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
+        )
+        configureNodeComposable(navController)
+        harvestHistoryComposable(
+            navController,
+            onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
+        )
+        winterChillComposable(
+            navController,
+            onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
+            onOpenAlert = { incidentId -> navController.navigate(AlertDetailRoute(incidentId = incidentId)) },
+        )
+        climateNavGraph(
+            navController,
+            onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
+        )
         alertsNavGraph(
             navController = navController,
             onOpenPlot = { plotId -> navController.navigate(PlotDetailRoute(plotId = plotId)) },

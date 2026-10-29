@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.OptionDivider
+import pe.edu.upc.viora.core.designsystem.component.OptionRow
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.component.VioraBottomSheet
 import pe.edu.upc.viora.core.designsystem.theme.Green200
@@ -44,7 +46,10 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.navigation.LotSectionsSheet
+import pe.edu.upc.viora.core.presentation.formatCount
 import pe.edu.upc.viora.core.presentation.formatHectares
+import pe.edu.upc.viora.core.presentation.labelRes
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
 
@@ -122,59 +127,6 @@ fun PlotOptionsSheet(
                     isDestructive = true,
                 )
             }
-        }
-    }
-}
-
-@Composable
-internal fun OptionDivider() {
-    HorizontalDivider(color = Neutral200)
-}
-
-@Composable
-internal fun OptionRow(
-    @DrawableRes icon: Int,
-    title: String,
-    hint: String,
-    onClick: () -> Unit,
-    isDestructive: Boolean = false,
-    enabled: Boolean = true,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .alpha(if (enabled) 1f else 0.5f)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier.size(40.dp).clip(CircleShape).background(if (isDestructive) Terracotta100 else Green200),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                tint = if (isDestructive) Terracotta700 else Neutral900,
-                modifier = Modifier.size(20.dp),
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                color = if (isDestructive) Terracotta700 else Neutral900,
-            )
-            Text(text = hint, style = MaterialTheme.typography.bodySmall, color = Neutral600)
-        }
-        if (!isDestructive && enabled) {
-            Icon(
-                painter = painterResource(R.drawable.ic_chevron_right),
-                contentDescription = null,
-                tint = Neutral600,
-                modifier = Modifier.size(20.dp),
-            )
         }
     }
 }

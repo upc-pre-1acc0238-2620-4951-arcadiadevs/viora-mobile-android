@@ -1,7 +1,8 @@
 package pe.edu.upc.viora.features.harvestsettlement.presentation.state
 
 import java.time.LocalDate
-import pe.edu.upc.viora.features.phenology.presentation.state.CampaignRules
+import pe.edu.upc.viora.core.presentation.parseKilos
+import pe.edu.upc.viora.features.harvestsettlement.domain.valueobject.CommercialSizeGrade
 
 /** What the "Calibre de venta" field resolves to. */
 sealed interface CalibreReading {
@@ -22,7 +23,7 @@ object SettleHarvestRules {
     const val MAX_FRUITS_PER_KG = 999.0
 
     /** Kilos of one quality: blank counts as 0, null when the text is not a number. */
-    fun kilos(text: String): Double? = if (text.isBlank()) 0.0 else CampaignRules.parseKilos(text)
+    fun kilos(text: String): Double? = if (text.isBlank()) 0.0 else parseKilos(text)
 
     /** True when the text is not a number or is negative. */
     fun kilosError(text: String): Boolean = kilos(text).let { it == null || it < 0.0 }

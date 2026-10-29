@@ -85,7 +85,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.core.presentation.vioraNumberFormat
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
+import pe.edu.upc.viora.core.presentation.labelRes
 import pe.edu.upc.viora.features.subscription.presentation.state.MyPlanUiState
 import pe.edu.upc.viora.features.subscription.presentation.state.PlanPlot
 import pe.edu.upc.viora.features.subscription.presentation.state.PlanStanding

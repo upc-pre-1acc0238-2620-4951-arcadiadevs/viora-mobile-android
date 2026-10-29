@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveSensorNodesUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.UnlinkSensorNodeUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.UpdateSensorNodeUseCase

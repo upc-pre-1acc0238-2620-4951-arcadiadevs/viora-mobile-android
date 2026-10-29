@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pe.edu.upc.viora.core.presentation.PhoneCountry
 import pe.edu.upc.viora.features.iam.domain.valueobject.OnboardingAnswers
 import pe.edu.upc.viora.features.iam.domain.repository.OnboardingAnswersRepository
-import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
 import pe.edu.upc.viora.features.iam.presentation.state.OnboardingStep
 import pe.edu.upc.viora.features.iam.presentation.state.OnboardingUiState
 
@@ -34,7 +34,7 @@ class OnboardingViewModel @Inject constructor(private val store: OnboardingAnswe
                 if (it.fullName.isNotEmpty() || it.step != OnboardingStep.NAME) return@update it
                 it.copy(
                     fullName = answers.fullName,
-                    country = IamCountry.fromIso(answers.countryIso),
+                    country = PhoneCountry.fromIso(answers.countryIso),
                     phone = answers.nationalPhone,
                     cooperativeCode = answers.cooperativeCode.orEmpty(),
                     savedCooperativeCode = answers.cooperativeCode,
@@ -53,7 +53,7 @@ class OnboardingViewModel @Inject constructor(private val store: OnboardingAnswe
 
     fun onName(value: String) = _uiState.update { it.copy(fullName = value) }
 
-    fun onCountry(value: IamCountry) =
+    fun onCountry(value: PhoneCountry) =
         _uiState.update { it.copy(country = value, phone = it.phone.take(value.nationalDigits)) }
 
     fun onPhone(value: String) = _uiState.update {

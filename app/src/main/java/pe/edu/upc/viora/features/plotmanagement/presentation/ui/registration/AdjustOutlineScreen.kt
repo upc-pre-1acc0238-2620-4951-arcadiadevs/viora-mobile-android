@@ -47,7 +47,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.AdjustOutlineUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.EditFailure

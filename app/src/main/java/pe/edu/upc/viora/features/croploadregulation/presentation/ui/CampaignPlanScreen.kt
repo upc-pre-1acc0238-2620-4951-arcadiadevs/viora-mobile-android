@@ -80,8 +80,8 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.CampaignP
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.PlanRow
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.PlanRowStatus
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.CampaignPlanViewModel
-import pe.edu.upc.viora.features.home.presentation.ui.HomeHeader
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouette
+import pe.edu.upc.viora.core.designsystem.component.VioraGreetingHeader
+import pe.edu.upc.viora.core.designsystem.component.PlotSilhouette
 
 /**
  * P60 · Plan, the Plan tab: the plots that need thinning this week in one block, then every plot with the state of
@@ -106,7 +106,7 @@ fun CampaignPlanScreen(
             .padding(horizontal = 24.dp)
             .padding(top = 12.dp),
     ) {
-        HomeHeader(
+        VioraGreetingHeader(
             date = state.today,
             isOffline = state.isOffline,
             lastRefresh = state.lastRefresh,

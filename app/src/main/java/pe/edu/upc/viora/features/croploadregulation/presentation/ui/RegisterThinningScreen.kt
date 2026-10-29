@@ -62,8 +62,10 @@ import java.time.format.DateTimeFormatter
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraDateField
 import pe.edu.upc.viora.core.designsystem.component.VioraDatePicker
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
+import pe.edu.upc.viora.core.designsystem.component.VioraTextFieldCard
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -85,8 +87,6 @@ import pe.edu.upc.viora.core.presentation.toPickerMillis
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.RegisterThinningUiState
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.WindowCheck
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.RegisterThinningViewModel
-import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.TextFieldCard
-import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.WeighingDateField
 
 /**
  * P62 · Registrar aclareo (US27): the day, the share of fruit removed (preloaded with the prescription) and a note.
@@ -145,14 +145,14 @@ internal fun RegisterThinningContent(
             if (state.isLoading) {
                 VioraLoadingState(modifier = Modifier.fillMaxWidth().padding(top = 40.dp))
             } else {
-                WeighingDateField(
+                VioraDateField(
                     dateText = thinningDateText(state.executedOn, state.today),
                     enabled = !state.isSaving && state.prescriptionId != null,
                     onClick = { pickingDate = true },
                     label = stringResource(R.string.thinning_register_date_label),
                 )
                 PercentageCard(state = state, onStep = onStep)
-                TextFieldCard(
+                VioraTextFieldCard(
                     label = stringResource(R.string.thinning_register_note_label),
                     value = state.note,
                     onValueChange = onNoteChange,

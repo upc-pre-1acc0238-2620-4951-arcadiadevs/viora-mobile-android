@@ -10,7 +10,7 @@ import pe.edu.upc.viora.features.croploadregulation.domain.entity.WindowPhase
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.LoadState
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.PrescriptionBlocker
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.PrescriptionStatus
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 
 /** P60 · Plan: every plot with the state of its thinning plan for one campaign, the urgent ones first. */
 data class CampaignPlanUiState(

@@ -12,6 +12,9 @@ enum class IncidentStatus {
     NORMALIZED,
     UNKNOWN;
 
+    /** Whether the incident still asks for attention: everything but [NORMALIZED], snoozed ones included. */
+    val isActive: Boolean get() = this != NORMALIZED
+
     companion object {
         fun fromString(value: String): IncidentStatus =
             runCatching { valueOf(value.uppercase()) }.getOrDefault(UNKNOWN)

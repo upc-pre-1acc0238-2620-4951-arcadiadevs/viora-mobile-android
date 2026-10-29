@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,9 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +32,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -44,11 +40,11 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.component.VioraBottomSheet
+import pe.edu.upc.viora.core.designsystem.component.VioraFieldLabel
+import pe.edu.upc.viora.core.designsystem.component.VioraStepButton
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
-import pe.edu.upc.viora.core.designsystem.theme.Neutral100
-import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
@@ -59,12 +55,12 @@ import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatKg
 import pe.edu.upc.viora.core.presentation.formatMediumDate
 import pe.edu.upc.viora.core.presentation.messageRes
+import pe.edu.upc.viora.features.phenology.domain.IndexPreview
+import pe.edu.upc.viora.features.phenology.domain.YearCaption
+import pe.edu.upc.viora.features.phenology.domain.YearError
 import pe.edu.upc.viora.features.phenology.domain.entity.HoblynBbi
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignEditorUiState
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignMode
-import pe.edu.upc.viora.features.phenology.presentation.state.IndexPreview
-import pe.edu.upc.viora.features.phenology.presentation.state.YearCaption
-import pe.edu.upc.viora.features.phenology.presentation.state.YearError
 
 /**
  * "Agrega una campaña" and "Corrige la campaña 2024" (Figma P41): the year, the kilos, what the
@@ -173,9 +169,9 @@ private fun YearCard(state: CampaignEditorUiState, onYearStep: (Int) -> Unit) {
             .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        FieldLabel(stringResource(R.string.harvest_campaign_label))
+        VioraFieldLabel(stringResource(R.string.harvest_campaign_label))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            StepButton(
+            VioraStepButton(
                 icon = null,
                 symbol = "−",
                 description = stringResource(R.string.harvest_year_previous),
@@ -190,7 +186,7 @@ private fun YearCard(state: CampaignEditorUiState, onYearStep: (Int) -> Unit) {
                 )
                 Text(yearCaptionText(state), style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 14.sp), color = if (hasError) Terracotta700 else Neutral600)
             }
-            StepButton(
+            VioraStepButton(
                 icon = R.drawable.ic_add,
                 symbol = null,
                 description = stringResource(R.string.harvest_year_next),
@@ -203,31 +199,12 @@ private fun YearCard(state: CampaignEditorUiState, onYearStep: (Int) -> Unit) {
 }
 
 @Composable
-internal fun StepButton(icon: Int?, symbol: String?, description: String, dark: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .background(if (dark) Green800 else Neutral100)
-            .clickable(role = Role.Button, onClick = onClick)
-            .semantics { contentDescription = description },
-        contentAlignment = Alignment.Center,
-    ) {
-        if (icon != null) {
-            Icon(painterResource(icon), contentDescription = null, tint = Neutral0, modifier = Modifier.size(24.dp))
-        } else {
-            Text(symbol.orEmpty(), style = MaterialTheme.typography.headlineMedium, color = Neutral900)
-        }
-    }
-}
-
-@Composable
 private fun CorrectedYearCard(mode: CampaignMode.Correct, state: CampaignEditorUiState) {
     Column(
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Neutral0).padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        FieldLabel(stringResource(R.string.harvest_campaign_label))
+        VioraFieldLabel(stringResource(R.string.harvest_campaign_label))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(state.year.toString(), style = MaterialTheme.typography.displayMedium.copy(fontSize = 34.sp, lineHeight = 40.sp), color = Neutral900)
             BearingTag(mode.record.bearing, large = true)
@@ -252,7 +229,7 @@ private fun KilosCard(state: CampaignEditorUiState, onKilosChange: (String) -> U
             .padding(start = 18.dp, end = 18.dp, top = 14.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        FieldLabel(stringResource(R.string.harvest_kilos_label))
+        VioraFieldLabel(stringResource(R.string.harvest_kilos_label))
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             BasicTextField(
                 value = state.kilosText,
@@ -369,11 +346,6 @@ private fun yearErrorText(error: YearError, state: CampaignEditorUiState): Strin
     YearError.FUTURE -> stringResource(R.string.harvest_error_future, state.year, state.minYear, state.maxYear)
     YearError.TOO_OLD -> stringResource(R.string.harvest_error_too_old, state.year, state.minYear, state.maxYear)
     YearError.DUPLICATE -> stringResource(R.string.harvest_error_duplicate, state.year)
-}
-
-@Composable
-internal fun FieldLabel(text: String) {
-    Text(text, style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.88.sp), color = Neutral600)
 }
 
 @Composable

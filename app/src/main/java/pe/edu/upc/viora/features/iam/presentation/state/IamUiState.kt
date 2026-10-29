@@ -17,28 +17,6 @@ enum class IamStep {
     LINK_EXPIRED,
 }
 
-/**
- * Countries of the operation the onboarding offers (T02b2 "PE +51"): how long their mobile numbers
- * are and how they start, for the input limit and the error hint. Validity itself is checked with
- * [pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers].
- */
-enum class IamCountry(
-    val iso: String,
-    val dialCode: String,
-    @StringRes val nameRes: Int,
-    val nationalDigits: Int,
-    @StringRes val invalidHintRes: Int,
-) {
-    PE("PE", "+51", R.string.iam_country_pe, 9, R.string.onboarding_phone_invalid_pe),
-    ES("ES", "+34", R.string.iam_country_es, 9, R.string.onboarding_phone_invalid_es),
-    CL("CL", "+56", R.string.iam_country_cl, 9, R.string.onboarding_phone_invalid_cl),
-    ;
-
-    companion object {
-        fun fromIso(iso: String): IamCountry = entries.firstOrNull { it.iso == iso } ?: PE
-    }
-}
-
 /** Failures that are not tied to one field; the UI maps each one to a string resource. */
 enum class IamError { OFFLINE, GENERIC, WAIT, PHONE_REJECTED }
 

@@ -5,9 +5,6 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.presentation.formatDecimal
 import pe.edu.upc.viora.features.phenology.domain.entity.BbiClass
 
-/** Tonnes per hectare of a harvest of [kg] kilograms on [areaHectares] hectares. */
-fun tonnesPerHectare(kg: Double, areaHectares: Double): Double = kg / 1_000 / areaHectares
-
 /** "0,51": the index with two decimals. */
 fun formatIndex(value: Double): String = formatDecimal(value, 2)
 

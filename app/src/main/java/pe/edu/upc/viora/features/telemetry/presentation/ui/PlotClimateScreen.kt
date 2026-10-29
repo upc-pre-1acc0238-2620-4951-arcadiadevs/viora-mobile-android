@@ -80,11 +80,11 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.navigation.LotSection
+import pe.edu.upc.viora.core.navigation.LotSectionsSheet
 import pe.edu.upc.viora.core.presentation.formatClock
 import pe.edu.upc.viora.core.presentation.formatPercent
 import pe.edu.upc.viora.core.presentation.shortWeekday
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
 import pe.edu.upc.viora.features.telemetry.domain.entity.DailyThermalSummary
 import pe.edu.upc.viora.features.telemetry.domain.entity.ForecastDay
 import pe.edu.upc.viora.features.telemetry.domain.entity.SoilMoistureRules

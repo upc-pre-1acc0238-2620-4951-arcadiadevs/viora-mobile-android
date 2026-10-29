@@ -8,8 +8,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import pe.edu.upc.viora.core.presentation.pickerMillisToLocalDate
 import pe.edu.upc.viora.core.presentation.toPickerMillis
+import pe.edu.upc.viora.features.harvestsettlement.domain.valueobject.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CalibreReading
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestRules
 
 class SettleHarvestRulesTest {

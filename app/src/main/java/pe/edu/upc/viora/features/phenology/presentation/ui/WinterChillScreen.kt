@@ -71,6 +71,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
+import pe.edu.upc.viora.core.navigation.LotSection
+import pe.edu.upc.viora.core.navigation.LotSectionsSheet
 import pe.edu.upc.viora.core.presentation.formatDayMonth
 import pe.edu.upc.viora.core.presentation.formatMonthShort
 import pe.edu.upc.viora.core.presentation.messageRes
@@ -79,8 +81,6 @@ import pe.edu.upc.viora.features.phenology.domain.entity.ThermalAnomaly
 import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
 import pe.edu.upc.viora.features.phenology.presentation.state.WinterChillUiState
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.WinterChillViewModel
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
 
 /**
  * Screen P80: "Frío invernal" (US22)

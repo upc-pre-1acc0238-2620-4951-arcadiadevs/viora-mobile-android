@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.map
 import pe.edu.upc.viora.core.datastore.SessionStore
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.MobileNumbers
 import pe.edu.upc.viora.core.network.ApiCaller
-import pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers
 import pe.edu.upc.viora.features.profiles.domain.entity.UserProfile
 import pe.edu.upc.viora.features.profiles.domain.repository.ProfileRepository
 import pe.edu.upc.viora.features.profiles.domain.valueobject.ProfileId

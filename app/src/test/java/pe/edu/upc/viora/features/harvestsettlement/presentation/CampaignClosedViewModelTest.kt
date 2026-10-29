@@ -19,6 +19,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.DiscardPendingSettlementUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePendingSettlementsUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObserveSettledHarvestsUseCase
@@ -28,7 +29,6 @@ import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementSumma
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CampaignClosedUiState
 import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.CampaignClosedViewModel
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CampaignClosedViewModelTest {

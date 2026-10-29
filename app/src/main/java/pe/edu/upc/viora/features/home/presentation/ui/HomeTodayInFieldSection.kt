@@ -14,9 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.HomeAlertsCard
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.HomeSoilMoistureCard
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.HomeWeatherCard
 
 private val ScreenPadding = 24.dp
 
@@ -28,7 +25,7 @@ private val ScreenPadding = 24.dp
  * - Left column: "Clima · ahora" (252dp height)
  * - Right column: 2 rows (120dp each, 12dp gap):
  *   - Top row: "Alertas · resumen" ([HomeAlertsCard])
- *   - Bottom row: "Suelo · humedad" ([HomeSoilMoistureCard])
+ *   - Bottom row: "Suelo · humedad" (telemetry, through [HomeWidgets.soilMoisture])
  */
 @Composable
 fun HomeTodayInFieldSection(
@@ -38,6 +35,7 @@ fun HomeTodayInFieldSection(
     modifier: Modifier = Modifier,
     onOpenWeatherForecast: () -> Unit = {},
     onOpenSoilMoisture: () -> Unit = {},
+    widgets: HomeWidgets = HomeWidgets(),
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         VioraSectionHeader(
@@ -57,10 +55,10 @@ fun HomeTodayInFieldSection(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // Left Column: Clima · ahora (Figma 194:5122)
-            HomeWeatherCard(
-                plotId = plotId,
-                onClick = onOpenWeatherForecast,
-                modifier = Modifier
+            widgets.weather(
+                plotId,
+                onOpenWeatherForecast,
+                Modifier
                     .weight(1f)
                     .fillMaxHeight(),
             )
@@ -80,11 +78,7 @@ fun HomeTodayInFieldSection(
                 )
 
                 // Bottom row: Suelo · humedad (Figma 194:5138)
-                HomeSoilMoistureCard(
-                    plotId = plotId,
-                    onClick = onOpenSoilMoisture,
-                    modifier = Modifier.weight(1f),
-                )
+                widgets.soilMoisture(plotId, onOpenSoilMoisture, Modifier.weight(1f))
             }
         }
     }

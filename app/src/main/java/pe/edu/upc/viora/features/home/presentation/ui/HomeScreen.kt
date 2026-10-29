@@ -40,23 +40,25 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.Year
 import pe.edu.upc.viora.R
-import pe.edu.upc.viora.features.home.presentation.state.HomePhase
+import pe.edu.upc.viora.core.designsystem.component.VioraGreetingHeader
+import pe.edu.upc.viora.core.designsystem.component.VioraHeadline
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.core.presentation.messageRes
+import pe.edu.upc.viora.features.home.presentation.state.HomePhase
 import pe.edu.upc.viora.features.home.presentation.state.HomeUiState
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
 import pe.edu.upc.viora.features.home.presentation.tour.LocalHomeTourTargets
 import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeGreetingViewModel
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeViewModel
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
+import pe.edu.upc.viora.core.domain.GeoPoint
 
 private val ScreenPadding = 24.dp
 
@@ -81,6 +83,7 @@ fun HomeScreen(
     phase: HomePhase? = null,
     viewModel: HomeViewModel = hiltViewModel(),
     greetingViewModel: HomeGreetingViewModel = hiltViewModel(),
+    widgets: HomeWidgets = HomeWidgets(),
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
@@ -101,6 +104,7 @@ fun HomeScreen(
         isAccessPaused = isAccessPaused,
         phase = phase,
         modifier = modifier,
+        widgets = widgets,
         sections = sections,
     )
 }
@@ -124,6 +128,7 @@ fun HomeScreenContent(
     today: LocalDate = LocalDate.now(),
     isAccessPaused: Boolean = false,
     phase: HomePhase? = null,
+    widgets: HomeWidgets = HomeWidgets(),
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
     val systemBars = WindowInsets.systemBars.asPaddingValues()
@@ -153,7 +158,7 @@ fun HomeScreenContent(
                     bottom = VioraTabBarDefaults.ContentBottomPadding + systemBars.calculateBottomPadding(),
                 ),
         ) {
-            HomeHeader(
+            VioraGreetingHeader(
                 date = today,
                 isOffline = state.isOffline,
                 lastRefresh = state.lastRefresh,
@@ -179,7 +184,7 @@ fun HomeScreenContent(
                     phase != null -> stringResource(phase.headline.second)
                     else -> stringResource(R.string.home_headline_emphasis)
                 }
-                HomeHeadline(lead = headlineLead, emphasis = headlineEmphasis)
+                VioraHeadline(lead = headlineLead, emphasis = headlineEmphasis)
                 HomeContextChips(
                     campaignYear = Year.from(today).value,
                     plotCount = plots.size,
@@ -226,15 +231,16 @@ fun HomeScreenContent(
                             modifier = Modifier
                                 .padding(top = 28.dp)
                                 .homeTourTarget(HomeTourTarget.Field),
+                            widgets = widgets,
                         )
                         val focused = state.focusedPlot
-                        val alternation = state.alternation
-                        if (focused != null && alternation != null) {
-                            HomeAlternationCard(
-                                plotName = focused.name,
-                                alternation = alternation,
-                                onOpen = { onOpenAlternation(focused.id, focused.name) },
-                                modifier = Modifier
+                        if (focused != null) {
+                            widgets.alternation(
+                                focused.id.value,
+                                focused.name,
+                                focused.areaHectares,
+                                { onOpenAlternation(focused.id, focused.name) },
+                                Modifier
                                     .padding(start = ScreenPadding, end = ScreenPadding, top = 32.dp)
                                     .homeTourTarget(HomeTourTarget.Alternation),
                             )

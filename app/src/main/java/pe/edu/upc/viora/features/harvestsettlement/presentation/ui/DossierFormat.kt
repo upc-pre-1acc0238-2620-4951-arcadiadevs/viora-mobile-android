@@ -6,12 +6,12 @@ import androidx.compose.ui.res.stringResource
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatDecimal
 import pe.edu.upc.viora.core.presentation.formatPercent
 import pe.edu.upc.viora.core.presentation.formatWhole
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
+import pe.edu.upc.viora.core.presentation.labelRes
 
 /**
  * "c7e1 09fa 3b42 d8e6" per line: the SHA-256 in groups of four, four groups a line, so the whole code fits the card

@@ -19,8 +19,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveTelemetryLastRefreshUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveTelemetrySeriesUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.RefreshTelemetrySeriesUseCase

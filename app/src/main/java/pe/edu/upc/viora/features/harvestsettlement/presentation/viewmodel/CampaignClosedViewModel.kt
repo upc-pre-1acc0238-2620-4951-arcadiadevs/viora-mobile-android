@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.core.domain.tonnesPerHectare
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.DiscardPendingSettlementUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePendingSettlementsUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObserveSettledHarvestsUseCase
@@ -22,14 +24,12 @@ import pe.edu.upc.viora.features.harvestsettlement.application.usecase.RefreshSe
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.HarvestSettlement
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.PendingSettlement
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.PendingStatus
+import pe.edu.upc.viora.features.harvestsettlement.domain.valueobject.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CampaignClosedUiState
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestRules
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettlementReceipt
-import pe.edu.upc.viora.features.phenology.presentation.ui.tonnesPerHectare
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /**

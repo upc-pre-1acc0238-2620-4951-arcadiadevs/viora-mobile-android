@@ -74,8 +74,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Shadow
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
+import pe.edu.upc.viora.core.presentation.PhoneCountry
 import pe.edu.upc.viora.core.presentation.formatWhole
-import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
 import pe.edu.upc.viora.features.iam.presentation.state.OnboardingUiState
 
 /**
@@ -101,7 +101,7 @@ internal fun italicMarkup(text: String): AnnotatedString = buildAnnotatedString 
 
 /** T02b2: the "País" field, "PE +51", that opens the list of countries. */
 @Composable
-internal fun CountryField(selected: IamCountry, onSelect: (IamCountry) -> Unit, modifier: Modifier = Modifier) {
+internal fun CountryField(selected: PhoneCountry, onSelect: (PhoneCountry) -> Unit, modifier: Modifier = Modifier) {
     var open by remember { mutableStateOf(false) }
     Box(modifier) {
         Column(
@@ -121,7 +121,7 @@ internal fun CountryField(selected: IamCountry, onSelect: (IamCountry) -> Unit, 
             Box(Modifier.fillMaxWidth().height(1.dp).background(Neutral300))
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = Neutral50) {
-            IamCountry.entries.forEach { country ->
+            PhoneCountry.entries.forEach { country ->
                 DropdownMenuItem(
                     text = { Text("${stringResource(country.nameRes)}  ${country.dialCode}", color = Neutral900) },
                     onClick = {

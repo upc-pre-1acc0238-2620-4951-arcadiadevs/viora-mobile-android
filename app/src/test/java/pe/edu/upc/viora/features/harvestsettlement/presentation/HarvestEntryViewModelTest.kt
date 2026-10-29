@@ -20,6 +20,7 @@ import org.junit.Test
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePendingSettlementsUseCase
+import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePlotsToSettleUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObserveSettledHarvestsUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.RefreshSettledHarvestsUseCase
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.PendingStatus
@@ -47,8 +48,9 @@ class HarvestEntryViewModelTest {
     private fun state(): HarvestEntryUiState {
         val vm = HarvestEntryViewModel(
             observePlots = ObservePlotsUseCase(plots),
-            observeSettlements = ObserveSettledHarvestsUseCase(settlements),
-            observePending = ObservePendingSettlementsUseCase(settlements),
+            observePlotsToSettle = ObservePlotsToSettleUseCase(
+                ObserveSettledHarvestsUseCase(settlements), ObservePendingSettlementsUseCase(settlements), clock,
+            ),
             refreshSettlements = RefreshSettledHarvestsUseCase(settlements),
             clock = clock,
         )

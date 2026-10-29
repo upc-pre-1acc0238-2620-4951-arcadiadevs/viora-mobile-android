@@ -1,6 +1,6 @@
 package pe.edu.upc.viora.features.profiles.domain.entity
 
-import pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers
+import pe.edu.upc.viora.core.domain.MobileNumbers
 import pe.edu.upc.viora.features.profiles.domain.valueobject.ProfileId
 
 /**

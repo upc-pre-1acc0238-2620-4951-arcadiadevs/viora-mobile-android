@@ -1,11 +1,13 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.navigation
 
+import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.core.navigation.PlotsGraph
 import pe.edu.upc.viora.core.navigation.PlotsRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotDetailScreen
@@ -14,16 +16,6 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotsScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.AdjustOutlineScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.EditPlotScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.RegisterPlotScreen
-import pe.edu.upc.viora.features.phenology.presentation.navigation.HarvestHistoryRoute
-import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
-import pe.edu.upc.viora.features.phenology.presentation.navigation.WinterChillRoute
-import pe.edu.upc.viora.features.phenology.presentation.navigation.harvestHistoryComposable
-import pe.edu.upc.viora.features.phenology.presentation.navigation.winterChillComposable
-import pe.edu.upc.viora.features.subscription.presentation.navigation.PlanExtensionRoute
-import pe.edu.upc.viora.features.subscription.presentation.ui.PlanQuotaCard
-import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
-import pe.edu.upc.viora.features.telemetry.presentation.navigation.configureNodeComposable
-import pe.edu.upc.viora.features.telemetry.presentation.navigation.sensorsComposable
 
 /** The plot registration wizard. It hides the tab bar because it is not a tab root. */
 @Serializable
@@ -49,27 +41,37 @@ data class EditPlotRoute(val plotId: String)
 data class AdjustOutlineRoute(val plotId: String)
 
 /** The "Lotes" tab: just the list. The screens it opens are [plotScreens], outside any tab. */
-fun NavGraphBuilder.plotsNavGraph(navController: NavController) {
+/**
+ * [quotaCard] is the plan's quota card the list shows on top; it comes from the subscription context through
+ * the app shell, so this context does not draw another context's screens.
+ */
+fun NavGraphBuilder.plotsNavGraph(navController: NavController, quotaCard: @Composable () -> Unit) {
     navigation<PlotsGraph>(startDestination = PlotsRoute) {
         composable<PlotsRoute> {
             PlotsScreen(
                 onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
                 onOpenMap = { navController.navigate(PlotsMapRoute) },
                 onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
-                quotaCard = { PlanQuotaCard(onExpand = { navController.navigate(PlanExtensionRoute) { launchSingleTop = true } }) },
+                quotaCard = quotaCard,
             )
         }
     }
 }
 
 /**
- * The screens about a plot (map, registration wizard, detail, edit, outline, sensors and
- * alternation). They sit at the root of the navigation, outside every tab graph, because the
+ * The screens about a plot (map, registration wizard, detail, edit and outline). They sit at the root of the navigation, outside every tab graph, because the
  * producer reaches them from several tabs (Home and Lotes). If they belonged to the Lotes graph,
  * opening one from the Home would push it into the Home's back stack while the tab bar showed
  * Lotes, and the Home tab would then bring that screen back instead of the Home.
+ *
+ * [onOpenSection] opens the sections of a plot that other contexts own (sensors, harvest, chill, thinning) and
+ * [onExpandPlan] the plan extension; the app shell registers those screens and knows their routes.
  */
-fun NavGraphBuilder.plotScreens(navController: NavController) {
+fun NavGraphBuilder.plotScreens(
+    navController: NavController,
+    onOpenSection: (section: LotSection, plotId: String, plotName: String) -> Unit,
+    onExpandPlan: () -> Unit,
+) {
     composable<PlotsMapRoute> {
         PlotsMapScreen(onBack = { navController.popBackStack() })
     }
@@ -83,7 +85,7 @@ fun NavGraphBuilder.plotScreens(navController: NavController) {
                 }
             },
             // P25 "Ampliar mi plan": the wizard stays below, so back returns to the review.
-            onExpandPlan = { navController.navigate(PlanExtensionRoute) { launchSingleTop = true } },
+            onExpandPlan = onExpandPlan,
         )
     }
     composable<PlotDetailRoute> { entry ->
@@ -91,16 +93,10 @@ fun NavGraphBuilder.plotScreens(navController: NavController) {
             onBack = { navController.popBackStack() },
             onEdit = { navController.navigate(EditPlotRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
             onAdjustOutline = { navController.navigate(AdjustOutlineRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
-            onSensors = { navController.navigate(SensorsRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId)) },
-            onHarvestHistory = { plotName ->
-                navController.navigate(HarvestHistoryRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
-            },
-            onWinterChill = { plotName ->
-                navController.navigate(WinterChillRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
-            },
-            onThinningPlan = { plotName ->
-                navController.navigate(ThinningPlanRoute(plotId = entry.toRoute<PlotDetailRoute>().plotId, plotName = plotName))
-            },
+            onSensors = { onOpenSection(LotSection.SENSORS, entry.toRoute<PlotDetailRoute>().plotId, "") },
+            onHarvestHistory = { plotName -> onOpenSection(LotSection.HARVEST, entry.toRoute<PlotDetailRoute>().plotId, plotName) },
+            onWinterChill = { plotName -> onOpenSection(LotSection.WINTER_CHILL, entry.toRoute<PlotDetailRoute>().plotId, plotName) },
+            onThinningPlan = { plotName -> onOpenSection(LotSection.THINNING, entry.toRoute<PlotDetailRoute>().plotId, plotName) },
         )
     }
     composable<EditPlotRoute> {
@@ -109,8 +105,4 @@ fun NavGraphBuilder.plotScreens(navController: NavController) {
     composable<AdjustOutlineRoute> {
         AdjustOutlineScreen(onBack = { navController.popBackStack() })
     }
-    sensorsComposable(navController)
-    configureNodeComposable(navController)
-    harvestHistoryComposable(navController)
-    winterChillComposable(navController)
 }

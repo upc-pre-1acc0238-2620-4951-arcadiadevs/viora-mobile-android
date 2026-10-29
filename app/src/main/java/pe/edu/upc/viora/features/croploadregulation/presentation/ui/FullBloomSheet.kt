@@ -38,6 +38,8 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.component.VioraBottomSheet
+import pe.edu.upc.viora.core.designsystem.component.VioraFieldLabel
+import pe.edu.upc.viora.core.designsystem.component.VioraStepButton
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
@@ -47,8 +49,6 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.FullBloomSheetState
-import pe.edu.upc.viora.features.phenology.presentation.ui.FieldLabel
-import pe.edu.upc.viora.features.phenology.presentation.ui.StepButton
 
 /**
  * P64 · Plena floración: the day most flowers of the plot were open, moved a day at a time, and the thinning window it
@@ -99,9 +99,9 @@ fun FullBloomSheet(
                     .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                FieldLabel(stringResource(R.string.full_bloom_date_label))
+                VioraFieldLabel(stringResource(R.string.full_bloom_date_label))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    StepButton(
+                    VioraStepButton(
                         icon = null,
                         symbol = "−",
                         description = stringResource(R.string.full_bloom_previous_day),
@@ -126,7 +126,7 @@ fun FullBloomSheet(
                             color = Neutral600,
                         )
                     }
-                    StepButton(
+                    VioraStepButton(
                         icon = R.drawable.ic_add,
                         symbol = null,
                         description = stringResource(R.string.full_bloom_next_day),
@@ -141,7 +141,7 @@ fun FullBloomSheet(
                     .padding(start = 18.dp, end = 18.dp, top = 14.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                FieldLabel(stringResource(R.string.full_bloom_what_label))
+                VioraFieldLabel(stringResource(R.string.full_bloom_what_label))
                 Text(stringResource(R.string.full_bloom_what_body), style = MaterialTheme.typography.bodySmall, color = Neutral700)
             }
 

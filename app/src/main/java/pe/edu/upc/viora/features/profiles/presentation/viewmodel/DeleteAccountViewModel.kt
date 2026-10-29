@@ -12,8 +12,8 @@ import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.domain.isConnectivity
+import pe.edu.upc.viora.features.iam.application.usecase.ChangePasswordUseCase
 import pe.edu.upc.viora.features.iam.application.usecase.DeleteAccountUseCase
-import pe.edu.upc.viora.features.iam.domain.repository.AuthRepository
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveProfileUseCase
 import pe.edu.upc.viora.features.profiles.presentation.state.DeleteAccountError
@@ -77,7 +77,7 @@ class DeleteAccountViewModel @Inject constructor(
     }
 
     private fun AppError.toDeleteError(): DeleteAccountError = when {
-        this is AppError.Validation && code == AuthRepository.WRONG_CURRENT_PASSWORD -> DeleteAccountError.WRONG_PASSWORD
+        this is AppError.Validation && code == ChangePasswordUseCase.WRONG_CURRENT_PASSWORD -> DeleteAccountError.WRONG_PASSWORD
         this is AppError.Forbidden -> DeleteAccountError.PROTECTED_ACCOUNT
         this.isConnectivity -> DeleteAccountError.OFFLINE
         else -> DeleteAccountError.GENERIC

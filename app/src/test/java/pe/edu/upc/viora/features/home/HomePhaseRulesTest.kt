@@ -5,11 +5,13 @@ import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.croploadregulation.blockedPlan
-import pe.edu.upc.viora.features.croploadregulation.domain.entity.CampaignPlan
+import pe.edu.upc.viora.features.croploadregulation.application.published.CampaignPlan
 import pe.edu.upc.viora.features.croploadregulation.issuedPlan
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.HarvestEntryUiState
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.PlotToSettle
+import pe.edu.upc.viora.features.harvestsettlement.application.published.PlotToSettle
+import pe.edu.upc.viora.features.home.presentation.state.HarvestProgress
 import pe.edu.upc.viora.features.home.presentation.state.HomePhase
 import pe.edu.upc.viora.features.home.presentation.state.HomePhaseRules
 import pe.edu.upc.viora.features.home.presentation.state.HomePhaseUiState
@@ -17,16 +19,15 @@ import pe.edu.upc.viora.features.home.presentation.state.PhaseAction
 import pe.edu.upc.viora.features.home.presentation.state.PhaseFigure
 import pe.edu.upc.viora.features.home.presentation.state.PhaseMessage
 import pe.edu.upc.viora.features.home.presentation.state.PhaseTiming
+import pe.edu.upc.viora.features.phenology.domain.OlivePhases
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillProjection
-import pe.edu.upc.viora.features.phenology.domain.entity.ChillTracker
+import pe.edu.upc.viora.features.phenology.application.published.ChillTracker
 import pe.edu.upc.viora.features.phenology.domain.entity.ThermalAnomaly
-import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.phenology.application.published.WinterSeasonState
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.telemetry.domain.entity.ForecastDay
-import pe.edu.upc.viora.features.telemetry.domain.entity.WeatherForecast
+import pe.edu.upc.viora.features.telemetry.application.published.WeatherForecast
 
 /** Figma P10 · Fase: which phase the Home opens on and what each card says, from the plot's own data. */
 class HomePhaseRulesTest {
@@ -43,14 +44,15 @@ class HomePhaseRulesTest {
         plan: CampaignPlan? = null,
         chill: ChillTracker? = null,
         forecast: WeatherForecast? = null,
-        harvest: HarvestEntryUiState? = HarvestEntryUiState(today.year, emptyList(), 2),
-    ): HomePhaseUiState = HomePhaseRules.state(today, plot, plan, chill, forecast, harvest)
+        harvest: HarvestProgress? = HarvestProgress(today.year, emptyList(), 2),
+    ): HomePhaseUiState =
+        HomePhaseRules.state(OlivePhases.of(today, HomePhaseRules.phaseDates(plan, harvest), chill), plot, plan, forecast, harvest)
 
     private fun HomePhaseUiState.card(phase: HomePhase) = cards[phase.ordinal]
 
     private fun HomePhaseUiState.currentPhase() = cards[current].phase
 
-    private fun pending(today: LocalDate, count: Int) = HarvestEntryUiState(
+    private fun pending(today: LocalDate, count: Int) = HarvestProgress(
         today.year,
         List(count) { PlotToSettle("p$it", "Lote $it", OliveVariety.SEVILLANA, 1.0) },
         2,

@@ -16,11 +16,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObserveThinningExecutionUseCase
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.RefreshThinningExecutionUseCase
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.ThinningResultUiState
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /**

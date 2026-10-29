@@ -1,8 +1,8 @@
 package pe.edu.upc.viora.features.profiles.presentation.state
 
-import pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers
-import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
+import pe.edu.upc.viora.core.domain.MobileNumbers
 import pe.edu.upc.viora.core.domain.validation.PersonName
+import pe.edu.upc.viora.core.presentation.PhoneCountry
 
 /** Why saving failed, beyond the fields (P96). */
 enum class SaveProfileError { OFFLINE, GENERIC }
@@ -11,7 +11,7 @@ enum class SaveProfileError { OFFLINE, GENERIC }
 data class EditProfileUiState(
     val fullName: String = "",
     val fullNameTouched: Boolean = false,
-    val country: IamCountry = IamCountry.PE,
+    val country: PhoneCountry = PhoneCountry.PE,
     val phone: String = "",
     val phoneTouched: Boolean = false,
     val email: String = "",

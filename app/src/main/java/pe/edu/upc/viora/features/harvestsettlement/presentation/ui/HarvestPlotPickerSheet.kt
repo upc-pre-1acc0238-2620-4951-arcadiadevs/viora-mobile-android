@@ -47,8 +47,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.HarvestEntryUiState
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.PlotToSettle
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
+import pe.edu.upc.viora.features.harvestsettlement.domain.PlotToSettle
+import pe.edu.upc.viora.core.presentation.labelRes
 
 /**
  * P70, "¿Qué lote cosechaste?": the plots still "por registrar" in the campaign. Choosing one

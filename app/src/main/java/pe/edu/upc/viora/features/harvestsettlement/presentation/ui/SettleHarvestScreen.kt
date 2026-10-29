@@ -43,14 +43,16 @@ import java.time.LocalDate
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraDateField
 import pe.edu.upc.viora.core.designsystem.component.VioraDatePicker
+import pe.edu.upc.viora.core.designsystem.component.VioraTextFieldCard
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.core.presentation.pickerMillisToLocalDate
 import pe.edu.upc.viora.core.presentation.toPickerMillis
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CommercialSizeGrade
+import pe.edu.upc.viora.features.harvestsettlement.domain.valueobject.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleDialog
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestRules
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestUiState
@@ -128,13 +130,13 @@ internal fun SettleHarvestContent(
                 Text(stringResource(R.string.settle_form_headline_lead), style = headline, color = Neutral900)
                 Text(stringResource(R.string.settle_form_headline_emphasis), style = headline, fontStyle = FontStyle.Italic, color = Neutral900)
             }
-            WeighingDateField(
+            VioraDateField(
                 dateText = formatSettleDate(state.weighedOn, R.string.settle_pattern_long, capitalize = true),
                 enabled = !state.isSaving,
                 onClick = { pickingDate = true },
             )
             KilosByQualityCard(state, onGreenChange, onBlackChange)
-            TextFieldCard(
+            VioraTextFieldCard(
                 label = stringResource(R.string.settle_mill_label),
                 value = state.millTicket,
                 onValueChange = onMillTicketChange,

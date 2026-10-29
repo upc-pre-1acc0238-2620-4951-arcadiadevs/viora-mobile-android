@@ -11,12 +11,13 @@ import pe.edu.upc.viora.core.database.CacheMetadataDao
 import pe.edu.upc.viora.core.database.CacheMetadataEntity
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.core.domain.appResultOf
 import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotChanges
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.toDomainOrNull
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.toEntity
@@ -24,7 +25,6 @@ import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.toRequestD
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.toUpdateRequestDto
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.PlotDto
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.PlotService
-import pe.edu.upc.viora.core.domain.appResultOf
 
 class PlotRepositoryImpl @Inject constructor(
     private val service: PlotService,

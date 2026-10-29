@@ -17,7 +17,7 @@ import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePe
 import pe.edu.upc.viora.features.home.application.usecase.RestartHomeTourUseCase
 import pe.edu.upc.viora.features.iam.application.usecase.SignOutUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveFieldNotesUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteSyncState
+import pe.edu.upc.viora.features.plotmanagement.application.published.FieldNoteSyncState
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveAnimatedVoiceUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveProfileUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.RefreshProfileUseCase

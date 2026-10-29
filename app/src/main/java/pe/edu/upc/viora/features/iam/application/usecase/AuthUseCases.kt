@@ -47,6 +47,11 @@ class ResetPasswordUseCase @Inject constructor(private val repository: AuthRepos
 class ChangePasswordUseCase @Inject constructor(private val repository: AuthRepository) {
     suspend operator fun invoke(currentPassword: String, newPassword: String): AppResult<Unit> =
         repository.changePassword(currentPassword, newPassword)
+
+    companion object {
+        /** The `AppError.Validation` code of a wrong current password, here and in [DeleteAccountUseCase]. */
+        const val WRONG_CURRENT_PASSWORD = AuthRepository.WRONG_CURRENT_PASSWORD
+    }
 }
 
 /** Closes the session on this phone and forgets every record of the account. */

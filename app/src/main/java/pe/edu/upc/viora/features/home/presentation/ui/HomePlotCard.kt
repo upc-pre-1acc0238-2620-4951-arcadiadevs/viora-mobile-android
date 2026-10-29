@@ -40,13 +40,13 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.ShadowTint
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.TreeGrid
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.drawPlot
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.drawTerrain
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.normalizeOutline
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.plotSummary
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.core.presentation.plotSummary
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
+import pe.edu.upc.viora.core.designsystem.component.TreeGrid
+import pe.edu.upc.viora.core.designsystem.component.drawPlot
+import pe.edu.upc.viora.core.designsystem.component.drawTerrain
+import pe.edu.upc.viora.core.designsystem.component.normalizeOutline
 
 /** Horizontal strip of plot cards under "Mis lotes". Bleeds to the screen edges. */
 @Composable
@@ -102,7 +102,7 @@ fun HomePlotCard(plot: Plot, onClick: () -> Unit, modifier: Modifier = Modifier)
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = plotSummary(plot),
+                text = plotSummary(plot.variety, plot.areaHectares, plot.estimatedTrees),
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, lineHeight = 18.sp, letterSpacing = 0.sp),
                 color = Neutral600,
                 maxLines = 1,

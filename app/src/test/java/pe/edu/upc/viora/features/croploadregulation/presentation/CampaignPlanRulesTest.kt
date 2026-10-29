@@ -4,6 +4,8 @@ import java.time.Instant
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.croploadregulation.blockedPlan
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CampaignPlan
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningPrescription
@@ -14,9 +16,7 @@ import pe.edu.upc.viora.features.croploadregulation.issuedPlan
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.CampaignPlanRules
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.CampaignPlanUiState
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.PlanRowStatus
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 
 class CampaignPlanRulesTest {
 

@@ -23,6 +23,7 @@ import org.junit.Before
 import org.junit.Test
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.phenology.application.usecase.ObserveAlternationSummaryUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveBearingIndexUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestHistoryUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestLastRefreshUseCase
@@ -52,9 +53,11 @@ class HarvestHistoryViewModelTest {
 
     private fun viewModel() = HarvestHistoryViewModel(
         savedStateHandle = SavedStateHandle(mapOf("plotId" to "plot-1", "plotName" to "")),
-        observeRecords = ObserveHarvestHistoryUseCase(repository),
-        observeIndex = ObserveBearingIndexUseCase(repository),
-        observeLastRefresh = ObserveHarvestLastRefreshUseCase(repository),
+        observeAlternation = ObserveAlternationSummaryUseCase(
+            ObserveHarvestHistoryUseCase(repository),
+            ObserveBearingIndexUseCase(repository),
+            ObserveHarvestLastRefreshUseCase(repository),
+        ),
         observePlot = ObservePlotUseCase(FakePlots()),
         refreshHistory = RefreshHarvestHistoryUseCase(repository),
         clock = clock,

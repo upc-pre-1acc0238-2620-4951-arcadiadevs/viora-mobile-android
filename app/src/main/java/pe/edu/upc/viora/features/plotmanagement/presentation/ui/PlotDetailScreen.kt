@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.plotmanagement.presentation.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -76,14 +77,16 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.core.presentation.formatCount
+import pe.edu.upc.viora.core.presentation.formatDecimal
 import pe.edu.upc.viora.core.presentation.formatHectares
-import pe.edu.upc.viora.features.phenology.domain.entity.BbiClass
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatIndex
-import pe.edu.upc.viora.features.phenology.presentation.ui.sentenceRes
+import pe.edu.upc.viora.core.presentation.formatMeters
+import pe.edu.upc.viora.core.presentation.labelRes
+import pe.edu.upc.viora.features.phenology.application.published.BbiClass
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.LotHarvest
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotDetailUiState
@@ -419,10 +422,18 @@ private fun harvestSubtitle(harvest: LotHarvest?): String = when {
     harvest == null -> stringResource(R.string.lot_section_harvest_hint)
     harvest.index != null -> stringResource(
         R.string.plot_detail_harvest_index,
-        formatIndex(harvest.index),
+        formatDecimal(harvest.index, 2),
         stringResource(BbiClass.of(harvest.index).sentenceRes()),
     )
     else -> pluralStringResource(R.plurals.plot_detail_harvest_missing, harvest.missingCampaigns, harvest.missingCampaigns)
+}
+
+/** "vecería severa" after the index, in the words of the alternation screen (phenology draws its own copy). */
+@StringRes
+private fun BbiClass.sentenceRes(): Int = when (this) {
+    BbiClass.LOW -> R.string.harvest_class_low_sentence
+    BbiClass.MODERATE -> R.string.harvest_class_moderate_sentence
+    BbiClass.SEVERE -> R.string.harvest_class_severe_sentence
 }
 
 /** A section of the plot as a card (Figma P26 "Tu lote"): icon, title and line, and an arrow to open it. */

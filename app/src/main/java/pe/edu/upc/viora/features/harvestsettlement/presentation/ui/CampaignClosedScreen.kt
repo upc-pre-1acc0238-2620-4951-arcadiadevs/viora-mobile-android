@@ -67,7 +67,7 @@ import pe.edu.upc.viora.core.presentation.formatTonnesPerHectare
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CampaignClosedUiState
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettlementReceipt
 import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.CampaignClosedViewModel
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
+import pe.edu.upc.viora.core.presentation.labelRes
 
 /**
  * P73: the receipt of a campaign. "Campaña cerrada" when the server stored the settlement, "Cosecha

@@ -63,42 +63,9 @@ import pe.edu.upc.viora.core.presentation.ThousandsVisualTransformation
 import pe.edu.upc.viora.core.presentation.formatKg
 import pe.edu.upc.viora.core.presentation.formatPercentOf
 import pe.edu.upc.viora.core.presentation.formatTonnesPerHectare
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CommercialSizeGrade
+import pe.edu.upc.viora.features.harvestsettlement.domain.valueobject.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestRules
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestUiState
-
-/**
- * "Fecha de pesaje" (Figma P71): the chosen day with the calendar button that opens the picker. P62 reuses it with
- * its own [label] ("Fecha del aclareo").
- */
-@Composable
-internal fun WeighingDateField(
-    dateText: String,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    label: String = stringResource(R.string.settle_date_label),
-) {
-    val description = stringResource(R.string.settle_date_pick)
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .background(Neutral0)
-            .clickable(enabled = enabled, role = Role.Button, onClickLabel = description, onClick = onClick)
-            .padding(start = 18.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(label, style = MaterialTheme.typography.labelMedium, color = Green800)
-            Text(dateText, style = MaterialTheme.typography.bodyLarge, color = Neutral900)
-        }
-        Box(Modifier.size(44.dp).clip(CircleShape).background(Neutral100), contentAlignment = Alignment.Center) {
-            Icon(painterResource(R.drawable.ic_calendar_month), contentDescription = description, tint = Neutral900)
-        }
-    }
-}
 
 /** The green and black kilos inputs and the live total with its split bar (Figma "Kilos por calidad"). */
 @Composable
@@ -250,39 +217,6 @@ internal fun SplitBar(greenShare: Double?, modifier: Modifier = Modifier) {
             if (greenShare > 0.0) Box(Modifier.weight(greenShare.toFloat()).height(10.dp).clip(RoundedCornerShape(5.dp)).background(Green700))
             if (greenShare < 1.0) Box(Modifier.weight((1 - greenShare).toFloat()).height(10.dp).clip(RoundedCornerShape(5.dp)).background(Neutral900))
         }
-    }
-}
-
-/** A white single-line text card with its label above (Figma "Campo · Boleta"). */
-@Composable
-internal fun TextFieldCard(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    enabled: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Neutral0).padding(horizontal = 18.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = Neutral600)
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            enabled = enabled,
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.sp, color = Neutral900),
-            cursorBrush = SolidColor(Green800),
-            modifier = Modifier.fillMaxWidth().semantics { contentDescription = label },
-            decorationBox = { inner ->
-                Box(Modifier.padding(vertical = 4.dp)) {
-                    if (value.isEmpty()) Text(placeholder, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.sp), color = Neutral600)
-                    inner()
-                }
-            },
-        )
     }
 }
 

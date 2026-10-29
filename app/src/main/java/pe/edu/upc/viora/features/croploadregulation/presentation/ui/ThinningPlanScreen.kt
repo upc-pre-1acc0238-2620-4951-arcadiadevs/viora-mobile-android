@@ -87,6 +87,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.newsreader
 import pe.edu.upc.viora.core.designsystem.theme.roboto
 import pe.edu.upc.viora.core.designsystem.theme.robotoMedium
+import pe.edu.upc.viora.core.navigation.LotSection
+import pe.edu.upc.viora.core.navigation.LotSectionsSheet
 import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatDecimal
 import pe.edu.upc.viora.core.presentation.formatHectares
@@ -106,9 +108,7 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.ThinningP
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.excessPercent
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.removalFraction
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.ThinningPlanViewModel
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
+import pe.edu.upc.viora.core.presentation.labelRes
 
 /**
  * P61 · Plan del lote (US26-US28): the fruit load the sampling measured against the sustainable target, and the

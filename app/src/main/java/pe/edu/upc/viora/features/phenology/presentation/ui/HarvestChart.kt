@@ -67,6 +67,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
+import pe.edu.upc.viora.core.domain.tonnesPerHectare
 import pe.edu.upc.viora.core.presentation.formatKg
 import pe.edu.upc.viora.core.presentation.formatKgCompact
 import pe.edu.upc.viora.core.presentation.formatTonnesPerHectare

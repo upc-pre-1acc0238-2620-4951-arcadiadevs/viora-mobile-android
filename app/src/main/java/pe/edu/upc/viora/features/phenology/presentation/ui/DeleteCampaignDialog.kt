@@ -21,8 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
@@ -36,7 +36,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.phenology.presentation.state.IndexPreview
+import pe.edu.upc.viora.features.phenology.domain.IndexPreview
 
 /** "¿Eliminar la campaña 2021?" (Figma): what is deleted and the index without that campaign. */
 @Composable

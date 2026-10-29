@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.home.application.usecase.ObserveChosenPlotUseCase
-import pe.edu.upc.viora.features.home.domain.FocusedPlotRule
+import pe.edu.upc.viora.features.plotmanagement.domain.FocusedPlotRule
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.WriteFieldNoteUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNote

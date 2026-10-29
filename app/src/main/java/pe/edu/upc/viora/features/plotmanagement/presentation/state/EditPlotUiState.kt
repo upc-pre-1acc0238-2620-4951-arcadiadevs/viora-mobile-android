@@ -1,11 +1,11 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.state
 
+import kotlin.math.roundToInt
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
-import kotlin.math.roundToInt
 
 /** Why saving a plot's edits failed. */
 sealed interface EditFailure {

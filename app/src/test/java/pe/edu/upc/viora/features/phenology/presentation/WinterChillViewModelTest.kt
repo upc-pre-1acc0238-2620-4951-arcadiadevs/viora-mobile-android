@@ -37,7 +37,7 @@ import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotU
 import pe.edu.upc.viora.features.telemetry.FakeWarmWinterIncidents
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
-import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
+import pe.edu.upc.viora.features.telemetry.application.published.IncidentType
 import pe.edu.upc.viora.features.telemetry.warmWinterIncident
 
 private class FakeChillViewModelRepo : ChillRepository {

@@ -4,8 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Clock
 import java.math.BigDecimal
+import java.time.Clock
 import java.time.LocalDate
 import java.util.UUID
 import javax.inject.Inject
@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.core.domain.tonnesPerHectare
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePendingSettlementsUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.SettleHarvestUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.UpdatePendingSettlementUseCase
@@ -26,15 +28,13 @@ import pe.edu.upc.viora.features.harvestsettlement.domain.entity.PendingSettleme
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.PendingStatus
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettleHarvestDraft
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettleOutcome
+import pe.edu.upc.viora.features.harvestsettlement.domain.valueobject.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CalibreReading
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleDialog
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestRules
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestUiState
-import pe.edu.upc.viora.features.phenology.presentation.ui.tonnesPerHectare
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /**

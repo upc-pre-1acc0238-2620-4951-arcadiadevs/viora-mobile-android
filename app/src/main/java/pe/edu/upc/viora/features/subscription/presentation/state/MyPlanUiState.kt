@@ -4,9 +4,9 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.core.presentation.daysUntil
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 import pe.edu.upc.viora.features.subscription.domain.entity.ProducerSubscription
 import pe.edu.upc.viora.features.subscription.domain.valueobject.SubscriptionMode
 

@@ -52,7 +52,6 @@ import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.PillShape
 import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
 import pe.edu.upc.viora.features.telemetry.domain.entity.AlertsSummary
-import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsFilter
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsUiState
 import pe.edu.upc.viora.features.telemetry.presentation.state.PlotFilterOption
@@ -193,10 +192,10 @@ private fun AlertsCenterContent(
     val scrollState = rememberScrollState()
 
     val activeIncidents = incidents.filter {
-        it.status != IncidentStatus.NORMALIZED
+        it.status.isActive
     }
     val normalizedIncidents = incidents.filter {
-        it.status == IncidentStatus.NORMALIZED
+        !it.status.isActive
     }
 
     Column(

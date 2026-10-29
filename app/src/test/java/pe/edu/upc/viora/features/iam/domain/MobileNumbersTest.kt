@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers
+import pe.edu.upc.viora.core.domain.MobileNumbers
 
 class MobileNumbersTest {
 

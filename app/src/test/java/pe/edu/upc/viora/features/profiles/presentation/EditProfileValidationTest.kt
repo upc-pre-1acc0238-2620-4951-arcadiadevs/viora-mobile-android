@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
+import pe.edu.upc.viora.core.presentation.PhoneCountry
 import pe.edu.upc.viora.features.profiles.presentation.state.EditProfileUiState
 
 class EditProfileValidationTest {
@@ -12,7 +12,7 @@ class EditProfileValidationTest {
     private val saved = EditProfileUiState(
         fullName = "Teodoro Mamani",
         initialFullName = "Teodoro Mamani",
-        country = IamCountry.PE,
+        country = PhoneCountry.PE,
         phone = "952184337",
         initialPhone = "952184337",
     )
