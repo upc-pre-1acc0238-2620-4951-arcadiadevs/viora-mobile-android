@@ -13,6 +13,7 @@ enum class OnboardingStep(val number: Int?) {
     COOPERATIVE_CODE(3),
     HECTARES(4),
     ALERTS(5),
+    LOCATION(6),
     SUMMARY(null),
 }
 
@@ -33,6 +34,7 @@ data class OnboardingUiState(
     /** "Aún no lo sé" was chosen on T02d. */
     val hectaresUnknown: Boolean = false,
     val alertsEnabled: Boolean = false,
+    val locationGranted: Boolean = false,
     /** Plan Productor price per hectare and month from the plan catalog; null until it is known. */
     val referenceRatePerHa: BigDecimal? = null,
     val currency: String = DEFAULT_CURRENCY,

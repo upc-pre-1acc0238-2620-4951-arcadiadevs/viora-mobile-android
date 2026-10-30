@@ -140,6 +140,7 @@ class OnboardingViewModelTest {
         vm.skipCooperativeCode()
         vm.continueFromHectares(unknown = true)
         vm.onAlertsAnswered(true)
+        vm.onLocationAnswered(false)
         assertEquals(OnboardingStep.SUMMARY, vm.uiState.value.step)
 
         vm.edit(OnboardingStep.NAME)
@@ -156,8 +157,9 @@ class OnboardingViewModelTest {
         vm.skipCooperativeCode()
         vm.continueFromHectares(unknown = true)
         vm.onAlertsAnswered(true)
+        vm.onLocationAnswered(true)
 
-        val answers = eventually({ store.answers().alertsEnabled }, true).let { runBlocking { store.answers() } }
+        val answers = eventually({ store.answers().locationGranted }, true).let { runBlocking { store.answers() } }
         assertEquals("Teodoro Mamani", answers.fullName)
         assertEquals("987654321", answers.nationalPhone)
         assertNull(answers.hectares)

@@ -57,6 +57,7 @@ class OnboardingViewModel @Inject constructor(
                     hectaresUnknown = answers.hectares == null && answers.cooperativeCode == null &&
                         answers.alertsEnabled != null,
                     alertsEnabled = answers.alertsEnabled == true,
+                    locationGranted = answers.locationGranted == true,
                 )
             }
         }
@@ -130,6 +131,12 @@ class OnboardingViewModel @Inject constructor(
     /** After the system dialog of "Activar alertas", or "Ahora no" (false). */
     fun onAlertsAnswered(enabled: Boolean) {
         _uiState.update { it.copy(alertsEnabled = enabled) }
+        advance(OnboardingStep.LOCATION)
+    }
+
+    /** After the system dialog of "Permitir ubicación", or "Ahora no" (false). */
+    fun onLocationAnswered(granted: Boolean) {
+        _uiState.update { it.copy(locationGranted = granted) }
         advance(OnboardingStep.SUMMARY)
     }
 
@@ -150,7 +157,8 @@ class OnboardingViewModel @Inject constructor(
             OnboardingStep.HECTARES -> OnboardingStep.COOPERATIVE_CODE
             OnboardingStep.ALERTS ->
                 if (s.savedCooperativeCode != null) OnboardingStep.COOPERATIVE_CODE else OnboardingStep.HECTARES
-            OnboardingStep.SUMMARY -> OnboardingStep.ALERTS
+            OnboardingStep.LOCATION -> OnboardingStep.ALERTS
+            OnboardingStep.SUMMARY -> OnboardingStep.LOCATION
         }
         goTo(previous, editing = false)
         return true
@@ -177,6 +185,7 @@ class OnboardingViewModel @Inject constructor(
             cooperativeCode = s.savedCooperativeCode,
             hectares = s.hectares.takeUnless { s.hectaresUnknown || s.savedCooperativeCode != null },
             alertsEnabled = s.alertsEnabled.takeIf { s.step.ordinal > OnboardingStep.ALERTS.ordinal },
+            locationGranted = s.locationGranted.takeIf { s.step == OnboardingStep.SUMMARY },
         )
         viewModelScope.launch { store.save(answers) }
     }
