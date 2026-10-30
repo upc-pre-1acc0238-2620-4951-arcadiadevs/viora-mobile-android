@@ -74,8 +74,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Shadow
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
-import pe.edu.upc.viora.core.presentation.formatWhole
-import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
+import pe.edu.upc.viora.core.presentation.PhoneCountry
+import pe.edu.upc.viora.core.presentation.formatMoney
 import pe.edu.upc.viora.features.iam.presentation.state.OnboardingUiState
 
 /**
@@ -101,7 +101,7 @@ internal fun italicMarkup(text: String): AnnotatedString = buildAnnotatedString 
 
 /** T02b2: the "País" field, "PE +51", that opens the list of countries. */
 @Composable
-internal fun CountryField(selected: IamCountry, onSelect: (IamCountry) -> Unit, modifier: Modifier = Modifier) {
+internal fun CountryField(selected: PhoneCountry, onSelect: (PhoneCountry) -> Unit, modifier: Modifier = Modifier) {
     var open by remember { mutableStateOf(false) }
     Box(modifier) {
         Column(
@@ -121,7 +121,7 @@ internal fun CountryField(selected: IamCountry, onSelect: (IamCountry) -> Unit, 
             Box(Modifier.fillMaxWidth().height(1.dp).background(Neutral300))
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = Neutral50) {
-            IamCountry.entries.forEach { country ->
+            PhoneCountry.entries.forEach { country ->
                 DropdownMenuItem(
                     text = { Text("${stringResource(country.nameRes)}  ${country.dialCode}", color = Neutral900) },
                     onClick = {
@@ -238,9 +238,12 @@ internal fun HectareRuler(hectares: Int, onChange: (Int) -> Unit, modifier: Modi
     }
 }
 
-/** "PLAN ESTIMADO · S/ 7,920 al año" and its two explanation lines. */
+/** "PLAN ESTIMADO · S/ 7 920 al año" and its two explanation lines, at the plan catalog's price. */
 @Composable
 internal fun PlanEstimate(state: OnboardingUiState, modifier: Modifier = Modifier) {
+    val rate = state.referenceRatePerHa
+    val monthly = state.monthlyPrice
+    val yearly = state.yearlyPrice
     Column(modifier.fillMaxWidth()) {
         Box(Modifier.fillMaxWidth().height(1.dp).background(Neutral200))
         Spacer(Modifier.height(24.dp))
@@ -248,7 +251,7 @@ internal fun PlanEstimate(state: OnboardingUiState, modifier: Modifier = Modifie
         Spacer(Modifier.height(6.dp))
         Text(
             text = buildAnnotatedString {
-                append(stringResource(R.string.onboarding_plan_price, formatWhole(state.yearlyPrice)))
+                append(formatMoney(yearly, state.currency))
                 append(' ')
                 withStyle(SpanStyle(fontSize = 22.sp, fontStyle = FontStyle.Italic, color = Neutral600)) {
                     append(stringResource(R.string.onboarding_plan_per_year))
@@ -261,8 +264,8 @@ internal fun PlanEstimate(state: OnboardingUiState, modifier: Modifier = Modifie
         Text(
             text = stringResource(
                 R.string.onboarding_plan_detail,
-                formatWhole(state.monthlyPrice),
-                OnboardingUiState.PRICE_PER_HECTARE_MONTH,
+                formatMoney(monthly, state.currency),
+                formatMoney(rate, state.currency),
             ),
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 19.sp, letterSpacing = 0.sp),
             color = Neutral700,

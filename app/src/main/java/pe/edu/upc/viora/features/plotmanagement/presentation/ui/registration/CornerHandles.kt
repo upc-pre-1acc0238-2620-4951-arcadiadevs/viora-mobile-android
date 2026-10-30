@@ -24,7 +24,7 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.ScreenCoordinate
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.TracedCorner
 import kotlin.math.roundToInt
 

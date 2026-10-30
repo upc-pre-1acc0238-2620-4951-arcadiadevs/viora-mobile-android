@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 
@@ -51,7 +52,6 @@ import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.PillShape
 import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
 import pe.edu.upc.viora.features.telemetry.domain.entity.AlertsSummary
-import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsFilter
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsUiState
 import pe.edu.upc.viora.features.telemetry.presentation.state.PlotFilterOption
@@ -64,6 +64,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.AlertsViewModel
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 
 @Composable
 fun AlertsCenterScreen(
@@ -83,12 +84,7 @@ fun AlertsCenterScreen(
     ) {
         when (val state = uiState) {
             is AlertsUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(color = Green900)
-                }
+                VioraLoadingState(modifier = Modifier.fillMaxSize())
             }
 
             is AlertsUiState.Error -> {
@@ -123,7 +119,7 @@ fun AlertsCenterScreen(
                             .padding(horizontal = 24.dp, vertical = 12.dp),
                     ) {
                         Text(
-                            text = stringResource(R.string.alerts_action_retry),
+                            text = stringResource(R.string.common_retry),
                             fontFamily = RobotoFamily,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
@@ -196,10 +192,10 @@ private fun AlertsCenterContent(
     val scrollState = rememberScrollState()
 
     val activeIncidents = incidents.filter {
-        it.status != IncidentStatus.NORMALIZED
+        it.status.isActive
     }
     val normalizedIncidents = incidents.filter {
-        it.status == IncidentStatus.NORMALIZED
+        !it.status.isActive
     }
 
     Column(
@@ -297,7 +293,7 @@ private fun AlertsCenterContent(
                 }
 
                 val locale = LocalConfiguration.current.locales[0]
-                val formattedTime = latestTriggeredAt?.let { formatAlertTriggerTime(it, locale) }
+                val formattedTime = latestTriggeredAt?.let { formatAlertTriggerTime(it, locale, LocalAppZone.current) }
 
                 val contextualSubtitle = when {
                     affectedPlotsText.isNotBlank() && !formattedTime.isNullOrBlank() -> {
@@ -441,12 +437,12 @@ private fun PlotFilterButton(state: PlotFilterButtonState, modifier: Modifier = 
     }
 }
 
-private fun formatAlertTriggerTime(triggerIso: String, locale: Locale): String? {
+private fun formatAlertTriggerTime(triggerIso: String, locale: Locale, zone: ZoneId): String? {
     return runCatching {
         val instant = Instant.parse(triggerIso)
         val isSpanish = locale.language.equals("es", ignoreCase = true)
         val formatter = DateTimeFormatter.ofPattern("h:mm a", locale)
-        var formatted = instant.atZone(ZoneId.systemDefault()).format(formatter)
+        var formatted = instant.atZone(zone).format(formatter)
         if (isSpanish) {
             formatted = formatted
                 .replace("AM", "a. m.")

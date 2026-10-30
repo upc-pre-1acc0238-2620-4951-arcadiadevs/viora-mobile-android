@@ -5,7 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-import pe.edu.upc.viora.core.database.AppDatabase
+import pe.edu.upc.viora.di.AppDatabase
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.IncidentDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.local.SensorNodeDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.IncidentService

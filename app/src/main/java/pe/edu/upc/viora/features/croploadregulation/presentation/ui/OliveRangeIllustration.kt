@@ -29,6 +29,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
+import pe.edu.upc.viora.core.designsystem.theme.newsreader
+import pe.edu.upc.viora.core.designsystem.theme.robotoMedium
 
 /**
  * Figma "Ilustración · aceitunas (rango)" (P63, 310 × 96): a small white olive, a dashed arrow and, on its right,

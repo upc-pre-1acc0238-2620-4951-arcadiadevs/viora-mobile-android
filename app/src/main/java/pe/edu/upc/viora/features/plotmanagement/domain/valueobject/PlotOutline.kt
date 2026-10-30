@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.plotmanagement.domain.valueobject
 
 import kotlin.math.abs
 import kotlin.math.cos
+import pe.edu.upc.viora.core.domain.GeoPoint
 
 /**
  * The corners of a plot in drawing order, without repeating the first one at the end.

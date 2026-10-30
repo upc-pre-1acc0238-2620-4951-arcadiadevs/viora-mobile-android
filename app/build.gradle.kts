@@ -61,8 +61,8 @@ android {
         applicationId = "pe.edu.upc.viora"
         minSdk = 26
         targetSdk = 37
-        versionCode = 31
-        versionName = "1.16.0"
+        versionCode = 32
+        versionName = "1.17.0"
 
         // The Maps SDK reads this string resource at startup.
         resValue("string", "mapbox_access_token", mapboxPublicToken)
@@ -108,6 +108,13 @@ android {
     // Lists Spanish and English in the phone's per-app language settings (Android 13+), as Mi cuenta does.
     androidResources {
         generateLocaleConfig = true
+    }
+    // The language is switched inside the app (Mi cuenta), so every language ships in the base APK instead of
+    // a split the Play Store would only install for the phone's own language.
+    bundle {
+        language {
+            enableSplit = false
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -190,4 +197,5 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.room.testing)
 }

@@ -1,6 +1,5 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel
 
-import pe.edu.upc.viora.features.plotmanagement.presentation.state.planLimitDetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,15 +13,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.UpdatePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotChanges
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.EditFailure
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.EditPlotUiState
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.planLimitDetail
 
 @HiltViewModel
 class EditPlotViewModel @Inject constructor(

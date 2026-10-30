@@ -1,7 +1,7 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.state
 
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
 
 /** The outline adjustment (Figma P29): the corners of a registered plot, moved on the map. */

@@ -1,6 +1,5 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel
 
-import pe.edu.upc.viora.features.plotmanagement.presentation.state.planLimitDetail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,11 +12,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RegisterPlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
@@ -26,6 +25,7 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotS
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.TracedCorner
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.planLimitDetail
 import pe.edu.upc.viora.features.subscription.application.usecase.GetCurrentSubscriptionUseCase
 
 /** Drives the wizard: choose how to mark the outline, mark it, describe the plot, review and save. */

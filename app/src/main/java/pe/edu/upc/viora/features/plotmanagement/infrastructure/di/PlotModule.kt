@@ -5,7 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-import pe.edu.upc.viora.core.database.AppDatabase
+import pe.edu.upc.viora.di.AppDatabase
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.PlotService
 import retrofit2.Retrofit

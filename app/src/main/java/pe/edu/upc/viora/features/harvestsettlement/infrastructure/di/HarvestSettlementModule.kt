@@ -10,7 +10,7 @@ import dagger.hilt.components.SingletonComponent
 import java.io.File
 import javax.inject.Named
 import javax.inject.Singleton
-import pe.edu.upc.viora.core.database.AppDatabase
+import pe.edu.upc.viora.di.AppDatabase
 import pe.edu.upc.viora.features.harvestsettlement.domain.repository.AgronomicDossierRepository
 import pe.edu.upc.viora.features.harvestsettlement.domain.repository.HarvestSettlementRepository
 import pe.edu.upc.viora.features.harvestsettlement.domain.service.SettlementSyncScheduler

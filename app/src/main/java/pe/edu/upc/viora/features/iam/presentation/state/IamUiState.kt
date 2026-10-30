@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.iam.presentation.state
 
 import androidx.annotation.StringRes
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.domain.validation.PasswordPolicy
 
 /** The screens of the IAM flow, in Figma order (frames 03 and 05). */
 enum class IamStep {
@@ -14,28 +15,6 @@ enum class IamStep {
     NEW_PASSWORD,
     RESET_DONE,
     LINK_EXPIRED,
-}
-
-/**
- * Countries of the operation the onboarding offers (T02b2 "PE +51"): how long their mobile numbers
- * are and how they start, for the input limit and the error hint. Validity itself is checked with
- * [pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers].
- */
-enum class IamCountry(
-    val iso: String,
-    val dialCode: String,
-    @StringRes val nameRes: Int,
-    val nationalDigits: Int,
-    @StringRes val invalidHintRes: Int,
-) {
-    PE("PE", "+51", R.string.iam_country_pe, 9, R.string.onboarding_phone_invalid_pe),
-    ES("ES", "+34", R.string.iam_country_es, 9, R.string.onboarding_phone_invalid_es),
-    CL("CL", "+56", R.string.iam_country_cl, 9, R.string.onboarding_phone_invalid_cl),
-    ;
-
-    companion object {
-        fun fromIso(iso: String): IamCountry = entries.firstOrNull { it.iso == iso } ?: PE
-    }
 }
 
 /** Failures that are not tied to one field; the UI maps each one to a string resource. */
@@ -86,18 +65,17 @@ data class IamUiState(
 
     val emailValid: Boolean get() = EMAIL_REGEX.matches(email.trim())
 
-    val passwordLongEnough: Boolean get() = password.length >= MIN_PASSWORD
-    val passwordHasLettersAndDigits: Boolean get() = password.any(Char::isLetter) && password.any(Char::isDigit)
+    val passwordLongEnough: Boolean get() = PasswordPolicy.isLongEnough(password)
+    val passwordHasLettersAndDigits: Boolean get() = PasswordPolicy.hasLettersAndDigits(password)
     val passwordOk: Boolean get() = passwordLongEnough && passwordHasLettersAndDigits
 
-    val confirmOk: Boolean get() = confirmPassword.isNotEmpty() && confirmPassword == password
+    val confirmOk: Boolean get() = PasswordPolicy.isConfirmed(password, confirmPassword)
     val newPasswordOk: Boolean get() = passwordOk && confirmOk
 
     val canSignIn: Boolean get() = emailValid && password.isNotEmpty()
     val canCreateAccount: Boolean get() = emailValid && passwordOk
 
     private companion object {
-        const val MIN_PASSWORD = 8
         val EMAIL_REGEX = Regex("^[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}$")
     }
 }

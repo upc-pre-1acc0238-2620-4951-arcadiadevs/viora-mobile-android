@@ -7,6 +7,8 @@ import java.time.ZoneId
 import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.floor
+import pe.edu.upc.viora.core.presentation.formatDayMonth
+import pe.edu.upc.viora.core.presentation.shortWeekday
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryRange
 
 /** The vertical scale of a chart: [min]..[max] with a gridline every [step]. */

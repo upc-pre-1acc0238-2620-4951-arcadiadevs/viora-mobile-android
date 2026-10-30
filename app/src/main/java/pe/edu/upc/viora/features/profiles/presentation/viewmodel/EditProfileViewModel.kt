@@ -1,6 +1,5 @@
 package pe.edu.upc.viora.features.profiles.presentation.viewmodel
 
-import pe.edu.upc.viora.core.domain.isConnectivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +13,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
-import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
+import pe.edu.upc.viora.core.domain.isConnectivity
+import pe.edu.upc.viora.core.presentation.PhoneCountry
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveProfileUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.UpdateProfileUseCase
 import pe.edu.upc.viora.features.profiles.presentation.state.EditProfileUiState
@@ -39,7 +39,7 @@ class EditProfileViewModel @Inject constructor(
                 it.copy(
                     fullName = profile.fullName,
                     initialFullName = profile.fullName,
-                    country = IamCountry.fromIso(profile.country),
+                    country = PhoneCountry.fromIso(profile.country),
                     phone = phone,
                     initialPhone = phone,
                     email = profile.email.orEmpty(),

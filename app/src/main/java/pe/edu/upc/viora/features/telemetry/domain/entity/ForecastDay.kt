@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.telemetry.domain.entity
 
 import java.time.LocalDate
+import pe.edu.upc.viora.core.domain.BloomHeat
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.HeatLevel
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.SkyCondition
 
@@ -32,7 +33,7 @@ data class ForecastDay(
         const val RAINY_FROM_PERCENT = 50
         const val WARM_CELSIUS = 30.0
 
-        /** Above this during flowering the stigmas dry out (US18, scenario 2). */
-        const val EXTREME_HEAT_CELSIUS = 32.0
+        /** Above this during flowering the stigmas dry out: the bloom heat threshold phenology uses too. */
+        const val EXTREME_HEAT_CELSIUS = BloomHeat.CELSIUS
     }
 }

@@ -1,9 +1,9 @@
 package pe.edu.upc.viora.features.phenology.infrastructure.mapper
 
 import java.time.Instant
-import java.time.LocalDate
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import pe.edu.upc.viora.core.network.toLocalDateOrNull
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillCurvePoint
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillProjection
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillTracker
@@ -103,5 +103,3 @@ fun String.toChillProjection(): ChillProjection = when (this) {
     "INSUFFICIENT_DATA" -> ChillProjection.INSUFFICIENT_DATA
     else -> ChillProjection.NOT_APPLICABLE
 }
-
-private fun String?.toLocalDateOrNull(): LocalDate? = this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }

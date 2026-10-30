@@ -48,8 +48,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBar
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBarTitle
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -69,6 +74,16 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.domain.tonnesPerHectare
+import pe.edu.upc.viora.core.navigation.LotSection
+import pe.edu.upc.viora.core.navigation.LotSectionsSheet
+import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatDayMonth
+import pe.edu.upc.viora.core.presentation.formatHectares
+import pe.edu.upc.viora.core.presentation.formatKg
+import pe.edu.upc.viora.core.presentation.formatMediumDate
+import pe.edu.upc.viora.core.presentation.formatPercentOf
+import pe.edu.upc.viora.core.presentation.formatTonnesPerHectare
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
 import pe.edu.upc.viora.features.phenology.domain.entity.HoblynBbi
@@ -82,13 +97,8 @@ import pe.edu.upc.viora.features.phenology.presentation.state.Outlook
 import pe.edu.upc.viora.features.phenology.presentation.state.Voice
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.CampaignEditorViewModel
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.HarvestHistoryViewModel
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
+import pe.edu.upc.viora.core.presentation.formatCount
+import pe.edu.upc.viora.core.presentation.labelRes
 
 private const val NOTICE_MILLIS = 3_500L
 
@@ -206,9 +216,7 @@ fun HarvestHistoryContent(
         val content = state as? HarvestHistoryUiState.Content
         TopBar(content = content, onBack = onBack, onDismissNotice = onDismissNotice, onMore = onMore)
         when (state) {
-            HarvestHistoryUiState.Loading -> Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Green900)
-            }
+            HarvestHistoryUiState.Loading -> VioraLoadingState(modifier = Modifier.weight(1f).fillMaxWidth())
             is HarvestHistoryUiState.Error -> ErrorBody(state, onRetry, Modifier.weight(1f))
             is HarvestHistoryUiState.Content -> ContentBody(
                 state = state,
@@ -225,16 +233,7 @@ fun HarvestHistoryContent(
 
 @Composable
 private fun TopBar(content: HarvestHistoryUiState.Content?, onBack: () -> Unit, onDismissNotice: () -> Unit, onMore: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        CircleIconButton(
-            icon = R.drawable.ic_arrow_back,
-            contentDescription = stringResource(R.string.action_back),
-            onClick = onBack,
-        )
+    VioraTopBar(onBack = onBack, onMore = onMore, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
         val notice = content?.notice
         if (notice != null) {
             LaunchedEffect(notice) {
@@ -243,35 +242,20 @@ private fun TopBar(content: HarvestHistoryUiState.Content?, onBack: () -> Unit, 
             }
             NoticePill(notice)
         } else {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f).padding(horizontal = 8.dp)) {
-                Text(
-                    text = content?.plotName.orEmpty().ifBlank { " " },
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Neutral900,
-                    maxLines = 1,
-                )
-                val subtitle = content?.plotSubtitle
-                Text(
-                    text = if (subtitle != null) {
-                        stringResource(
-                            R.string.harvest_subtitle,
-                            stringResource(subtitle.variety.labelRes()),
-                            formatHectares(subtitle.areaHectares),
-                        )
-                    } else {
-                        stringResource(R.string.harvest_subtitle_plain)
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Neutral600,
-                    maxLines = 1,
-                )
-            }
+            val subtitle = content?.plotSubtitle
+            VioraTopBarTitle(
+                title = content?.plotName.orEmpty().ifBlank { " " },
+                subtitle = if (subtitle != null) {
+                    stringResource(
+                        R.string.harvest_subtitle,
+                        stringResource(subtitle.variety.labelRes()),
+                        formatHectares(subtitle.areaHectares),
+                    )
+                } else {
+                    stringResource(R.string.harvest_subtitle_plain)
+                },
+            )
         }
-        CircleIconButton(
-            icon = R.drawable.ic_more_vert,
-            contentDescription = stringResource(R.string.plot_menu_more),
-            onClick = onMore,
-        )
     }
 }
 
@@ -311,7 +295,7 @@ private fun ErrorBody(state: HarvestHistoryUiState.Error, onRetry: () -> Unit, m
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Terracotta100).padding(16.dp),
         )
-        PillAction(stringResource(R.string.harvest_retry), onClick = onRetry, enabled = true)
+        PillAction(stringResource(R.string.common_retry), onClick = onRetry, enabled = true)
     }
 }
 
@@ -427,7 +411,7 @@ fun voiceText(voice: Voice): String = when (voice) {
 
 @Composable
 private fun OfflineBanner(state: HarvestHistoryUiState.Content, onRetry: () -> Unit) {
-    val date = state.lastRefresh?.let { formatShortDate(it) }
+    val date = state.lastRefresh?.let { formatDayMonth(it.atZone(LocalAppZone.current).toLocalDate()) }
     Row(
         modifier = Modifier
             .clip(CircleShape)
@@ -532,7 +516,7 @@ private fun AfterOnCard(ratio: Double, fromKg: Double, afterKg: Double, modifier
             }
         }
         Text(
-            text = formatPercent(ratio),
+            text = formatPercentOf(ratio),
             style = MaterialTheme.typography.displayLarge.copy(fontSize = 56.sp, lineHeight = 60.sp, letterSpacing = (-1.5).sp),
             color = Terracotta700,
             modifier = Modifier.padding(vertical = 12.dp),
@@ -659,7 +643,7 @@ private fun CampaignRow(record: HarvestRecord, areaHectares: Double?, isNew: Boo
                         R.string.harvest_row_per_ha,
                         formatTonnesPerHectare(tonnesPerHectare(record.totalYieldKg, areaHectares)),
                     )
-                    else -> stringResource(R.string.harvest_row_recorded, formatRecordDate(record.recordedAt))
+                    else -> stringResource(R.string.harvest_row_recorded, formatMediumDate(record.recordedAt, LocalAppZone.current))
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = Neutral600,

@@ -38,6 +38,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest400
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
@@ -49,7 +50,6 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.locale.AppLanguage
 import pe.edu.upc.viora.core.presentation.vioraNumberFormat
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 
 /**
  * P98 · Idioma (US42): Spanish of Peru or English, each with a sample of its numbers and dates.

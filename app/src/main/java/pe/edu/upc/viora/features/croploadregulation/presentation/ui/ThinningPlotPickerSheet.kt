@@ -31,13 +31,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.VioraBottomSheet
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.PlanRow
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.PlanRowStatus
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.CampaignPlanViewModel
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 
 /**
  * "Aclareo realizado" of the "+" menu: the plots of this campaign with the state of their plan, as
@@ -53,13 +55,7 @@ fun ThinningPlotPickerSheet(
     viewModel: CampaignPlanViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        dragHandle = { Box(Modifier.padding(top = 12.dp).size(width = 36.dp, height = 4.dp).clip(CircleShape).background(Neutral300)) },
-    ) {
+    VioraBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
                 .navigationBarsPadding()
@@ -84,9 +80,7 @@ fun ThinningPlotPickerSheet(
                 CircleIconButton(icon = R.drawable.ic_close, contentDescription = stringResource(R.string.action_close), onClick = onDismiss)
             }
             when {
-                state.isLoading && state.rows.isEmpty() -> Box(Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                }
+                state.isLoading && state.rows.isEmpty() -> VioraLoadingState(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), color = MaterialTheme.colorScheme.primary)
                 state.rows.isEmpty() -> Text(
                     stringResource(R.string.thinning_picker_empty),
                     style = MaterialTheme.typography.bodyMedium,

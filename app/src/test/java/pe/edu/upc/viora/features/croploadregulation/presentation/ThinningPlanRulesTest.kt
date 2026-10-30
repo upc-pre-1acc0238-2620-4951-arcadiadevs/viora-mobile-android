@@ -7,6 +7,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import pe.edu.upc.viora.features.croploadregulation.blockedPlan
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningPrescription
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningTimeliness
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.WindowPhase
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.PrescriptionBlocker
 import pe.edu.upc.viora.features.croploadregulation.issuedPlan
@@ -77,6 +78,16 @@ class ThinningPlanRulesTest {
         assertEquals(WindowPhase.Open(0, 1f), plan.windowPhase(LocalDate.of(2026, 11, 30)))
         assertEquals(WindowPhase.Closed(9), plan.windowPhase(LocalDate.of(2026, 12, 9)))
         assertNull(blockedPlan(PrescriptionBlocker.FULL_BLOOM_MISSING).windowPhase(LocalDate.of(2026, 11, 18)))
+    }
+
+    @Test
+    fun `an execution date against the window, both ends inside it`() {
+        val plan = issuedPlan()
+        assertEquals(ThinningTimeliness.BEFORE, plan.timelinessOf(LocalDate.of(2026, 11, 2)))
+        assertEquals(ThinningTimeliness.WITHIN, plan.timelinessOf(LocalDate.of(2026, 11, 3)))
+        assertEquals(ThinningTimeliness.WITHIN, plan.timelinessOf(LocalDate.of(2026, 11, 30)))
+        assertEquals(ThinningTimeliness.LATE, plan.timelinessOf(LocalDate.of(2026, 12, 1)))
+        assertNull(blockedPlan(PrescriptionBlocker.FULL_BLOOM_MISSING).timelinessOf(LocalDate.of(2026, 11, 18)))
     }
 
     @Test

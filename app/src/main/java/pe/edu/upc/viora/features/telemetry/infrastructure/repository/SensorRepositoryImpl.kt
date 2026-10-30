@@ -17,6 +17,7 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toCalibrationRe
 import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toRequestDto
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.SensorNodeDto
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.SensorService
+import pe.edu.upc.viora.core.domain.appResultOf
 
 class SensorRepositoryImpl @Inject constructor(
     private val service: SensorService,
@@ -31,7 +32,7 @@ class SensorRepositoryImpl @Inject constructor(
         val remote = apiCaller.call { service.getNodes(plotId) }
         if (remote is AppResult.Failure) return remote
         val entities = (remote as AppResult.Success).value.map { it.toEntity() }
-        return guarded {
+        return appResultOf<Unit> {
             sensorNodeDao.upsertAll(entities)
             sensorNodeDao.deleteExcept(plotId, entities.map { it.id })
         }
@@ -52,7 +53,7 @@ class SensorRepositoryImpl @Inject constructor(
         val entity = remoteEntity.copy(status = node.status.name)
         val updated = entity.toDomainOrNull()
             ?: return AppResult.Failure(AppError.Unknown(IllegalStateException("Server returned an unreadable node")))
-        return guarded { sensorNodeDao.upsertAll(listOf(entity)) }.let { stored ->
+        return appResultOf<Unit> { sensorNodeDao.upsertAll(listOf(entity)) }.let { stored ->
             if (stored is AppResult.Failure) stored else AppResult.Success(updated)
         }
     }
@@ -60,7 +61,7 @@ class SensorRepositoryImpl @Inject constructor(
     override suspend fun unlinkNode(plotId: String, nodeId: String): AppResult<Unit> {
         val result = apiCaller.callUnit { service.unlinkNode(plotId, nodeId) }
         if (result is AppResult.Failure) return result
-        return guarded { sensorNodeDao.delete(plotId, nodeId) }
+        return appResultOf<Unit> { sensorNodeDao.delete(plotId, nodeId) }
     }
 
     private suspend fun AppResult<SensorNodeDto>.cached(): AppResult<SensorNode> {
@@ -68,17 +69,8 @@ class SensorRepositoryImpl @Inject constructor(
         val entity = (this as AppResult.Success).value.toEntity()
         val node = entity.toDomainOrNull()
             ?: return AppResult.Failure(AppError.Unknown(IllegalStateException("Server returned an unreadable node")))
-        return guarded { sensorNodeDao.upsertAll(listOf(entity)) }.let { stored ->
+        return appResultOf<Unit> { sensorNodeDao.upsertAll(listOf(entity)) }.let { stored ->
             if (stored is AppResult.Failure) stored else AppResult.Success(node)
         }
-    }
-
-    private suspend fun guarded(block: suspend () -> Unit): AppResult<Unit> = try {
-        block()
-        AppResult.Success(Unit)
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (throwable: Throwable) {
-        AppResult.Failure(AppError.Unknown(throwable))
     }
 }

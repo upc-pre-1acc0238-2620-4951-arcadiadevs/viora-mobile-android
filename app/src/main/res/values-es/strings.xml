@@ -1,4 +1,6 @@
 <resources>
+    <!-- Shared actions -->
+    <string name="common_retry">Reintentar</string>
     <string name="app_name">Viora</string>
 
     <!-- Navegación inferior -->
@@ -18,7 +20,6 @@
     <string name="record_note_subtitle">Observación libre o foto</string>
 
     <!-- Marcadores para pestañas aún no construidas -->
-    <string name="placeholder_coming_soon">Próximamente</string>
 
     <!-- Inicio -->
     <string name="home_greeting">Hola, %1$s</string>
@@ -36,6 +37,7 @@
     <string name="home_campaign">Campaña %1$d</string>
     <plurals name="home_plots_chip">
         <item quantity="one">%1$d lote · %2$s ha</item>
+        <item quantity="many">%1$d lotes · %2$s ha</item>
         <item quantity="other">%1$d lotes · %2$s ha</item>
     </plurals>
     <string name="home_offline_notice">Sin señal. Lo que registres se guarda aquí y se envía al volver.</string>
@@ -81,7 +83,6 @@
     <string name="plots_empty_title">Aún no tienes lotes</string>
     <string name="plots_empty_body">Los lotes que registres aparecerán aquí.</string>
     <string name="plots_map_open">Ver todos los lotes en el mapa</string>
-    <string name="plots_retry">Reintentar</string>
     <string name="variety_criolla">Criolla</string>
     <string name="variety_sevillana">Sevillana</string>
     <string name="variety_manzanilla">Manzanilla</string>
@@ -187,6 +188,7 @@
     <string name="gps_lost_body_empty">Sigue en el mapa satelital o espera a que vuelva la señal.</string>
     <plurals name="gps_lost_body_kept">
         <item quantity="one">Tu esquina se conserva. Sigue en el mapa satelital o espera a que vuelva la señal.</item>
+        <item quantity="many">Tus %1$d esquinas se conservan. Sigue en el mapa satelital o espera a que vuelva la señal.</item>
         <item quantity="other">Tus %1$d esquinas se conservan. Sigue en el mapa satelital o espera a que vuelva la señal.</item>
     </plurals>
     <string name="gps_keep_map">Seguir en el mapa</string>
@@ -245,6 +247,7 @@
     <string name="adjust_corners_label">esquinas</string>
     <plurals name="adjust_corners_moved">
         <item quantity="one">esquinas · %1$d movida</item>
+        <item quantity="many">esquinas · %1$d movidas</item>
         <item quantity="other">esquinas · %1$d movidas</item>
     </plurals>
     <string name="adjust_area_before">antes %1$s ha</string>
@@ -266,6 +269,7 @@
     <string name="tour_welcome_title">Hola.\nTe muestro *tu Inicio*.</string>
     <plurals name="tour_welcome_body">
         <item quantity="one">Es una sola parada, menos de un minuto. Cada tarjeta responde una pregunta de tu campo.</item>
+        <item quantity="many">Son %1$d paradas, menos de un minuto. Cada tarjeta responde una pregunta de tu campo.</item>
         <item quantity="other">Son %1$d paradas, menos de un minuto. Cada tarjeta responde una pregunta de tu campo.</item>
     </plurals>
     <string name="tour_today_title">Cada mañana te digo *qué toca hoy*.</string>
@@ -286,6 +290,7 @@
     <string name="tour_first_welcome_title">Hola.\nTe muestro *lo primero*.</string>
     <plurals name="tour_first_welcome_body">
         <item quantity="one">Es una sola parada, menos de medio minuto. El resto del Inicio te lo muestro cuando registres tu primer lote.</item>
+        <item quantity="many">Son %1$d paradas, menos de medio minuto. El resto del Inicio te lo muestro cuando registres tu primer lote.</item>
         <item quantity="other">Son %1$d paradas, menos de medio minuto. El resto del Inicio te lo muestro cuando registres tu primer lote.</item>
     </plurals>
     <string name="tour_first_plot_title">Todo parte de *tu lote*.</string>
@@ -310,11 +315,8 @@
     <string name="sensors_type_microclima_subtitle">Microclima · aire y temperatura</string>
     <string name="sensors_type_sonda_subtitle">Suelo · %1$d cm</string>
     <string name="sensors_active_since">Activo · hace %1$s</string>
-    <string name="sensors_active_simple">Activo</string>
     <string name="sensors_paused_since">En pausa desde el %1$s</string>
     <string name="sensors_paused_simple">En pausa</string>
-    <string name="sensors_reading_temp_hum">%1$s° · %2$s %%</string>
-    <string name="sensors_reading_hum">%1$s %%</string>
 
     <!-- Sheet de vinculación -->
     <string name="sensors_link_title_lead">Vincular</string>
@@ -337,7 +339,6 @@
     <string name="alerts_hero_affected_plots">En %1$s</string>
     <string name="alerts_hero_no_affected_plots">Tus parcelas están en condiciones óptimas</string>
     <string name="alerts_plots_conjunction">" y "</string>
-    <string name="alerts_updated_at">actualizado %1$s</string>
     <string name="alert_detail_date_pattern">EEEE d \'de\' MMMM</string>
     <string name="alerts_filter_critical">Críticas</string>
     <string name="alerts_filter_warning">Atención</string>
@@ -347,7 +348,6 @@
     <string name="alerts_empty_filtered">No hay alertas con el filtro seleccionado.</string>
     <string name="alerts_error_title">No se pudieron cargar las alertas</string>
     <string name="alerts_error_subtitle">Revisa tu conexión e inténtalo de nuevo.</string>
-    <string name="alerts_action_retry">Reintentar</string>
     <string name="alerts_nav_back">Regresar</string>
     <string name="alerts_nav_settings">Configuración de alertas</string>
     <string name="alerts_plot_filter_open">Filtrar por lote</string>
@@ -379,9 +379,6 @@
     <string name="alert_title_heat_wave">Golpe de calor en %1$s</string>
     <string name="alert_title_hydric_stress">Estrés hídrico en %1$s</string>
     <string name="alert_title_frost_warning">Riesgo de helada en %1$s</string>
-    <string name="alert_title_evapotranspiration">Alta evapotranspiración en %1$s</string>
-    <string name="alert_title_water_deficit">Déficit hídrico en %1$s</string>
-    <string name="alert_title_drought">Sequía prolongada en %1$s</string>
     <string name="alert_title_generic">Alerta agroclimática en %1$s</string>
     <string name="alert_desc_heat_wave">Riega antes de las 9 a. m. para proteger el fruto recién cuajado.</string>
     <string name="alert_desc_hydric_stress">La humedad del suelo bajó. Programa un riego esta semana.</string>
@@ -396,15 +393,11 @@
     <string name="alert_detail_title_heat_wave">Golpe de calor</string>
     <string name="alert_detail_title_hydric_stress">Estrés hídrico</string>
     <string name="alert_detail_title_frost_warning">Riesgo de helada</string>
-    <string name="alert_detail_title_evapotranspiration">Alta evapotranspiración</string>
-    <string name="alert_detail_title_water_deficit">Déficit hídrico</string>
-    <string name="alert_detail_title_drought">Sequía prolongada</string>
     <string name="alert_detail_title_generic">Alerta agroclimática</string>
     <string name="alert_detail_share">Compartir con técnico</string>
     <string name="alert_detail_rule_chip">Umbral térmico</string>
     <string name="alert_chart_title">Máximas de la semana</string>
     <string name="alert_chart_threshold_label">umbral %1$s</string>
-    <string name="alert_checklist_header">Qué hacer · %1$d de %2$d</string>
     <string name="alert_checklist_title">Qué hacer</string>
     <string name="alert_checklist_progress">%1$d de %2$d</string>
     <string name="alert_detail_traceability_note">Pronóstico de 7 días + nodo virtual del lote (dato simulado).</string>
@@ -433,7 +426,6 @@
     <!-- Historial de cosechas e índice de vecería (US20) -->
     <string name="harvest_subtitle">Alternancia · %1$s · %2$s ha</string>
     <string name="harvest_subtitle_plain">Alternancia</string>
-    <string name="harvest_retry">Reintentar</string>
     <string name="harvest_headline_lead">Tu olivar</string>
     <string name="harvest_headline_strong">alterna fuerte.</string>
     <string name="harvest_headline_moderate">alterna un poco.</string>
@@ -514,14 +506,17 @@
     <string name="harvest_info_got_it">Entendido</string>
     <plurals name="harvest_campaigns">
         <item quantity="one">%1$d campaña</item>
+        <item quantity="many">%1$d campañas</item>
         <item quantity="other">%1$d campañas</item>
     </plurals>
     <plurals name="harvest_campaigns_label">
         <item quantity="one">campaña</item>
+        <item quantity="many">campañas</item>
         <item quantity="other">campañas</item>
     </plurals>
     <plurals name="harvest_insufficient_body">
         <item quantity="one">Con una campaña más calculo tu índice de vecería. Mientras tanto, el plan, el muestreo y el clima siguen disponibles.</item>
+        <item quantity="many">Con %1$d campañas más calculo tu índice de vecería. Mientras tanto, el plan, el muestreo y el clima siguen disponibles.</item>
         <item quantity="other">Con %1$d campañas más calculo tu índice de vecería. Mientras tanto, el plan, el muestreo y el clima siguen disponibles.</item>
     </plurals>
 
@@ -568,6 +563,7 @@
     <string name="harvest_delete_no_index">Con menos de 3 campañas no se puede calcular el índice hasta que agregues más.</string>
     <plurals name="harvest_delete_body">
         <item quantity="one">Se borra del historial de %1$s y el índice se recalcula con la %2$d campaña que queda.</item>
+        <item quantity="many">Se borra del historial de %1$s y el índice se recalcula con las %2$d campañas que quedan.</item>
         <item quantity="other">Se borra del historial de %1$s y el índice se recalcula con las %2$d campañas que quedan.</item>
     </plurals>
     <string name="lot_section_harvest">Vecería del lote</string>
@@ -585,12 +581,14 @@
     <string name="plot_detail_harvest_index">Índice %1$s · %2$s</string>
     <plurals name="plot_detail_harvest_missing">
         <item quantity="one">Te falta %1$d campaña para tu índice</item>
+        <item quantity="many">Te faltan %1$d campañas para tu índice</item>
         <item quantity="other">Te faltan %1$d campañas para tu índice</item>
     </plurals>
     <string name="home_alternation_title">Tu alternancia</string>
     <string name="home_alternation_subtitle">%1$s · cosecha en t/ha</string>
     <plurals name="home_alternation_missing">
         <item quantity="one">Te falta %1$d campaña para calcular tu índice de vecería.</item>
+        <item quantity="many">Te faltan %1$d campañas para calcular tu índice de vecería.</item>
         <item quantity="other">Te faltan %1$d campañas para calcular tu índice de vecería.</item>
     </plurals>
     <string name="home_alternation_add">Agregar campañas</string>
@@ -702,7 +700,6 @@
 
     <string name="sampling_offline_banner">Sin conexión: tus registros se guardan en el teléfono.</string>
     <string name="sampling_synced_banner">Volvió la señal · %1$d árboles sincronizados</string>
-    <string name="sampling_badge_pending_sync">Por sincronizar</string>
     <string name="sampling_badge_synced">Sincronizado</string>
     <string name="sampling_stat_synced">sincronizados</string>
     <string name="sampling_error_fruits_out_of_range">Con %1$d brotes, el máximo admitido es %2$d frutos (4 por brote).</string>
@@ -740,9 +737,7 @@
     <string name="climate_night">Noche</string>
     <string name="climate_now_ago">Ahora · hace %1$s</string>
     <string name="climate_now_none">Sin lectura todavía</string>
-    <string name="climate_open_metric">Ver el historial de %1$s</string>
     <string name="climate_oscillation">oscilación diaria</string>
-    <string name="climate_retry">Reintentar</string>
     <string name="climate_sensors_title">Sensores del lote</string>
     <string name="climate_sky_partly_cloudy">Parcialmente nublado</string>
     <string name="climate_sky_rainy">Lluvioso</string>
@@ -796,6 +791,7 @@
     <string name="settle_picker_title_emphasis">cosechaste?</string>
     <plurals name="settle_picker_subtitle">
         <item quantity="one">Campaña %1$d · %2$d lote por registrar</item>
+        <item quantity="many">Campaña %1$d · %2$d lotes por registrar</item>
         <item quantity="other">Campaña %1$d · %2$d lotes por registrar</item>
     </plurals>
     <string name="settle_picker_status">Por registrar</string>
@@ -994,6 +990,7 @@
     <string name="thinning_reason_balanced">Tu carga está dentro de lo que el árbol sostiene: la próxima floración no se verá afectada.</string>
     <plurals name="thinning_based_on">
         <item quantity="one">Basado en %1$d árbol · ronda del %2$s</item>
+        <item quantity="many">Basado en %1$d árboles · ronda del %2$s</item>
         <item quantity="other">Basado en %1$d árboles · ronda del %2$s</item>
     </plurals>
     <string name="thinning_prescription_eyebrow">PRESCRIPCIÓN · ACLAREO</string>
@@ -1010,15 +1007,18 @@
     <string name="thinning_window_until">Hasta %1$s · carozo</string>
     <plurals name="thinning_days_left">
         <item quantity="one">Queda %d día</item>
+        <item quantity="many">Quedan %d días</item>
         <item quantity="other">Quedan %d días</item>
     </plurals>
     <string name="thinning_last_day">Hoy es el último día</string>
     <plurals name="thinning_opens_in">
         <item quantity="one">La ventana abre en %d día</item>
+        <item quantity="many">La ventana abre en %d días</item>
         <item quantity="other">La ventana abre en %d días</item>
     </plurals>
     <plurals name="thinning_closed_since">
         <item quantity="one">Hoy, %2$s · %1$d día después</item>
+        <item quantity="many">Hoy, %2$s · %1$d días después</item>
         <item quantity="other">Hoy, %2$s · %1$d días después</item>
     </plurals>
     <string name="thinning_register">Registrar aclareo</string>
@@ -1027,6 +1027,7 @@
     <string name="thinning_sampling_eyebrow">AÚN NO PUEDO CALCULAR LA CARGA</string>
     <plurals name="thinning_sampling_title">
         <item quantity="one">Falta %d árbol</item>
+        <item quantity="many">Faltan %d árboles</item>
         <item quantity="other">Faltan %d árboles</item>
     </plurals>
     <string name="thinning_sampling_title_more">Amplía la muestra</string>
@@ -1053,10 +1054,12 @@
     <string name="plan_register_plot">Registrar lote</string>
     <plurals name="plan_week_title">
         <item quantity="one">lote necesita\naclareo esta semana</item>
+        <item quantity="many">lotes necesitan\naclareo esta semana</item>
         <item quantity="other">lotes necesitan\naclareo esta semana</item>
     </plurals>
     <plurals name="plan_week_days_left">
         <item quantity="one">queda %1$d día antes del carozo</item>
+        <item quantity="many">quedan %1$d días antes del carozo</item>
         <item quantity="other">quedan %1$d días antes del carozo</item>
     </plurals>
     <string name="plan_week_last_day">hoy es el último día antes del carozo</string>
@@ -1103,6 +1106,7 @@
     <string name="thinning_register_note_placeholder">Ej.: empecé por las ramas del lado norte</string>
     <plurals name="thinning_register_within">
         <item quantity="one">Dentro de la ventana · queda %1$d día</item>
+        <item quantity="many">Dentro de la ventana · quedan %1$d días</item>
         <item quantity="other">Dentro de la ventana · quedan %1$d días</item>
     </plurals>
     <string name="thinning_register_within_past">Dentro de la ventana</string>
@@ -1169,6 +1173,7 @@
     <string name="full_bloom_date_label">FECHA DE PLENA FLORACIÓN</string>
     <plurals name="full_bloom_days_ago">
         <item quantity="one">hace %1$d día · hoy es %2$s</item>
+        <item quantity="many">hace %1$d días · hoy es %2$s</item>
         <item quantity="other">hace %1$d días · hoy es %2$s</item>
     </plurals>
     <string name="full_bloom_today">es hoy · %1$s</string>
@@ -1197,10 +1202,12 @@
     <string name="dossier_row_climate">Clima y telemetría</string>
     <plurals name="dossier_climate_nodes">
         <item quantity="one">%d nodo</item>
+        <item quantity="many">%d nodos</item>
         <item quantity="other">%d nodos</item>
     </plurals>
     <plurals name="dossier_climate_days">
         <item quantity="one">%d día de datos</item>
+        <item quantity="many">%d días de datos</item>
         <item quantity="other">%d días de datos</item>
     </plurals>
     <string name="dossier_no_record">Sin registro</string>
@@ -1212,7 +1219,6 @@
     <string name="dossier_offline">Sin conexión · el PDF sellado necesita internet</string>
     <string name="dossier_open_last">Abrir la última versión · %1$s</string>
     <string name="dossier_download_failed">No se pudo descargar el PDF. Inténtalo de nuevo.</string>
-    <string name="dossier_retry">Reintentar</string>
     <string name="dossier_empty_lead">Aún no hay</string>
     <string name="dossier_empty_emphasis">expediente.</string>
     <string name="dossier_empty_body">El expediente de %1$s se sella cuando asientas la cosecha de una campaña. Asiéntala y vuelve aquí.</string>
@@ -1222,6 +1228,7 @@
     <string name="dossier_pdf_sealed_on">Sellado el %1$s</string>
     <plurals name="dossier_pages">
         <item quantity="one">%d página</item>
+        <item quantity="many">%d páginas</item>
         <item quantity="other">%d páginas</item>
     </plurals>
     <string name="dossier_pdf_seal">con sello SHA-256</string>
@@ -1256,6 +1263,7 @@
     <string name="alert_detail_title_warm_winter">Invierno cálido</string>
     <plurals name="alert_detail_warm_streak">
         <item quantity="one">%d día seguido</item>
+        <item quantity="many">%d días seguidos</item>
         <item quantity="other">%d días seguidos</item>
     </plurals>
     <string name="alert_detail_warm_chip">Más de %1$s °C</string>
@@ -1265,15 +1273,18 @@
     <string name="warm_winter_change_chill_halted_lead">Frío frenado:</string>
     <plurals name="warm_winter_change_chill_halted">
         <item quantity="one">%1$d día sin sumar porciones (%2$d de %3$d).</item>
+        <item quantity="many">%1$d días sin sumar porciones (%2$d de %3$d).</item>
         <item quantity="other">%1$d días sin sumar porciones (%2$d de %3$d).</item>
     </plurals>
     <string name="warm_winter_change_chill_risk_lead">Frío en riesgo:</string>
     <plurals name="warm_winter_change_chill_risk">
         <item quantity="one">%1$d día seguido sobre %2$s °C (%3$d de %4$d porciones).</item>
+        <item quantity="many">%1$d días seguidos sobre %2$s °C (%3$d de %4$d porciones).</item>
         <item quantity="other">%1$d días seguidos sobre %2$s °C (%3$d de %4$d porciones).</item>
     </plurals>
     <plurals name="warm_winter_change_chill_unknown">
         <item quantity="one">%1$d día seguido sobre %2$s °C.</item>
+        <item quantity="many">%1$d días seguidos sobre %2$s °C.</item>
         <item quantity="other">%1$d días seguidos sobre %2$s °C.</item>
     </plurals>
     <string name="warm_winter_change_chill_generic">el calor frena el conteo de porciones.</string>
@@ -1353,9 +1364,9 @@
     <string name="onboarding_hectares_more">Una hectárea más</string>
     <string name="onboarding_hectares_unknown">Aún no lo sé</string>
     <string name="onboarding_plan_estimate">PLAN ESTIMADO</string>
-    <string name="onboarding_plan_price">S/ %1$s</string>
     <string name="onboarding_plan_per_year">al año</string>
-    <string name="onboarding_plan_detail">Equivale a S/ %1$s al mes · S/ %2$d por hectárea\nPrecio referencial. Pagas después de crear tu cuenta.</string>
+    <string name="onboarding_plan_detail">Equivale a %1$s al mes · %2$s por hectárea
+Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="onboarding_alerts_title">Te aviso solo\nlo *importante*.</string>
     <string name="onboarding_alerts_voice">Puedes apagarlas cuando quieras desde tu cuenta.</string>
     <string name="onboarding_alerts_enable">Activar alertas</string>
@@ -1420,7 +1431,6 @@
     <string name="iam_create_footnote">Te enviaremos un código para verificar tu correo.</string>
     <string name="iam_email_taken">Este correo ya tiene una cuenta. Inicia sesión o usa otro correo.</string>
     <string name="iam_email_taken_link">Inicia sesión</string>
-    <string name="iam_email_invalid">Escribe un correo válido.</string>
     <string name="iam_rule_length">8 caracteres</string>
     <string name="iam_rule_letters_digits">Letras y números</string>
     <string name="iam_rule_match">Coinciden</string>
@@ -1462,7 +1472,6 @@
     <string name="iam_request_new_link">Solicitar nuevo enlace</string>
     <string name="iam_back_to_sign_in">Volver a iniciar sesión</string>
     <string name="iam_checking_link">Comprobando tu enlace…</string>
-    <string name="iam_retry">Reintentar</string>
     <string name="iam_error_offline">No pudimos conectar con Viora. Revisa tu conexión e inténtalo otra vez.</string>
     <string name="iam_error_generic">No pudimos completar la solicitud. Inténtalo otra vez.</string>
     <string name="iam_error_phone_rejected">Viora no aceptó tu celular para el país elegido. Vuelve al paso del celular y corrígelo.</string>
@@ -1470,11 +1479,14 @@
     <string name="iam_code_wrong_plain">Código incorrecto.</string>
     <plurals name="iam_code_wrong">
         <item quantity="one">Código incorrecto. Te queda %1$d intento.</item>
+        <item quantity="many">Código incorrecto. Te quedan %1$d intentos.</item>
         <item quantity="other">Código incorrecto. Te quedan %1$d intentos.</item>
     </plurals>
 
     <!-- 18 · Mi cuenta (P95–P98) -->
     <string name="account_title">Mi cuenta</string>
+    <string name="account_password_show">Mostrar contraseña</string>
+    <string name="account_password_hide">Ocultar contraseña</string>
     <string name="account_role_producer">Productor</string>
     <string name="account_headline_lead">Tu</string>
     <string name="account_headline_emphasis">cuenta.</string>
@@ -1568,8 +1580,6 @@
     <string name="producer_plan_updated">Catálogo actualizado: %1$s</string>
     <string name="producer_plan_saved_copy">Información guardada. Actualiza para verificar las condiciones vigentes.</string>
     <string name="producer_plan_loading">Actualizando las condiciones del plan…</string>
-    <string name="producer_plan_refresh">Actualizar</string>
-    <string name="producer_plan_retry">Reintentar</string>
     <string name="producer_plan_empty">No hay planes disponibles. Actualiza el catálogo para volver a consultar.</string>
     <string name="producer_plan_cooperative">Tengo un código de cooperativa</string>
     <string name="producer_plan_tax_included">Incluye IGV</string>
@@ -1581,23 +1591,8 @@
     <string name="purchase_continue">Continuar al pago</string>
     <string name="purchase_later">Más tarde</string>
     <string name="purchase_not_pending">Este contrato ya no está pendiente de pago. No se abrió otro pago.</string>
-    <string name="purchase_verifying">Verificando el pago con Mercado Pago…</string>
-    <string name="purchase_verifying_hint">Espera un momento mientras confirmamos tu transacción.</string>
-    <string name="purchase_unconfirmed_title">Pago pendiente de confirmación</string>
     <string name="purchase_unconfirmed_message">Todavía no hemos confirmado el pago. Si ya pagaste, vuelve a consultar el estado. Este mensaje no significa que el pago haya sido rechazado.</string>
     <string name="purchase_check_status">Consultar estado</string>
-    <string name="purchase_confirmed_title">Suscripción activa</string>
-    <string name="purchase_confirmed_message">Tu suscripción ya está activa con %1$s ha. ¡Bienvenido a Viora!</string>
-    <string name="purchase_close">Cerrar</string>
-    <string name="subscription_access_title">Mi suscripción</string>
-    <string name="subscription_access_inactive">Sin acceso activo confirmado</string>
-    <string name="subscription_access_quota">Cupo contratado: %1$s ha</string>
-    <string name="subscription_access_mode">Modalidad: %1$s</string>
-    <string name="subscription_access_until">Vigente hasta: %1$s</string>
-    <string name="subscription_access_plan">Ver Plan Productor</string>
-    <string name="subscription_mode_individual">Individual</string>
-    <string name="subscription_mode_cooperative">Cooperativa</string>
-    <string name="subscription_mode_unknown">No disponible</string>
     <string name="home_access_inactive_chip">Acceso inactivo</string>
     <string name="home_access_expired_title">Tu plan venció el\n%1$s</string>
     <string name="home_access_none_title">Aún no tienes\nun plan activo</string>
@@ -1748,23 +1743,26 @@
     <string name="home_headline_harvest_emphasis">cosechar.</string>
     <plurals name="phase_unit_days">
         <item quantity="one">día</item>
+        <item quantity="many">días</item>
         <item quantity="other">días</item>
     </plurals>
     <plurals name="phase_unit_trees">
         <item quantity="one">árbol</item>
+        <item quantity="many">árboles</item>
         <item quantity="other">árboles</item>
     </plurals>
     <plurals name="phase_unit_plots">
         <item quantity="one">lote</item>
+        <item quantity="many">lotes</item>
         <item quantity="other">lotes</item>
     </plurals>
     <plurals name="phase_msg_chill_missing">
         <item quantity="one">porciones de frío. Falta %1$d para florecer parejo.</item>
+        <item quantity="many">porciones de frío. Faltan %1$d para florecer parejo.</item>
         <item quantity="other">porciones de frío. Faltan %1$d para florecer parejo.</item>
     </plurals>
     <!-- P99 · Mi plan, P100 · Eliminar cuenta, P101 · Cuenta eliminada -->
     <string name="my_plan_title">Mi plan</string>
-    <string name="my_plan_retry">Reintentar</string>
     <string name="my_plan_headline_lead">Tu plan,</string>
     <string name="my_plan_headline_emphasis">en hectáreas.</string>
     <string name="my_plan_section_validity">Vigencia</string>
@@ -1847,30 +1845,37 @@
     <string name="account_deleted_done">Volver al inicio</string>
     <plurals name="my_plan_ring_plots">
         <item quantity="one">en %1$d lote</item>
+        <item quantity="many">en %1$d lotes</item>
         <item quantity="other">en %1$d lotes</item>
     </plurals>
     <plurals name="my_plan_days_left">
         <item quantity="one">día de plan</item>
+        <item quantity="many">días de plan</item>
         <item quantity="other">días de plan</item>
     </plurals>
     <plurals name="my_plan_days_to_renew">
         <item quantity="one">día para renovar</item>
+        <item quantity="many">días para renovar</item>
         <item quantity="other">días para renovar</item>
     </plurals>
     <plurals name="my_plan_free_detail">
         <item quantity="one">Cabe unos %1$d lote más</item>
+        <item quantity="many">Caben unos %1$d lotes más</item>
         <item quantity="other">Caben unos %1$d lotes más</item>
     </plurals>
     <plurals name="my_plan_eyebrow_expiring">
         <item quantity="one">Vence en %1$d día</item>
+        <item quantity="many">Vence en %1$d días</item>
         <item quantity="other">Vence en %1$d días</item>
     </plurals>
     <plurals name="delete_account_item_plots">
         <item quantity="one">Tu %1$d lote, con su contorno y sensores</item>
+        <item quantity="many">Tus %1$d lotes, con sus contornos y sensores</item>
         <item quantity="other">Tus %1$d lotes, con sus contornos y sensores</item>
     </plurals>
     <plurals name="delete_account_sheet_body">
         <item quantity="one">Borraremos tu %1$d lote y todo su historial ahora mismo. No hay papelera ni forma de recuperarlo.</item>
+        <item quantity="many">Borraremos tus %1$d lotes y todo su historial ahora mismo. No hay papelera ni forma de recuperarlos.</item>
         <item quantity="other">Borraremos tus %1$d lotes y todo su historial ahora mismo. No hay papelera ni forma de recuperarlos.</item>
     </plurals>
     <!-- Plan extension: P102, P103, P104 and the P04 results (Figma section 22) -->

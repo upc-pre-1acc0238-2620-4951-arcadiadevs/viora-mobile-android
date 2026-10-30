@@ -29,7 +29,7 @@ import com.mapbox.maps.plugin.gestures.gestures
 import pe.edu.upc.viora.core.designsystem.theme.Green100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 
 private const val FIT_PADDING_DP = 40f
 

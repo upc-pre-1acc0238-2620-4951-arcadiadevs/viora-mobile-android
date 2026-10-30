@@ -1,8 +1,10 @@
 package pe.edu.upc.viora.core.presentation
 
+import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
+import java.util.Currency
 import java.util.Locale
 
 /**
@@ -40,5 +42,53 @@ fun formatDecimal(value: Double, decimals: Int, locale: Locale = Locale.getDefau
 fun formatWhole(value: Number, locale: Locale = Locale.getDefault()): String =
     vioraNumberFormat(0, 0, locale).format(value)
 
+/** "34 %" for a value already in percent (0..100); the sign goes after a no-break space, as in the design. */
+fun formatPercent(percent: Double, locale: Locale = Locale.getDefault()): String =
+    formatWhole(percent, locale) + NO_BREAK_SPACE + "%"
+
+/** "32 %" for a 0..1 ratio. */
+fun formatPercentOf(ratio: Double, locale: Locale = Locale.getDefault()): String = formatPercent(ratio * 100, locale)
+
+/** "2,5" or "117,82": hectares always with one or two decimals, so 2,25 ha is never shown as "2,2". */
+fun formatHectares(hectares: Double, locale: Locale = Locale.getDefault()): String =
+    vioraNumberFormat(1, 2, locale).format(hectares)
+
+/** "24 000" in Spanish, "24,000" in English: kilograms, with at most one decimal. */
+fun formatKg(kg: Double, locale: Locale = Locale.getDefault()): String = vioraNumberFormat(0, 1, locale).format(kg)
+
+/** "7,8k" for bars too narrow for the whole number; below a tonne the plain kilos. */
+fun formatKgCompact(kg: Double, locale: Locale = Locale.getDefault()): String =
+    if (kg < 1_000) formatWhole(kg, locale) else vioraNumberFormat(0, 1, locale).format(kg / 1_000) + "k"
+
+/**
+ * "8,5" t/ha: one decimal as in Figma. A yield under 0,1 t/ha (a few kilos on a large plot) keeps two
+ * decimals ("0,02") so it is not written as an empty "0,0".
+ */
+fun formatTonnesPerHectare(value: Double, locale: Locale = Locale.getDefault()): String =
+    formatDecimal(value, if (value > 0.0 && value < SMALL_YIELD) 2 else 1, locale)
+
+private const val SMALL_YIELD = 0.1
 private const val SPANISH = "es"
 private const val NO_BREAK_SPACE = '\u00A0'
+
+/**
+ * An amount in [currency] as every price of the app writes it: soles as "S/" with the app's separators
+ * ("S/ 27,5" in Spanish), whole amounts without decimals and at most two otherwise.
+ */
+fun formatMoney(value: BigDecimal, currency: String, locale: Locale = Locale.getDefault()): String =
+    NumberFormat.getCurrencyInstance(locale).apply {
+        this.currency = Currency.getInstance(currency)
+        if (currency == "PEN" && this is DecimalFormat) {
+            decimalFormatSymbols = decimalFormatSymbols.apply {
+                currencySymbol = "S/"
+                // Same separators as every other figure of the app ("S/ 27,5").
+                if (locale.language == "es") {
+                    decimalSeparator = ','
+                    monetaryDecimalSeparator = ','
+                    groupingSeparator = ' '
+                }
+            }
+            minimumFractionDigits = 0
+            maximumFractionDigits = 2
+        }
+    }.format(value)

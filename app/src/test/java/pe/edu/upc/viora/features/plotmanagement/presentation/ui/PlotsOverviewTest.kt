@@ -3,7 +3,7 @@ package pe.edu.upc.viora.features.plotmanagement.presentation.ui
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 
 class PlotsOverviewTest {
     private val west = listOf(

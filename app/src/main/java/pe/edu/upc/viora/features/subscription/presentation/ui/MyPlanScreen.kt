@@ -61,9 +61,13 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
+import pe.edu.upc.viora.core.designsystem.component.OutlinedPillButton
 import pe.edu.upc.viora.core.designsystem.component.PhaseCardArtwork
 import pe.edu.upc.viora.core.designsystem.component.PhaseIllustration
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -78,11 +82,10 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.core.presentation.vioraNumberFormat
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
+import pe.edu.upc.viora.core.presentation.labelRes
 import pe.edu.upc.viora.features.subscription.presentation.state.MyPlanUiState
 import pe.edu.upc.viora.features.subscription.presentation.state.PlanPlot
 import pe.edu.upc.viora.features.subscription.presentation.state.PlanStanding
@@ -124,9 +127,7 @@ fun MyPlanScreen(actions: MyPlanActions, modifier: Modifier = Modifier, viewMode
             Spacer(Modifier.size(48.dp))
         }
         when {
-            state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Green900)
-            }
+            state.isLoading -> VioraLoadingState(modifier = Modifier.fillMaxSize())
             state.error != null -> Column(
                 Modifier.fillMaxSize().padding(24.dp),
                 verticalArrangement = Arrangement.Center,
@@ -134,7 +135,7 @@ fun MyPlanScreen(actions: MyPlanActions, modifier: Modifier = Modifier, viewMode
             ) {
                 Text(stringResource(state.error!!.messageRes()), textAlign = TextAlign.Center, color = Neutral900)
                 Spacer(Modifier.height(16.dp))
-                PrimaryPillButton(text = stringResource(R.string.my_plan_retry), onClick = viewModel::refresh)
+                PrimaryPillButton(text = stringResource(R.string.common_retry), onClick = viewModel::refresh)
             }
             else -> MyPlanContent(state, actions)
         }
@@ -295,7 +296,7 @@ private fun HectareRing(state: MyPlanUiState, progress: Float, modifier: Modifie
                 else -> state.freeHectares
             } * progress
             Text(
-                vioraNumberFormat(1, 1).format(shown),
+                formatHectares(shown),
                 style = MaterialTheme.typography.displayLarge.copy(fontFamily = NewsreaderFamily, fontSize = 72.sp, lineHeight = 72.sp),
                 color = Neutral50,
             )
@@ -524,7 +525,7 @@ fun AccountPlanCard(onOpen: () -> Unit, modifier: Modifier = Modifier, viewModel
                 } else {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
                         Text(
-                            vioraNumberFormat(1, 1).format(if (state.isOverQuota) state.excessHectares else state.freeHectares),
+                            formatHectares(if (state.isOverQuota) state.excessHectares else state.freeHectares),
                             style = MaterialTheme.typography.displaySmall.copy(fontFamily = NewsreaderFamily, fontSize = 52.sp, lineHeight = 52.sp),
                             color = Neutral50,
                         )
@@ -569,7 +570,7 @@ private val PlotPalette = listOf(Harvest300, Harvest100, Green200, Terracotta100
 private fun plotColor(index: Int): Color = PlotPalette[index % PlotPalette.size]
 
 @Composable
-private fun hectares(value: Double): String = vioraNumberFormat(0, 1).format(value)
+private fun hectares(value: Double): String = formatHectares(value)
 
 @Composable
 private fun date(value: LocalDate): String =

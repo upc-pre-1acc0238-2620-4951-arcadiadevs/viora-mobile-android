@@ -18,6 +18,7 @@ import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.ConfirmThinningExecutionUseCase
 import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObserveThinningPrescriptionUseCase
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.RegisterThinningUiState
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /** P62 · Registrar aclareo, opened from the prescription card of P61 (so the plan is already cached). */
 @HiltViewModel
@@ -28,7 +29,7 @@ class RegisterThinningViewModel @Inject constructor(
     clock: Clock,
 ) : ViewModel() {
 
-    val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "RegisterThinningRoute requires plotId" }
+    val plotId: String = savedStateHandle.requirePlotId().value
     val campaignYear: Int = savedStateHandle.get<Int>("campaignYear")?.takeIf { it > 0 } ?: LocalDate.now(clock).year
 
     private val today = LocalDate.now(clock)

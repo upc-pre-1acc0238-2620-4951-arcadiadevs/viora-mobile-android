@@ -22,7 +22,7 @@ class FocusedPlotRepositoryImpl @Inject constructor(
         dataStore.edit { it[HOME_FOCUSED_PLOT] = plotId }
     }
 
-    private companion object {
+    internal companion object {
         val HOME_FOCUSED_PLOT = stringPreferencesKey("home_focused_plot")
     }
 }

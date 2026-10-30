@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.plotmanagement.presentation.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -11,8 +12,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -26,8 +25,10 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -58,8 +59,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBar
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -73,17 +77,19 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
-import pe.edu.upc.viora.features.phenology.domain.entity.BbiClass
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatIndex
-import pe.edu.upc.viora.features.phenology.presentation.ui.sentenceRes
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.core.presentation.formatCount
+import pe.edu.upc.viora.core.presentation.formatDecimal
+import pe.edu.upc.viora.core.presentation.formatHectares
+import pe.edu.upc.viora.core.presentation.formatMeters
+import pe.edu.upc.viora.core.presentation.labelRes
+import pe.edu.upc.viora.features.phenology.application.published.BbiClass
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.LotHarvest
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotDetailUiState
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.PlotDetailViewModel
 
 /** Distance from the top of the screen to the sheet when it is open: the map shows above it. */
@@ -146,9 +152,7 @@ fun PlotDetailContent(
     onDismissArchiveFailure: () -> Unit = {},
 ) {
     when (state) {
-        PlotDetailUiState.Loading -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
+        PlotDetailUiState.Loading -> VioraLoadingState(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.primary)
         PlotDetailUiState.NotFound -> PlotNotFound(onBack = onBack, modifier = modifier)
         is PlotDetailUiState.Content -> PlotDetailBody(
             plot = state.plot,
@@ -267,21 +271,12 @@ private fun PlotDetailBody(
 /** Back button on the left and, for a moment after registering, the "plot saved" notice centred. */
 @Composable
 private fun TopBar(showSavedNotice: Boolean, onBack: () -> Unit, onMore: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 24.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    VioraTopBar(
+        onBack = onBack,
+        onMore = onMore,
+        modifier = Modifier.statusBarsPadding().padding(horizontal = 24.dp, vertical = 12.dp),
     ) {
-        CircleIconButton(
-            icon = R.drawable.ic_arrow_back,
-            contentDescription = stringResource(R.string.action_back),
-            onClick = onBack,
-        )
         SavedNoticeSlot(visible = showSavedNotice, modifier = Modifier.weight(1f))
-        CircleIconButton(
-            icon = R.drawable.ic_more_vert,
-            contentDescription = stringResource(R.string.plot_menu_more),
-            onClick = onMore,
-        )
     }
 }
 
@@ -427,10 +422,18 @@ private fun harvestSubtitle(harvest: LotHarvest?): String = when {
     harvest == null -> stringResource(R.string.lot_section_harvest_hint)
     harvest.index != null -> stringResource(
         R.string.plot_detail_harvest_index,
-        formatIndex(harvest.index),
+        formatDecimal(harvest.index, 2),
         stringResource(BbiClass.of(harvest.index).sentenceRes()),
     )
     else -> pluralStringResource(R.plurals.plot_detail_harvest_missing, harvest.missingCampaigns, harvest.missingCampaigns)
+}
+
+/** "vecería severa" after the index, in the words of the alternation screen (phenology draws its own copy). */
+@StringRes
+private fun BbiClass.sentenceRes(): Int = when (this) {
+    BbiClass.LOW -> R.string.harvest_class_low_sentence
+    BbiClass.MODERATE -> R.string.harvest_class_moderate_sentence
+    BbiClass.SEVERE -> R.string.harvest_class_severe_sentence
 }
 
 /** A section of the plot as a card (Figma P26 "Tu lote"): icon, title and line, and an arrow to open it. */

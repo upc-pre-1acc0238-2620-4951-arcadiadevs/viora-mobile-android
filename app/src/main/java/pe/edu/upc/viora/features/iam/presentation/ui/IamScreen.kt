@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.PillButton
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
@@ -353,7 +354,7 @@ private fun CheckingLinkStep(state: IamUiState, vm: IamViewModel) {
                 Text(stringResource(R.string.iam_checking_link), style = MaterialTheme.typography.bodyMedium, color = Neutral600)
             } else {
                 ErrorLine(state.error)
-                PillButton(text = stringResource(R.string.iam_retry), onClick = vm::checkResetLink)
+                PillButton(text = stringResource(R.string.common_retry), onClick = vm::checkResetLink)
                 UnderlinedLink(stringResource(R.string.iam_back_to_sign_in), onClick = { vm.goTo(IamStep.SIGN_IN) })
             }
         }

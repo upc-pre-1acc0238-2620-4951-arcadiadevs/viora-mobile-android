@@ -21,7 +21,6 @@ import pe.edu.upc.viora.features.telemetry.application.usecase.RefreshIncidentsU
 import pe.edu.upc.viora.features.telemetry.domain.entity.AgroclimaticIncident
 import pe.edu.upc.viora.features.telemetry.domain.entity.AlertsSummary
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentSeverity
-import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsFilter
 import pe.edu.upc.viora.features.telemetry.presentation.state.AlertsUiState
 import pe.edu.upc.viora.features.telemetry.presentation.state.PlotFilterOption
@@ -72,12 +71,12 @@ class AlertsViewModel @Inject constructor(
 
         val filteredList = when (filter) {
             AlertsFilter.ALL -> scoped
-            AlertsFilter.CRITICAL -> scoped.filter { it.severity == IncidentSeverity.CRITICAL && it.status != IncidentStatus.NORMALIZED }
-            AlertsFilter.WARNING -> scoped.filter { it.severity == IncidentSeverity.WARNING && it.status != IncidentStatus.NORMALIZED }
-            AlertsFilter.NORMALIZED -> scoped.filter { it.status == IncidentStatus.NORMALIZED }
+            AlertsFilter.CRITICAL -> scoped.filter { it.severity == IncidentSeverity.CRITICAL && it.status.isActive }
+            AlertsFilter.WARNING -> scoped.filter { it.severity == IncidentSeverity.WARNING && it.status.isActive }
+            AlertsFilter.NORMALIZED -> scoped.filter { !it.status.isActive }
         }
 
-        val activeIncidents = scoped.filter { it.status != IncidentStatus.NORMALIZED }
+        val activeIncidents = scoped.filter { it.status.isActive }
         val affectedPlotNames = if (plot != null) {
             listOf(plot.plotName)
         } else {
@@ -164,7 +163,7 @@ internal fun plotOptionsOf(incidents: List<AgroclimaticIncident>): List<PlotFilt
         .filter { it.plotId.isNotBlank() }
         .groupBy { it.plotId }
         .map { (plotId, alerts) ->
-            val active = alerts.filter { it.status != IncidentStatus.NORMALIZED }
+            val active = alerts.filter { it.status.isActive }
             PlotFilterOption(
                 plotId = plotId,
                 plotName = alerts.firstOrNull { it.plotName.isNotBlank() }?.plotName ?: plotId,
@@ -175,13 +174,13 @@ internal fun plotOptionsOf(incidents: List<AgroclimaticIncident>): List<PlotFilt
         .sortedWith(compareBy({ it.worstSeverity?.ordinal ?: Int.MAX_VALUE }, { it.plotName }))
 
 private fun summaryOf(incidents: List<AgroclimaticIncident>): AlertsSummary {
-    val active = incidents.filter { it.status != IncidentStatus.NORMALIZED }
+    val active = incidents.filter { it.status.isActive }
     val critical = active.count { it.severity == IncidentSeverity.CRITICAL }.toLong()
     val warning = active.count { it.severity == IncidentSeverity.WARNING }.toLong()
     return AlertsSummary(
         activeCount = critical + warning,
         criticalCount = critical,
         warningCount = warning,
-        normalizedCount = incidents.count { it.status == IncidentStatus.NORMALIZED }.toLong(),
+        normalizedCount = incidents.count { !it.status.isActive }.toLong(),
     )
 }

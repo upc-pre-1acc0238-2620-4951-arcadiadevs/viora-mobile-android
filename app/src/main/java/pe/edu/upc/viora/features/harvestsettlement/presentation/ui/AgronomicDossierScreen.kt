@@ -46,8 +46,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import java.time.ZoneId
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBar
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBarTitle
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest400
@@ -58,18 +62,20 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.designsystem.theme.newsreader
+import pe.edu.upc.viora.core.designsystem.theme.roboto
+import pe.edu.upc.viora.core.designsystem.theme.robotoMedium
+import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatDayMonth
+import pe.edu.upc.viora.core.presentation.formatDayRange
 import pe.edu.upc.viora.core.presentation.formatDecimal
+import pe.edu.upc.viora.core.presentation.formatHectares
+import pe.edu.upc.viora.core.presentation.formatKg
+import pe.edu.upc.viora.core.presentation.formatPercent
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.newsreader
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.roboto
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.robotoMedium
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.AgronomicDossier
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.AgronomicDossierUiState
 import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.AgronomicDossierViewModel
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatKg
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * P76 · Expediente del lote (US30): the sealed dossier of a settled campaign, its SHA-256 and the way to its PDF.
@@ -88,9 +94,7 @@ fun AgronomicDossierScreen(
 
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerLow)) {
         when (val s = state) {
-            AgronomicDossierUiState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Green900)
-            }
+            AgronomicDossierUiState.Loading -> VioraLoadingState(modifier = Modifier.fillMaxSize())
             is AgronomicDossierUiState.NoDossier -> MessageScreen(
                 onBack = onBack,
                 lead = stringResource(R.string.dossier_empty_lead),
@@ -154,7 +158,7 @@ private fun DossierContent(
             modifier = Modifier.padding(top = 16.dp),
         )
         val locale = LocalConfiguration.current.locales[0]
-        val lastPdfDay = state.lastPdfSavedAt?.let { formatDay(it.atZone(ZoneId.systemDefault()).toLocalDate(), locale) }
+        val lastPdfDay = state.lastPdfSavedAt?.let { formatDayMonth(it.atZone(LocalAppZone.current).toLocalDate(), locale) }
         when {
             !state.offline -> WhitePillButton(R.drawable.ic_share, stringResource(R.string.dossier_share), onOpenPdf, Modifier.padding(top = 10.dp))
             state.lastPdf != null && lastPdfDay != null ->
@@ -175,14 +179,14 @@ private fun DossierContent(
 /** Back on the left and the title centred over the plot and campaign, as every lot screen. */
 @Composable
 private fun TopBar(title: String, subtitle: String, onBack: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        CircleIconButton(icon = R.drawable.ic_arrow_back, contentDescription = stringResource(R.string.action_back), onClick = onBack)
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f).padding(horizontal = 8.dp)) {
-            Text(title, style = robotoMedium(15.sp, 20.sp), color = Neutral900, maxLines = 1)
-            Text(subtitle, style = roboto(12.sp, 16.sp), color = Neutral600, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
-        // Keeps the title centred on the screen, as the 48 dp back button does on the left.
-        Spacer(Modifier.size(48.dp))
+    VioraTopBar(onBack = onBack) {
+        VioraTopBarTitle(
+            title,
+            subtitle,
+            titleStyle = robotoMedium(15.sp, 20.sp),
+            subtitleStyle = roboto(12.sp, 16.sp),
+            subtitleOverflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
@@ -253,13 +257,13 @@ private fun summaryRows(dossier: AgronomicDossier): List<Pair<String, String>> {
         val opens = dossier.prescription.windowOpensOn
         val closes = dossier.prescription.windowClosesOn
         listOfNotNull(
-            stringResource(R.string.dossier_prescription_value, formatShare(share)),
-            if (opens != null && closes != null) formatWindow(opens, closes, locale) else null,
+            stringResource(R.string.dossier_prescription_value, formatPercent(share)),
+            if (opens != null && closes != null) formatDayRange(opens, closes, locale) else null,
         ).joinToString(separator)
     } ?: none
 
     val thinning = dossier.thinning?.takeIf { it.recorded }?.let { done ->
-        listOfNotNull(done.actualRemovalPercentage?.let { formatShare(it) }, done.executedOn?.let { formatDay(it, locale) })
+        listOfNotNull(done.actualRemovalPercentage?.let { formatPercent(it) }, done.executedOn?.let { formatDayMonth(it, locale) })
             .joinToString(separator).ifEmpty { null }
     } ?: none
 
@@ -399,7 +403,7 @@ private fun MessageScreen(
             Spacer(Modifier.weight(1f))
             Text(body, style = MaterialTheme.typography.bodyLarge, color = Neutral700, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             if (onRetry != null) {
-                PrimaryPillButton(text = stringResource(R.string.dossier_retry), onClick = onRetry, modifier = Modifier.padding(top = 16.dp))
+                PrimaryPillButton(text = stringResource(R.string.common_retry), onClick = onRetry, modifier = Modifier.padding(top = 16.dp))
             }
             Spacer(Modifier.weight(1f))
         }

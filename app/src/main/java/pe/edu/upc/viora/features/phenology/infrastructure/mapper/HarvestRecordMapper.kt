@@ -1,7 +1,7 @@
 package pe.edu.upc.viora.features.phenology.infrastructure.mapper
 
 import java.time.Instant
-import java.time.OffsetDateTime
+import pe.edu.upc.viora.core.network.toInstantOrNull
 import pe.edu.upc.viora.features.phenology.domain.entity.BearingIndex
 import pe.edu.upc.viora.features.phenology.domain.entity.BearingYear
 import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
@@ -9,8 +9,8 @@ import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexEnti
 import pe.edu.upc.viora.features.phenology.infrastructure.local.HarvestRecordEntity
 import pe.edu.upc.viora.features.phenology.infrastructure.remote.HarvestRecordDto
 import pe.edu.upc.viora.features.phenology.infrastructure.remote.MetricDto
-import pe.edu.upc.viora.features.phenology.infrastructure.remote.RectifyHarvestYieldRequestDto
 import pe.edu.upc.viora.features.phenology.infrastructure.remote.RecordHarvestYieldRequestDto
+import pe.edu.upc.viora.features.phenology.infrastructure.remote.RectifyHarvestYieldRequestDto
 
 fun HarvestRecordDto.toEntity(): HarvestRecordEntity = HarvestRecordEntity(
     id = id,
@@ -60,9 +60,3 @@ fun recordRequestDto(campaignYear: Int, totalYieldKg: Double): RecordHarvestYiel
 
 fun rectifyRequestDto(totalYieldKg: Double): RectifyHarvestYieldRequestDto =
     RectifyHarvestYieldRequestDto(totalYieldKg = totalYieldKg)
-
-private fun String?.toInstantOrNull(): Instant? = this?.let { raw ->
-    runCatching { Instant.parse(raw) }
-        .recoverCatching { OffsetDateTime.parse(raw).toInstant() }
-        .getOrNull()
-}

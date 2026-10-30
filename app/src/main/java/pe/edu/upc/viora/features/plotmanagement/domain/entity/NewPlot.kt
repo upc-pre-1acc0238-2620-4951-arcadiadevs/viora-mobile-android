@@ -1,6 +1,6 @@
 package pe.edu.upc.viora.features.plotmanagement.domain.entity
 
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
+import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline

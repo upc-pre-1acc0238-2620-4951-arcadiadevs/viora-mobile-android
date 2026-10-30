@@ -28,7 +28,6 @@ import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlots
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RefreshPlotsUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
-import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
 
 /** P60 · Plan, the Plan tab: every plot with the state of its thinning plan, read from the phone and refreshed. */
 @HiltViewModel
@@ -58,7 +57,7 @@ class CampaignPlanViewModel @Inject constructor(
     private val plans = campaignYear.flatMapLatest { year -> observeCampaignPlans(year).map { year to it } }
 
     private val hasUnreadAlerts: Flow<Boolean> =
-        observeIncidents(null).map { incidents -> incidents.any { it.status != IncidentStatus.NORMALIZED } }
+        observeIncidents(null).map { incidents -> incidents.any { it.status.isActive } }
 
     val uiState: StateFlow<CampaignPlanUiState> = combine(
         observePlots(),

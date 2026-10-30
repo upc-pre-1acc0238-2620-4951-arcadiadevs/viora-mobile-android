@@ -42,6 +42,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 private class NotesDaoFake : FieldNoteDao {
+    override suspend fun wipeAll() = Unit
+
     val rows = MutableStateFlow<Map<String, FieldNoteEntity>>(emptyMap())
 
     override fun observeAll(): Flow<List<FieldNoteEntity>> = MutableStateFlow(rows.value.values.toList())

@@ -46,6 +46,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.Locale
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -60,6 +61,10 @@ import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.presentation.formatDayMonth
+import pe.edu.upc.viora.core.presentation.formatPercent
+import pe.edu.upc.viora.core.presentation.fullWeekday
+import pe.edu.upc.viora.core.presentation.shortWeekday
 import pe.edu.upc.viora.features.telemetry.domain.entity.SoilMoistureRules
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.SoilMoistureStatus
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
@@ -74,13 +79,9 @@ import pe.edu.upc.viora.features.telemetry.presentation.ui.components.ClimateNot
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.ClimateTopBar
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.MetricLineChart
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.SelectablePill
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatDayMonth
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatDegrees
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatElapsed
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatPercent
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatReadingStamp
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.fullWeekday
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.shortWeekday
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.timeAxisLabels
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.windowFraction
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.TelemetryDetailViewModel
@@ -149,10 +150,7 @@ fun TelemetryDetailContent(
                 MetricChips(selected = state.metric, onSelect = onSelectMetric)
                 Spacer(Modifier.height(20.dp))
                 when (state) {
-                    is TelemetryDetailUiState.Loading -> Box(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
-                        contentAlignment = Alignment.Center,
-                    ) { CircularProgressIndicator(color = Green900) }
+                    is TelemetryDetailUiState.Loading -> VioraLoadingState(modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp))
                     is TelemetryDetailUiState.Error -> ClimateErrorCard(error = state.error, onRetry = onRefresh)
                     is TelemetryDetailUiState.Content -> DetailBody(state, onSelectRange)
                 }
@@ -206,7 +204,7 @@ private fun MetricChips(selected: TelemetryMetric, onSelect: (TelemetryMetric) -
 
 /** Formats a value of [metric]: degrees with one decimal for the temperature, whole percent otherwise. */
 private fun formatMetric(locale: Locale, metric: TelemetryMetric, value: Double): String =
-    if (metric == TelemetryMetric.TEMPERATURE) formatDegrees(locale, value, 1) else formatPercent(locale, value)
+    if (metric == TelemetryMetric.TEMPERATURE) formatDegrees(locale, value, 1) else formatPercent(value, locale)
 
 @Composable
 private fun DetailBody(state: TelemetryDetailUiState.Content, onSelectRange: (TelemetryRange) -> Unit) {
@@ -295,7 +293,7 @@ private fun LastReadingCard(state: TelemetryDetailUiState.Content, locale: Local
                     stringResource(
                         R.string.metric_stamp_soil,
                         stamp,
-                        formatPercent(locale, SoilMoistureRules.RECHARGE_POINT_PERCENT),
+                        formatPercent(SoilMoistureRules.RECHARGE_POINT_PERCENT, locale),
                     )
                 } else {
                     stamp
@@ -332,8 +330,8 @@ private fun StatusPill(status: SoilMoistureStatus) {
 @Composable
 private fun SoilAdvice(state: TelemetryDetailUiState.Content, locale: Locale) {
     val status = state.soilStatus ?: return
-    val recharge = formatPercent(locale, SoilMoistureRules.RECHARGE_POINT_PERCENT)
-    val watchLevel = formatPercent(locale, SoilMoistureRules.WATCH_LEVEL_PERCENT)
+    val recharge = formatPercent(SoilMoistureRules.RECHARGE_POINT_PERCENT, locale)
+    val watchLevel = formatPercent(SoilMoistureRules.WATCH_LEVEL_PERCENT, locale)
     val projected = state.projectedWatchLevelAt
     val text = when (status) {
         SoilMoistureStatus.STRESS -> stringResource(R.string.metric_hint_stress, recharge)
@@ -413,7 +411,7 @@ private fun MetricChart(state: TelemetryDetailUiState.Content, locale: Locale) {
     val chartPoints = state.points.map { ChartPoint(windowFraction(it.observedAt, state.range, state.now), it.value) }
     val labels: List<AxisLabel> = timeAxisLabels(state.range, state.now, state.zone, locale)
     val latestText = latest?.let { formatMetric(locale, metric, it.value) }.orEmpty()
-    val rechargeText = formatPercent(locale, SoilMoistureRules.RECHARGE_POINT_PERCENT)
+    val rechargeText = formatPercent(SoilMoistureRules.RECHARGE_POINT_PERCENT, locale)
 
     MetricLineChart(
         points = chartPoints,

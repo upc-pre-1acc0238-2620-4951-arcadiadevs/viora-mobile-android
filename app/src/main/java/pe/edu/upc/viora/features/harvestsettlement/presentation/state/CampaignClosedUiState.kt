@@ -1,8 +1,8 @@
 package pe.edu.upc.viora.features.harvestsettlement.presentation.state
 
 import java.time.LocalDate
+import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementSummary
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 
 /**
  * What the receipt card (P73) shows, whether the settlement is already on the server or still

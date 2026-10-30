@@ -39,10 +39,10 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
+import pe.edu.upc.viora.core.presentation.formatKg
+import pe.edu.upc.viora.core.presentation.formatPercentOf
+import pe.edu.upc.viora.core.presentation.formatTonnesPerHectare
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementSummary
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatKg
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatPercent
-import pe.edu.upc.viora.features.phenology.presentation.ui.formatTonnesPerHectare
 
 /** P72, "¿Asentar la cosecha 2026?": what will be closed and the total, with a loading confirm button. */
 @Composable
@@ -56,7 +56,7 @@ internal fun ConfirmSettleDialog(
     onConfirm: () -> Unit,
     onReview: () -> Unit,
 ) {
-    val green = greenShare?.let { formatPercent(it) }
+    val green = greenShare?.let { formatPercentOf(it) }
     val caption = when {
         tonnesPerHectare != null && green != null -> stringResource(R.string.settle_confirm_caption_tonnes, formatTonnesPerHectare(tonnesPerHectare), green)
         green != null -> stringResource(R.string.settle_confirm_caption_green, green)

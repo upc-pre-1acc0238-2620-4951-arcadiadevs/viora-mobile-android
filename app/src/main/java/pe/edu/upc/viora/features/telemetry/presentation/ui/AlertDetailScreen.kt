@@ -21,16 +21,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -40,7 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +51,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
 import pe.edu.upc.viora.core.designsystem.theme.Harvest800
@@ -72,6 +73,7 @@ import pe.edu.upc.viora.core.designsystem.theme.PillShape
 import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.features.telemetry.domain.entity.IncidentDetail
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentSeverity
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
@@ -79,9 +81,9 @@ import pe.edu.upc.viora.features.telemetry.presentation.state.AlertDetailUiState
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.MitigationChecklistCard
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.SnoozeBottomSheet
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.WarmWinterChangesCard
+import pe.edu.upc.viora.features.telemetry.presentation.ui.components.WeeklyTrendChart
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatMetricValue
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatWholeNumber
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.WeeklyTrendChart
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.AlertDetailViewModel
 
 @Composable
@@ -125,12 +127,7 @@ fun AlertDetailScreen(
     ) {
         when (val state = uiState) {
             is AlertDetailUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(color = Green900)
-                }
+                VioraLoadingState(modifier = Modifier.fillMaxSize())
             }
 
             is AlertDetailUiState.Error -> {
@@ -165,7 +162,7 @@ fun AlertDetailScreen(
                             .padding(horizontal = 24.dp, vertical = 12.dp),
                     ) {
                         Text(
-                            text = stringResource(R.string.alerts_action_retry),
+                            text = stringResource(R.string.common_retry),
                             fontFamily = RobotoFamily,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
@@ -216,6 +213,7 @@ fun AlertDetailScreen(
                         dateFormatted = if (isWarmWinter && lastTrendDay != null) "" else detail.dateFormatted,
                         triggeredAt = if (isWarmWinter && lastTrendDay != null) lastTrendDay else detail.triggeredAt,
                         timeWindow = detail.timeWindow,
+                        zone = LocalAppZone.current,
                         weeklyTrend = detail.weeklyTrend,
                         datePattern = datePattern,
                         locale = locale,
@@ -262,7 +260,7 @@ fun AlertDetailScreen(
                                     scope.launch {
                                         // Without the image (not drawn yet) the text still goes out.
                                         val panel = runCatching { panelLayer.toImageBitmap() }.getOrNull()
-                                        AlertShare.share(context, panel, shareText, detail.id)
+                                        AlertShare.share(context, panel, shareText, detail.id, viewModel.ioDispatcher)
                                     }
                                 },
                             contentAlignment = Alignment.Center,
@@ -511,6 +509,7 @@ private fun formatAlertDetailDateTime(
     datePattern: String,
     locale: Locale = Locale.getDefault(),
     windowOverride: String? = null,
+    zone: ZoneId = ZoneId.systemDefault(),
 ): String {
     val rawDateCandidate = dateFormatted.ifBlank { triggeredAt }.ifBlank {
         weeklyTrend.lastOrNull()?.timestamp.orEmpty()
@@ -520,20 +519,20 @@ private fun formatAlertDetailDateTime(
         runCatching {
             LocalDate.parse(rawDateCandidate)
         }.recoverCatching {
-            Instant.parse(rawDateCandidate).atZone(ZoneId.systemDefault()).toLocalDate()
+            Instant.parse(rawDateCandidate).atZone(zone).toLocalDate()
         }.recoverCatching {
             LocalDateTime.parse(rawDateCandidate).toLocalDate()
         }.getOrNull()
     } else null
 
-    val resolvedDate = parsedDate ?: LocalDate.now(ZoneId.systemDefault())
+    val resolvedDate = parsedDate ?: LocalDate.now(zone)
 
     val formattedDateText = DateTimeFormatter.ofPattern(datePattern, locale)
         .format(resolvedDate)
         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
 
     // A warm winter is a run of days, not hours: its line says how many in a row instead of a time window.
-    val formattedTimeWindow = windowOverride ?: formatDetailTimeWindow(timeWindow, triggeredAt, locale)
+    val formattedTimeWindow = windowOverride ?: formatDetailTimeWindow(timeWindow, triggeredAt, locale, zone)
 
     return if (formattedTimeWindow.isNotBlank()) {
         "$formattedDateText · $formattedTimeWindow"
@@ -546,6 +545,7 @@ private fun formatDetailTimeWindow(
     rawTimeWindow: String,
     triggeredAt: String,
     locale: Locale,
+    zone: ZoneId,
 ): String {
     val trimmed = rawTimeWindow.trim()
     if (trimmed.isNotBlank()) {
@@ -576,7 +576,7 @@ private fun formatDetailTimeWindow(
     if (triggeredAt.isNotBlank()) {
         val instant = runCatching { Instant.parse(triggeredAt) }.getOrNull()
         if (instant != null) {
-            val localTime = instant.atZone(ZoneId.systemDefault()).toLocalTime()
+            val localTime = instant.atZone(zone).toLocalTime()
             val isSpanish = locale.language.equals("es", ignoreCase = true)
             val timeFormatter = DateTimeFormatter.ofPattern("h:mm a", locale)
             return formatAmPm(localTime.format(timeFormatter), isSpanish)

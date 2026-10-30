@@ -30,7 +30,7 @@ import pe.edu.upc.viora.features.harvestsettlement.application.usecase.UpdatePen
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.PendingStatus
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettleOutcome
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementSummary
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CommercialSizeGrade
+import pe.edu.upc.viora.features.harvestsettlement.domain.valueobject.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleDialog
 import pe.edu.upc.viora.features.harvestsettlement.presentation.viewmodel.SettleHarvestViewModel
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase

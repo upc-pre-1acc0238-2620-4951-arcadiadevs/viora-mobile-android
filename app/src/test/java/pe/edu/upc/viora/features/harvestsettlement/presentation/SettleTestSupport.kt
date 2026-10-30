@@ -4,7 +4,10 @@ import java.time.Instant
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.HarvestSettlement
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.PendingSettlement
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.PendingStatus
@@ -18,12 +21,9 @@ import pe.edu.upc.viora.features.harvestsettlement.domain.entity.ThinningBalance
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.ThinningStatus
 import pe.edu.upc.viora.features.harvestsettlement.domain.repository.HarvestSettlementRepository
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotChanges
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
-import pe.edu.upc.viora.core.domain.AppError
 
 internal fun testPlot(id: String, name: String, hectares: Double = 2.5) = Plot(
     id = PlotId(id),

@@ -17,19 +17,3 @@ data class UpdateProfileRequest(
     val country: String,
     val phoneNumber: String,
 )
-
-@Serializable
-data class ChangePasswordRequest(
-    val currentPassword: String,
-    val newPassword: String,
-)
-
-/** The part of the current subscription the account needs: whether access is active today. */
-@Serializable
-data class CurrentSubscriptionResource(
-    val status: String? = null,
-    val entitlementActive: Boolean = false,
-)
-
-@Serializable
-data class DeleteAccountRequest(val password: String)

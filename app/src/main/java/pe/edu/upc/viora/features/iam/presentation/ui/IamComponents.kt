@@ -311,63 +311,6 @@ internal fun OtpInput(
     )
 }
 
-/** Full-width 56 dp dark pill; the disabled look is the flat sand pill of the Figma variants. */
-@Composable
-internal fun PillButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    loading: Boolean = false,
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .clip(CircleShape)
-            .background(if (enabled) Green900 else Neutral200)
-            .clickable(enabled = enabled && !loading, role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (loading) {
-            CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.5.dp, color = Neutral50)
-        } else {
-            Text(text, style = MaterialTheme.typography.titleMedium, color = if (enabled) Neutral50 else Neutral500)
-        }
-    }
-}
-
-/** Figma "Editorial/Botón" (Secundario): outlined 56 dp pill for an equivalent alternative. */
-@Composable
-internal fun OutlinedPillButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .clip(CircleShape)
-            .border(1.dp, Neutral300, CircleShape)
-            .clickable(role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text, style = MaterialTheme.typography.titleMedium, color = Neutral900)
-    }
-}
-
-/** Figma "Editorial/Botón" (Texto): a 56 dp tall text-only pill for skip and secondary links. */
-@Composable
-internal fun TextPillButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .clip(CircleShape)
-            .clickable(role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text, style = MaterialTheme.typography.titleMedium, color = Neutral900)
-    }
-}
-
 /** Underlined text link ("Cambiar correo", "¿Olvidaste tu contraseña?"). */
 @Composable
 internal fun UnderlinedLink(

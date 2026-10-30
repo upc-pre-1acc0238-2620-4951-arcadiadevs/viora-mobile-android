@@ -36,9 +36,9 @@ class ProfileStore @Inject constructor(private val dataStore: DataStore<Preferen
     }
 
     private fun read(prefs: Preferences): UserProfile? {
-        val userId = prefs[KEY_USER_ID] ?: return null
+        val userId = prefs[KEY_USER_ID]?.takeIf(String::isNotBlank) ?: return null
         return UserProfile(
-            id = ProfileId(prefs[KEY_PROFILE_ID] ?: userId),
+            id = ProfileId(prefs[KEY_PROFILE_ID]?.takeIf(String::isNotBlank) ?: userId),
             userId = userId,
             fullName = prefs[KEY_FULL_NAME].orEmpty(),
             country = prefs[KEY_COUNTRY].orEmpty(),

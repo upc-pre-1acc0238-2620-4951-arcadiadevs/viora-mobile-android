@@ -46,10 +46,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -67,6 +68,10 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.designsystem.theme.newsreader
+import pe.edu.upc.viora.core.designsystem.theme.roboto
+import pe.edu.upc.viora.core.designsystem.theme.robotoMedium
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatWhole
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningPrescription
@@ -75,9 +80,8 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.CampaignP
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.PlanRow
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.PlanRowStatus
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.CampaignPlanViewModel
-import pe.edu.upc.viora.features.home.presentation.ui.HomeHeader
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouette
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraGreetingHeader
+import pe.edu.upc.viora.core.designsystem.component.PlotSilhouette
 
 /**
  * P60 · Plan, the Plan tab: the plots that need thinning this week in one block, then every plot with the state of
@@ -102,7 +106,7 @@ fun CampaignPlanScreen(
             .padding(horizontal = 24.dp)
             .padding(top = 12.dp),
     ) {
-        HomeHeader(
+        VioraGreetingHeader(
             date = state.today,
             isOffline = state.isOffline,
             lastRefresh = state.lastRefresh,
@@ -111,12 +115,10 @@ fun CampaignPlanScreen(
         )
         Headline(state, onSelectCampaign = viewModel::selectCampaign, modifier = Modifier.padding(top = 28.dp))
         when {
-            state.isLoading -> Box(Modifier.fillMaxWidth().padding(top = 80.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Green900)
-            }
+            state.isLoading -> VioraLoadingState(modifier = Modifier.fillMaxWidth().padding(top = 80.dp))
             !state.hasPlots && state.error != null -> Message(
                 text = stringResource(checkNotNull(state.error).messageRes()),
-                action = stringResource(R.string.harvest_retry),
+                action = stringResource(R.string.common_retry),
                 onAction = viewModel::refresh,
             )
             !state.hasPlots -> Message(
@@ -316,7 +318,7 @@ private fun rowDetail(row: PlanRow, state: CampaignPlanUiState): String {
         PlanRowStatus.NO_BLOOM -> stringResource(R.string.plan_detail_no_bloom)
         PlanRowStatus.NO_PROFILE -> stringResource(R.string.plan_detail_no_profile)
         PlanRowStatus.NO_SAMPLING -> row.plot.registeredAt?.takeIf { state.isCurrentCampaign }?.let {
-            val day = it.atZone(ZoneId.systemDefault()).toLocalDate()
+            val day = it.atZone(LocalAppZone.current).toLocalDate()
             stringResource(R.string.plan_detail_registered, DateTimeFormatter.ofPattern(stringResource(R.string.thinning_pattern_day_month), locale).format(day))
         } ?: stringResource(R.string.plan_detail_no_sampling, state.campaignYear)
     }

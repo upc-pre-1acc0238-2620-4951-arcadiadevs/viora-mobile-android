@@ -15,12 +15,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveSensorNodesUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.RefreshSensorNodesUseCase
 import pe.edu.upc.viora.features.telemetry.presentation.navigation.SensorsRoute
 import pe.edu.upc.viora.features.telemetry.presentation.state.SensorsUiState
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 @HiltViewModel
 class SensorsViewModel @Inject constructor(
@@ -30,7 +31,7 @@ class SensorsViewModel @Inject constructor(
     private val refreshNodes: RefreshSensorNodesUseCase,
 ) : ViewModel() {
 
-    val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "SensorsRoute needs a plotId" }
+    val plotId: String = savedStateHandle.requirePlotId().value
     private val plotName: String = savedStateHandle.get<String>("plotName").orEmpty()
 
     private data class RefreshState(

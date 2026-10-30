@@ -12,8 +12,8 @@ import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import pe.edu.upc.viora.core.database.AppDatabase
-import pe.edu.upc.viora.core.database.AppMigrations
+import pe.edu.upc.viora.di.AppDatabase
+import pe.edu.upc.viora.di.AppMigrations
 import pe.edu.upc.viora.core.database.CacheMetadataEntity
 import pe.edu.upc.viora.features.subscription.infrastructure.local.PRODUCER_PLAN_CATALOG_KEY
 import pe.edu.upc.viora.features.subscription.infrastructure.local.ProducerPlanEntity
@@ -91,7 +91,7 @@ class ProducerPlanCacheInstrumentedTest {
     @Test fun migrationFromExportedVersionTenKeepsExistingMetadata() = runBlocking {
         val name = "producer-migration-${UUID.randomUUID()}"
         try {
-            val schema = contextForTests().assets.open("pe.edu.upc.viora.core.database.AppDatabase/10.json")
+            val schema = contextForTests().assets.open("pe.edu.upc.viora.di.AppDatabase/10.json")
                 .bufferedReader().use { JSONObject(it.readText()).getJSONObject("database") }
             val sqlite = context.openOrCreateDatabase(name, Context.MODE_PRIVATE, null)
             try {
@@ -122,7 +122,7 @@ class ProducerPlanCacheInstrumentedTest {
     @Test fun migrationFromElevenInvalidatesOnlyLegacyOffersAndPreservesQueuedData() = runBlocking {
         val name = "producer-tax-migration-${UUID.randomUUID()}"
         try {
-            val schema = contextForTests().assets.open("pe.edu.upc.viora.core.database.AppDatabase/11.json")
+            val schema = contextForTests().assets.open("pe.edu.upc.viora.di.AppDatabase/11.json")
                 .bufferedReader().use { JSONObject(it.readText()).getJSONObject("database") }
             val sqlite = context.openOrCreateDatabase(name, Context.MODE_PRIVATE, null)
             try {

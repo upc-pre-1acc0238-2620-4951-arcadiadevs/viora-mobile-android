@@ -52,6 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Duration
 import java.time.Instant
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -68,11 +69,11 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.presentation.formatPercent
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorNode
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorType
 import pe.edu.upc.viora.features.telemetry.presentation.state.ConfigureNodeUiState
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatPercent
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.ConfigureNodeViewModel
 
 @Composable
@@ -247,7 +248,7 @@ private fun ReadingCard(node: SensorNode) {
             Column {
                 Text(stringResource(R.string.sensors_config_last_reading), style = MaterialTheme.typography.labelSmall, color = Neutral600)
                 Text(
-                    text = node.lastHumidityPercent?.let { formatPercent(LocalConfiguration.current.locales[0], it) } ?: "—",
+                    text = node.lastHumidityPercent?.let { formatPercent(it, LocalConfiguration.current.locales[0]) } ?: "—",
                     style = MaterialTheme.typography.displaySmall.copy(fontSize = 48.sp, lineHeight = 52.sp),
                     color = Neutral900,
                 )
@@ -479,30 +480,6 @@ private fun ConfigureNodePreview() {
             ),
             plotName = "La Yarada 02",
             onBack = {}, onNameChange = {}, onDepthChange = {}, onTransmitReadingsChange = {}, onUnlink = {}, onSave = {},
-        )
-    }
-}
-
-@Composable
-private fun CircleIconButton(
-    icon: Int,
-    contentDescription: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .background(Neutral0)
-            .clickable(role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = contentDescription,
-            tint = Neutral900,
-            modifier = Modifier.size(22.dp),
         )
     }
 }

@@ -8,12 +8,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.CompositionLocalProvider
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.ZoneId
+import javax.inject.Inject
 import pe.edu.upc.viora.core.locale.AppLanguage
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var zone: ZoneId
 
     // Before Android 13 the language chosen in Mi cuenta is applied here (from 13 the system does it).
     override fun attachBaseContext(newBase: Context) {
@@ -38,8 +45,10 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
         )
         setContent {
-            VioraTheme {
-                VioraApp()
+            CompositionLocalProvider(LocalAppZone provides zone) {
+                VioraTheme {
+                    VioraApp()
+                }
             }
         }
     }

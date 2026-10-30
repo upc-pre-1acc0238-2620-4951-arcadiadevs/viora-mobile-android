@@ -1,10 +1,10 @@
 package pe.edu.upc.viora.features.croploadregulation.presentation.state
 
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningExecution
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.CaliberProjectionStatus
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.LoadState
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 
 /** P63 · Aclareo registrado. */
 sealed interface ThinningResultUiState {

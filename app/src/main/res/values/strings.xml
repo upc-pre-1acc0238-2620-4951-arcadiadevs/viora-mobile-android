@@ -1,4 +1,6 @@
 <resources>
+    <!-- Shared actions -->
+    <string name="common_retry">Try again</string>
     <string name="app_name">Viora</string>
 
     <!-- Bottom navigation -->
@@ -18,7 +20,6 @@
     <string name="record_note_subtitle">Free observation or photo</string>
 
     <!-- Placeholders for tabs that are not built yet -->
-    <string name="placeholder_coming_soon">Coming soon</string>
 
     <!-- Home -->
     <string name="home_greeting">Hello, %1$s</string>
@@ -80,7 +81,6 @@
     <string name="plots_empty_title">No plots yet</string>
     <string name="plots_empty_body">The plots you register will show up here.</string>
     <string name="plots_map_open">See all plots on the map</string>
-    <string name="plots_retry">Retry</string>
     <string name="variety_criolla">Criolla</string>
     <string name="variety_sevillana">Sevillana</string>
     <string name="variety_manzanilla">Manzanilla</string>
@@ -308,11 +308,8 @@
     <string name="sensors_type_microclima_subtitle">Microclimate · air and temperature</string>
     <string name="sensors_type_sonda_subtitle">Soil · %1$d cm</string>
     <string name="sensors_active_since">Active · %1$s ago</string>
-    <string name="sensors_active_simple">Active</string>
     <string name="sensors_paused_since">Paused since %1$s</string>
     <string name="sensors_paused_simple">Paused</string>
-    <string name="sensors_reading_temp_hum">%1$s° · %2$s %%</string>
-    <string name="sensors_reading_hum">%1$s %%</string>
 
     <!-- Link sensor sheet -->
     <string name="sensors_link_title_lead">Link</string>
@@ -335,7 +332,6 @@
     <string name="alerts_hero_affected_plots">In %1$s</string>
     <string name="alerts_hero_no_affected_plots">Your fields are in optimal condition</string>
     <string name="alerts_plots_conjunction">" and "</string>
-    <string name="alerts_updated_at">updated %1$s</string>
     <string name="alert_detail_date_pattern">EEEE, MMMM d</string>
     <string name="alerts_filter_critical">Critical</string>
     <string name="alerts_filter_warning">Warning</string>
@@ -345,7 +341,6 @@
     <string name="alerts_empty_filtered">No alerts match the selected filter.</string>
     <string name="alerts_error_title">Could not load alerts</string>
     <string name="alerts_error_subtitle">Check your connection and try again.</string>
-    <string name="alerts_action_retry">Try again</string>
     <string name="alerts_nav_back">Go back</string>
     <string name="alerts_nav_settings">Alert settings</string>
     <string name="alerts_plot_filter_open">Filter by plot</string>
@@ -374,9 +369,6 @@
     <string name="alert_title_heat_wave">Heat wave in %1$s</string>
     <string name="alert_title_hydric_stress">Water stress in %1$s</string>
     <string name="alert_title_frost_warning">Frost warning in %1$s</string>
-    <string name="alert_title_evapotranspiration">High evapotranspiration in %1$s</string>
-    <string name="alert_title_water_deficit">Soil water deficit in %1$s</string>
-    <string name="alert_title_drought">Prolonged drought in %1$s</string>
     <string name="alert_title_generic">Agroclimatic alert in %1$s</string>
     <string name="alert_desc_heat_wave">Irrigate early in the morning to protect newly set fruit.</string>
     <string name="alert_desc_hydric_stress">Soil moisture dropped. Schedule irrigation this week.</string>
@@ -391,15 +383,11 @@
     <string name="alert_detail_title_heat_wave">Heat wave</string>
     <string name="alert_detail_title_hydric_stress">Water stress</string>
     <string name="alert_detail_title_frost_warning">Frost warning</string>
-    <string name="alert_detail_title_evapotranspiration">High evapotranspiration</string>
-    <string name="alert_detail_title_water_deficit">Soil water deficit</string>
-    <string name="alert_detail_title_drought">Prolonged drought</string>
     <string name="alert_detail_title_generic">Agroclimatic alert</string>
     <string name="alert_detail_share">Share with technician</string>
     <string name="alert_detail_rule_chip">Agronomic threshold</string>
     <string name="alert_chart_title">Weekly highs</string>
     <string name="alert_chart_threshold_label">threshold %1$s</string>
-    <string name="alert_checklist_header">What to do · %1$d of %2$d</string>
     <string name="alert_checklist_title">What to do</string>
     <string name="alert_checklist_progress">%1$d of %2$d</string>
     <string name="alert_detail_traceability_note">7-day forecast + virtual plot node (simulated data).</string>
@@ -428,7 +416,6 @@
     <!-- Harvest history and bearing index (US20) -->
     <string name="harvest_subtitle">Alternation · %1$s · %2$s ha</string>
     <string name="harvest_subtitle_plain">Alternation</string>
-    <string name="harvest_retry">Try again</string>
     <string name="harvest_headline_lead">Your olive grove</string>
     <string name="harvest_headline_strong">alternates strongly.</string>
     <string name="harvest_headline_moderate">alternates a little.</string>
@@ -697,7 +684,6 @@
 
     <string name="sampling_offline_banner">No connection: your records are saved on phone.</string>
     <string name="sampling_synced_banner">Signal restored · %1$d trees synced</string>
-    <string name="sampling_badge_pending_sync">Pending sync</string>
     <string name="sampling_badge_synced">Synced</string>
     <string name="sampling_stat_synced">synced</string>
     <string name="sampling_error_fruits_out_of_range">With %1$d shoots, the maximum allowed is %2$d fruits (4 per shoot).</string>
@@ -735,9 +721,7 @@
     <string name="climate_night">Night</string>
     <string name="climate_now_ago">Now · %1$s ago</string>
     <string name="climate_now_none">No reading yet</string>
-    <string name="climate_open_metric">See the %1$s history</string>
     <string name="climate_oscillation">daily swing</string>
-    <string name="climate_retry">Try again</string>
     <string name="climate_sensors_title">Plot sensors</string>
     <string name="climate_sky_partly_cloudy">Partly cloudy</string>
     <string name="climate_sky_rainy">Rainy</string>
@@ -1207,7 +1191,6 @@
     <string name="dossier_offline">Offline · the sealed PDF needs internet</string>
     <string name="dossier_open_last">Open the last version · %1$s</string>
     <string name="dossier_download_failed">The PDF could not be downloaded. Try again.</string>
-    <string name="dossier_retry">Retry</string>
     <string name="dossier_empty_lead">No dossier</string>
     <string name="dossier_empty_emphasis">yet.</string>
     <string name="dossier_empty_body">The dossier of %1$s is sealed when you settle the harvest of a season. Settle it and come back here.</string>
@@ -1348,9 +1331,9 @@
     <string name="onboarding_hectares_more">One hectare more</string>
     <string name="onboarding_hectares_unknown">I am not sure yet</string>
     <string name="onboarding_plan_estimate">ESTIMATED PLAN</string>
-    <string name="onboarding_plan_price">S/ %1$s</string>
     <string name="onboarding_plan_per_year">a year</string>
-    <string name="onboarding_plan_detail">That is S/ %1$s a month · S/ %2$d per hectare\nReference price. You pay after creating your account.</string>
+    <string name="onboarding_plan_detail">That is %1$s a month · %2$s per hectare
+Reference price. You pay after creating your account.</string>
     <string name="onboarding_alerts_title">I only tell you\nwhat *matters*.</string>
     <string name="onboarding_alerts_voice">You can turn them off any time from your account.</string>
     <string name="onboarding_alerts_enable">Turn on alerts</string>
@@ -1415,7 +1398,6 @@
     <string name="iam_create_footnote">We\'ll send you a code to verify your email.</string>
     <string name="iam_email_taken">This email already has an account. Sign in or use another email.</string>
     <string name="iam_email_taken_link">Sign in</string>
-    <string name="iam_email_invalid">Enter a valid email.</string>
     <string name="iam_rule_length">8 characters</string>
     <string name="iam_rule_letters_digits">Letters and numbers</string>
     <string name="iam_rule_match">Match</string>
@@ -1457,7 +1439,6 @@
     <string name="iam_request_new_link">Request a new link</string>
     <string name="iam_back_to_sign_in">Back to sign in</string>
     <string name="iam_checking_link">Checking your link…</string>
-    <string name="iam_retry">Try again</string>
     <string name="iam_error_offline">We couldn\'t reach Viora. Check your connection and try again.</string>
     <string name="iam_error_generic">We couldn\'t complete the request. Please try again.</string>
     <string name="iam_error_phone_rejected">Viora did not accept your mobile for the chosen country. Go back to the mobile step and fix it.</string>
@@ -1470,6 +1451,8 @@
 
     <!-- 18 · My account (P95–P98) -->
     <string name="account_title">My account</string>
+    <string name="account_password_show">Show password</string>
+    <string name="account_password_hide">Hide password</string>
     <string name="account_role_producer">Producer</string>
     <string name="account_headline_lead">Your</string>
     <string name="account_headline_emphasis">account.</string>
@@ -1562,8 +1545,6 @@
     <string name="producer_plan_updated">Catalog updated: %1$s</string>
     <string name="producer_plan_saved_copy">Saved information. Refresh to check the latest conditions.</string>
     <string name="producer_plan_loading">Updating plan conditions…</string>
-    <string name="producer_plan_refresh">Refresh</string>
-    <string name="producer_plan_retry">Try again</string>
     <string name="producer_plan_empty">No plans are available. Refresh the catalog to check again.</string>
     <string name="producer_plan_cooperative">I have a cooperative code</string>
     <string name="producer_plan_tax_included">Includes IGV</string>
@@ -1575,23 +1556,8 @@
     <string name="purchase_continue">Continue to payment</string>
     <string name="purchase_later">Later</string>
     <string name="purchase_not_pending">This contract is no longer awaiting payment. No new payment was opened.</string>
-    <string name="purchase_verifying">Verifying payment with Mercado Pago…</string>
-    <string name="purchase_verifying_hint">Please wait while we confirm your transaction.</string>
-    <string name="purchase_unconfirmed_title">Payment pending confirmation</string>
     <string name="purchase_unconfirmed_message">We have not confirmed payment yet. If you paid, check the status again. This message does not mean your payment was rejected.</string>
     <string name="purchase_check_status">Check status</string>
-    <string name="purchase_confirmed_title">Subscription active</string>
-    <string name="purchase_confirmed_message">Your subscription is now active with %1$s ha. Welcome to Viora!</string>
-    <string name="purchase_close">Close</string>
-    <string name="subscription_access_title">My subscription</string>
-    <string name="subscription_access_inactive">No confirmed active access</string>
-    <string name="subscription_access_quota">Contracted capacity: %1$s ha</string>
-    <string name="subscription_access_mode">Mode: %1$s</string>
-    <string name="subscription_access_until">Valid until: %1$s</string>
-    <string name="subscription_access_plan">View Producer Plan</string>
-    <string name="subscription_mode_individual">Individual</string>
-    <string name="subscription_mode_cooperative">Cooperative</string>
-    <string name="subscription_mode_unknown">Unavailable</string>
     <string name="home_access_inactive_chip">Access inactive</string>
     <string name="home_access_expired_title">Your plan expired on\n%1$s</string>
     <string name="home_access_none_title">You don\'t have\nan active plan yet</string>
@@ -1758,7 +1724,6 @@
     </plurals>
     <!-- P99 · Mi plan, P100 · Eliminar cuenta, P101 · Cuenta eliminada -->
     <string name="my_plan_title">My plan</string>
-    <string name="my_plan_retry">Try again</string>
     <string name="my_plan_headline_lead">Your plan,</string>
     <string name="my_plan_headline_emphasis">in hectares.</string>
     <string name="my_plan_section_validity">Validity</string>

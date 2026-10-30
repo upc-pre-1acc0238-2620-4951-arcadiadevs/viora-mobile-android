@@ -20,15 +20,15 @@ import org.junit.Before
 import org.junit.Test
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.UpdatePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotChanges
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.EditFailure
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.EditPlotUiState

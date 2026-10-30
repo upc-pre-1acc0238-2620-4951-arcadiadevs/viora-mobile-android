@@ -47,6 +47,9 @@ import androidx.compose.ui.unit.sp
 import java.io.File
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraBottomSheet
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -57,14 +60,12 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.newsreader
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.roboto
-import pe.edu.upc.viora.features.croploadregulation.presentation.ui.robotoMedium
+import pe.edu.upc.viora.core.designsystem.theme.newsreader
+import pe.edu.upc.viora.core.designsystem.theme.roboto
+import pe.edu.upc.viora.core.designsystem.theme.robotoMedium
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.AgronomicDossier
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.DossierVerificationState
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * P77 · PDF listo: the sealed PDF already on the phone, to open it, send it by WhatsApp with its code, or save a copy
@@ -248,13 +249,7 @@ private fun RecordAnswer(state: DossierVerificationState) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DossierSheet(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        dragHandle = { Box(Modifier.padding(top = 12.dp).size(width = 36.dp, height = 4.dp).clip(CircleShape).background(Neutral300)) },
-    ) {
+    VioraBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(horizontal = 24.dp).padding(top = 14.dp, bottom = 8.dp),
             content = content,

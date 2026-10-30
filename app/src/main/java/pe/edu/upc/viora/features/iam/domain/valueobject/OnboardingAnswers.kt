@@ -19,6 +19,8 @@ data class OnboardingAnswers(
     val alertsEnabled: Boolean? = null,
     /** Null until T02e2 is answered. */
     val locationGranted: Boolean? = null,
+    /** True once "Crear mi cuenta" was pressed under the legal notice of the summary. */
+    val termsAccepted: Boolean = false,
 ) {
     val firstName: String get() = fullName.trim().substringBefore(' ')
 

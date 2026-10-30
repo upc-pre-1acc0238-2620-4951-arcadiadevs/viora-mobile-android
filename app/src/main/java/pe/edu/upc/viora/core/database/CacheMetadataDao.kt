@@ -19,4 +19,8 @@ interface CacheMetadataDao {
 
     @Query("DELETE FROM cache_metadata WHERE resource_key = :resourceKey")
     suspend fun delete(resourceKey: String)
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM cache_metadata")
+    suspend fun wipeAll()
 }

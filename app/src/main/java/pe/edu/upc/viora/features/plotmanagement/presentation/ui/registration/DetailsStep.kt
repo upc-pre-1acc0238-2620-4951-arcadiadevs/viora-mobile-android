@@ -9,17 +9,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,10 +39,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
@@ -54,16 +57,16 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatMeters
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
+import pe.edu.upc.viora.core.presentation.formatCount
+import pe.edu.upc.viora.core.presentation.formatMeters
+import pe.edu.upc.viora.core.presentation.labelRes
 
 /** Step 2: name, variety and planting frame. Density and net area update as the frame changes. */
 @OptIn(ExperimentalLayoutApi::class)
@@ -244,7 +247,7 @@ private fun SpacingCard(
             style = MaterialTheme.typography.headlineMedium,
             color = if (hasError) Terracotta700 else Neutral900,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
+        Row(modifier = Modifier.padding(top = 4.dp)) {
             StepperButton(isPlus = false, contentDescription = stringResource(R.string.details_decrease)) { onChange(-1) }
             StepperButton(isPlus = true, contentDescription = stringResource(R.string.details_increase)) { onChange(1) }
         }
@@ -254,24 +257,39 @@ private fun SpacingCard(
 /** The round minus/plus button; the minus is a plain bar exactly as the design draws it. */
 @Composable
 private fun StepperButton(isPlus: Boolean, contentDescription: String, onClick: () -> Unit) {
+    // The circle stays 36 dp as drawn; the 48 dp box around it is the touch target and carries the label,
+    // so the minus (a plain bar, no icon) is announced too.
     Box(
         modifier = Modifier
-            .size(36.dp)
+            .size(48.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .clickable(role = Role.Button, onClick = onClick),
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
-        if (isPlus) {
-            Icon(painter = painterResource(R.drawable.ic_add), contentDescription = contentDescription, tint = Neutral900)
-        } else {
-            Box(
-                modifier = Modifier
-                    .size(width = 14.dp, height = 2.2.dp)
-                    .clip(RoundedCornerShape(1.dp))
-                    .background(Neutral900),
-            )
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            StepperGlyph(isPlus)
         }
+    }
+}
+
+@Composable
+private fun StepperGlyph(isPlus: Boolean) {
+    if (isPlus) {
+        Icon(painter = painterResource(R.drawable.ic_add), contentDescription = null, tint = Neutral900)
+    } else {
+        Box(
+            modifier = Modifier
+                .size(width = 14.dp, height = 2.2.dp)
+                .clip(RoundedCornerShape(1.dp))
+                .background(Neutral900),
+        )
     }
 }
 

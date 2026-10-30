@@ -42,6 +42,8 @@ import pe.edu.upc.viora.features.croploadregulation.infrastructure.repository.Th
 import retrofit2.Response
 
 private class FakePrescriptionDao : ThinningPrescriptionDao {
+    override suspend fun wipeAll() = Unit
+
     val rows = MutableStateFlow<Map<Pair<String, Int>, ThinningPrescriptionEntity>>(emptyMap())
 
     override fun observe(plotId: String, campaignYear: Int): Flow<ThinningPrescriptionEntity?> =

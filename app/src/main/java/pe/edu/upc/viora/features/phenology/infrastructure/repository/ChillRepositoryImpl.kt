@@ -17,6 +17,7 @@ import pe.edu.upc.viora.features.phenology.infrastructure.local.ChillTrackerDao
 import pe.edu.upc.viora.features.phenology.infrastructure.mapper.toChillEntity
 import pe.edu.upc.viora.features.phenology.infrastructure.mapper.toDomain
 import pe.edu.upc.viora.features.phenology.infrastructure.remote.PhenologyService
+import pe.edu.upc.viora.core.domain.appResultOf
 
 class ChillRepositoryImpl @Inject constructor(
     private val service: PhenologyService,
@@ -46,7 +47,7 @@ class ChillRepositoryImpl @Inject constructor(
                 ?: return AppResult.Failure(AppError.Unknown(IllegalStateException("Malformed chill metric")))
         }
 
-        return guarded {
+        return appResultOf<Unit> {
             if (entity != null) {
                 chillTrackerDao.upsert(entity)
                 cacheMetadataDao.upsert(CacheMetadataEntity(cacheKey(plotId), clock.millis()))
@@ -54,15 +55,6 @@ class ChillRepositoryImpl @Inject constructor(
                 chillTrackerDao.deleteByPlot(plotId)
             }
         }
-    }
-
-    private suspend fun guarded(block: suspend () -> Unit): AppResult<Unit> = try {
-        block()
-        AppResult.Success(Unit)
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (throwable: Throwable) {
-        AppResult.Failure(AppError.Unknown(throwable))
     }
 
     private fun cacheKey(plotId: String): String = "chill:$plotId"

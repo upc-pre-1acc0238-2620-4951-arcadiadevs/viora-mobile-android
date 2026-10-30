@@ -5,15 +5,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import pe.edu.upc.viora.core.di.IoDispatcher
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveChillTrackerUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RefreshChillTrackerUseCase
-import pe.edu.upc.viora.features.phenology.domain.entity.ChillTracker
+import pe.edu.upc.viora.features.phenology.application.published.ChillTracker
 import pe.edu.upc.viora.features.telemetry.application.usecase.CompleteMitigationStepUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.GetIncidentDetailUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.PostponeIncidentUseCase
@@ -34,6 +36,8 @@ class AlertDetailViewModel @Inject constructor(
     private val completeMitigationStepUseCase: CompleteMitigationStepUseCase,
     private val observeChillTracker: ObserveChillTrackerUseCase,
     private val refreshChillTracker: RefreshChillTrackerUseCase,
+    /** Where "Compartir con técnico" writes the panel image. */
+    @IoDispatcher val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     val incidentId: String = checkNotNull(savedStateHandle.get<String>("incidentId")) {

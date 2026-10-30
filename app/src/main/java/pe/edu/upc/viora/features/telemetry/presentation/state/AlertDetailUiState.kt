@@ -2,8 +2,8 @@ package pe.edu.upc.viora.features.telemetry.presentation.state
 
 import kotlin.math.floor
 import pe.edu.upc.viora.core.domain.AppError
-import pe.edu.upc.viora.features.phenology.domain.entity.ChillTracker
-import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
+import pe.edu.upc.viora.features.phenology.application.published.ChillTracker
+import pe.edu.upc.viora.features.phenology.application.published.WinterSeasonState
 import pe.edu.upc.viora.features.telemetry.domain.entity.IncidentDetail
 import pe.edu.upc.viora.features.telemetry.domain.entity.WeeklyTrendPoint
 

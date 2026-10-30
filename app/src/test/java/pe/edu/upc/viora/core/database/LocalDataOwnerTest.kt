@@ -1,12 +1,7 @@
 package pe.edu.upc.viora.core.database
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 import pe.edu.upc.viora.features.iam.InMemoryPreferences
 
@@ -15,7 +10,6 @@ class LocalDataOwnerTest {
     private val preferences = InMemoryPreferences()
     private var wipes = 0
     private val owner = LocalDataOwner(preferences) { wipes++ }
-    private val focusedPlot = stringPreferencesKey("home_focused_plot")
 
     @Test
     fun `data of an unknown owner is wiped on the first sign-in, since it came from the demo producer`() = runTest {
@@ -33,25 +27,22 @@ class LocalDataOwnerTest {
     }
 
     @Test
-    fun `another account wipes the tables and the plot the previous one had chosen`() = runTest {
+    fun `another account wipes the data of the previous one`() = runTest {
         owner.claimFor("ana")
-        preferences.edit { it[focusedPlot] = "plot-of-ana" }
 
         owner.claimFor("bruno")
 
         assertEquals(2, wipes)
-        assertNull(preferences.data.first()[focusedPlot])
     }
 
     @Test
-    fun `another account sees the Home tours again`() = runTest {
-        val tourSeen = booleanPreferencesKey("home_tour_seen")
+    fun `signing out wipes the data and forgets the owner`() = runTest {
         owner.claimFor("ana")
-        preferences.edit { it[tourSeen] = true }
 
-        owner.claimFor("bruno")
+        owner.release()
+        owner.claimFor("ana")
 
-        assertNull(preferences.data.first()[tourSeen])
+        assertEquals(3, wipes)
     }
 
     @Test

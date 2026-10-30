@@ -5,7 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-import pe.edu.upc.viora.core.database.AppDatabase
+import pe.edu.upc.viora.di.AppDatabase
 import pe.edu.upc.viora.features.phenology.infrastructure.local.BearingIndexDao
 import pe.edu.upc.viora.features.phenology.infrastructure.local.ChillTrackerDao
 import pe.edu.upc.viora.features.phenology.infrastructure.local.HarvestRecordDao

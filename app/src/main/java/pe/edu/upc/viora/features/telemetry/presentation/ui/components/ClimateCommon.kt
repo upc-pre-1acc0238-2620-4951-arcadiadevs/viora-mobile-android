@@ -23,7 +23,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBar
+import pe.edu.upc.viora.core.designsystem.component.VioraTopBarTitle
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Harvest800
@@ -36,7 +39,6 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
 
 /** Back button, plot name with a subtitle, and the "more options" button: the top bar of P90 and P91. */
 @Composable
@@ -47,33 +49,8 @@ internal fun ClimateTopBar(
     onMore: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        CircleIconButton(
-            icon = R.drawable.ic_arrow_back,
-            contentDescription = stringResource(R.string.action_back),
-            onClick = onBack,
-        )
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = title.ifBlank { " " },
-                style = MaterialTheme.typography.titleMedium,
-                color = Neutral900,
-            )
-            Text(text = subtitle, style = MaterialTheme.typography.bodySmall, color = Neutral600)
-        }
-        if (onMore != null) {
-            CircleIconButton(
-                icon = R.drawable.ic_more_vert,
-                contentDescription = stringResource(R.string.plot_menu_more),
-                onClick = onMore,
-            )
-        } else {
-            Spacer(Modifier.size(48.dp))
-        }
+    VioraTopBar(onBack = onBack, onMore = onMore, modifier = modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+        VioraTopBarTitle(title = title.ifBlank { " " }, subtitle = subtitle, fill = false, maxLines = Int.MAX_VALUE)
     }
 }
 
@@ -135,7 +112,7 @@ internal fun ClimateErrorCard(error: AppError, onRetry: () -> Unit, modifier: Mo
             color = Terracotta700,
         )
         TextButton(onClick = onRetry) {
-            Text(text = stringResource(R.string.climate_retry), color = Terracotta700)
+            Text(text = stringResource(R.string.common_retry), color = Terracotta700)
         }
     }
 }

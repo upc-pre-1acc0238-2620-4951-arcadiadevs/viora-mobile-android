@@ -14,18 +14,18 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
-import pe.edu.upc.viora.core.domain.isConnectivity
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.core.domain.isConnectivity
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveChillTrackerUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RefreshChillTrackerUseCase
 import pe.edu.upc.viora.features.phenology.domain.repository.ChillRepository
 import pe.edu.upc.viora.features.phenology.presentation.state.WinterChillUiState
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveIncidentsUseCase
-import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentStatus
-import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
+import pe.edu.upc.viora.features.telemetry.application.published.IncidentType
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 @HiltViewModel
 class WinterChillViewModel @Inject constructor(
@@ -37,7 +37,7 @@ class WinterChillViewModel @Inject constructor(
     observeIncidents: ObserveIncidentsUseCase,
 ) : ViewModel() {
 
-    val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "WinterChillRoute requires plotId" }
+    val plotId: String = savedStateHandle.requirePlotId().value
     private val initialPlotName: String = savedStateHandle.get<String>("plotName").orEmpty()
 
     private data class RefreshState(
@@ -54,7 +54,7 @@ class WinterChillViewModel @Inject constructor(
         observePlot(PlotId(plotId)),
         refreshState,
         observeIncidents(plotId).map { incidents ->
-            incidents.firstOrNull { it.type == IncidentType.WARM_WINTER && it.status != IncidentStatus.NORMALIZED }?.id
+            incidents.firstOrNull { it.type == IncidentType.WARM_WINTER && it.status.isActive }?.id
         },
     ) { tracker, lastSync, plot, refresh, warmWinterAlertId ->
         val plotName = plot?.name ?: initialPlotName

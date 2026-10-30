@@ -16,4 +16,8 @@ interface BearingIndexDao {
 
     @Query("DELETE FROM bearing_indexes WHERE plot_id = :plotId")
     suspend fun deleteByPlot(plotId: String)
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM bearing_indexes")
+    suspend fun wipeAll()
 }

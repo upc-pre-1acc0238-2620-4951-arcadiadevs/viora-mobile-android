@@ -31,9 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Instant
-import java.time.ZoneId
 import java.time.format.TextStyle
-import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Harvest400
@@ -48,6 +46,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.features.telemetry.domain.entity.WeeklyTrendPoint
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentSeverity
 
@@ -189,9 +188,10 @@ fun WeeklyTrendChart(
                                 label = "tube_liquid_height",
                             )
 
+                            val zone = LocalAppZone.current
                             val dayLabel = runCatching {
                                 val instant = Instant.parse(point.timestamp)
-                                instant.atZone(ZoneId.systemDefault())
+                                instant.atZone(zone)
                                     .dayOfWeek
                                     .getDisplayName(TextStyle.SHORT, locale)
                                     .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }

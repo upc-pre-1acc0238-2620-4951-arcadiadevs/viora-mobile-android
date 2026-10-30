@@ -5,9 +5,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pe.edu.upc.viora.features.phenology.presentation.state.CampaignRules
-import pe.edu.upc.viora.features.phenology.presentation.state.YearCaption
-import pe.edu.upc.viora.features.phenology.presentation.state.YearError
+import pe.edu.upc.viora.core.presentation.parseKilos
+import pe.edu.upc.viora.features.phenology.domain.CampaignRules
+import pe.edu.upc.viora.features.phenology.domain.YearCaption
+import pe.edu.upc.viora.features.phenology.domain.YearError
 
 class CampaignRulesTest {
 
@@ -34,21 +35,21 @@ class CampaignRulesTest {
 
     @Test
     fun `kilos accept plain, grouped and decimal writings`() {
-        assertEquals(20_500.0, CampaignRules.parseKilos("20500")!!, 0.0)
-        assertEquals(20_500.0, CampaignRules.parseKilos("20 500")!!, 0.0)
-        assertEquals(20_500.0, CampaignRules.parseKilos("20.500")!!, 0.0)
-        assertEquals(20_500.0, CampaignRules.parseKilos("20,500")!!, 0.0)
-        assertEquals(20_500.5, CampaignRules.parseKilos("20500,5")!!, 0.0)
-        assertEquals(20_500.5, CampaignRules.parseKilos("20500.5")!!, 0.0)
-        assertEquals(-500.0, CampaignRules.parseKilos("-500")!!, 0.0)
+        assertEquals(20_500.0, parseKilos("20500")!!, 0.0)
+        assertEquals(20_500.0, parseKilos("20 500")!!, 0.0)
+        assertEquals(20_500.0, parseKilos("20.500")!!, 0.0)
+        assertEquals(20_500.0, parseKilos("20,500")!!, 0.0)
+        assertEquals(20_500.5, parseKilos("20500,5")!!, 0.0)
+        assertEquals(20_500.5, parseKilos("20500.5")!!, 0.0)
+        assertEquals(-500.0, parseKilos("-500")!!, 0.0)
     }
 
     @Test
     fun `kilos that are not a number are null`() {
-        assertNull(CampaignRules.parseKilos(""))
-        assertNull(CampaignRules.parseKilos("  "))
-        assertNull(CampaignRules.parseKilos("abc"))
-        assertNull(CampaignRules.parseKilos("-"))
+        assertNull(parseKilos(""))
+        assertNull(parseKilos("  "))
+        assertNull(parseKilos("abc"))
+        assertNull(parseKilos("-"))
     }
 
     @Test

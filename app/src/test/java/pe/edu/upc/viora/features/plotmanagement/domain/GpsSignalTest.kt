@@ -5,7 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GpsFix
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GpsSignal
 

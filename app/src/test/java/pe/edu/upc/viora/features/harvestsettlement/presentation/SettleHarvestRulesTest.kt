@@ -6,8 +6,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import pe.edu.upc.viora.core.presentation.pickerMillisToLocalDate
+import pe.edu.upc.viora.core.presentation.toPickerMillis
+import pe.edu.upc.viora.features.harvestsettlement.domain.valueobject.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CalibreReading
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.CommercialSizeGrade
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestRules
 
 class SettleHarvestRulesTest {
@@ -64,7 +66,7 @@ class SettleHarvestRulesTest {
     fun `the date picker round trips a local date through UTC millis`() {
         val date = LocalDate.of(2026, 5, 14)
 
-        assertEquals(date, SettleHarvestRules.fromPickerMillis(SettleHarvestRules.toPickerMillis(date)))
+        assertEquals(date, pickerMillisToLocalDate(date.toPickerMillis()))
     }
 
     @Test

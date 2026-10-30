@@ -12,18 +12,16 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppResult
-import pe.edu.upc.viora.features.phenology.application.usecase.ObserveBearingIndexUseCase
-import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestHistoryUseCase
-import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestLastRefreshUseCase
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.features.phenology.application.usecase.ObserveAlternationSummaryUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RefreshHarvestHistoryUseCase
-import pe.edu.upc.viora.features.phenology.domain.entity.HoblynBbi
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ArchivePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.LotHarvest
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotDetailUiState
@@ -34,9 +32,7 @@ class PlotDetailViewModel @Inject constructor(
     observePlot: ObservePlotUseCase,
     observePlots: ObservePlotsUseCase,
     private val archivePlot: ArchivePlotUseCase,
-    observeHarvests: ObserveHarvestHistoryUseCase,
-    observeBearingIndex: ObserveBearingIndexUseCase,
-    observeHarvestRefresh: ObserveHarvestLastRefreshUseCase,
+    observeAlternation: ObserveAlternationSummaryUseCase,
     private val refreshHarvests: RefreshHarvestHistoryUseCase,
 ) : ViewModel() {
 
@@ -48,16 +44,8 @@ class PlotDetailViewModel @Inject constructor(
     private val savedNoticeVisible: StateFlow<Boolean> =
         savedStateHandle.getStateFlow(KEY_NOTICE_VISIBLE, savedStateHandle.get<Boolean>(KEY_JUST_SAVED) ?: false)
 
-    private val harvest: Flow<LotHarvest?> = combine(
-        observeHarvests(plotId.value),
-        observeBearingIndex(plotId.value),
-        observeHarvestRefresh(plotId.value),
-    ) { records, index, lastRefresh ->
-        when {
-            records.isEmpty() && lastRefresh == null -> null
-            records.size >= HoblynBbi.MIN_CAMPAIGNS -> LotHarvest(index?.value ?: HoblynBbi.index(records), missingCampaigns = 0)
-            else -> LotHarvest(index = null, missingCampaigns = HoblynBbi.MIN_CAMPAIGNS - records.size)
-        }
+    private val harvest: Flow<LotHarvest?> = observeAlternation(plotId.value).map { summary ->
+        summary?.let { LotHarvest(it.index, missingCampaigns = it.missingCampaigns) }
     }
 
     val uiState: StateFlow<PlotDetailUiState> = combine(

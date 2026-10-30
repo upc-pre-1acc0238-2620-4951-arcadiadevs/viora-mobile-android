@@ -38,13 +38,14 @@ import java.math.BigDecimal
 import java.time.Instant
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
+import pe.edu.upc.viora.core.designsystem.component.OutlinedPillButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Neutral100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral200
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 import pe.edu.upc.viora.features.subscription.domain.entity.QuotaExtension
 import pe.edu.upc.viora.features.subscription.presentation.state.ExtensionCodeUiState
 import pe.edu.upc.viora.features.subscription.presentation.state.RedeemFailure

@@ -19,7 +19,7 @@ import org.junit.Before
 import org.junit.Test
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveGpsFixesUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.service.LocationTracker
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GpsFix
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.GpsReading
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.GpsTrackingViewModel

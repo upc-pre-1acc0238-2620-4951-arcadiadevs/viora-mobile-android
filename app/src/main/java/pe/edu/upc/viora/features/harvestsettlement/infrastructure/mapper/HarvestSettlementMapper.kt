@@ -1,8 +1,8 @@
 package pe.edu.upc.viora.features.harvestsettlement.infrastructure.mapper
 
 import java.time.Instant
-import java.time.LocalDate
-import java.time.OffsetDateTime
+import pe.edu.upc.viora.core.network.toInstantOrNull
+import pe.edu.upc.viora.core.network.toLocalDateOrNull
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.HarvestSettlement
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettleHarvestDraft
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementStatus
@@ -131,11 +131,3 @@ fun String.toStabilizationStatus(): StabilizationStatus = when (this) {
     "NO_BASELINE_ALTERNATION" -> StabilizationStatus.NO_BASELINE_ALTERNATION
     else -> StabilizationStatus.INSUFFICIENT_SETTLEMENTS
 }
-
-private fun String?.toInstantOrNull(): Instant? = this?.let { raw ->
-    runCatching { Instant.parse(raw) }
-        .recoverCatching { OffsetDateTime.parse(raw).toInstant() }
-        .getOrNull()
-}
-
-private fun String?.toLocalDateOrNull(): LocalDate? = this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }

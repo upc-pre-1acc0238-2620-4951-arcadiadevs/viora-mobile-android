@@ -2,10 +2,10 @@ package pe.edu.upc.viora.features.phenology.presentation.state
 
 import java.time.Instant
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.features.phenology.domain.entity.BbiClass
 import pe.edu.upc.viora.features.phenology.domain.entity.BbiInterval
 import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 
 /** The plot facts the header shows next to "Alternancia". */
 data class PlotSubtitle(val variety: OliveVariety, val areaHectares: Double, val estimatedTrees: Int)

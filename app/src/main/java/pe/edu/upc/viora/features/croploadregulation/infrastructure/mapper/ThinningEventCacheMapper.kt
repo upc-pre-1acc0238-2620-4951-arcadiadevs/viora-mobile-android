@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper
 
+import java.time.Clock
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningEvent
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventEntity
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.ThinningEventItemDto
@@ -29,7 +30,7 @@ fun ThinningEventItemDto.toEntity(): ThinningEventEntity = ThinningEventEntity(
     timeliness = timeliness,
 )
 
-fun ThinningEventEntity.toDomain(): ThinningEvent = ThinningEventItemDto(
+fun ThinningEventEntity.toDomain(clock: Clock): ThinningEvent = ThinningEventItemDto(
     id = id,
     eventType = eventType,
     prescriptionId = prescriptionId,
@@ -48,4 +49,4 @@ fun ThinningEventEntity.toDomain(): ThinningEvent = ThinningEventItemDto(
     executedDate = executedDate,
     laborCrewSize = laborCrewSize,
     timeliness = timeliness,
-).toDomain()
+).toDomain(clock)

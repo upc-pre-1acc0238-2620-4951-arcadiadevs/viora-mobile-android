@@ -29,6 +29,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraBottomSheet
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
@@ -43,7 +45,6 @@ import pe.edu.upc.viora.core.presentation.formatDecimal
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CaliberProjection
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.LoadBalance
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.CaliberCard
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * "¿Cómo se calcula?" of P63, built like the BBI sheet of Alternancia (P40): what the caliber compares, the plot's own
@@ -58,13 +59,7 @@ internal fun CaliberInfoSheet(
     variety: String,
     onDismiss: () -> Unit,
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        dragHandle = { Box(Modifier.padding(top = 12.dp).width(36.dp).height(4.dp).clip(RoundedCornerShape(2.dp)).background(Neutral300)) },
-    ) {
+    VioraBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())

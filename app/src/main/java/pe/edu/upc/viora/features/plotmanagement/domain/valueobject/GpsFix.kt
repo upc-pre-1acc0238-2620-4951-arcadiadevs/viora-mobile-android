@@ -1,5 +1,7 @@
 package pe.edu.upc.viora.features.plotmanagement.domain.valueobject
 
+import pe.edu.upc.viora.core.domain.GeoPoint
+
 /**
  * A position reported by the phone's GPS. [accuracyMeters] is the radius of the circle the real
  * position lies in (68 % of the time): the smaller, the better.

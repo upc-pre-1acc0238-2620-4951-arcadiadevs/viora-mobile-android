@@ -19,8 +19,8 @@ import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveChillTrackerUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RefreshChillTrackerUseCase
 import pe.edu.upc.viora.features.phenology.chillTracker
-import pe.edu.upc.viora.features.phenology.domain.entity.ChillTracker
-import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
+import pe.edu.upc.viora.features.phenology.application.published.ChillTracker
+import pe.edu.upc.viora.features.phenology.application.published.WinterSeasonState
 import pe.edu.upc.viora.features.phenology.domain.repository.ChillRepository
 import pe.edu.upc.viora.features.telemetry.FakeWarmWinterIncidents
 import pe.edu.upc.viora.features.telemetry.application.usecase.CompleteMitigationStepUseCase
@@ -68,6 +68,7 @@ class WarmWinterAlertTest {
         completeMitigationStepUseCase = CompleteMitigationStepUseCase(incidents),
         observeChillTracker = ObserveChillTrackerUseCase(chill),
         refreshChillTracker = RefreshChillTrackerUseCase(chill),
+        ioDispatcher = Dispatchers.Unconfined,
     )
 
     private fun AlertDetailViewModel.content() = uiState.value as AlertDetailUiState.Content

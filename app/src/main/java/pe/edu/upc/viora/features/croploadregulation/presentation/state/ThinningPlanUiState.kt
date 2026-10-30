@@ -5,10 +5,10 @@ import java.time.LocalDate
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningExecution
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningPrescription
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.PrescriptionBlocker
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 
 /** P61 · Plan del lote. */
 sealed interface ThinningPlanUiState {

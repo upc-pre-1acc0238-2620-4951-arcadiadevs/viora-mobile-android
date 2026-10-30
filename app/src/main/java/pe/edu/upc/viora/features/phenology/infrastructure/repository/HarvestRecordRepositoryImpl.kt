@@ -23,6 +23,7 @@ import pe.edu.upc.viora.features.phenology.infrastructure.mapper.toDomain
 import pe.edu.upc.viora.features.phenology.infrastructure.mapper.toEntity
 import pe.edu.upc.viora.features.phenology.infrastructure.remote.HarvestRecordDto
 import pe.edu.upc.viora.features.phenology.infrastructure.remote.PhenologyService
+import pe.edu.upc.viora.core.domain.appResultOf
 
 class HarvestRecordRepositoryImpl @Inject constructor(
     private val service: PhenologyService,
@@ -54,7 +55,7 @@ class HarvestRecordRepositoryImpl @Inject constructor(
             else -> return remoteMetrics
         }
         val entities = (remoteRecords as AppResult.Success).value.map { it.toEntity() }
-        return guarded {
+        return appResultOf<Unit> {
             recordDao.replaceForPlot(plotId, entities)
             if (index != null) indexDao.upsert(index) else indexDao.deleteByPlot(plotId)
             cacheMetadataDao.upsert(CacheMetadataEntity(cacheKey(plotId), clock.millis()))
@@ -72,7 +73,7 @@ class HarvestRecordRepositoryImpl @Inject constructor(
     override suspend fun remove(plotId: String, recordId: String): AppResult<Unit> {
         val result = apiCaller.callUnit { service.removeRecord(plotId, recordId) }
         if (result is AppResult.Failure) return result
-        val dropped = guarded {
+        val dropped = appResultOf<Unit> {
             recordDao.deleteById(recordId)
             indexDao.deleteByPlot(plotId)
         }
@@ -90,22 +91,13 @@ class HarvestRecordRepositoryImpl @Inject constructor(
     private suspend fun AppResult<HarvestRecordDto>.cachedAndRefreshed(plotId: String): AppResult<HarvestRecord> {
         if (this is AppResult.Failure) return this
         val entity = (this as AppResult.Success).value.toEntity()
-        val stored = guarded {
+        val stored = appResultOf<Unit> {
             recordDao.upsertAll(listOf(entity))
             indexDao.deleteByPlot(plotId)
         }
         if (stored is AppResult.Failure) return stored
         refresh(plotId)
         return AppResult.Success(entity.toDomain())
-    }
-
-    private suspend fun guarded(block: suspend () -> Unit): AppResult<Unit> = try {
-        block()
-        AppResult.Success(Unit)
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (throwable: Throwable) {
-        AppResult.Failure(AppError.Unknown(throwable))
     }
 
     private fun cacheKey(plotId: String) = "harvest:$plotId"

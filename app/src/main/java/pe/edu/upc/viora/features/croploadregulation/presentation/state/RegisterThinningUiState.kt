@@ -2,6 +2,8 @@ package pe.edu.upc.viora.features.croploadregulation.presentation.state
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningTimeliness
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.thinningTimeliness
 import pe.edu.upc.viora.core.domain.AppError
 
 /**
@@ -34,8 +36,8 @@ data class RegisterThinningUiState(
             val opens = windowOpensOn ?: return null
             val closes = windowClosesOn ?: return null
             return when {
-                today.isBefore(opens) -> WindowCheck.NotOpenYet(opens)
-                executedOn.isAfter(closes) -> WindowCheck.Late(closes)
+                thinningTimeliness(today, opens, closes) == ThinningTimeliness.BEFORE -> WindowCheck.NotOpenYet(opens)
+                thinningTimeliness(executedOn, opens, closes) == ThinningTimeliness.LATE -> WindowCheck.Late(closes)
                 else -> WindowCheck.Within(ChronoUnit.DAYS.between(today, closes).toInt().takeIf { it >= 0 })
             }
         }

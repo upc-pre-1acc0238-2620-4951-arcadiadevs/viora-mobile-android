@@ -37,15 +37,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Instant
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.MorphingShapeIndicator
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.theme.*
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatMoney
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 import pe.edu.upc.viora.features.subscription.domain.entity.ExtensionAction
 import pe.edu.upc.viora.features.subscription.presentation.state.PlanExtensionUiState
 import pe.edu.upc.viora.features.subscription.presentation.viewmodel.PaymentResultProfileViewModel
@@ -165,7 +166,7 @@ internal fun PlanExtensionContent(
                 is PlanExtensionUiState.Failed -> {
                     Text(stringResource(state.error.messageRes()), Modifier.padding(vertical = Spacing.lg),
                         style = MaterialTheme.typography.bodyLarge, color = Terracotta600)
-                    TextButton(onRetry) { Text(stringResource(R.string.producer_plan_retry)) }
+                    TextButton(onRetry) { Text(stringResource(R.string.common_retry)) }
                 }
                 else -> {
                     Spacer(Modifier.height(Spacing.xl))
@@ -272,16 +273,16 @@ private fun ExtensionPrice(state: PlanExtensionUiState.Selecting) {
     val days = state.pricing.billableDays
     Text(stringResource(R.string.plan_extension_total), Modifier.padding(top = Spacing.lg),
         style = EditorialEyebrow, color = Neutral600)
-    Text(formatPlanMoney(state.total, currency, locale), Modifier.testTag("plan-extension-total").drawBehind {
+    Text(formatMoney(state.total, currency, locale), Modifier.testTag("plan-extension-total").drawBehind {
         drawLine(Harvest300.copy(alpha = 0.55f), Offset(0f, size.height * 0.82f),
             Offset(size.width, size.height * 0.82f), strokeWidth = size.height * 0.16f)
     }, style = EditorialPrice, color = Neutral900)
     val breakdown = if (days != null) {
         pluralStringResource(R.plurals.plan_extension_breakdown_days, days, days,
-            formatPlanCapacity(state.addedHectares, locale), formatPlanMoney(state.pricing.ratePerHa, currency, locale))
+            formatPlanCapacity(state.addedHectares, locale), formatMoney(state.pricing.ratePerHa, currency, locale))
     } else {
         pluralStringResource(R.plurals.plan_extension_breakdown, months, months,
-            formatPlanCapacity(state.addedHectares, locale), formatPlanMoney(state.pricing.monthlyRatePerHa, currency, locale))
+            formatPlanCapacity(state.addedHectares, locale), formatMoney(state.pricing.monthlyRatePerHa, currency, locale))
     }
     Text(breakdown, style = MaterialTheme.typography.bodySmall, color = Neutral700)
 }
@@ -398,7 +399,7 @@ private fun ResultRow(label: String, value: String) {
 internal fun planDate(at: Instant?): String? {
     val pattern = stringResource(R.string.my_plan_date_pattern)
     val locale: Locale = LocalConfiguration.current.locales[0]
-    return at?.atZone(ZoneId.systemDefault())?.toLocalDate()?.format(DateTimeFormatter.ofPattern(pattern, locale))
+    return at?.atZone(LocalAppZone.current)?.toLocalDate()?.format(DateTimeFormatter.ofPattern(pattern, locale))
 }
 
 /** The renewal window has its own message; anything else uses the app's generic one. */

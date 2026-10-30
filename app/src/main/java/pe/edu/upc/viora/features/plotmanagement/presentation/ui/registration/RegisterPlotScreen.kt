@@ -18,7 +18,7 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraConfirmDialog
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.MarkingMethod
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.GpsTrackingViewModel

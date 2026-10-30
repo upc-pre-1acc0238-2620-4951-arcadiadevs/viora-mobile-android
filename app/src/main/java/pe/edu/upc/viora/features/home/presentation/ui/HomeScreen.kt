@@ -1,11 +1,9 @@
 package pe.edu.upc.viora.features.home.presentation.ui
 
 import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -19,8 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -40,23 +36,24 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.Year
 import pe.edu.upc.viora.R
-import pe.edu.upc.viora.features.home.presentation.state.HomePhase
+import pe.edu.upc.viora.core.designsystem.component.VioraErrorState
+import pe.edu.upc.viora.core.designsystem.component.VioraGreetingHeader
+import pe.edu.upc.viora.core.designsystem.component.VioraHeadline
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
-import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
-import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.core.presentation.messageRes
+import pe.edu.upc.viora.features.home.presentation.state.HomePhase
 import pe.edu.upc.viora.features.home.presentation.state.HomeUiState
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
 import pe.edu.upc.viora.features.home.presentation.tour.LocalHomeTourTargets
 import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeGreetingViewModel
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeViewModel
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
+import pe.edu.upc.viora.core.domain.GeoPoint
 
 private val ScreenPadding = 24.dp
 
@@ -81,6 +78,7 @@ fun HomeScreen(
     phase: HomePhase? = null,
     viewModel: HomeViewModel = hiltViewModel(),
     greetingViewModel: HomeGreetingViewModel = hiltViewModel(),
+    widgets: HomeWidgets = HomeWidgets(),
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
@@ -101,6 +99,7 @@ fun HomeScreen(
         isAccessPaused = isAccessPaused,
         phase = phase,
         modifier = modifier,
+        widgets = widgets,
         sections = sections,
     )
 }
@@ -124,6 +123,7 @@ fun HomeScreenContent(
     today: LocalDate = LocalDate.now(),
     isAccessPaused: Boolean = false,
     phase: HomePhase? = null,
+    widgets: HomeWidgets = HomeWidgets(),
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
     val systemBars = WindowInsets.systemBars.asPaddingValues()
@@ -153,7 +153,7 @@ fun HomeScreenContent(
                     bottom = VioraTabBarDefaults.ContentBottomPadding + systemBars.calculateBottomPadding(),
                 ),
         ) {
-            HomeHeader(
+            VioraGreetingHeader(
                 date = today,
                 isOffline = state.isOffline,
                 lastRefresh = state.lastRefresh,
@@ -179,7 +179,7 @@ fun HomeScreenContent(
                     phase != null -> stringResource(phase.headline.second)
                     else -> stringResource(R.string.home_headline_emphasis)
                 }
-                HomeHeadline(lead = headlineLead, emphasis = headlineEmphasis)
+                VioraHeadline(lead = headlineLead, emphasis = headlineEmphasis)
                 HomeContextChips(
                     campaignYear = Year.from(today).value,
                     plotCount = plots.size,
@@ -197,7 +197,12 @@ fun HomeScreenContent(
             }
             when (state) {
                 HomeUiState.Loading -> Centered { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) }
-                is HomeUiState.Error -> ErrorState(error = state.error, onRetry = onRefresh)
+                is HomeUiState.Error -> VioraErrorState(
+                    message = stringResource(state.error.messageRes()),
+                    onRetry = onRefresh,
+                    modifier = Modifier.padding(horizontal = ScreenPadding, vertical = 32.dp),
+                    title = stringResource(R.string.home_loading_error),
+                )
                 is HomeUiState.NoPlots -> {
                     // Without plots and without access the yellow card still comes first (Figma P10 · Sin acceso activo).
                     if (isAccessPaused) sections()
@@ -226,15 +231,16 @@ fun HomeScreenContent(
                             modifier = Modifier
                                 .padding(top = 28.dp)
                                 .homeTourTarget(HomeTourTarget.Field),
+                            widgets = widgets,
                         )
                         val focused = state.focusedPlot
-                        val alternation = state.alternation
-                        if (focused != null && alternation != null) {
-                            HomeAlternationCard(
-                                plotName = focused.name,
-                                alternation = alternation,
-                                onOpen = { onOpenAlternation(focused.id, focused.name) },
-                                modifier = Modifier
+                        if (focused != null) {
+                            widgets.alternation(
+                                focused.id.value,
+                                focused.name,
+                                focused.areaHectares,
+                                { onOpenAlternation(focused.id, focused.name) },
+                                Modifier
                                     .padding(start = ScreenPadding, end = ScreenPadding, top = 32.dp)
                                     .homeTourTarget(HomeTourTarget.Alternation),
                             )
@@ -271,18 +277,6 @@ private fun FocusPicker(state: HomeUiState.Content, onSelect: (PlotId) -> Unit, 
 @Composable
 private fun Centered(content: @Composable () -> Unit) {
     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp), contentAlignment = Alignment.Center) { content() }
-}
-
-@Composable
-private fun ErrorState(error: AppError, onRetry: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenPadding, vertical = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(text = stringResource(R.string.home_loading_error), style = MaterialTheme.typography.headlineSmall)
-        Text(text = stringResource(error.messageRes()), style = MaterialTheme.typography.bodyMedium, color = Neutral600)
-        TextButton(onClick = onRetry) { Text(stringResource(R.string.plots_retry)) }
-    }
 }
 
 private fun samplePlot(id: String, name: String, variety: OliveVariety, hectares: Double, treesPerHectare: Int) = Plot(

@@ -9,11 +9,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pe.edu.upc.viora.core.presentation.PhoneCountry
 import pe.edu.upc.viora.features.iam.domain.valueobject.OnboardingAnswers
-import pe.edu.upc.viora.features.iam.infrastructure.local.OnboardingStore
-import pe.edu.upc.viora.features.iam.presentation.state.IamCountry
+import pe.edu.upc.viora.features.iam.domain.repository.OnboardingAnswersRepository
 import pe.edu.upc.viora.features.iam.presentation.state.OnboardingStep
 import pe.edu.upc.viora.features.iam.presentation.state.OnboardingUiState
+import pe.edu.upc.viora.features.subscription.application.usecase.ObserveProducerPlanCatalogUseCase
+import pe.edu.upc.viora.features.subscription.application.usecase.RefreshProducerPlanCatalogUseCase
 
 /**
  * The onboarding questions T02b-T02f. Order: name, mobile, cooperative code, hectares (skipped when
@@ -21,12 +23,24 @@ import pe.edu.upc.viora.features.iam.presentation.state.OnboardingUiState
  * producer moves on, and an earlier run is picked up where its answers left off.
  */
 @HiltViewModel
-class OnboardingViewModel @Inject constructor(private val store: OnboardingStore) : ViewModel() {
+class OnboardingViewModel @Inject constructor(
+    private val store: OnboardingAnswersRepository,
+    observePlanCatalog: ObserveProducerPlanCatalogUseCase,
+    refreshPlanCatalog: RefreshProducerPlanCatalogUseCase,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
 
     init {
+        // The estimate of T02d uses the price of the plan catalog (public, cached once downloaded).
+        viewModelScope.launch { refreshPlanCatalog() }
+        viewModelScope.launch {
+            observePlanCatalog().collect { catalog ->
+                val offer = catalog.offers.firstOrNull() ?: return@collect
+                _uiState.update { it.copy(referenceRatePerHa = offer.monthlyRatePerHa, currency = offer.currency) }
+            }
+        }
         viewModelScope.launch {
             val answers = store.answers()
             _uiState.update {
@@ -34,7 +48,7 @@ class OnboardingViewModel @Inject constructor(private val store: OnboardingStore
                 if (it.fullName.isNotEmpty() || it.step != OnboardingStep.NAME) return@update it
                 it.copy(
                     fullName = answers.fullName,
-                    country = IamCountry.fromIso(answers.countryIso),
+                    country = PhoneCountry.fromIso(answers.countryIso),
                     phone = answers.nationalPhone,
                     cooperativeCode = answers.cooperativeCode.orEmpty(),
                     savedCooperativeCode = answers.cooperativeCode,
@@ -49,11 +63,19 @@ class OnboardingViewModel @Inject constructor(private val store: OnboardingStore
         }
     }
 
+    /** Continuing below the legal notice records acceptance before opening registration. */
+    fun acceptTermsAndContinue(onContinue: () -> Unit) {
+        viewModelScope.launch {
+            store.acceptTerms()
+            onContinue()
+        }
+    }
+
     // ---- Field edits -----------------------------------------------------------------------
 
     fun onName(value: String) = _uiState.update { it.copy(fullName = value) }
 
-    fun onCountry(value: IamCountry) =
+    fun onCountry(value: PhoneCountry) =
         _uiState.update { it.copy(country = value, phone = it.phone.take(value.nationalDigits)) }
 
     fun onPhone(value: String) = _uiState.update {

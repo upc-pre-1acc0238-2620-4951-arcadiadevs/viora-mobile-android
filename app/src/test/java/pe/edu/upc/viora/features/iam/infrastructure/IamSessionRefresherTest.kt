@@ -3,6 +3,8 @@ package pe.edu.upc.viora.features.iam.infrastructure
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -140,6 +142,56 @@ class IamSessionRefresherTest {
 
         assertEquals("old-access", refresher.freshAccessToken())
         assertEquals("old-refresh", runBlocking { store.session() }!!.refreshToken)
+    }
+
+    /** N threads ask at the same moment; the answer is slow so they all queue behind the first renewal. */
+    private fun askAtOnce(threads: Int, rejected: String?): List<String?> {
+        val start = CountDownLatch(1)
+        val pool = Executors.newFixedThreadPool(threads)
+        try {
+            val answers = (1..threads).map {
+                pool.submit<String?> {
+                    start.await()
+                    refresher.freshAccessToken(rejected)
+                }
+            }
+            start.countDown()
+            return answers.map { it.get(10, TimeUnit.SECONDS) }
+        } finally {
+            pool.shutdownNow()
+        }
+    }
+
+    @Test
+    fun `many requests with a token about to expire renew it only once`() {
+        saveSession(expiresInMillis = 30_000)
+        server.enqueue(
+            MockResponse()
+                .setBody("""{"accessToken":"new-access","refreshToken":"new-refresh","tokenType":"Bearer","expiresIn":900,"userId":"user-1","role":"ROLE_PRODUCER"}""")
+                .setBodyDelay(300, TimeUnit.MILLISECONDS),
+        )
+
+        val tokens = askAtOnce(threads = 8, rejected = null)
+
+        // A second refresh would present the used refresh token and close every session of the account.
+        assertEquals(List(8) { "new-access" }, tokens)
+        assertEquals(1, server.requestCount)
+    }
+
+    @Test
+    fun `many requests rejected with the same token renew it only once`() {
+        saveSession(expiresInMillis = 5 * 60_000)
+        server.enqueue(
+            MockResponse()
+                .setBody("""{"accessToken":"new-access","refreshToken":"new-refresh","tokenType":"Bearer","expiresIn":900,"userId":"user-1","role":"ROLE_PRODUCER"}""")
+                .setBodyDelay(300, TimeUnit.MILLISECONDS),
+        )
+
+        val tokens = askAtOnce(threads = 8, rejected = "old-access")
+
+        assertEquals(List(8) { "new-access" }, tokens)
+        assertEquals(1, server.requestCount)
+        assertEquals("new-refresh", runBlocking { store.session() }!!.refreshToken)
     }
 
     @Test

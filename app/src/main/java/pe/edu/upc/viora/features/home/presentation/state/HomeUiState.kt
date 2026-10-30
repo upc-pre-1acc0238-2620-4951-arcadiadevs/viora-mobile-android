@@ -3,7 +3,7 @@ package pe.edu.upc.viora.features.home.presentation.state
 import java.time.Instant
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.isConnectivity
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 
 /**
  * What the Home (Figma P10 "Inicio") shows. The states are mutually exclusive.
@@ -41,10 +41,7 @@ sealed interface HomeUiState {
         override val activeAlertsCount: Long = 0,
     ) : HomeUiState
 
-    /**
-     * Cached plots, possibly stale. [focusedPlot] is the one the cards of the Home talk about and
-     * [alternation] what is known about its harvests (null until they are downloaded).
-     */
+    /** Cached plots, possibly stale. [focusedPlot] is the one the cards of the Home talk about. */
     data class Content(
         val plots: List<Plot>,
         override val isOffline: Boolean,
@@ -52,6 +49,5 @@ sealed interface HomeUiState {
         val isRefreshing: Boolean,
         override val activeAlertsCount: Long = 0,
         val focusedPlot: Plot? = plots.firstOrNull(),
-        val alternation: HomeAlternation? = null,
     ) : HomeUiState
 }

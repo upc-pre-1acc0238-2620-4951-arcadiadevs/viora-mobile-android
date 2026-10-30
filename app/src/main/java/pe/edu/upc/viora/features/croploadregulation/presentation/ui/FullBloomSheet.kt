@@ -35,6 +35,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraBottomSheet
+import pe.edu.upc.viora.core.designsystem.component.VioraFieldLabel
+import pe.edu.upc.viora.core.designsystem.component.VioraStepButton
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
@@ -44,10 +49,6 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.FullBloomSheetState
-import pe.edu.upc.viora.features.phenology.presentation.ui.FieldLabel
-import pe.edu.upc.viora.features.phenology.presentation.ui.StepButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
 
 /**
  * P64 · Plena floración: the day most flowers of the plot were open, moved a day at a time, and the thinning window it
@@ -69,13 +70,7 @@ fun FullBloomSheet(
     val short = DateTimeFormatter.ofPattern(stringResource(R.string.thinning_pattern_short), locale)
     fun LocalDate.short(): String = short.format(this).replace(".", "")
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        dragHandle = { Box(Modifier.padding(top = 12.dp).width(36.dp).height(4.dp).clip(RoundedCornerShape(2.dp)).background(Neutral300)) },
-    ) {
+    VioraBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
@@ -104,9 +99,9 @@ fun FullBloomSheet(
                     .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                FieldLabel(stringResource(R.string.full_bloom_date_label))
+                VioraFieldLabel(stringResource(R.string.full_bloom_date_label))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    StepButton(
+                    VioraStepButton(
                         icon = null,
                         symbol = "−",
                         description = stringResource(R.string.full_bloom_previous_day),
@@ -131,7 +126,7 @@ fun FullBloomSheet(
                             color = Neutral600,
                         )
                     }
-                    StepButton(
+                    VioraStepButton(
                         icon = R.drawable.ic_add,
                         symbol = null,
                         description = stringResource(R.string.full_bloom_next_day),
@@ -146,7 +141,7 @@ fun FullBloomSheet(
                     .padding(start = 18.dp, end = 18.dp, top = 14.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                FieldLabel(stringResource(R.string.full_bloom_what_label))
+                VioraFieldLabel(stringResource(R.string.full_bloom_what_label))
                 Text(stringResource(R.string.full_bloom_what_body), style = MaterialTheme.typography.bodySmall, color = Neutral700)
             }
 

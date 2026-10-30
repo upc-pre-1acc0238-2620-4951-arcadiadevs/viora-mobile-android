@@ -3,10 +3,10 @@ package pe.edu.upc.viora.features.plotmanagement.domain.repository
 import java.time.Instant
 import kotlinx.coroutines.flow.Flow
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotChanges
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 
 /**
  * Offline-first access to the producer's plots. The local cache is the source of truth:

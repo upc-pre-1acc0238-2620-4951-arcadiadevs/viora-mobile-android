@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.harvestsettlement.infrastructure.mapper
 
+import java.time.Clock
 import java.time.LocalDate
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.PendingSettlement
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.PendingStatus
@@ -41,8 +42,8 @@ fun PendingSettlementEntity.toDraft(): SettleHarvestDraft = SettleHarvestDraft(
     notes = notes,
 )
 
-fun PendingSettlementEntity.toDomain(): PendingSettlement = PendingSettlement(
-    draft = runCatching { toDraft() }.getOrElse { toDraftWithToday() },
+fun PendingSettlementEntity.toDomain(clock: Clock): PendingSettlement = PendingSettlement(
+    draft = runCatching { toDraft() }.getOrElse { toDraftWithToday(clock) },
     idempotencyKey = idempotencyKey,
     status = runCatching { PendingStatus.valueOf(status) }.getOrDefault(PendingStatus.FAILED),
     lastErrorCode = lastErrorCode,
@@ -59,12 +60,12 @@ fun PendingSettlementEntity.toDomain(): PendingSettlement = PendingSettlement(
 )
 
 /** A corrupt date must not break the observed list: show the row with today's date so the user can fix or discard it. */
-private fun PendingSettlementEntity.toDraftWithToday() = SettleHarvestDraft(
+private fun PendingSettlementEntity.toDraftWithToday(clock: Clock) = SettleHarvestDraft(
     plotId = plotId,
     campaignYear = campaignYear,
     greenOlivesKg = greenOlivesKg,
     blackOlivesKg = blackOlivesKg,
-    weighedOn = LocalDate.now(),
+    weighedOn = LocalDate.now(clock),
     millTicketNumber = millTicketNumber,
     commercialFruitsPerKg = commercialFruitsPerKg,
     notes = notes,

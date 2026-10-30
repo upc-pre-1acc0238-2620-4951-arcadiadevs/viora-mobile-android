@@ -1,12 +1,10 @@
 package pe.edu.upc.viora.features.phenology.presentation.viewmodel
 
-import pe.edu.upc.viora.core.domain.isConnectivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
-import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,13 +16,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
-import pe.edu.upc.viora.features.phenology.application.usecase.ObserveBearingIndexUseCase
-import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestHistoryUseCase
-import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestLastRefreshUseCase
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.core.domain.isConnectivity
+import pe.edu.upc.viora.features.phenology.application.usecase.ObserveAlternationSummaryUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RefreshHarvestHistoryUseCase
-import pe.edu.upc.viora.features.phenology.domain.entity.BbiClass
-import pe.edu.upc.viora.features.phenology.domain.entity.BearingIndex
-import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
+import pe.edu.upc.viora.features.phenology.domain.AlternationSummary
 import pe.edu.upc.viora.features.phenology.domain.entity.HoblynBbi
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignChangeKind
 import pe.edu.upc.viora.features.phenology.presentation.state.HarvestHistoryUiState
@@ -32,21 +28,19 @@ import pe.edu.upc.viora.features.phenology.presentation.state.HarvestNotice
 import pe.edu.upc.viora.features.phenology.presentation.state.HarvestPresenter
 import pe.edu.upc.viora.features.phenology.presentation.state.PlotSubtitle
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 @HiltViewModel
 class HarvestHistoryViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    observeRecords: ObserveHarvestHistoryUseCase,
-    observeIndex: ObserveBearingIndexUseCase,
-    observeLastRefresh: ObserveHarvestLastRefreshUseCase,
+    observeAlternation: ObserveAlternationSummaryUseCase,
     observePlot: ObservePlotUseCase,
     private val refreshHistory: RefreshHarvestHistoryUseCase,
     private val clock: Clock,
 ) : ViewModel() {
 
-    val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "HarvestHistoryRoute needs a plotId" }
+    val plotId: String = savedStateHandle.requirePlotId().value
     private val plotName: String = savedStateHandle.get<String>("plotName").orEmpty()
 
     private data class RefreshState(
@@ -57,18 +51,14 @@ class HarvestHistoryViewModel @Inject constructor(
 
     private data class Extras(val newRecordId: String? = null, val notice: HarvestNotice? = null)
 
-    private data class Cache(
-        val records: List<HarvestRecord>,
-        val index: BearingIndex?,
-        val lastRefresh: Instant?,
-        val plot: Plot?,
-    )
+    /** The campaigns and the alternation as every screen reads them; null while nothing was ever cached. */
+    private data class Cache(val alternation: AlternationSummary?, val plot: Plot?)
 
     private val refreshState = MutableStateFlow(RefreshState())
     private val extras = MutableStateFlow(Extras())
 
     val uiState: StateFlow<HarvestHistoryUiState> = combine(
-        combine(observeRecords(plotId), observeIndex(plotId), observeLastRefresh(plotId), observePlot(PlotId(plotId)), ::Cache),
+        combine(observeAlternation(plotId), observePlot(PlotId(plotId)), ::Cache),
         refreshState,
         extras,
     ) { cache, refresh, extra -> build(cache, refresh, extra) }
@@ -106,8 +96,7 @@ class HarvestHistoryViewModel @Inject constructor(
     }
 
     private fun build(cache: Cache, refresh: RefreshState, extra: Extras): HarvestHistoryUiState {
-        val hasCache = cache.records.isNotEmpty() || cache.lastRefresh != null
-        if (!hasCache) {
+        if (cache.alternation == null) {
             return when {
                 refresh.error != null && !refresh.isRefreshing -> HarvestHistoryUiState.Error(refresh.error)
                 refresh.hasFinishedOnce && !refresh.isRefreshing -> content(cache, refresh, extra)
@@ -118,14 +107,10 @@ class HarvestHistoryViewModel @Inject constructor(
     }
 
     private fun content(cache: Cache, refresh: RefreshState, extra: Extras): HarvestHistoryUiState.Content {
-        val records = cache.records.sortedByDescending { it.campaignYear }
-        // The server's index is what is shown; the local formula only stands in if it is missing.
-        val index = if (records.size >= HoblynBbi.MIN_CAMPAIGNS) {
-            cache.index?.value ?: HoblynBbi.index(records)
-        } else {
-            null
-        }
-        val bbiClass = index?.let(BbiClass::of)
+        val records = cache.alternation?.records.orEmpty().sortedByDescending { it.campaignYear }
+        // Phenology decides the index once for every screen (the server's, or the local formula while it is missing).
+        val index = cache.alternation?.index
+        val bbiClass = cache.alternation?.bbiClass
         val currentYear = LocalDate.now(clock).year
         val summary = HarvestPresenter.summarize(records, bbiClass, currentYear)
         val suggestedYear = HarvestPresenter.suggestedYear(records, currentYear)
@@ -142,7 +127,7 @@ class HarvestHistoryViewModel @Inject constructor(
             summary = summary,
             suggestedYear = suggestedYear,
             offline = refresh.error.isConnectivity,
-            lastRefresh = cache.lastRefresh,
+            lastRefresh = cache.alternation?.lastRefresh,
             isRefreshing = refresh.isRefreshing,
             newRecordId = extra.newRecordId,
             notice = extra.notice,

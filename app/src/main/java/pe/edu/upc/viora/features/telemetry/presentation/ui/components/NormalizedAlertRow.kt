@@ -25,9 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.Green100
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -36,6 +34,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.PillShape
 import pe.edu.upc.viora.core.designsystem.theme.RobotoFamily
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.features.telemetry.domain.entity.AgroclimaticIncident
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.IncidentType
 
@@ -117,7 +116,7 @@ internal fun formatResolutionDate(incident: AgroclimaticIncident): String {
     val dateString = incident.triggeredAt
     if (dateString.isBlank()) return ""
 
-    val zone = ZoneId.systemDefault()
+    val zone = LocalAppZone.current
     val eventDate = runCatching {
         Instant.parse(dateString).atZone(zone).toLocalDate()
     }.recoverCatching {

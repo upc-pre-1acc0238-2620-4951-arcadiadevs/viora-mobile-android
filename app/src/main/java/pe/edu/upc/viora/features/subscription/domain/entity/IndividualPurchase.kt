@@ -4,9 +4,9 @@ import java.math.BigDecimal
 import java.net.URI
 import java.time.Instant
 import java.util.Currency
-import java.util.UUID
 import pe.edu.upc.viora.features.subscription.domain.valueobject.PlanCapacity
 import pe.edu.upc.viora.features.subscription.domain.valueobject.ProducerPlanCode
+import pe.edu.upc.viora.core.domain.Uuid
 
 /** Confirmed server terms; this model never grants application access. */
 data class IndividualPurchase(
@@ -20,7 +20,7 @@ data class IndividualPurchase(
     val status: String,
 ) {
     init {
-        UUID.fromString(id)
+        Uuid.parse(id)
         Currency.getInstance(currency)
         require(base.signum() >= 0 && tax.signum() >= 0 && total.signum() > 0)
         require(base.add(tax).compareTo(total) == 0)
@@ -30,7 +30,7 @@ data class IndividualPurchase(
 /** Only exact provider hosts over HTTPS are eligible for external navigation. */
 data class IndividualCheckout(val intentId: String, val url: String, val expiresAt: Instant) {
     init {
-        UUID.fromString(intentId)
+        Uuid.parse(intentId)
         require(isAllowedCheckoutUrl(url)) { "subscription.checkout.url.invalid" }
     }
 }

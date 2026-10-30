@@ -8,6 +8,8 @@ import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.PendingS
 import pe.edu.upc.viora.features.harvestsettlement.infrastructure.local.PendingSettlementEntity
 
 internal class InMemoryPendingSettlementDao : PendingSettlementDao {
+    override suspend fun wipeAll() = Unit
+
     val rows = MutableStateFlow<List<PendingSettlementEntity>>(emptyList())
 
     override fun observeAll(): Flow<List<PendingSettlementEntity>> = rows.map { it.sortedBy { row -> row.createdAt } }

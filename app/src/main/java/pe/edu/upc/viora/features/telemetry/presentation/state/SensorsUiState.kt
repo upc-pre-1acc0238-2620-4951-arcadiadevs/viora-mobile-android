@@ -1,7 +1,7 @@
 package pe.edu.upc.viora.features.telemetry.presentation.state
 
 import pe.edu.upc.viora.core.domain.AppError
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorNode
 
 /** What the sensors list screen shows (US14). */

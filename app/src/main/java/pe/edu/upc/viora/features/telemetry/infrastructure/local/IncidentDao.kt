@@ -43,4 +43,8 @@ interface IncidentDao {
     /** Updates local status and snooze timestamp when an alert is postponed offline or optimistically. */
     @Query("UPDATE agroclimatic_incidents SET status = :status, snoozed_until = :snoozedUntil WHERE id = :incidentId")
     suspend fun updatePostponed(incidentId: String, status: String, snoozedUntil: String?)
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM agroclimatic_incidents")
+    suspend fun wipeAll()
 }

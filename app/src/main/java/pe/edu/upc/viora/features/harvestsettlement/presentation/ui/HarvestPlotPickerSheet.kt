@@ -34,6 +34,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.VioraBottomSheet
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
@@ -43,11 +45,10 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.HarvestEntryUiState
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.PlotToSettle
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.CircleIconButton
+import pe.edu.upc.viora.features.harvestsettlement.domain.PlotToSettle
+import pe.edu.upc.viora.core.presentation.labelRes
 
 /**
  * P70, "¿Qué lote cosechaste?": the plots still "por registrar" in the campaign. Choosing one
@@ -60,13 +61,7 @@ fun HarvestPlotPickerSheet(
     onSelect: (PlotToSettle) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        dragHandle = { Box(Modifier.padding(top = 12.dp).size(width = 36.dp, height = 4.dp).clip(CircleShape).background(Neutral300)) },
-    ) {
+    VioraBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
                 .navigationBarsPadding()

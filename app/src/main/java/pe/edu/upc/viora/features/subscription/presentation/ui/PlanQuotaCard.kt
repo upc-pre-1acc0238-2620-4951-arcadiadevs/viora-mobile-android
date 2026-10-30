@@ -38,7 +38,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
-import pe.edu.upc.viora.core.presentation.vioraNumberFormat
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.features.subscription.presentation.viewmodel.MyPlanViewModel
 
 /**
@@ -52,7 +52,6 @@ fun PlanQuotaCard(onExpand: () -> Unit, modifier: Modifier = Modifier, viewModel
     // Back from an extension the quota has grown: read it again.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refresh() }
     if (state.isLoading || state.error != null || !state.isQuotaTight) return
-    val format = vioraNumberFormat(1, 1)
     val over = state.isOverQuota
     Column(
         modifier
@@ -64,12 +63,12 @@ fun PlanQuotaCard(onExpand: () -> Unit, modifier: Modifier = Modifier, viewModel
     ) {
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                "${format.format(state.usedHectares)} ha",
+                "${formatHectares(state.usedHectares)} ha",
                 style = MaterialTheme.typography.headlineMedium.copy(fontFamily = NewsreaderFamily, fontSize = 32.sp, lineHeight = 34.sp),
                 color = Neutral900,
             )
             Text(
-                stringResource(R.string.plots_quota_of, format.format(state.quotaHectares)),
+                stringResource(R.string.plots_quota_of, formatHectares(state.quotaHectares)),
                 style = MaterialTheme.typography.bodySmall,
                 color = Neutral600,
                 modifier = Modifier.padding(bottom = 6.dp),
@@ -82,8 +81,8 @@ fun PlanQuotaCard(onExpand: () -> Unit, modifier: Modifier = Modifier, viewModel
         }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                if (over) stringResource(R.string.plots_quota_over, format.format(state.excessHectares))
-                else stringResource(R.string.plots_quota_left, format.format(state.freeHectares)),
+                if (over) stringResource(R.string.plots_quota_over, formatHectares(state.excessHectares))
+                else stringResource(R.string.plots_quota_left, formatHectares(state.freeHectares)),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (over) Terracotta600 else Neutral700,
                 modifier = Modifier.weight(1f),

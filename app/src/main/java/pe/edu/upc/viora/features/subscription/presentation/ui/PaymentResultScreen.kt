@@ -18,12 +18,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.theme.*
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.PrimaryPillButton
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.features.subscription.presentation.state.IndividualCheckoutUiState
 
 /** P04: native full-screen results; entitlement and rejection come only from server evidence. */
@@ -95,7 +94,7 @@ internal fun PaymentResultScreen(
                 HorizontalDivider(color = Neutral200)
                 PaymentResultRow(stringResource(R.string.payment_result_plan),
                     stringResource(R.string.payment_result_quota, formatPlanCapacity(confirmed.subscription.capacity.hectares, locale)))
-                val end = confirmed.subscription.endsAt?.atZone(ZoneId.systemDefault())?.toLocalDate()
+                val end = confirmed.subscription.endsAt?.atZone(LocalAppZone.current)?.toLocalDate()
                 PaymentResultRow(stringResource(R.string.payment_result_validity), end?.let {
                     val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, "ddMMyyyy")
                     stringResource(R.string.payment_result_until, it.format(DateTimeFormatter.ofPattern(pattern, locale)))

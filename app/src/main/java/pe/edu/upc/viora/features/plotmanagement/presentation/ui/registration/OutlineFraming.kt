@@ -4,7 +4,7 @@ import kotlin.math.cos
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 
 /** Where to point a map camera so a whole outline is in view. */
 data class MapFraming(val center: GeoPoint, val zoom: Double)

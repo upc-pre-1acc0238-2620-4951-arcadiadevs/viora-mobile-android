@@ -17,11 +17,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.presentation.parseKilos
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveBearingIndexUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestHistoryUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RecordHarvestYieldUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RectifyHarvestYieldUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RemoveHarvestRecordUseCase
+import pe.edu.upc.viora.features.phenology.domain.CampaignRules
 import pe.edu.upc.viora.features.phenology.domain.entity.BearingIndex
 import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
 import pe.edu.upc.viora.features.phenology.domain.entity.HoblynBbi
@@ -29,8 +31,8 @@ import pe.edu.upc.viora.features.phenology.presentation.state.CampaignChangeKind
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignEditorUiState
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignMode
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignResult
-import pe.edu.upc.viora.features.phenology.presentation.state.CampaignRules
 import pe.edu.upc.viora.features.phenology.presentation.state.HarvestPresenter
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /**
  * Logic of the campaign sheet: the year and kilos the producer is typing, their validation, the
@@ -47,7 +49,7 @@ class CampaignEditorViewModel @Inject constructor(
     private val clock: Clock,
 ) : ViewModel() {
 
-    private val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId")) { "HarvestHistoryRoute needs a plotId" }
+    private val plotId: String = savedStateHandle.requirePlotId().value
 
     private data class Draft(
         val mode: CampaignMode,
@@ -101,7 +103,7 @@ class CampaignEditorViewModel @Inject constructor(
     fun save(onSaved: (CampaignResult) -> Unit) {
         val state = uiState.value ?: return
         if (!state.canSave || state.isSaving) return
-        val kilos = CampaignRules.parseKilos(state.kilosText) ?: return
+        val kilos = parseKilos(state.kilosText) ?: return
         draft.update { it?.copy(isSaving = true, error = null) }
         viewModelScope.launch {
             when (val mode = state.mode) {
@@ -154,7 +156,7 @@ class CampaignEditorViewModel @Inject constructor(
         val currentYear = currentYear()
         val registered = records.map { it.campaignYear }
         val current = if (records.size >= HoblynBbi.MIN_CAMPAIGNS) serverIndex?.value ?: HoblynBbi.index(records) else null
-        val kilos = CampaignRules.parseKilos(draft.kilosText)
+        val kilos = parseKilos(draft.kilosText)
         val kilosValid = CampaignRules.isValidKilos(kilos)
         val mode = draft.mode
         val yearError = when (mode) {

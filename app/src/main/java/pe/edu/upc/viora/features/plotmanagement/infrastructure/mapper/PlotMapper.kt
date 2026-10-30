@@ -3,9 +3,9 @@ package pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper
 import android.util.Log
 import java.time.Instant
 import java.time.LocalDate
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotEntity
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.PlotDto
 

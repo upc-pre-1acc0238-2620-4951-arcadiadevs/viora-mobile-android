@@ -9,10 +9,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.subscription.domain.entity.ProducerSubscription
 import pe.edu.upc.viora.features.subscription.domain.valueobject.PlanCapacity
 import pe.edu.upc.viora.features.subscription.domain.valueobject.SubscriptionMode

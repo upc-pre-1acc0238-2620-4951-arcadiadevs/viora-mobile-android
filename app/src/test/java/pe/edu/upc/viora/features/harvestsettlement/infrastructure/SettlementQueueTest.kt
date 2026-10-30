@@ -378,7 +378,7 @@ class SettlementQueueTest {
     fun `a pending row maps back to the same draft`() {
         val entity = draft.copy(commercialFruitsPerKg = 105.0, notes = "ok").toPendingEntity("k", 1L, 2L)
 
-        val pending = entity.toDomain()
+        val pending = entity.toDomain(java.time.Clock.systemUTC())
 
         assertEquals(draft.copy(commercialFruitsPerKg = 105.0, notes = "ok"), pending.draft)
         assertEquals("k", pending.idempotencyKey)

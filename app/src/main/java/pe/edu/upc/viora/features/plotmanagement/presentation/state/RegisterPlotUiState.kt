@@ -1,10 +1,10 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.state
 
 import pe.edu.upc.viora.core.domain.AppError
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
 

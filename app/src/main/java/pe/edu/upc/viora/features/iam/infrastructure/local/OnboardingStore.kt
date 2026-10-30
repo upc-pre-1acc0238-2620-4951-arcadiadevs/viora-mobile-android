@@ -10,16 +10,14 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.first
+import pe.edu.upc.viora.features.iam.domain.repository.OnboardingAnswersRepository
 import pe.edu.upc.viora.features.iam.domain.valueobject.OnboardingAnswers
 
-/**
- * Keeps the onboarding answers on the phone, so closing the app in the middle does not lose them
- * (guide 02, section 3.1). Cleared once the email is verified.
- */
+/** The onboarding answers in DataStore. Cleared once the email is verified. */
 @Singleton
-class OnboardingStore @Inject constructor(private val dataStore: DataStore<Preferences>) {
+class OnboardingStore @Inject constructor(private val dataStore: DataStore<Preferences>) : OnboardingAnswersRepository {
 
-    suspend fun answers(): OnboardingAnswers {
+    override suspend fun answers(): OnboardingAnswers {
         val prefs = dataStore.data.first()
         return OnboardingAnswers(
             fullName = prefs[FULL_NAME].orEmpty(),
@@ -29,10 +27,12 @@ class OnboardingStore @Inject constructor(private val dataStore: DataStore<Prefe
             hectares = prefs[HECTARES],
             alertsEnabled = prefs[ALERTS],
             locationGranted = prefs[LOCATION],
+            termsAccepted = prefs[TERMS_ACCEPTED] == true,
         )
     }
 
-    suspend fun save(answers: OnboardingAnswers) {
+    /** The answers typed so far; the acceptance of the terms is only written by [acceptTerms]. */
+    override suspend fun save(answers: OnboardingAnswers) {
         dataStore.edit {
             it[FULL_NAME] = answers.fullName
             it[COUNTRY] = answers.countryIso
@@ -44,7 +44,12 @@ class OnboardingStore @Inject constructor(private val dataStore: DataStore<Prefe
         }
     }
 
-    suspend fun clear() {
+    /** One edit of its own, so it never writes back answers read before a save still in progress. */
+    override suspend fun acceptTerms() {
+        dataStore.edit { it[TERMS_ACCEPTED] = true }
+    }
+
+    override suspend fun clear() {
         dataStore.edit { prefs -> ALL_KEYS.forEach { prefs.remove(it) } }
     }
 
@@ -58,8 +63,9 @@ class OnboardingStore @Inject constructor(private val dataStore: DataStore<Prefe
         val PHONE = stringPreferencesKey("onboarding_phone")
         val COOPERATIVE_CODE = stringPreferencesKey("onboarding_cooperative_code")
         val HECTARES = intPreferencesKey("onboarding_hectares")
+        val TERMS_ACCEPTED = booleanPreferencesKey("onboarding_terms_accepted")
         val ALERTS = booleanPreferencesKey("onboarding_alerts")
         val LOCATION = booleanPreferencesKey("onboarding_location")
-        val ALL_KEYS = listOf(FULL_NAME, COUNTRY, PHONE, COOPERATIVE_CODE, HECTARES, ALERTS, LOCATION)
+        val ALL_KEYS = listOf(TERMS_ACCEPTED, FULL_NAME, COUNTRY, PHONE, COOPERATIVE_CODE, HECTARES, ALERTS, LOCATION)
     }
 }

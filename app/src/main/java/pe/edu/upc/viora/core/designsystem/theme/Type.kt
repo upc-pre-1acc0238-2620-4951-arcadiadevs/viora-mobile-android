@@ -8,6 +8,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
 
@@ -149,3 +150,13 @@ val EditorialMeasure = AppTypography.displayLarge.copy(fontSize = 64.sp, lineHei
 val EditorialPrice = AppTypography.displayLarge.copy(fontSize = 52.sp, lineHeight = 60.sp, letterSpacing = (-1.56).sp)
 val EditorialAction = AppTypography.titleLarge.copy(fontSize = 24.sp, lineHeight = 28.sp)
 val EditorialEyebrow = AppTypography.labelSmall.copy(letterSpacing = 1.32.sp)
+
+/** Exact Figma sizes the Material type scale does not cover (the thinning and dossier screens). */
+fun roboto(size: TextUnit, lineHeight: TextUnit) =
+    TextStyle(fontFamily = RobotoFamily, fontWeight = FontWeight.Normal, fontSize = size, lineHeight = lineHeight)
+
+fun robotoMedium(size: TextUnit, lineHeight: TextUnit) =
+    TextStyle(fontFamily = RobotoFamily, fontWeight = FontWeight.Medium, fontSize = size, lineHeight = lineHeight)
+
+fun newsreader(size: TextUnit, lineHeight: TextUnit) =
+    TextStyle(fontFamily = NewsreaderFamily, fontWeight = FontWeight.Normal, fontSize = size, lineHeight = lineHeight)

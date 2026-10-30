@@ -5,7 +5,7 @@ import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 
 /** Reads the outer ring of a GeoJSON `Polygon` (RFC 7946: `[longitude, latitude]` positions). */
 object GeoJsonPolygonParser {

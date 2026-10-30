@@ -19,4 +19,8 @@ interface SensorNodeDao {
 
     @Query("DELETE FROM sensor_nodes WHERE plot_id = :plotId AND id = :nodeId")
     suspend fun delete(plotId: String, nodeId: String)
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM sensor_nodes")
+    suspend fun wipeAll()
 }

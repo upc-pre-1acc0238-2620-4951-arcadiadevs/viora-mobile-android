@@ -14,11 +14,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePendingSettlementsUseCase
-import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObserveSettledHarvestsUseCase
+import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePlotsToSettleUseCase
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.RefreshSettledHarvestsUseCase
-import pe.edu.upc.viora.features.harvestsettlement.presentation.state.HarvestEntryRules
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.HarvestEntryUiState
+import pe.edu.upc.viora.features.harvestsettlement.presentation.state.toSettleCandidates
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 
 /**
@@ -29,8 +28,7 @@ import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlots
 @HiltViewModel
 class HarvestEntryViewModel @Inject constructor(
     private val observePlots: ObservePlotsUseCase,
-    observeSettlements: ObserveSettledHarvestsUseCase,
-    observePending: ObservePendingSettlementsUseCase,
+    observePlotsToSettle: ObservePlotsToSettleUseCase,
     private val refreshSettlements: RefreshSettledHarvestsUseCase,
     private val clock: Clock,
 ) : ViewModel() {
@@ -40,14 +38,12 @@ class HarvestEntryViewModel @Inject constructor(
 
     val uiState: StateFlow<HarvestEntryUiState> = combine(
         observePlots(),
-        observeSettlements(),
-        observePending(),
+        observePlotsToSettle(observePlots().map { it.toSettleCandidates() }),
         ready,
-    ) { plots, settlements, pending, isReady ->
-        val year = currentYear()
+    ) { plots, toSettle, isReady ->
         HarvestEntryUiState(
-            campaignYear = year,
-            plots = if (isReady) HarvestEntryRules.plotsToSettle(plots, settlements, pending, year) else emptyList(),
+            campaignYear = currentYear(),
+            plots = if (isReady) toSettle else emptyList(),
             totalPlots = plots.size,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HarvestEntryUiState(currentYear(), emptyList(), 0))

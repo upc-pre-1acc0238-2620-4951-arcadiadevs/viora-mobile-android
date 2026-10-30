@@ -2,7 +2,7 @@ package pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper
 
 import java.math.BigDecimal
 import java.math.RoundingMode
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 
 /** Writes the corners of a plot as a GeoJSON `Polygon` string (RFC 7946, `[longitude, latitude]`). */
 object GeoJsonPolygonWriter {

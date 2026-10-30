@@ -33,4 +33,8 @@ interface PlotDao {
     /** Drops the archived plots the server no longer lists (restored elsewhere). */
     @Query("DELETE FROM plots WHERE status != 'ACTIVE' AND id NOT IN (:keepIds)")
     suspend fun deleteArchivedExcept(keepIds: List<String>)
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM plots")
+    suspend fun wipeAll()
 }

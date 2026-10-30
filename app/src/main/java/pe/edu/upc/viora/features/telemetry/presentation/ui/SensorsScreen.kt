@@ -56,10 +56,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import java.util.Locale
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green100
@@ -81,19 +82,19 @@ import pe.edu.upc.viora.core.designsystem.theme.NewsreaderItalic
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.navigation.LotSection
+import pe.edu.upc.viora.core.navigation.LotSectionsSheet
+import pe.edu.upc.viora.core.presentation.formatHectares
+import pe.edu.upc.viora.core.presentation.formatPercent
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
+import pe.edu.upc.viora.core.presentation.formatCount
+import pe.edu.upc.viora.core.presentation.labelRes
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorNode
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorStatus
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorType
 import pe.edu.upc.viora.features.telemetry.presentation.state.LinkNodeUiState
 import pe.edu.upc.viora.features.telemetry.presentation.state.SensorsUiState
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatDegrees
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatPercent
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.LinkNodeViewModel
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.SensorsViewModel
 
@@ -272,14 +273,9 @@ fun SensorsScreenContent(
 
             when (state) {
                 SensorsUiState.Loading -> {
-                    Box(
-                        modifier = Modifier
+                    VioraLoadingState(modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 48.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator(color = Green900)
-                    }
+                            .padding(vertical = 48.dp))
                 }
                 is SensorsUiState.Error -> {
                     Column(
@@ -518,10 +514,10 @@ private fun SensorCard(node: SensorNode, onClick: () -> Unit = {}, modifier: Mod
                 val locale = LocalConfiguration.current.locales[0]
                 val readingText = when {
                     temp != null && hum != null -> {
-                        "${formatDegrees(locale, temp, decimals = 1)} · ${formatPercent(locale, hum)}"
+                        "${formatDegrees(locale, temp, decimals = 1)} · ${formatPercent(hum, locale)}"
                     }
                     hum != null -> {
-                        formatPercent(locale, hum)
+                        formatPercent(hum, locale)
                     }
                     else -> null
                 }
@@ -565,31 +561,6 @@ private fun StatusSummaryChip(
             text = text,
             style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
             color = textColor,
-        )
-    }
-}
-
-/** Circular icon button used for back and more-options buttons. */
-@Composable
-private fun CircleIconButton(
-    icon: Int,
-    contentDescription: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .background(Neutral0)
-            .clickable(role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = contentDescription,
-            tint = Neutral900,
-            modifier = Modifier.size(22.dp),
         )
     }
 }

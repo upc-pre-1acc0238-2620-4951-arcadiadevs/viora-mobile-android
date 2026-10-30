@@ -21,4 +21,8 @@ interface TelemetryReadingDao {
     /** Keeps the table small: nothing in the app reads further back than the 30-day window. */
     @Query("DELETE FROM telemetry_readings WHERE plot_id = :plotId AND observed_at_epoch_ms < :beforeEpochMs")
     suspend fun deleteBefore(plotId: String, beforeEpochMs: Long)
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM telemetry_readings")
+    suspend fun wipeAll()
 }

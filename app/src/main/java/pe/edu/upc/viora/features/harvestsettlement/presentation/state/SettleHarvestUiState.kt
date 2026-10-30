@@ -3,6 +3,7 @@ package pe.edu.upc.viora.features.harvestsettlement.presentation.state
 import java.time.LocalDate
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementSummary
+import pe.edu.upc.viora.features.harvestsettlement.domain.valueobject.CommercialSizeGrade
 
 /** The dialog over the settle form, if any. */
 sealed interface SettleDialog {

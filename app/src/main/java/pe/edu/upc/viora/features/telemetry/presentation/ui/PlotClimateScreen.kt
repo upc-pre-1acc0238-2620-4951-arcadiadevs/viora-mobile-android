@@ -59,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Duration
 import java.util.Locale
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green200
@@ -79,8 +80,11 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSectionsSheet
+import pe.edu.upc.viora.core.navigation.LotSection
+import pe.edu.upc.viora.core.navigation.LotSectionsSheet
+import pe.edu.upc.viora.core.presentation.formatClock
+import pe.edu.upc.viora.core.presentation.formatPercent
+import pe.edu.upc.viora.core.presentation.shortWeekday
 import pe.edu.upc.viora.features.telemetry.domain.entity.DailyThermalSummary
 import pe.edu.upc.viora.features.telemetry.domain.entity.ForecastDay
 import pe.edu.upc.viora.features.telemetry.domain.entity.SoilMoistureRules
@@ -100,13 +104,10 @@ import pe.edu.upc.viora.features.telemetry.presentation.ui.components.SoilGauge
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.Sparkline
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.SunGlyph
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.WeatherGlyph
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatClock
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatDegrees
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatElapsed
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatPercent
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatReadingStamp
 import pe.edu.upc.viora.features.telemetry.presentation.ui.components.formatWholeNumber
-import pe.edu.upc.viora.features.telemetry.presentation.ui.components.shortWeekday
 import pe.edu.upc.viora.features.telemetry.presentation.viewmodel.PlotClimateViewModel
 
 private val ScreenPadding = 24.dp
@@ -204,10 +205,7 @@ fun PlotClimateContent(
                 )
                 Spacer(Modifier.height(16.dp))
                 when (state) {
-                    PlotClimateUiState.Loading -> Box(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
-                        contentAlignment = Alignment.Center,
-                    ) { CircularProgressIndicator(color = Green900) }
+                    PlotClimateUiState.Loading -> VioraLoadingState(modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp))
                     is PlotClimateUiState.Error -> ClimateErrorCard(error = state.error, onRetry = onRefresh)
                     is PlotClimateUiState.Content -> ClimateSections(state, onSelectPlot, onOpenMetric)
                 }
@@ -330,14 +328,14 @@ private fun WeatherHeroCard(state: PlotClimateUiState.Content, locale: Locale) {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 latestHumidity?.let {
-                    HeroChip(stringResource(R.string.climate_chip_air, formatPercent(locale, it.value)))
+                    HeroChip(stringResource(R.string.climate_chip_air, formatPercent(it.value, locale)))
                 }
                 today?.let {
                     HeroChip(stringResource(R.string.climate_chip_wind, formatWholeNumber(locale, it.windSpeedKmh)))
                     HeroChip(
                         stringResource(
                             R.string.climate_chip_rain,
-                            formatPercent(locale, it.precipitationProbabilityPercent.toDouble()),
+                            formatPercent(it.precipitationProbabilityPercent.toDouble(), locale),
                         ),
                     )
                 }
@@ -454,7 +452,7 @@ private fun ForecastRow(
                     modifier = Modifier.padding(start = 4.dp).size(14.dp),
                 )
                 Text(
-                    text = formatPercent(locale, day.precipitationProbabilityPercent.toDouble()),
+                    text = formatPercent(day.precipitationProbabilityPercent.toDouble(), locale),
                     style = MaterialTheme.typography.labelSmall,
                     color = Green700,
                     modifier = Modifier.padding(start = 1.dp),
@@ -558,7 +556,7 @@ private fun SensorsRow(
             )
             MetricCard(
                 label = stringResource(R.string.climate_air_humidity),
-                value = state.series.latest(TelemetryMetric.AIR_HUMIDITY)?.let { formatPercent(locale, it.value) },
+                value = state.series.latest(TelemetryMetric.AIR_HUMIDITY)?.let { formatPercent(it.value, locale) },
                 trend = recent(TelemetryMetric.AIR_HUMIDITY).map { it.value },
                 onClick = { onOpenMetric(TelemetryMetric.AIR_HUMIDITY) },
                 modifier = Modifier.weight(1f),
@@ -606,7 +604,7 @@ private fun SoilCard(
                 return@Column
             }
             Text(
-                text = formatPercent(locale, latest.value),
+                text = formatPercent(latest.value, locale),
                 style = TextStyle(fontFamily = NewsreaderFamily, fontSize = 44.sp, lineHeight = 48.sp),
                 color = Neutral900,
                 // Narrow phones (360 dp) cannot fit "22 %" at 44 sp next to the gauge: shrink, never wrap.
@@ -632,7 +630,7 @@ private fun SoilCard(
                 Text(
                     text = stringResource(
                         R.string.climate_soil_recharge,
-                        formatPercent(locale, SoilMoistureRules.RECHARGE_POINT_PERCENT),
+                        formatPercent(SoilMoistureRules.RECHARGE_POINT_PERCENT, locale),
                     ),
                     style = MaterialTheme.typography.labelSmall,
                     color = Neutral900,

@@ -1,7 +1,10 @@
 package pe.edu.upc.viora.features.iam.presentation.state
 
-import pe.edu.upc.viora.features.iam.domain.valueobject.MobileNumbers
-import pe.edu.upc.viora.features.subscription.domain.valueobject.InvitationCode
+import java.math.BigDecimal
+import pe.edu.upc.viora.core.domain.MobileNumbers
+import pe.edu.upc.viora.core.domain.validation.PersonName
+import pe.edu.upc.viora.core.presentation.PhoneCountry
+import pe.edu.upc.viora.features.subscription.application.published.InvitationCode
 
 /** The onboarding questions in Figma order ("02 · Preguntas del onboarding"). */
 enum class OnboardingStep(val number: Int?) {
@@ -20,7 +23,7 @@ data class OnboardingUiState(
     val editing: Boolean = false,
 
     val fullName: String = "",
-    val country: IamCountry = IamCountry.PE,
+    val country: PhoneCountry = PhoneCountry.PE,
     val phone: String = "",
     /** The phone field was left or submitted, so an invalid number may show its error. */
     val phoneTouched: Boolean = false,
@@ -32,8 +35,11 @@ data class OnboardingUiState(
     val hectaresUnknown: Boolean = false,
     val alertsEnabled: Boolean = false,
     val locationGranted: Boolean = false,
+    /** Plan Productor price per hectare and month: the plan catalog's, or [FALLBACK_RATE_PER_HA] until it is known. */
+    val referenceRatePerHa: BigDecimal = FALLBACK_RATE_PER_HA,
+    val currency: String = DEFAULT_CURRENCY,
 ) {
-    val nameValid: Boolean get() = fullName.trim().count(Char::isLetter) >= MIN_NAME_LETTERS
+    val nameValid: Boolean get() = PersonName.isValid(fullName)
     val phoneValid: Boolean get() = MobileNumbers.isValidMobile(phone, country.iso)
     val showPhoneError: Boolean get() = !phoneValid && (phoneTouched || phone.length >= country.nationalDigits)
     /** The same format the redemption screen and the backend accept (COOP-XXXX), so a typo is caught here. */
@@ -41,9 +47,9 @@ data class OnboardingUiState(
 
     val phoneInternational: String get() = MobileNumbers.international(phone, country.iso)
 
-    /** Plan Productor estimate of T02d: a reference price per hectare and month. */
-    val monthlyPrice: Int get() = hectares * PRICE_PER_HECTARE_MONTH
-    val yearlyPrice: Int get() = monthlyPrice * 12
+    /** Plan Productor estimate of T02d at [referenceRatePerHa]. */
+    val monthlyPrice: BigDecimal get() = referenceRatePerHa.multiply(hectares.toBigDecimal())
+    val yearlyPrice: BigDecimal get() = monthlyPrice.multiply(MONTHS_PER_YEAR.toBigDecimal())
 
     companion object {
         const val MIN_HECTARES = 1
@@ -51,9 +57,13 @@ data class OnboardingUiState(
         /** The ruler of T02d spans 0-40 ha; larger farms keep using the + button. */
         const val RULER_MAX_HECTARES = 40
         const val DEFAULT_HECTARES = 5
-        /** Soles per hectare and month, the reference price shown in Figma (12 ha = S/ 660 al mes). */
-        const val PRICE_PER_HECTARE_MONTH = 55
-        const val MIN_NAME_LETTERS = 2
+        const val DEFAULT_CURRENCY = "PEN"
+        /**
+         * Only until the plan catalog answers (or when it never does, offline on the first run): the screen keeps
+         * the card of Figma instead of hiding it. The real price is always the server's.
+         */
+        val FALLBACK_RATE_PER_HA: BigDecimal = BigDecimal("55")
+        const val MONTHS_PER_YEAR = 12
         const val MAX_CODE_LENGTH = 16
     }
 }

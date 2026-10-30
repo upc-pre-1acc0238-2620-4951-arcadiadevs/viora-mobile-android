@@ -2,8 +2,8 @@ package pe.edu.upc.viora.features.plotmanagement.presentation.state
 
 import java.time.Instant
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 
 /** What the plots list screen shows. The states are mutually exclusive. */
 sealed interface PlotsUiState {

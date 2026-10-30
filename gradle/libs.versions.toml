@@ -75,6 +75,7 @@ okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver",
 # Persistence (Room 3 lives under the androidx.room3 group/package)
 room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
+room-testing = { group = "androidx.room3", name = "room3-testing", version.ref = "room" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 # Maps (Mapbox Maps SDK v11; the ndk27 builds are 16 KB page-size compatible)

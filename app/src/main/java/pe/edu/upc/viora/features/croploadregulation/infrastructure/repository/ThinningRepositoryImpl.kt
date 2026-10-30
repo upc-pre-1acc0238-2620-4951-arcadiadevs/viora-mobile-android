@@ -4,25 +4,28 @@ import java.time.Clock
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.map as flowMap
 import pe.edu.upc.viora.core.database.CacheMetadataDao
 import pe.edu.upc.viora.core.database.CacheMetadataEntity
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.domain.map
 import pe.edu.upc.viora.core.network.ApiCaller
+import pe.edu.upc.viora.features.croploadregulation.domain.entity.DraftSample
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.PlotSamplingOverview
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingDetailedReport
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingSummary
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningEvent
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.TreeSample
 import pe.edu.upc.viora.features.croploadregulation.domain.repository.ThinningRepository
-import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toDomain
-import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toRequestDto
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.SamplingStatus
 import pe.edu.upc.viora.features.croploadregulation.domain.valueobject.ThinningEventType
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventDao
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toDomain
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toDraft
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toEntity
+import pe.edu.upc.viora.features.croploadregulation.infrastructure.mapper.toRequestDto
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.SamplingBatchRequestDto
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.remote.ThinningService
 
@@ -69,7 +72,7 @@ class ThinningRepositoryImpl @Inject constructor(
 
     override suspend fun getSamplingDetailed(plotId: String, campaignYear: Int?): AppResult<SamplingDetailedReport> =
         apiCaller.call { service.getSamplingDetailed(plotId, campaignYear) }
-            .map { it.toDomain() }
+            .map { it.toDomain(clock) }
 
     override suspend fun submitSamplingBatch(
         plotId: String,
@@ -97,7 +100,7 @@ class ThinningRepositoryImpl @Inject constructor(
                     eventDao.replaceAll(envelope.events.map { it.toEntity() })
                     cacheMetadataDao.upsert(CacheMetadataEntity(EVENTS_CACHE_KEY, clock.millis()))
                 }
-                val events = envelope.events.map { it.toDomain() }
+                val events = envelope.events.map { it.toDomain(clock) }
                 events.filter { it.eventType == ThinningEventType.SAMPLING_COMPLETED }
                     .forEach { completed ->
                         draftDao.clearSamples(completed.plotId, completed.campaignYear)
@@ -107,7 +110,7 @@ class ThinningRepositoryImpl @Inject constructor(
 
     override fun observeThinningEvents(): Flow<List<ThinningEvent>?> =
         combine(eventDao.observeAll(), cacheMetadataDao.observeFetchedAt(EVENTS_CACHE_KEY)) { rows, fetchedAt ->
-            if (fetchedAt == null) null else rows.map { it.toDomain() }
+            if (fetchedAt == null) null else rows.map { it.toDomain(clock) }
         }
 
     override fun observeActiveSampling(): Flow<PlotSamplingOverview?> =
@@ -139,6 +142,34 @@ class ThinningRepositoryImpl @Inject constructor(
 
     override fun observePendingDraftSamplesCount(): Flow<Int> =
         draftDao.observePendingDraftSamplesCount()
+
+    override suspend fun saveDraftSample(
+        plotId: String,
+        plotName: String,
+        campaignYear: Int,
+        sample: TreeSample,
+        batchId: String,
+    ): DraftSample {
+        val entity = sample.toEntity(plotId, plotName, campaignYear, createdAt = clock.millis(), batchId = batchId)
+        draftDao.insertSample(entity)
+        return entity.toDraft(clock)
+    }
+
+    override fun observeDrafts(plotId: String, campaignYear: Int): Flow<List<DraftSample>> =
+        draftDao.observeAllSamples().map { drafts ->
+            drafts.filter { it.plotId == plotId && it.campaignYear == campaignYear }.map { it.toDraft(clock) }
+        }
+
+    override suspend fun unsyncedDrafts(): List<DraftSample> =
+        draftDao.getAllSamples().filter { !it.isSynced }.map { it.toDraft(clock) }
+
+    override suspend fun assignBatchId(draftId: String, batchId: String) = draftDao.setBatchId(draftId, batchId)
+
+    override suspend fun markSynced(draftId: String) = draftDao.markSampleAsSynced(draftId)
+
+    override suspend fun deleteDraft(draftId: String) = draftDao.deleteSample(draftId)
+
+    override suspend fun clearDrafts(plotId: String, campaignYear: Int) = draftDao.clearSamples(plotId, campaignYear)
 
     private companion object {
         const val EVENTS_CACHE_KEY = "thinning_events"

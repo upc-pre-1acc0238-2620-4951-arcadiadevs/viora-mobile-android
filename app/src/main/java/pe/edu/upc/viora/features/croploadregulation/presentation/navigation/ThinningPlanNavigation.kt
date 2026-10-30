@@ -5,10 +5,10 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.RegisterThinningScreen
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.ThinningPlanScreen
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.ThinningResultScreen
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.LotSection
 
 /** P61 · Plan del lote. [campaignYear] 0 means the current campaign; [recordBloom] opens its P64 sheet on arrival. */
 @Serializable

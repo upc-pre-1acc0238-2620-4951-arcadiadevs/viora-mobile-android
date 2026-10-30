@@ -16,16 +16,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.PlotSilhouette
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
+import pe.edu.upc.viora.core.presentation.plotSummary
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 
 /**
@@ -83,13 +83,4 @@ fun PlotCard(plot: Plot, onClick: (() -> Unit)?, modifier: Modifier = Modifier, 
 
 /** "Sevillana · 2,5 ha · 180 árboles", localised. */
 @Composable
-fun plotSummary(plot: Plot): String {
-    val variety = stringResource(plot.variety.labelRes())
-    val area = formatHectares(plot.areaHectares)
-    val trees = pluralStringResource(
-        R.plurals.plots_trees_count,
-        plot.estimatedTrees,
-        formatCount(plot.estimatedTrees),
-    )
-    return stringResource(R.string.plots_summary, variety, area, trees)
-}
+fun plotSummary(plot: Plot): String = plotSummary(plot.variety, plot.areaHectares, plot.estimatedTrees)

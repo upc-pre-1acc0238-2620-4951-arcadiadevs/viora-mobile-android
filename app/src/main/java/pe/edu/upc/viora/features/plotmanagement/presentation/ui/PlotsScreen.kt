@@ -1,29 +1,27 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.ui
 
-import pe.edu.upc.viora.features.plotmanagement.presentation.state.planLimitDetail
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -31,8 +29,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
@@ -43,26 +41,29 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Instant
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.VioraEmptyState
+import pe.edu.upc.viora.core.designsystem.component.VioraErrorState
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
-import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
+import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Spacing
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.core.domain.AppError
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotsFilter
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotsUiState
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.planLimitDetail
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.PlotsViewModel
 
 @Composable
@@ -121,8 +122,8 @@ fun PlotsScreenContent(
             item { PlotsTitle(onRegisterPlot) }
             when (state) {
                 PlotsUiState.Loading -> item { Centered { CircularProgressIndicator(color = MaterialTheme.colorScheme.primary) } }
-                PlotsUiState.Empty -> item { EmptyState() }
-                is PlotsUiState.Error -> item { ErrorState(error = state.error, onRetry = onRefresh) }
+                PlotsUiState.Empty -> item { VioraEmptyState(stringResource(R.string.plots_empty_title), stringResource(R.string.plots_empty_body), Modifier.padding(vertical = Spacing.xl)) }
+                is PlotsUiState.Error -> item { VioraErrorState(stringResource(state.error.messageRes()), onRefresh, Modifier.padding(vertical = Spacing.xl)) }
                 is PlotsUiState.Content -> {
                     if (state.filter == PlotsFilter.ACTIVE) item { quotaCard() }
                     item { FilterAndStatus(state, onSelectFilter) }
@@ -138,7 +139,7 @@ fun PlotsScreenContent(
                                 )
                             }
                         }
-                        state.plots.isEmpty() -> item { EmptyState() }
+                        state.plots.isEmpty() -> item { VioraEmptyState(stringResource(R.string.plots_empty_title), stringResource(R.string.plots_empty_body), Modifier.padding(vertical = Spacing.xl)) }
                         else -> {
                             item { PlotsOverview(plots = state.plots, onExpand = onOpenMap) }
                             items(state.plots, key = { it.id.value }) { plot -> PlotCard(plot, onClick = { onOpenPlot(plot.id) }) }
@@ -293,46 +294,6 @@ private fun LastRefreshLabel(lastRefresh: Instant) {
         stringResource(R.string.plots_updated, relative)
     }
     Text(text = text, style = MaterialTheme.typography.bodySmall, color = Neutral600)
-}
-
-@Composable
-private fun EmptyState() {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xl),
-        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-    ) {
-        Text(text = stringResource(R.string.plots_empty_title), style = MaterialTheme.typography.headlineMedium)
-        Text(
-            text = stringResource(R.string.plots_empty_body),
-            style = MaterialTheme.typography.bodyLarge,
-            color = Neutral600,
-        )
-    }
-}
-
-@Composable
-private fun ErrorState(error: AppError, onRetry: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xl),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
-    ) {
-        Text(text = stringResource(error.messageRes()), style = MaterialTheme.typography.bodyLarge)
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(percent = 50))
-                .background(Green900)
-                .clickable(role = Role.Button, onClick = onRetry)
-                .heightIn(min = Spacing.minTouchTarget)
-                .padding(horizontal = Spacing.lg),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = stringResource(R.string.plots_retry),
-                style = MaterialTheme.typography.labelLarge,
-                color = Neutral50,
-            )
-        }
-    }
 }
 
 @Composable

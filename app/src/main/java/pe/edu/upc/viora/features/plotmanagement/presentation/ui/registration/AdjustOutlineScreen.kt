@@ -39,15 +39,18 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.AdjustOutlineUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.EditFailure
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.AdjustOutlineViewModel
 
 /**
@@ -63,9 +66,7 @@ fun AdjustOutlineScreen(
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     when (state) {
-        AdjustOutlineUiState.Loading -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
+        AdjustOutlineUiState.Loading -> VioraLoadingState(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.primary)
         AdjustOutlineUiState.NotFound -> Box(modifier.fillMaxSize().statusBarsPadding().padding(24.dp)) {
             CircleIconButton(
                 icon = R.drawable.ic_arrow_back,

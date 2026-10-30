@@ -2,11 +2,11 @@ package pe.edu.upc.viora.features.subscription.domain.entity
 
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.UUID
 import pe.edu.upc.viora.features.subscription.domain.valueobject.PlanCapacity
 import pe.edu.upc.viora.features.subscription.domain.valueobject.ProducerPlanCode
 import pe.edu.upc.viora.features.subscription.domain.valueobject.SubscriptionMode
 import pe.edu.upc.viora.features.subscription.domain.valueobject.SubscriptionStatus
+import pe.edu.upc.viora.core.domain.Uuid
 
 /**
  * Server-verified subscription record.
@@ -30,7 +30,7 @@ data class ProducerSubscription(
         pe.edu.upc.viora.features.subscription.domain.valueobject.IndividualPaymentStatus.UNKNOWN,
 ) {
     init {
-        UUID.fromString(id)
+        Uuid.parse(id)
         if (totalAmount != null && baseAmount != null && taxAmount != null) {
             require(baseAmount.signum() >= 0 && taxAmount.signum() >= 0 && totalAmount.signum() > 0)
             require(baseAmount.add(taxAmount).compareTo(totalAmount) == 0)

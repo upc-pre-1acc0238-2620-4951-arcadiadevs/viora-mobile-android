@@ -63,6 +63,10 @@ data class ThinningPrescription(
         return bloom.plusDays(opens.toLong()) to bloom.plusDays(closes.toLong())
     }
 
+    /** Classifies an execution against the prescribed intervention window. */
+    fun timelinessOf(date: LocalDate): ThinningTimeliness? =
+        thinningTimeliness(date, windowOpensOn, windowClosesOn)
+
     companion object {
         /** Trees a representative sampling round needs. */
         const val SAMPLE_SIZE = 5
@@ -101,3 +105,15 @@ data class CampaignPlan(val plotId: String, val prescription: ThinningPrescripti
 
 /** A prescription read from the cache, with the moment it was downloaded. */
 data class CachedPrescription(val prescription: ThinningPrescription?, val syncedAt: Instant)
+
+/** Whether an intervention falls before, within or after its prescribed window. */
+enum class ThinningTimeliness { BEFORE, WITHIN, LATE }
+
+fun thinningTimeliness(date: LocalDate, opens: LocalDate?, closes: LocalDate?): ThinningTimeliness? {
+    if (opens == null || closes == null) return null
+    return when {
+        date.isBefore(opens) -> ThinningTimeliness.BEFORE
+        date.isAfter(closes) -> ThinningTimeliness.LATE
+        else -> ThinningTimeliness.WITHIN
+    }
+}

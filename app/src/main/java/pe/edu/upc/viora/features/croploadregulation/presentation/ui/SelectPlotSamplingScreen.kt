@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -194,14 +195,9 @@ fun SelectPlotSamplingContent(
 
             when (state) {
                 is SelectPlotSamplingUiState.Loading -> {
-                    Box(
-                        modifier = Modifier
+                    VioraLoadingState(modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 48.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator(color = Green900)
-                    }
+                            .padding(vertical = 48.dp))
                 }
 
                 is SelectPlotSamplingUiState.Content -> {

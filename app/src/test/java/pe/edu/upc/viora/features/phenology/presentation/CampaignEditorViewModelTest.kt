@@ -28,12 +28,12 @@ import pe.edu.upc.viora.features.phenology.application.usecase.ObserveHarvestHis
 import pe.edu.upc.viora.features.phenology.application.usecase.RecordHarvestYieldUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RectifyHarvestYieldUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RemoveHarvestRecordUseCase
+import pe.edu.upc.viora.features.phenology.domain.YearCaption
+import pe.edu.upc.viora.features.phenology.domain.YearError
 import pe.edu.upc.viora.features.phenology.domain.entity.BearingIndex
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignChangeKind
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignEditorUiState
 import pe.edu.upc.viora.features.phenology.presentation.state.CampaignResult
-import pe.edu.upc.viora.features.phenology.presentation.state.YearCaption
-import pe.edu.upc.viora.features.phenology.presentation.state.YearError
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.CampaignEditorViewModel
 
 @OptIn(ExperimentalCoroutinesApi::class)

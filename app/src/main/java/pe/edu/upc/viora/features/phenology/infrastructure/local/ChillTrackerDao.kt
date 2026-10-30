@@ -16,4 +16,8 @@ interface ChillTrackerDao {
 
     @Query("DELETE FROM chill_trackers WHERE plot_id = :plotId")
     suspend fun deleteByPlot(plotId: String)
+
+    /** Signing out (or another account signing in): the whole table goes, see the context's tables wiper. */
+    @Query("DELETE FROM chill_trackers")
+    suspend fun wipeAll()
 }

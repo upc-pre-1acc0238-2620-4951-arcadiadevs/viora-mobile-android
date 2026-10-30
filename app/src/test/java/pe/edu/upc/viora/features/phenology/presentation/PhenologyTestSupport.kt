@@ -3,18 +3,18 @@ package pe.edu.upc.viora.features.phenology.presentation
 import java.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.phenology.domain.entity.BearingIndex
 import pe.edu.upc.viora.features.phenology.domain.entity.BearingYear
 import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
 import pe.edu.upc.viora.features.phenology.domain.repository.HarvestRecordRepository
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotChanges
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
-import pe.edu.upc.viora.core.domain.AppError
 
 internal fun harvest(
     year: Int,

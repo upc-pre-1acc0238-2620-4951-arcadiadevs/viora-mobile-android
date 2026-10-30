@@ -28,6 +28,7 @@ import pe.edu.upc.viora.features.telemetry.domain.entity.WeatherForecast
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryRange
 import pe.edu.upc.viora.features.telemetry.presentation.state.ClimatePlot
 import pe.edu.upc.viora.features.telemetry.presentation.state.PlotClimateUiState
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 /**
  * View model of the plot climate screen (Figma P90): the 7-day forecast (US19) and the last
@@ -47,7 +48,7 @@ class PlotClimateViewModel @Inject constructor(
 
     private val routePlotName: String = savedStateHandle.get<String>("plotName").orEmpty()
     private val selectedPlotId = MutableStateFlow(
-        checkNotNull(savedStateHandle.get<String>("plotId")) { "PlotClimateRoute needs a plotId" },
+        savedStateHandle.requirePlotId().value,
     )
 
     private data class RefreshState(

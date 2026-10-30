@@ -18,11 +18,11 @@ import org.junit.Before
 import org.junit.Test
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
+import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveSensorNodesUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.RefreshSensorNodesUseCase
 import pe.edu.upc.viora.features.telemetry.domain.entity.NewSensorNode

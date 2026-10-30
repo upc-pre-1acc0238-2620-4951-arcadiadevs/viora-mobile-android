@@ -20,45 +20,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import java.time.Instant
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.*
 import pe.edu.upc.viora.core.domain.AppResult
-import pe.edu.upc.viora.features.subscription.presentation.viewmodel.SubscriptionAccessViewModel
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 
 /**
  * Home status block (Figma P10 "Sin acceso activo"). Only the server's effective access decides:
  * without `entitlementActive` the yellow card is shown; with access the Home stays as designed, with nothing added.
  * While loading or on a network failure nothing is shown, so Home never claims a state it has not confirmed.
  */
-@Composable
-fun SubscriptionHomeSection(
-    onRenew: () -> Unit,
-    onRedeemCode: () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: SubscriptionAccessViewModel = hiltViewModel(),
-) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val owner = LocalLifecycleOwner.current
-    LaunchedEffect(owner) {
-        owner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { viewModel.refresh() }
-    }
-    SubscriptionHomeContent(
-        result = state,
-        onRenew = onRenew,
-        onRedeemCode = onRedeemCode,
-        modifier = modifier,
-    )
-}
-
 @Composable
 fun SubscriptionHomeContent(
     result: AppResult<pe.edu.upc.viora.features.subscription.domain.entity.ProducerSubscription?>?,
@@ -98,7 +71,7 @@ fun InactiveAccessCard(
 ) {
     val title = if (endsAt != null) {
         val date = DateTimeFormatter.ofPattern(stringResource(R.string.home_access_date_pattern), androidx.compose.ui.platform.LocalConfiguration.current.locales[0])
-            .withZone(ZoneId.systemDefault()).format(endsAt)
+            .withZone(LocalAppZone.current).format(endsAt)
         stringResource(R.string.home_access_expired_title, date)
     } else {
         stringResource(R.string.home_access_none_title)

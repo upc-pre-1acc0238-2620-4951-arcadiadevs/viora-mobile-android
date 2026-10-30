@@ -15,6 +15,7 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.ForecastDayDao
 import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toEntity
 import pe.edu.upc.viora.features.telemetry.infrastructure.mapper.toForecastOrNull
 import pe.edu.upc.viora.features.telemetry.infrastructure.remote.ForecastService
+import pe.edu.upc.viora.core.domain.appResultOf
 
 class ForecastRepositoryImpl @Inject constructor(
     private val service: ForecastService,
@@ -40,15 +41,6 @@ class ForecastRepositoryImpl @Inject constructor(
         if (entities.isEmpty()) {
             return AppResult.Failure(AppError.Unknown(IllegalStateException("Server returned an empty forecast")))
         }
-        return guarded { forecastDao.replaceForPlot(plotId, entities) }
-    }
-
-    private suspend fun guarded(block: suspend () -> Unit): AppResult<Unit> = try {
-        block()
-        AppResult.Success(Unit)
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (throwable: Throwable) {
-        AppResult.Failure(AppError.Unknown(throwable))
+        return appResultOf<Unit> { forecastDao.replaceForPlot(plotId, entities) }
     }
 }

@@ -25,11 +25,11 @@ data class DraftTreeSampleEntity(
     @ColumnInfo(name = "trunk_diameter_mm")
     val trunkDiameterMm: Double? = null,
     @ColumnInfo(name = "observed_on")
-    val observedOn: String = java.time.LocalDate.now().toString(),
+    val observedOn: String,
     @ColumnInfo(name = "is_synced", defaultValue = "0")
     val isSynced: Boolean = false,
     @ColumnInfo(name = "created_at")
-    val createdAt: Long = System.currentTimeMillis(),
+    val createdAt: Long,
     /**
      * The client batch id this draft is sent with, every time: a retry of a batch the server already took is then a
      * replay it ignores, never a second round. Null only for drafts saved before version 15 of the database.

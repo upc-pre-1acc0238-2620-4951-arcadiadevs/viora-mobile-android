@@ -19,6 +19,7 @@ import pe.edu.upc.viora.features.subscription.domain.entity.*
 import pe.edu.upc.viora.features.subscription.domain.repository.IndividualPurchaseRepository
 import pe.edu.upc.viora.features.subscription.domain.valueobject.*
 import pe.edu.upc.viora.features.subscription.infrastructure.local.*
+import pe.edu.upc.viora.features.subscription.infrastructure.mapper.asPurchase
 import pe.edu.upc.viora.features.subscription.infrastructure.mapper.toDomain
 import pe.edu.upc.viora.features.subscription.infrastructure.remote.*
 
@@ -26,6 +27,8 @@ import pe.edu.upc.viora.features.subscription.infrastructure.remote.*
 @Singleton
 class IndividualPurchaseRepositoryImpl @Inject constructor(
     private val service: IndividualPurchaseService,
+    /** `GET /subscriptions` is modelled once, there; a purchase is recovered through it. */
+    private val subscriptions: ProducerSubscriptionService,
     private val dao: IndividualPurchaseDao,
     private val caller: ApiCaller,
     private val sessions: SessionStore,
@@ -94,10 +97,10 @@ class IndividualPurchaseRepositoryImpl @Inject constructor(
         if (missingHistorical || existingPurchase) {
             // A missing historical ID is not permission to create another purchase.
             // Only adopt an existing contract returned for the authenticated account.
-            val current = caller.callOptional { service.current() }
+            val current = caller.callOptional { subscriptions.getCurrent() }
             if (owner() != row.owner) return AppResult.Failure(AppError.Unauthorized)
             if (current is AppResult.Failure) return current
-            val recovered = (current as AppResult.Success).value ?: return result
+            val recovered = (current as AppResult.Success).value?.asPurchase() ?: return result
             if (recovered.mode != "PLAN_PRODUCTOR_INDIVIDUAL") return result
             val purchase = recovered.toDomain()
             val updated = row.copy(plan = purchase.planCode.value,

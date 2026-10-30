@@ -38,6 +38,8 @@ import pe.edu.upc.viora.features.harvestsettlement.infrastructure.repository.Agr
 import retrofit2.Response
 
 private class FakeDossierDao : AgronomicDossierDao {
+    override suspend fun wipeAll() = Unit
+
     val rows = MutableStateFlow<Map<Pair<String, Int>, AgronomicDossierEntity>>(emptyMap())
 
     override fun observe(plotId: String, campaignYear: Int): Flow<AgronomicDossierEntity?> = rows.map { it[plotId to campaignYear] }

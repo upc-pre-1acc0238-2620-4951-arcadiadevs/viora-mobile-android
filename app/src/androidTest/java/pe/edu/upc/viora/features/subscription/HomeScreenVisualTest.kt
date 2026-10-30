@@ -19,8 +19,8 @@ import org.junit.Test
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.features.home.presentation.ui.HomeContextChips
-import pe.edu.upc.viora.features.home.presentation.ui.HomeHeader
-import pe.edu.upc.viora.features.home.presentation.ui.HomeHeadline
+import pe.edu.upc.viora.core.designsystem.component.VioraGreetingHeader
+import pe.edu.upc.viora.core.designsystem.component.VioraHeadline
 import pe.edu.upc.viora.features.subscription.presentation.ui.InactiveAccessCard
 
 class HomeScreenVisualTest {
@@ -48,7 +48,7 @@ class HomeScreenVisualTest {
                             .background(MaterialTheme.colorScheme.surfaceContainerLow)
                             .padding(top = 40.dp, bottom = 40.dp)
                     ) {
-                        HomeHeader(
+                        VioraGreetingHeader(
                             date = LocalDate.of(2026, 11, 18),
                             isOffline = false,
                             lastRefresh = Instant.now(),
@@ -59,7 +59,7 @@ class HomeScreenVisualTest {
                         )
                         Spacer(Modifier.height(28.dp))
                         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                            HomeHeadline(
+                            VioraHeadline(
                                 lead = stringResource(R.string.home_headline_paused_lead),
                                 emphasis = stringResource(R.string.home_headline_paused_emphasis),
                             )
@@ -99,7 +99,7 @@ class HomeScreenVisualTest {
                         .background(MaterialTheme.colorScheme.surfaceContainerLow)
                         .padding(top = 40.dp, bottom = 40.dp)
                 ) {
-                    HomeHeader(
+                    VioraGreetingHeader(
                         date = LocalDate.of(2026, 11, 18),
                         isOffline = false,
                         lastRefresh = Instant.now(),
@@ -110,7 +110,7 @@ class HomeScreenVisualTest {
                     )
                     Spacer(Modifier.height(28.dp))
                     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                        HomeHeadline(
+                        VioraHeadline(
                             lead = stringResource(R.string.home_headline_paused_lead),
                             emphasis = stringResource(R.string.home_headline_paused_emphasis),
                         )

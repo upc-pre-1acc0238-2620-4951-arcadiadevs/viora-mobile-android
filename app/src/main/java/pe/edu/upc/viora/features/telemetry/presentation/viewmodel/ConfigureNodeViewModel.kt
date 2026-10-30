@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveSensorNodesUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.UnlinkSensorNodeUseCase
 import pe.edu.upc.viora.features.telemetry.application.usecase.UpdateSensorNodeUseCase
@@ -20,6 +20,7 @@ import pe.edu.upc.viora.features.telemetry.domain.entity.SensorNode
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorStatus
 import pe.edu.upc.viora.features.telemetry.domain.entity.SensorType
 import pe.edu.upc.viora.features.telemetry.presentation.state.ConfigureNodeUiState
+import pe.edu.upc.viora.core.presentation.requirePlotId
 
 @HiltViewModel
 class ConfigureNodeViewModel @Inject constructor(
@@ -30,7 +31,7 @@ class ConfigureNodeViewModel @Inject constructor(
     private val unlinkNode: UnlinkSensorNodeUseCase,
 ) : ViewModel() {
 
-    private val plotId: String = checkNotNull(savedStateHandle.get<String>("plotId"))
+    private val plotId: String = savedStateHandle.requirePlotId().value
     private val nodeId: String = checkNotNull(savedStateHandle.get<String>("nodeId"))
 
     private val _uiState = MutableStateFlow(ConfigureNodeUiState())

@@ -18,31 +18,33 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import retrofit2.Response
 import pe.edu.upc.viora.core.database.CacheMetadataDao
 import pe.edu.upc.viora.core.database.CacheMetadataEntity
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.core.network.ApiErrorMapper
-import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
-import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.GeoJsonPolygonParser
-import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotEntity
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotChanges
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GeoPoint
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotId
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
+import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotDao
+import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.PlotEntity
+import pe.edu.upc.viora.features.plotmanagement.infrastructure.mapper.GeoJsonPolygonParser
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.CreatePlotRequestDto
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.PlotDto
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.PlotService
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.UpdatePlotRequestDto
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.repository.PlotRepositoryImpl
-import retrofit2.Response
 
 private class FakePlotDao : PlotDao {
+    override suspend fun wipeAll() = Unit
+
     val rows = MutableStateFlow<List<PlotEntity>>(emptyList())
 
     override fun observeActive(): Flow<List<PlotEntity>> =
@@ -73,6 +75,8 @@ private class FakePlotDao : PlotDao {
 }
 
 private class FakeCacheMetadataDao : CacheMetadataDao {
+    override suspend fun wipeAll() = Unit
+
     val values = MutableStateFlow<Map<String, Long>>(emptyMap())
 
     override suspend fun fetchedAt(resourceKey: String): Long? = values.value[resourceKey]

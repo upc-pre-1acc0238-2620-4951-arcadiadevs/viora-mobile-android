@@ -36,6 +36,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 internal class InMemorySettlementDao : HarvestSettlementDao {
+    override suspend fun wipeAll() = Unit
+
     val rows = MutableStateFlow<List<HarvestSettlementEntity>>(emptyList())
     var failOnUpsert = false
 

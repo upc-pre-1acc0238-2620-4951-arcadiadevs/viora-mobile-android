@@ -49,6 +49,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
+import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
@@ -58,15 +61,15 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.messageRes
-import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.OliveVariety
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.EditFailure
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.EditPlotUiState
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatCount
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.formatHectares
-import pe.edu.upc.viora.features.plotmanagement.presentation.ui.labelRes
+import pe.edu.upc.viora.core.presentation.formatCount
+import pe.edu.upc.viora.core.presentation.labelRes
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.EditPlotViewModel
 
 /** Edits the name, variety and planting frame of a registered plot (Figma P28 "Editar lote"). */
@@ -78,9 +81,7 @@ fun EditPlotScreen(
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     when (state) {
-        EditPlotUiState.Loading -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
+        EditPlotUiState.Loading -> VioraLoadingState(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.primary)
         EditPlotUiState.NotFound -> EditPlotNotFound(onBack = onBack, modifier = modifier)
         is EditPlotUiState.Editing -> {
             // Saved: the detail behind this form already shows the new data (it observes the cache).

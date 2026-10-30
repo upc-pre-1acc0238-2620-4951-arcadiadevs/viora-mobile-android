@@ -81,7 +81,7 @@ class PlanExtensionRepositoryImpl @Inject constructor(
         is AppResult.Failure -> result
     }
 
-    private companion object {
+    internal companion object {
         val PENDING_SUBSCRIPTION = stringPreferencesKey("plan_extension_pending_subscription")
         val PENDING_EXTENSION = stringPreferencesKey("plan_extension_pending_id")
     }
