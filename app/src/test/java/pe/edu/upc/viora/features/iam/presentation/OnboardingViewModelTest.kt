@@ -112,12 +112,13 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `without the plan catalog there is no price to estimate`() {
+    fun `without the plan catalog the estimate uses the reference price`() {
         plans = FakePlanCatalog(emptyList())
         val vm = viewModel()
         vm.onHectares(12)
 
-        assertNull(vm.uiState.value.yearlyPrice)
+        assertEquals(BigDecimal("660"), vm.uiState.value.monthlyPrice)
+        assertEquals(BigDecimal("7920"), vm.uiState.value.yearlyPrice)
     }
 
     @Test

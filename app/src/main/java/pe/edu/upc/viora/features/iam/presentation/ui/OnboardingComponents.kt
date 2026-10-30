@@ -241,10 +241,9 @@ internal fun HectareRuler(hectares: Int, onChange: (Int) -> Unit, modifier: Modi
 /** "PLAN ESTIMADO · S/ 7 920 al año" and its two explanation lines, at the plan catalog's price. */
 @Composable
 internal fun PlanEstimate(state: OnboardingUiState, modifier: Modifier = Modifier) {
-    // Without the plan catalog (first run offline) there is no price to estimate with.
-    val rate = state.referenceRatePerHa ?: return
-    val monthly = state.monthlyPrice ?: return
-    val yearly = state.yearlyPrice ?: return
+    val rate = state.referenceRatePerHa
+    val monthly = state.monthlyPrice
+    val yearly = state.yearlyPrice
     Column(modifier.fillMaxWidth()) {
         Box(Modifier.fillMaxWidth().height(1.dp).background(Neutral200))
         Spacer(Modifier.height(24.dp))

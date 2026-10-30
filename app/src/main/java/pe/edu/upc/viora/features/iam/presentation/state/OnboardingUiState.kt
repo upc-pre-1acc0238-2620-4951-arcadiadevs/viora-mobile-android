@@ -35,8 +35,8 @@ data class OnboardingUiState(
     val hectaresUnknown: Boolean = false,
     val alertsEnabled: Boolean = false,
     val locationGranted: Boolean = false,
-    /** Plan Productor price per hectare and month from the plan catalog; null until it is known. */
-    val referenceRatePerHa: BigDecimal? = null,
+    /** Plan Productor price per hectare and month: the plan catalog's, or [FALLBACK_RATE_PER_HA] until it is known. */
+    val referenceRatePerHa: BigDecimal = FALLBACK_RATE_PER_HA,
     val currency: String = DEFAULT_CURRENCY,
 ) {
     val nameValid: Boolean get() = PersonName.isValid(fullName)
@@ -47,9 +47,9 @@ data class OnboardingUiState(
 
     val phoneInternational: String get() = MobileNumbers.international(phone, country.iso)
 
-    /** Plan Productor estimate of T02d at the catalog's price; null while the catalog is unknown. */
-    val monthlyPrice: BigDecimal? get() = referenceRatePerHa?.multiply(hectares.toBigDecimal())
-    val yearlyPrice: BigDecimal? get() = monthlyPrice?.multiply(MONTHS_PER_YEAR.toBigDecimal())
+    /** Plan Productor estimate of T02d at [referenceRatePerHa]. */
+    val monthlyPrice: BigDecimal get() = referenceRatePerHa.multiply(hectares.toBigDecimal())
+    val yearlyPrice: BigDecimal get() = monthlyPrice.multiply(MONTHS_PER_YEAR.toBigDecimal())
 
     companion object {
         const val MIN_HECTARES = 1
@@ -58,6 +58,11 @@ data class OnboardingUiState(
         const val RULER_MAX_HECTARES = 40
         const val DEFAULT_HECTARES = 5
         const val DEFAULT_CURRENCY = "PEN"
+        /**
+         * Only until the plan catalog answers (or when it never does, offline on the first run): the screen keeps
+         * the card of Figma instead of hiding it. The real price is always the server's.
+         */
+        val FALLBACK_RATE_PER_HA: BigDecimal = BigDecimal("55")
         const val MONTHS_PER_YEAR = 12
         const val MAX_CODE_LENGTH = 16
     }
