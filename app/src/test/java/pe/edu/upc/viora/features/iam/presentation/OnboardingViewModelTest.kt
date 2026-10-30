@@ -112,12 +112,13 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `without the plan catalog there is no price to estimate`() {
+    fun `without the plan catalog the estimate uses the reference price`() {
         plans = FakePlanCatalog(emptyList())
         val vm = viewModel()
         vm.onHectares(12)
 
-        assertNull(vm.uiState.value.yearlyPrice)
+        assertEquals(BigDecimal("660"), vm.uiState.value.monthlyPrice)
+        assertEquals(BigDecimal("7920"), vm.uiState.value.yearlyPrice)
     }
 
     @Test
@@ -140,6 +141,7 @@ class OnboardingViewModelTest {
         vm.skipCooperativeCode()
         vm.continueFromHectares(unknown = true)
         vm.onAlertsAnswered(true)
+        vm.onLocationAnswered(false)
         assertEquals(OnboardingStep.SUMMARY, vm.uiState.value.step)
 
         vm.edit(OnboardingStep.NAME)
@@ -156,8 +158,9 @@ class OnboardingViewModelTest {
         vm.skipCooperativeCode()
         vm.continueFromHectares(unknown = true)
         vm.onAlertsAnswered(true)
+        vm.onLocationAnswered(true)
 
-        val answers = eventually({ store.answers().alertsEnabled }, true).let { runBlocking { store.answers() } }
+        val answers = eventually({ store.answers().locationGranted }, true).let { runBlocking { store.answers() } }
         assertEquals("Teodoro Mamani", answers.fullName)
         assertEquals("987654321", answers.nationalPhone)
         assertNull(answers.hectares)

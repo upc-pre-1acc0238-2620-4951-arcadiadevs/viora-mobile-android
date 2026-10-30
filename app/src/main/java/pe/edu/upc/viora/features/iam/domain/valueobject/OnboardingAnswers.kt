@@ -1,7 +1,7 @@
 package pe.edu.upc.viora.features.iam.domain.valueobject
 
 /**
- * What the producer answered in the onboarding questions (Figma T02b-T02e). They stay on the
+ * What the producer answered in the onboarding questions (Figma T02b-T02e2). They stay on the
  * phone until the email is verified (guide 02, option B): name, country and mobile become the
  * profile at sign-up; the rest waits for the plan and alerts features.
  */
@@ -17,6 +17,8 @@ data class OnboardingAnswers(
     val hectares: Int? = null,
     /** Null until T02e is answered. */
     val alertsEnabled: Boolean? = null,
+    /** Null until T02e2 is answered. */
+    val locationGranted: Boolean? = null,
     /** True once "Crear mi cuenta" was pressed under the legal notice of the summary. */
     val termsAccepted: Boolean = false,
 ) {

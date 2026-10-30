@@ -64,6 +64,7 @@ private class FakeThinningRepo : ThinningRepository {
     )
     val submittedBatches = mutableListOf<List<TreeSample>>()
     val submittedBatchIds = mutableListOf<String>()
+    val failingBatchIds = mutableSetOf<String>()
 
     override suspend fun getPlotSamplingOverview(campaignYear: Int?): AppResult<List<PlotSamplingOverview>> =
         AppResult.Success(emptyList())
@@ -82,6 +83,7 @@ private class FakeThinningRepo : ThinningRepository {
     ): AppResult<SamplingSummary> {
         submittedBatches.add(samples)
         submittedBatchIds.add(batchId)
+        if (batchId in failingBatchIds) return AppResult.Failure(AppError.Server(500))
         return submitResult
     }
 
@@ -380,6 +382,21 @@ class SamplingSessionViewModelTest {
 
         assertTrue(fakeRepo.submittedBatchIds.isEmpty())
         assertTrue(outcome.syncedTrees.isEmpty())
+    }
+
+    @Test
+    fun `a draft that keeps failing does not hold back the ones behind it`() = runTest {
+        fakeRepo.failingBatchIds += "batch-1"
+        fakeRepo.keep(draft("sample-1", "A-01", batchId = "batch-1"))
+        fakeRepo.keep(draft("sample-2", "A-02", batchId = "batch-2"))
+
+        val outcome = sync(fakeRepo.drafts.toList())
+
+        assertEquals(listOf("batch-1", "batch-2"), fakeRepo.submittedBatchIds)
+        assertEquals(setOf("A-02"), outcome.syncedTrees)
+        assertTrue(outcome.pendingLeft)
+        assertFalse(outcome.offline)
+        assertFalse(fakeRepo.drafts.first { it.id == "sample-1" }.isSynced)
     }
 
     @Test

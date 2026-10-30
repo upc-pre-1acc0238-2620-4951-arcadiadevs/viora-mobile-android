@@ -26,6 +26,7 @@ class OnboardingStore @Inject constructor(private val dataStore: DataStore<Prefe
             cooperativeCode = prefs[COOPERATIVE_CODE],
             hectares = prefs[HECTARES],
             alertsEnabled = prefs[ALERTS],
+            locationGranted = prefs[LOCATION],
             termsAccepted = prefs[TERMS_ACCEPTED] == true,
         )
     }
@@ -39,7 +40,7 @@ class OnboardingStore @Inject constructor(private val dataStore: DataStore<Prefe
             it.setOrRemove(COOPERATIVE_CODE, answers.cooperativeCode)
             it.setOrRemove(HECTARES, answers.hectares)
             it.setOrRemove(ALERTS, answers.alertsEnabled)
-            it.remove(LEGACY_LOCATION)
+            it.setOrRemove(LOCATION, answers.locationGranted)
         }
     }
 
@@ -64,8 +65,7 @@ class OnboardingStore @Inject constructor(private val dataStore: DataStore<Prefe
         val HECTARES = intPreferencesKey("onboarding_hectares")
         val TERMS_ACCEPTED = booleanPreferencesKey("onboarding_terms_accepted")
         val ALERTS = booleanPreferencesKey("onboarding_alerts")
-        /** The location question left the onboarding; the key is still cleared for installs that saved it. */
-        val LEGACY_LOCATION = booleanPreferencesKey("onboarding_location")
-        val ALL_KEYS = listOf(TERMS_ACCEPTED, FULL_NAME, COUNTRY, PHONE, COOPERATIVE_CODE, HECTARES, ALERTS, LEGACY_LOCATION)
+        val LOCATION = booleanPreferencesKey("onboarding_location")
+        val ALL_KEYS = listOf(TERMS_ACCEPTED, FULL_NAME, COUNTRY, PHONE, COOPERATIVE_CODE, HECTARES, ALERTS, LOCATION)
     }
 }

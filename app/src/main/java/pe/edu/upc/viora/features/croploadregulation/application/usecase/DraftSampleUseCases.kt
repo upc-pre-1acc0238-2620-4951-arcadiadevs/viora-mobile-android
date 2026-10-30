@@ -121,8 +121,9 @@ class SyncDraftSamplesUseCase @Inject constructor(
                                 rejectedMessage = error.detail ?: outcome.rejectedMessage,
                             )
                         }
-                        // Any other failure keeps the draft, to be sent again later with the same batch id.
-                        else -> return outcome.copy(pendingLeft = true)
+                        // Any other failure keeps the draft, to be sent again later with the same batch id, and the
+                        // drafts behind it still go: one the server cannot take must not hold the rest back.
+                        else -> outcome = outcome.copy(pendingLeft = true)
                     }
                 }
             }
