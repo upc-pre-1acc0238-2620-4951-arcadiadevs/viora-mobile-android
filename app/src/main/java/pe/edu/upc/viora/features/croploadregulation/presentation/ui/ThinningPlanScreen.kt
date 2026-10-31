@@ -60,6 +60,8 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AskVioraCard
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
@@ -93,6 +95,7 @@ import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatDecimal
 import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.formatWhole
+import pe.edu.upc.viora.core.presentation.labelRes
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.CurrentLoad
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.ThinningPrescription
@@ -108,7 +111,6 @@ import pe.edu.upc.viora.features.croploadregulation.presentation.state.ThinningP
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.excessPercent
 import pe.edu.upc.viora.features.croploadregulation.presentation.state.removalFraction
 import pe.edu.upc.viora.features.croploadregulation.presentation.viewmodel.ThinningPlanViewModel
-import pe.edu.upc.viora.core.presentation.labelRes
 
 /**
  * P61 · Plan del lote (US26-US28): the fruit load the sampling measured against the sustainable target, and the
@@ -123,11 +125,13 @@ fun ThinningPlanScreen(
     onViewResult: (prescriptionId: String, plotName: String, campaignYear: Int) -> Unit,
     onOpenSection: (LotSection, plotName: String) -> Unit,
     modifier: Modifier = Modifier,
+    assistantSheet: AssistantSheetSlot? = null,
     viewModel: ThinningPlanViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val sheet by viewModel.sheet.collectAsStateWithLifecycle()
     var showMore by rememberSaveable { mutableStateOf(false) }
+    var showAssistant by rememberSaveable { mutableStateOf(false) }
     val scroll = rememberScrollState()
     val scope = rememberCoroutineScope()
     val content = state as? ThinningPlanUiState.Content
@@ -160,6 +164,7 @@ fun ThinningPlanScreen(
                 onRegisterThinning = { onRegisterThinning(s.plotName, s.campaignYear) },
                 onViewResult = { id -> onViewResult(id, s.plotName, s.campaignYear) },
                 onViewLoad = { scope.launch { scroll.animateScrollTo(0) } },
+                onAskViora = assistantSheet?.let { { showAssistant = true } },
                 modifier = Modifier.weight(1f),
             )
         }
@@ -178,6 +183,10 @@ fun ThinningPlanScreen(
                 onDismiss = viewModel::dismissFullBloomSheet,
             )
         }
+    }
+
+    if (showAssistant && content != null && assistantSheet != null) {
+        assistantSheet(viewModel.plotId, content.plotName) { showAssistant = false }
     }
 
     if (showMore && content != null) {
@@ -223,6 +232,7 @@ private fun PlanBody(
     onRegisterThinning: () -> Unit,
     onViewResult: (prescriptionId: String) -> Unit,
     onViewLoad: () -> Unit,
+    onAskViora: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val plan = state.prescription
@@ -264,6 +274,15 @@ private fun PlanBody(
                 onAction = onRecordBloom,
             )
             PlanStage.PRESCRIBED -> plan?.currentLoad?.let { LoadCard(plan, it, state) }
+        }
+        // P120: the assistant's card goes between the load and the prescription, once there is a plan to ask about
+        if (state.stage == PlanStage.PRESCRIBED && plan != null && onAskViora != null) {
+            val percent = plan.percentageToRemove?.roundToInt()?.takeIf { it > 0 }
+            AskVioraCard(
+                examples = percent?.let { stringResource(R.string.assistant_entry_plan_examples, it) }
+                    ?: stringResource(R.string.assistant_entry_plan_examples_plain),
+                onClick = onAskViora,
+            )
         }
         if (state.stage == PlanStage.PRESCRIBED && plan != null) {
             PrescriptionCard(

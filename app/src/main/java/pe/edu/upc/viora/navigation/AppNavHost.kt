@@ -32,6 +32,8 @@ import pe.edu.upc.viora.core.navigation.PlotsGraph
 import pe.edu.upc.viora.core.navigation.ResetPasswordRoute
 import pe.edu.upc.viora.core.navigation.SplashRoute
 import pe.edu.upc.viora.core.navigation.WelcomeRoute
+import pe.edu.upc.viora.features.assistant.domain.entity.AssistantScreen
+import pe.edu.upc.viora.features.assistant.presentation.ui.AssistantSheet
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRoundRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
@@ -326,6 +328,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         harvestHistoryComposable(
             navController,
             onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
+            assistantSheet = { plotId, plotName, onDismiss -> AssistantSheet(AssistantScreen.ALTERNATION, plotId, plotName, onDismiss) },
         )
         winterChillComposable(
             navController,
@@ -358,6 +361,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 }
             },
             onOpenAlternation = { plotId, plotName -> navController.navigate(HarvestHistoryRoute(plotId = plotId, plotName = plotName)) },
+            assistantSheet = { plotId, plotName, onDismiss -> AssistantSheet(AssistantScreen.PLAN, plotId, plotName, onDismiss) },
         )
         navigation<PlanGraph>(startDestination = PlanRoute) {
             composable<PlanRoute> {

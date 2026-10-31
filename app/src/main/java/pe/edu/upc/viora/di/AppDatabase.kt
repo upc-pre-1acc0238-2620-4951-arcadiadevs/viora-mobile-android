@@ -4,6 +4,8 @@ import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import pe.edu.upc.viora.core.database.CacheMetadataDao
 import pe.edu.upc.viora.core.database.CacheMetadataEntity
+import pe.edu.upc.viora.features.assistant.infrastructure.local.AssistantAnswerDao
+import pe.edu.upc.viora.features.assistant.infrastructure.local.AssistantAnswerEntity
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleEntity
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventDao
@@ -72,8 +74,9 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
         ThinningPrescriptionEntity::class,
         AgronomicDossierEntity::class,
         FieldNoteEntity::class,
+        AssistantAnswerEntity::class,
     ],
-    version = 15,
+    version = 16,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -95,4 +98,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun thinningPrescriptionDao(): ThinningPrescriptionDao
     abstract fun agronomicDossierDao(): AgronomicDossierDao
     abstract fun fieldNoteDao(): FieldNoteDao
+    abstract fun assistantAnswerDao(): AssistantAnswerDao
 }

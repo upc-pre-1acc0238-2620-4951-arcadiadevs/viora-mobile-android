@@ -48,6 +48,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AssistantEntryButton
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
@@ -78,12 +80,14 @@ import pe.edu.upc.viora.core.domain.tonnesPerHectare
 import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.core.navigation.LotSectionsSheet
 import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatCount
 import pe.edu.upc.viora.core.presentation.formatDayMonth
 import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.formatKg
 import pe.edu.upc.viora.core.presentation.formatMediumDate
 import pe.edu.upc.viora.core.presentation.formatPercentOf
 import pe.edu.upc.viora.core.presentation.formatTonnesPerHectare
+import pe.edu.upc.viora.core.presentation.labelRes
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
 import pe.edu.upc.viora.features.phenology.domain.entity.HoblynBbi
@@ -97,8 +101,6 @@ import pe.edu.upc.viora.features.phenology.presentation.state.Outlook
 import pe.edu.upc.viora.features.phenology.presentation.state.Voice
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.CampaignEditorViewModel
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.HarvestHistoryViewModel
-import pe.edu.upc.viora.core.presentation.formatCount
-import pe.edu.upc.viora.core.presentation.labelRes
 
 private const val NOTICE_MILLIS = 3_500L
 
@@ -110,6 +112,7 @@ fun HarvestHistoryScreen(
     onClimate: () -> Unit = {},
     onWinterChill: () -> Unit = {},
     onThinning: () -> Unit = {},
+    assistantSheet: AssistantSheetSlot? = null,
     viewModel: HarvestHistoryViewModel = hiltViewModel(),
     editor: CampaignEditorViewModel = hiltViewModel(),
 ) {
@@ -117,6 +120,7 @@ fun HarvestHistoryScreen(
     val editorState by editor.uiState.collectAsStateWithLifecycle()
     var showInfo by rememberSaveable { mutableStateOf(false) }
     var showMore by rememberSaveable { mutableStateOf(false) }
+    var showAssistant by rememberSaveable { mutableStateOf(false) }
 
     HarvestHistoryContent(
         state = state,
@@ -128,6 +132,7 @@ fun HarvestHistoryScreen(
         onAddCampaign = { editor.openAdd() },
         onAddYear = { editor.openAdd(it) },
         onEditCampaign = editor::openCorrect,
+        onAskViora = assistantSheet?.let { { showAssistant = true } },
         modifier = modifier,
     )
 
@@ -184,6 +189,9 @@ fun HarvestHistoryScreen(
             onDismiss = { showMore = false },
         )
     }
+    if (showAssistant && content != null && assistantSheet != null) {
+        assistantSheet(viewModel.plotId, content.plotName) { showAssistant = false }
+    }
     if (showInfo && content != null) {
         BbiInfoSheet(
             index = content.index,
@@ -206,6 +214,7 @@ fun HarvestHistoryContent(
     onAddCampaign: () -> Unit = {},
     onAddYear: (Int) -> Unit = {},
     onEditCampaign: (HarvestRecord) -> Unit = {},
+    onAskViora: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
@@ -225,6 +234,7 @@ fun HarvestHistoryContent(
                 onAddCampaign = onAddCampaign,
                 onAddYear = onAddYear,
                 onEditCampaign = onEditCampaign,
+                onAskViora = onAskViora,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -307,6 +317,7 @@ private fun ContentBody(
     onAddCampaign: () -> Unit,
     onAddYear: (Int) -> Unit,
     onEditCampaign: (HarvestRecord) -> Unit,
+    onAskViora: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val summary = state.summary
@@ -315,7 +326,7 @@ private fun ContentBody(
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         Spacer(Modifier.height(4.dp))
-        Heading(summary.headline, summary.missing)
+        Heading(summary.headline, summary.missing, onAskViora)
         if (state.offline) OfflineBanner(state, onRetry)
 
         val index = state.index
@@ -380,7 +391,7 @@ private fun ContentBody(
 }
 
 @Composable
-private fun Heading(headline: Headline, missing: Int) {
+private fun Heading(headline: Headline, missing: Int, onAskViora: (() -> Unit)?) {
     val (lead, emphasis) = when (headline) {
         Headline.STRONG -> stringResource(R.string.harvest_headline_lead) to stringResource(R.string.harvest_headline_strong)
         Headline.MODERATE -> stringResource(R.string.harvest_headline_lead) to stringResource(R.string.harvest_headline_moderate)
@@ -391,13 +402,17 @@ private fun Heading(headline: Headline, missing: Int) {
             stringResource(R.string.harvest_headline_missing_many_lead) to stringResource(R.string.harvest_headline_missing_many, missing)
         }
     }
-    Column {
-        Text(lead, style = MaterialTheme.typography.displayMedium.copy(fontSize = 44.sp, lineHeight = 46.sp), color = Neutral900)
-        Text(
-            emphasis,
-            style = MaterialTheme.typography.displayMedium.copy(fontSize = 44.sp, lineHeight = 46.sp, fontStyle = FontStyle.Italic),
-            color = Neutral900,
-        )
+    // P114: the assistant's round entry sits at the top right, under the ⋮ of the header
+    Row(verticalAlignment = Alignment.Top) {
+        Column(Modifier.weight(1f)) {
+            Text(lead, style = MaterialTheme.typography.displayMedium.copy(fontSize = 44.sp, lineHeight = 46.sp), color = Neutral900)
+            Text(
+                emphasis,
+                style = MaterialTheme.typography.displayMedium.copy(fontSize = 44.sp, lineHeight = 46.sp, fontStyle = FontStyle.Italic),
+                color = Neutral900,
+            )
+        }
+        if (onAskViora != null) AssistantEntryButton(onClick = onAskViora, modifier = Modifier.padding(start = 12.dp))
     }
 }
 
