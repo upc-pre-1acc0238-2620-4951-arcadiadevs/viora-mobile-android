@@ -177,4 +177,12 @@ class AppMigrationsTest {
         assertEquals(v14.keys, v15.keys)
         (v14.keys - "draft_tree_samples").forEach { assertEquals(v14[it], v15[it]) }
     }
+
+    @Test fun `assistant answers migration matches the exported v16 schema and leaves every other table intact`() {
+        val v15 = createSqlByTable(15)
+        val v16 = createSqlByTable(16)
+        assertEquals(v16.getValue("assistant_answers"), AppMigrations.MIGRATION_15_16_STATEMENTS.first())
+        assertEquals(v15.keys + "assistant_answers", v16.keys)
+        v15.keys.forEach { assertEquals(v15[it], v16[it]) }
+    }
 }

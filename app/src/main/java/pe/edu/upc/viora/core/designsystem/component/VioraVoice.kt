@@ -340,7 +340,7 @@ private fun ThinkingDots(moving: Boolean) {
 
 /** Whether the phone has the system animations off (Developer options or accessibility). */
 @Composable
-private fun rememberAnimationsOff(): Boolean {
+internal fun rememberAnimationsOff(): Boolean {
     val context = LocalContext.current
     return remember(context) {
         Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
