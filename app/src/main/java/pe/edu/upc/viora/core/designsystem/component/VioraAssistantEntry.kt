@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -30,7 +29,6 @@ import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
-import pe.edu.upc.viora.core.designsystem.theme.ShadowTint
 import pe.edu.upc.viora.core.designsystem.theme.newsreader
 
 /**
@@ -40,17 +38,17 @@ import pe.edu.upc.viora.core.designsystem.theme.newsreader
 typealias AssistantSheetSlot = @Composable (plotId: String, plotName: String, onDismiss: () -> Unit) -> Unit
 
 /**
- * The round entry of the Viora assistant (Figma P114): a 48 dp pale yellow circle with Viora's isotype,
- * under the ⋮ of the header, with the same shadow as the header buttons.
+ * The round entry of the Viora assistant (Figma P114): a 48 dp white circle with Viora's isotype under
+ * the ⋮ of the header, dressed like the header buttons so the three read as one family. The card entry
+ * stays yellow: there it is content, not a header button.
  */
 @Composable
 fun AssistantEntryButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .size(48.dp)
-            .shadow(elevation = 6.dp, shape = CircleShape, ambientColor = ShadowTint, spotColor = ShadowTint)
             .clip(CircleShape)
-            .background(Harvest100)
+            .background(Neutral0)
             .clickable(role = Role.Button, onClickLabel = stringResource(R.string.assistant_entry), onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
