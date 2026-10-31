@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.RegisterThinningScreen
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.ThinningPlanScreen
@@ -37,6 +38,7 @@ fun NavGraphBuilder.thinningPlanComposable(
     onOpenSection: (section: LotSection, plotId: String, plotName: String) -> Unit,
     onOpenLogbook: () -> Unit,
     onOpenAlternation: (plotId: String, plotName: String) -> Unit,
+    assistantSheet: AssistantSheetSlot? = null,
 ) {
     composable<ThinningPlanRoute> { entry ->
         val route = entry.toRoute<ThinningPlanRoute>()
@@ -54,6 +56,7 @@ fun NavGraphBuilder.thinningPlanComposable(
                 )
             },
             onOpenSection = { section, plotName -> onOpenSection(section, route.plotId, plotName) },
+            assistantSheet = assistantSheet,
         )
     }
     composable<RegisterThinningRoute> { entry ->

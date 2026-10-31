@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.features.phenology.presentation.ui.HarvestHistoryScreen
 
@@ -15,10 +16,14 @@ import pe.edu.upc.viora.features.phenology.presentation.ui.HarvestHistoryScreen
 @Serializable
 data class HarvestHistoryRoute(val plotId: String, val plotName: String = "")
 
-/** [onOpenSection] opens another section of the plot; the app shell knows where each one lives. */
+/**
+ * [onOpenSection] opens another section of the plot; the app shell knows where each one lives, and
+ * provides the [assistantSheet] its round entry opens (P114).
+ */
 fun NavGraphBuilder.harvestHistoryComposable(
     navController: NavController,
     onOpenSection: (section: LotSection, plotId: String, plotName: String) -> Unit,
+    assistantSheet: AssistantSheetSlot? = null,
 ) {
     composable<HarvestHistoryRoute> { entry ->
         val route = entry.toRoute<HarvestHistoryRoute>()
@@ -28,6 +33,7 @@ fun NavGraphBuilder.harvestHistoryComposable(
             onClimate = { onOpenSection(LotSection.CLIMATE, route.plotId, route.plotName) },
             onWinterChill = { onOpenSection(LotSection.WINTER_CHILL, route.plotId, route.plotName) },
             onThinning = { onOpenSection(LotSection.THINNING, route.plotId, route.plotName) },
+            assistantSheet = assistantSheet,
         )
     }
 }
