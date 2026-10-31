@@ -205,8 +205,21 @@ object AppMigrations {
         connection.execSQL(MIGRATION_14_15_SQL)
     }
 
+    internal val MIGRATION_15_16_STATEMENTS = listOf(
+        "CREATE TABLE IF NOT EXISTS `assistant_answers` (`id` TEXT NOT NULL, `question_id` TEXT NOT NULL, `question` TEXT, " +
+            "`plot_id` TEXT NOT NULL, `created_at_epoch_ms` INTEGER NOT NULL, `freshness` TEXT NOT NULL, `text` TEXT NOT NULL, " +
+            "`facts_json` TEXT NOT NULL, `sources_json` TEXT NOT NULL, `actions_json` TEXT NOT NULL, `moved_on` INTEGER NOT NULL, " +
+            "PRIMARY KEY(`id`))",
+        "CREATE INDEX IF NOT EXISTS `index_assistant_answers_plot_id` ON `assistant_answers` (`plot_id`)",
+    )
+
+    /** The answers of the assistant (P114-P129), kept to reopen them without signal. */
+    val MIGRATION_15_16 = Migration(15, 16) { connection ->
+        MIGRATION_15_16_STATEMENTS.forEach { connection.execSQL(it) }
+    }
+
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-        MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15,
+        MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16,
     )
 }
