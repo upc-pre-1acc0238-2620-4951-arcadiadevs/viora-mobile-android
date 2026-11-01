@@ -265,6 +265,20 @@
     <string name="tour_next">Siguiente</string>
     <!-- Voz de Viora -->
     <string name="viora_voice_thinking">Viora está pensando</string>
+    <string-array name="viora_voice_thinking_words">
+        <item>Pensando</item>
+        <item>Leyendo tus brotes</item>
+        <item>Contando frutos</item>
+        <item>Midiendo el cuajado</item>
+        <item>Podando ideas</item>
+        <item>Aclareando dudas</item>
+        <item>Regando la respuesta</item>
+        <item>Sumando porciones de frío</item>
+        <item>Mirando el cielo</item>
+        <item>Madurando la respuesta</item>
+        <item>Cosechando datos</item>
+        <item>Afinando el calibre</item>
+    </string-array>
     <string name="tour_finish">Empezar a usar Viora</string>
     <string name="tour_welcome_title">Hola.\nTe muestro *tu Inicio*.</string>
     <plurals name="tour_welcome_body">
@@ -2012,7 +2026,7 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="assistant_age_minutes">Hace %1$d min</string>
     <string name="assistant_age_hours">Hace %1$d h</string>
     <string name="assistant_age_day">Respuesta del %1$s</string>
-    <string name="assistant_keeps_until">Se mantiene hasta “Otra pregunta”</string>
+    <string name="assistant_keeps_until">Guardada en Recientes</string>
     <string name="assistant_answer_source">Respuesta de Viora · %1$s</string>
     <string name="assistant_answer_source_plain">Respuesta de Viora</string>
     <string name="assistant_another_question">Otra pregunta</string>
