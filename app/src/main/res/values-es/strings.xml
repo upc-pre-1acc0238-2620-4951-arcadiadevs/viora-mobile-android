@@ -1970,6 +1970,9 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="assistant_plot_label">Lote</string>
     <string name="assistant_whole_field">Todo mi campo</string>
     <string name="assistant_summary_overline">Resumen de hoy · %1$s</string>
+    <string name="notification_channel_daily_summary">Resumen del día</string>
+    <string name="notification_channel_daily_summary_description">Cada mañana, lo que toca en tu campo según Viora.</string>
+    <string name="notification_daily_summary_title">Tu resumen de hoy</string>
     <string name="assistant_subject_alert">esta alerta</string>
     <string name="assistant_subject_climate">el clima de tu lote</string>
     <string name="assistant_subject_winter_chill">tu frío invernal</string>

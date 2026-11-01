@@ -1919,6 +1919,9 @@ Reference price. You pay after creating your account.</string>
     <string name="assistant_plot_label">Plot</string>
     <string name="assistant_whole_field">My whole field</string>
     <string name="assistant_summary_overline">Today’s summary · %1$s</string>
+    <string name="notification_channel_daily_summary">Summary of the day</string>
+    <string name="notification_channel_daily_summary_description">Every morning, what your field needs according to Viora.</string>
+    <string name="notification_daily_summary_title">Your summary today</string>
     <string name="assistant_subject_alert">this alert</string>
     <string name="assistant_subject_climate">your plot\'s climate</string>
     <string name="assistant_subject_winter_chill">your winter chill</string>
