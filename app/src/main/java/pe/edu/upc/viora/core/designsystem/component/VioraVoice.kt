@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.core.designsystem.component
 
 import android.provider.Settings
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -10,6 +11,11 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -41,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -197,7 +204,7 @@ fun VioraVoice(
         VioraVoiceMark(phase = phase, moving = animated, modifier = Modifier.padding(top = 2.dp).size(20.dp))
 
         if (phase == Phase.Thinking) {
-            ThinkingDots(moving = animated)
+            ThinkingWords(moving = animated)
         } else {
             var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
             val style = MaterialTheme.typography.headlineSmall.copy(fontSize = 18.sp, lineHeight = 24.sp, fontStyle = FontStyle.Italic)
@@ -316,27 +323,43 @@ private fun VioraVoiceMark(phase: Phase, moving: Boolean, modifier: Modifier = M
     }
 }
 
-/** "·  ·  ·" while an answer is on its way, each dot fading in turn (still when not [moving]). */
+/**
+ * While an answer is on its way the voice says what Viora is doing, in the words of the olive grove
+ * ("Contando frutos…", "Podando ideas…"): a new one every [THINKING_WORD_MILLIS], rising in while the
+ * last one fades. They are shuffled each time Viora thinks; still, it says only the first.
+ */
 @Composable
-private fun ThinkingDots(moving: Boolean) {
-    val motion = rememberInfiniteTransition(label = "dots")
-    val wave by motion.animateFloat(
-        initialValue = 0f,
-        targetValue = 3f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 1_200, easing = LinearEasing)),
-        label = "wave",
-    )
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 2.dp)) {
-        repeat(3) { index ->
-            val lit = if (!moving) 1f else (wave - index).let { if (it in 0f..1f) 1f - it else 0f }
-            Text(
-                text = "·",
-                style = MaterialTheme.typography.headlineSmall.copy(fontSize = 18.sp, lineHeight = 24.sp),
-                color = Neutral700.copy(alpha = 0.35f + 0.65f * lit),
-            )
+private fun ThinkingWords(moving: Boolean) {
+    val all = stringArrayResource(R.array.viora_voice_thinking_words)
+    val words = remember(all) { all.toList().shuffled() }
+    var index by remember { mutableIntStateOf(0) }
+    if (moving) {
+        LaunchedEffect(words) {
+            while (true) {
+                delay(THINKING_WORD_MILLIS)
+                index = (index + 1) % words.size
+            }
         }
     }
+    AnimatedContent(
+        targetState = words[index],
+        transitionSpec = {
+            (fadeIn(tween(320, delayMillis = 80)) + slideInVertically(tween(360)) { it / 2 })
+                .togetherWith(fadeOut(tween(200)) + slideOutVertically(tween(260)) { -it / 3 })
+        },
+        label = "thinking-words",
+    ) { word ->
+        Text(
+            text = "$word…",
+            style = MaterialTheme.typography.headlineSmall.copy(fontSize = 18.sp, lineHeight = 24.sp, fontStyle = FontStyle.Italic),
+            color = Neutral700.copy(alpha = 0.72f),
+            maxLines = 1,
+        )
+    }
 }
+
+/** How long each thinking word stays before the next one. */
+private const val THINKING_WORD_MILLIS = 1_700L
 
 /** Whether the phone has the system animations off (Developer options or accessibility). */
 @Composable

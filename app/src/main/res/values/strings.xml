@@ -260,6 +260,20 @@
     <string name="tour_next">Next</string>
     <!-- Voz de Viora -->
     <string name="viora_voice_thinking">Viora is thinking</string>
+    <string-array name="viora_voice_thinking_words">
+        <item>Thinking</item>
+        <item>Reading your shoots</item>
+        <item>Counting fruit</item>
+        <item>Measuring fruit set</item>
+        <item>Pruning ideas</item>
+        <item>Thinning out doubts</item>
+        <item>Watering the answer</item>
+        <item>Adding up chill</item>
+        <item>Checking the sky</item>
+        <item>Ripening the answer</item>
+        <item>Harvesting data</item>
+        <item>Tuning the caliber</item>
+    </string-array>
     <string name="tour_finish">Start using Viora</string>
     <string name="tour_welcome_title">Hello.\nLet me show you *your Home*.</string>
     <plurals name="tour_welcome_body">
@@ -1961,7 +1975,7 @@ Reference price. You pay after creating your account.</string>
     <string name="assistant_age_minutes">%1$d min ago</string>
     <string name="assistant_age_hours">%1$d h ago</string>
     <string name="assistant_age_day">Answer of %1$s</string>
-    <string name="assistant_keeps_until">Kept until “Another question”</string>
+    <string name="assistant_keeps_until">Saved in Recent</string>
     <string name="assistant_answer_source">Viora\'s answer · %1$s</string>
     <string name="assistant_answer_source_plain">Viora\'s answer</string>
     <string name="assistant_another_question">Another question</string>
