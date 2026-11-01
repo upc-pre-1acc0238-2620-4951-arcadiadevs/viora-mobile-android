@@ -283,7 +283,8 @@ internal const val SUMMARY_CARDS = 3
  */
 @Composable
 internal fun SummaryTiles(facts: List<AnswerFact>, modifier: Modifier = Modifier) {
-    val backgrounds = listOf(Harvest100, Terracotta100, Neutral100)
+    // The third tile is a translucent sand so it shows both on the white card and on the sand sheet
+    val backgrounds = listOf(Harvest100, Terracotta100, Neutral200.copy(alpha = 0.6f))
     Row(
         modifier = modifier.fillMaxWidth().height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
