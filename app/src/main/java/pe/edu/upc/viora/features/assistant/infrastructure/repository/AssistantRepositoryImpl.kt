@@ -12,8 +12,10 @@ import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantAnswer
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantQuestion
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantScreen
+import pe.edu.upc.viora.features.assistant.domain.entity.DailySummary
 import pe.edu.upc.viora.features.assistant.domain.repository.AssistantRepository
 import pe.edu.upc.viora.features.assistant.infrastructure.local.AssistantAnswerDao
+import pe.edu.upc.viora.features.assistant.infrastructure.local.DailySummaryDao
 import pe.edu.upc.viora.features.assistant.infrastructure.mapper.toDomain
 import pe.edu.upc.viora.features.assistant.infrastructure.mapper.toDomainOrNull
 import pe.edu.upc.viora.features.assistant.infrastructure.mapper.toEntity
@@ -22,6 +24,9 @@ import pe.edu.upc.viora.features.assistant.infrastructure.remote.AssistantAnswer
 import pe.edu.upc.viora.features.assistant.infrastructure.remote.AssistantService
 import java.time.Clock
 import java.time.Duration
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.Locale
 import javax.inject.Inject
 
 /**
@@ -32,12 +37,14 @@ import javax.inject.Inject
 class AssistantRepositoryImpl @Inject constructor(
     private val service: AssistantService,
     private val answerDao: AssistantAnswerDao,
+    private val summaryDao: DailySummaryDao,
     private val apiCaller: ApiCaller,
     private val json: Json,
     private val clock: Clock,
+    private val zone: ZoneId,
 ) : AssistantRepository {
 
-    override suspend fun questions(screen: AssistantScreen, plotId: String): AppResult<List<AssistantQuestion>> =
+    override suspend fun questions(screen: AssistantScreen, plotId: String?): AppResult<List<AssistantQuestion>> =
         when (val result = apiCaller.call { service.getQuestions(screen.name, plotId) }) {
             is AppResult.Success -> AppResult.Success(result.value.questions.map { it.toDomain() })
             is AppResult.Failure -> result
@@ -45,7 +52,7 @@ class AssistantRepositoryImpl @Inject constructor(
 
     override suspend fun ask(
         questionId: String,
-        plotId: String,
+        plotId: String?,
         requestKey: IdempotencyKey,
         forceRefresh: Boolean,
     ): AppResult<AssistantAnswer> {
@@ -56,7 +63,7 @@ class AssistantRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun answerToReopen(screen: AssistantScreen, plotId: String): AppResult<AssistantAnswer?> =
+    override suspend fun answerToReopen(screen: AssistantScreen, plotId: String?): AppResult<AssistantAnswer?> =
         when (val result = apiCaller.call { service.getLatest(screen.name, plotId) }) {
             is AppResult.Success -> when (val saved = save(result.value)) {
                 is AppResult.Success -> AppResult.Success(saved.value.takeUnless { isMovedOn(it.id) })
@@ -98,6 +105,30 @@ class AssistantRepositoryImpl @Inject constructor(
 
     override suspend fun moveOn(answerId: String) = answerDao.markMovedOn(answerId)
 
+    override suspend fun dailySummary(): AppResult<DailySummary> {
+        val language = summaryLanguage()
+        val today = LocalDate.now(clock.withZone(zone))
+        return when (val result = apiCaller.call { service.getDailySummary() }) {
+            is AppResult.Success -> {
+                val summary = result.value.toDomainOrNull()
+                    ?: return AppResult.Failure(AppError.Unknown(IllegalStateException("Malformed daily summary")))
+                appResultOf {
+                    summaryDao.upsert(summary.toEntity(json, language, summary.createdAt.atZone(zone).toLocalDate()))
+                    summary
+                }
+            }
+            is AppResult.Failure -> {
+                // Without signal the one kept on the phone, only while it is still today's
+                val kept = if (result.error.isConnectivity) {
+                    summaryDao.find(language)?.takeIf { it.day == today.toString() }?.toDomainOrNull(json)
+                } else {
+                    null
+                }
+                if (kept != null) AppResult.Success(kept) else result
+            }
+        }
+    }
+
     /** Saves an answer that arrived, keeping its "Otra pregunta" mark, and drops those older than the history. */
     private suspend fun save(dto: AssistantAnswerDto): AppResult<AssistantAnswer> {
         val answer = dto.toDomainOrNull()
@@ -110,6 +141,9 @@ class AssistantRepositoryImpl @Inject constructor(
     }
 
     private suspend fun isMovedOn(answerId: String): Boolean = answerDao.findById(answerId)?.movedOn == true
+
+    /** The language the server wrote the texts in: the one of Accept-Language. */
+    private fun summaryLanguage(): String = Locale.getDefault().language.takeIf { it == "en" } ?: "es"
 
     private fun historyStart(): Long = clock.instant().minus(HISTORY).toEpochMilli()
 

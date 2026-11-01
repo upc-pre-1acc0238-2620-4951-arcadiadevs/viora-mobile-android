@@ -9,13 +9,17 @@ import pe.edu.upc.viora.features.assistant.domain.entity.AnswerAction
 import pe.edu.upc.viora.features.assistant.domain.entity.AnswerFact
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantAnswer
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantQuestion
+import pe.edu.upc.viora.features.assistant.domain.entity.DailySummary
 import pe.edu.upc.viora.features.assistant.domain.entity.FactTone
 import pe.edu.upc.viora.features.assistant.domain.entity.Freshness
 import pe.edu.upc.viora.features.assistant.domain.entity.QuestionIcon
 import pe.edu.upc.viora.features.assistant.infrastructure.local.AssistantAnswerEntity
+import pe.edu.upc.viora.features.assistant.infrastructure.local.DailySummaryEntity
 import pe.edu.upc.viora.features.assistant.infrastructure.remote.AssistantAnswerDto
+import pe.edu.upc.viora.features.assistant.infrastructure.remote.DailySummaryDto
 import pe.edu.upc.viora.features.assistant.infrastructure.remote.QuestionDto
 import java.time.Instant
+import java.time.LocalDate
 
 /** The only buttons the app knows how to open; anything else the server sends is left out. */
 private const val DEEPLINK = "DEEPLINK"
@@ -84,3 +88,40 @@ fun AssistantAnswerEntity.toDomainOrNull(json: Json): AssistantAnswer? = runCatc
         actions = json.decodeFromString(ListSerializer(StoredAction.serializer()), actionsJson).map { AnswerAction(it.label, it.target) },
     )
 }.getOrNull()?.takeIf { it.facts.size == 2 }
+
+/** Null when the summary cannot be shown as designed: not exactly three cards, or a malformed date. */
+fun DailySummaryDto.toDomainOrNull(): DailySummary? {
+    val created = runCatching { Instant.parse(createdAt) }.getOrNull() ?: return null
+    val cards = facts.map { AnswerFact(it.value, it.label, it.pill, enumOrDefault(it.tone, FactTone.HIGHLIGHT)) }
+    if (cards.size != 3) return null
+    return DailySummary(
+        id = summaryId,
+        createdAt = created,
+        text = text,
+        facts = cards,
+        sources = sources.map { it.label }.filter { it.isNotBlank() },
+    )
+}
+
+/** The summary kept for [language] on [day], the producer's day it was written on. */
+fun DailySummary.toEntity(json: Json, language: String, day: LocalDate): DailySummaryEntity = DailySummaryEntity(
+    language = language,
+    id = id,
+    day = day.toString(),
+    createdAtEpochMs = createdAt.toEpochMilli(),
+    text = text,
+    factsJson = json.encodeToString(ListSerializer(StoredFact.serializer()), facts.map { StoredFact(it.value, it.label, it.pill, it.tone.name) }),
+    sourcesJson = json.encodeToString(ListSerializer(String.serializer()), sources),
+)
+
+/** Null for a row that no longer reads as a summary. */
+fun DailySummaryEntity.toDomainOrNull(json: Json): DailySummary? = runCatching {
+    DailySummary(
+        id = id,
+        createdAt = Instant.ofEpochMilli(createdAtEpochMs),
+        text = text,
+        facts = json.decodeFromString(ListSerializer(StoredFact.serializer()), factsJson)
+            .map { AnswerFact(it.value, it.label, it.pill, enumOrDefault(it.tone, FactTone.HIGHLIGHT)) },
+        sources = json.decodeFromString(ListSerializer(String.serializer()), sourcesJson),
+    )
+}.getOrNull()?.takeIf { it.facts.size == 3 }

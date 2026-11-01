@@ -15,12 +15,15 @@ interface AssistantAnswerDao {
     @Query("SELECT * FROM assistant_answers WHERE id = :id")
     suspend fun findById(id: String): AssistantAnswerEntity?
 
-    /** The newest answer about a plot to a question of a screen (its id starts with [prefix]). */
+    /**
+     * The newest answer about a plot to a question of a screen (its id starts with [prefix]). A null [plotId] is
+     * the producer's whole field (Inicio): `IS` matches it, where `=` never matches NULL.
+     */
     @Query(
-        "SELECT * FROM assistant_answers WHERE plot_id = :plotId AND question_id LIKE :prefix || '%' " +
+        "SELECT * FROM assistant_answers WHERE plot_id IS :plotId AND question_id LIKE :prefix || '%' " +
             "AND created_at_epoch_ms >= :sinceEpochMs ORDER BY created_at_epoch_ms DESC LIMIT 1",
     )
-    suspend fun findLatestOfScreen(plotId: String, prefix: String, sinceEpochMs: Long): AssistantAnswerEntity?
+    suspend fun findLatestOfScreen(plotId: String?, prefix: String, sinceEpochMs: Long): AssistantAnswerEntity?
 
     @Query("SELECT id FROM assistant_answers WHERE moved_on = 1 AND id IN (:ids)")
     suspend fun movedOnAmong(ids: List<String>): List<String>

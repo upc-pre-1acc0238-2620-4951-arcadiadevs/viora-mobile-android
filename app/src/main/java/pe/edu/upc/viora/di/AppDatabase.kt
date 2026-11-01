@@ -6,6 +6,8 @@ import pe.edu.upc.viora.core.database.CacheMetadataDao
 import pe.edu.upc.viora.core.database.CacheMetadataEntity
 import pe.edu.upc.viora.features.assistant.infrastructure.local.AssistantAnswerDao
 import pe.edu.upc.viora.features.assistant.infrastructure.local.AssistantAnswerEntity
+import pe.edu.upc.viora.features.assistant.infrastructure.local.DailySummaryDao
+import pe.edu.upc.viora.features.assistant.infrastructure.local.DailySummaryEntity
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleDao
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.DraftTreeSampleEntity
 import pe.edu.upc.viora.features.croploadregulation.infrastructure.local.ThinningEventDao
@@ -75,8 +77,9 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
         AgronomicDossierEntity::class,
         FieldNoteEntity::class,
         AssistantAnswerEntity::class,
+        DailySummaryEntity::class,
     ],
-    version = 17,
+    version = 18,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -99,4 +102,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun agronomicDossierDao(): AgronomicDossierDao
     abstract fun fieldNoteDao(): FieldNoteDao
     abstract fun assistantAnswerDao(): AssistantAnswerDao
+    abstract fun dailySummaryDao(): DailySummaryDao
 }

@@ -10,6 +10,6 @@ import javax.inject.Inject
 class FindAnswerToReopenUseCase @Inject constructor(
     private val repository: AssistantRepository,
 ) {
-    suspend operator fun invoke(screen: AssistantScreen, plotId: String): AppResult<AssistantAnswer?> =
+    suspend operator fun invoke(screen: AssistantScreen, plotId: String?): AppResult<AssistantAnswer?> =
         repository.answerToReopen(screen, plotId)
 }

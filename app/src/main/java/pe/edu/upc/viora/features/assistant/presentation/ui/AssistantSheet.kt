@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.assistant.presentation.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.RepeatMode
@@ -20,6 +21,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -32,6 +35,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -48,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -71,17 +76,22 @@ import pe.edu.upc.viora.core.designsystem.component.rememberAnimationsOff
 import pe.edu.upc.viora.core.designsystem.theme.EditorialEyebrow
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
+import pe.edu.upc.viora.core.designsystem.theme.Harvest300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral100
+import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral500
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.ShadowTint
 import pe.edu.upc.viora.core.designsystem.theme.newsreader
 import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatClock
 import pe.edu.upc.viora.core.presentation.formatDayMonth
+import pe.edu.upc.viora.features.assistant.domain.entity.AssistantAnswer
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantQuestion
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantScreen
+import pe.edu.upc.viora.features.assistant.domain.entity.DailySummary
 import pe.edu.upc.viora.features.assistant.presentation.state.AnswerAge
 import pe.edu.upc.viora.features.assistant.presentation.state.AskFailure
 import pe.edu.upc.viora.features.assistant.presentation.state.AskPage
@@ -89,6 +99,7 @@ import pe.edu.upc.viora.features.assistant.presentation.state.AssistantPresenter
 import pe.edu.upc.viora.features.assistant.presentation.state.AssistantSheetUiState
 import pe.edu.upc.viora.features.assistant.presentation.state.AssistantTab
 import pe.edu.upc.viora.features.assistant.presentation.state.Catalog
+import pe.edu.upc.viora.features.assistant.presentation.state.PlotChoice
 import pe.edu.upc.viora.features.assistant.presentation.state.RecentAnswer
 import pe.edu.upc.viora.features.assistant.presentation.viewmodel.AssistantSheetViewModel
 import java.time.Instant
@@ -101,12 +112,16 @@ import java.time.Instant
 @Composable
 fun AssistantSheet(
     screen: AssistantScreen,
-    plotId: String,
+    plotId: String?,
     plotName: String,
     onDismiss: () -> Unit,
-    viewModel: AssistantSheetViewModel = hiltViewModel(key = "assistant-${screen.name}-$plotId"),
+    opening: AssistantAnswer? = null,
+    // Inicio keeps one sheet whatever plot its "LOTE" chips pick (P112)
+    viewModel: AssistantSheetViewModel = hiltViewModel(
+        key = if (screen == AssistantScreen.HOME) "assistant-HOME" else "assistant-${screen.name}-$plotId",
+    ),
 ) {
-    LaunchedEffect(screen, plotId) { viewModel.bind(screen, plotId, plotName) }
+    LaunchedEffect(screen, plotId, opening) { viewModel.bind(screen, plotId, plotName, opening) }
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val current = state ?: return
     VioraBottomSheet(onDismissRequest = onDismiss) {
@@ -121,6 +136,7 @@ fun AssistantSheet(
                 onAskAgain = viewModel::askAgainWithNewData,
                 onOpenRecent = viewModel::openRecent,
                 onReloadQuestions = viewModel::reloadQuestions,
+                onSelectPlot = viewModel::selectPlot,
             ),
         )
     }
@@ -136,6 +152,7 @@ data class AssistantSheetActions(
     val onAskAgain: () -> Unit = {},
     val onOpenRecent: (RecentAnswer) -> Unit = {},
     val onReloadQuestions: () -> Unit = {},
+    val onSelectPlot: (PlotChoice) -> Unit = {},
 )
 
 /** The content of the sheet, stateless: header, tabs where the design has them, and the page. */
@@ -196,14 +213,21 @@ private fun Header(state: AssistantSheetUiState, onQuestion: Boolean, now: Insta
     val answered = (state.page as? AskPage.Answered)?.takeIf { state.tab == AssistantTab.ASK }
     Row(verticalAlignment = Alignment.Top) {
         Column(Modifier.weight(1f).padding(top = 2.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            if (answered != null) Overline(answered.answer.createdAt, answered.answer.isStale, now)
+            when {
+                answered == null -> Unit
+                // The summary of the day keeps its own line (P113): "RESUMEN DE HOY · 7:02"
+                answered.answer.questionId == DailySummary.QUESTION_ID -> SummaryOverline(answered.answer.createdAt)
+                else -> Overline(answered.answer.createdAt, answered.answer.isStale, now)
+            }
             val titleStyle = newsreader(30.sp, 36.sp).copy(letterSpacing = (-0.3).sp)
             when {
                 state.tab == AssistantTab.RECENT ->
                     Text(stringResource(R.string.assistant_title_recent), style = titleStyle, color = Neutral900, modifier = Modifier.semantics { heading() })
                 onQuestion ->
                     Text(stringResource(R.string.assistant_title_answer), style = titleStyle, color = Neutral900, modifier = Modifier.semantics { heading() })
-                else -> SheetTitle(subject(state.screen, state.plotName), titleStyle)
+                state.screen == AssistantScreen.HOME ->
+                    SheetTitle(R.string.assistant_sheet_title_home, stringResource(R.string.assistant_subject_home), titleStyle)
+                else -> SheetTitle(R.string.assistant_sheet_title, subject(state.screen, state.plotName), titleStyle)
             }
         }
         Spacer(Modifier.width(12.dp))
@@ -221,9 +245,9 @@ private fun Header(state: AssistantSheetUiState, onQuestion: Boolean, now: Insta
  * wherever the language puts it.
  */
 @Composable
-private fun SheetTitle(subject: String, style: androidx.compose.ui.text.TextStyle) {
+private fun SheetTitle(@StringRes title: Int, subject: String, style: androidx.compose.ui.text.TextStyle) {
     val marker = "\u0001"
-    val template = stringResource(R.string.assistant_sheet_title, marker)
+    val template = stringResource(title, marker)
     val before = template.substringBefore(marker)
     val after = template.substringAfter(marker, "")
     Text(
@@ -241,6 +265,7 @@ private fun SheetTitle(subject: String, style: androidx.compose.ui.text.TextStyl
 /** What the sheet asks about (P115, P121, P124, P131…): the plot by its name, the rest by their content. */
 @Composable
 private fun subject(screen: AssistantScreen, plotName: String): String = when (screen) {
+    AssistantScreen.HOME -> stringResource(R.string.assistant_subject_home)
     AssistantScreen.ALTERNATION, AssistantScreen.PLAN, AssistantScreen.PLOT_DETAIL -> plotName
     AssistantScreen.ALERT -> stringResource(R.string.assistant_subject_alert)
     AssistantScreen.CLIMATE -> stringResource(R.string.assistant_subject_climate)
@@ -249,6 +274,22 @@ private fun subject(screen: AssistantScreen, plotName: String): String = when (s
     AssistantScreen.SAMPLING_SUMMARY -> stringResource(R.string.assistant_subject_sampling_summary)
     AssistantScreen.THINNING_DONE -> stringResource(R.string.assistant_subject_thinning_done)
     AssistantScreen.CAMPAIGN_CLOSED -> stringResource(R.string.assistant_subject_campaign_closed)
+}
+
+/** "● RESUMEN DE HOY · 7:02" (P111, P113): when the server wrote the summary of the day. */
+@Composable
+internal fun SummaryOverline(createdAt: Instant, modifier: Modifier = Modifier) {
+    val zone = LocalAppZone.current
+    val locale = LocalConfiguration.current.locales[0]
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Box(Modifier.size(6.dp).clip(CircleShape).background(OverlineDot))
+        Text(
+            stringResource(R.string.assistant_summary_overline, formatClock(createdAt, zone, locale)).uppercase(),
+            style = EditorialEyebrow,
+            color = Neutral600,
+            maxLines = 1,
+        )
+    }
 }
 
 /** "● HACE 2 MIN · SE MANTIENE HASTA “OTRA PREGUNTA”" (P117) or "● RESPUESTA DEL 23 OCT" (P119). */
@@ -350,6 +391,7 @@ private fun QuestionsPage(state: AssistantSheetUiState, actions: AssistantSheetA
         if (state.offline) {
             AssistantNotice(stringResource(R.string.assistant_offline_notice), icon = R.drawable.ic_cloud_sync)
         }
+        if (state.plots.isNotEmpty()) PlotChips(state.plots, state.selectedPlotId, actions.onSelectPlot)
         when (val catalog = state.catalog) {
             Catalog.Loading -> QuestionsLoading()
             is Catalog.Failed -> {
@@ -368,6 +410,36 @@ private fun QuestionsPage(state: AssistantSheetUiState, actions: AssistantSheetA
             }
         }
         Footer()
+    }
+}
+
+/** "LOTE" (P112): each active plot and the whole field; the questions follow the chip picked. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun PlotChips(plots: List<PlotChoice>, selectedId: String?, onSelect: (PlotChoice) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(bottom = 4.dp)) {
+        Text(stringResource(R.string.assistant_plot_label).uppercase(), style = EditorialEyebrow, color = Neutral600)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            plots.forEach { plot ->
+                val selected = plot.id == selectedId
+                Row(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(if (selected) Green800 else Neutral0)
+                        .selectable(selected = selected, role = Role.RadioButton, onClick = { onSelect(plot) })
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Box(Modifier.size(6.dp).clip(CircleShape).background(if (selected) Harvest300 else Neutral300))
+                    Text(
+                        plot.name ?: stringResource(R.string.assistant_whole_field),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (selected) Neutral0 else Neutral900,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -517,6 +589,7 @@ private fun FailedPage(reason: AskFailure, actions: AssistantSheetActions) {
 private fun thinkingCaption(screen: AssistantScreen): String = when (screen) {
     AssistantScreen.ALTERNATION -> stringResource(R.string.assistant_thinking_alternation)
     AssistantScreen.PLAN -> stringResource(R.string.assistant_thinking_plan)
+    AssistantScreen.HOME -> stringResource(R.string.assistant_thinking_home)
     AssistantScreen.ALERT -> stringResource(R.string.assistant_thinking_alert)
     AssistantScreen.CLIMATE -> stringResource(R.string.assistant_thinking_climate)
     AssistantScreen.WINTER_CHILL -> stringResource(R.string.assistant_thinking_winter_chill)

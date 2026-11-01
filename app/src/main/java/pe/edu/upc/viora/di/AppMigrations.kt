@@ -225,9 +225,41 @@ object AppMigrations {
         connection.execSQL(MIGRATION_16_17_SQL)
     }
 
+    /** The answers of the assistant after Inicio: `plot_id` accepts NULL, the producer's whole field. */
+    internal const val MIGRATION_17_18_ANSWERS_SQL =
+        "CREATE TABLE IF NOT EXISTS `assistant_answers` (`id` TEXT NOT NULL, `question_id` TEXT NOT NULL, `question` TEXT, " +
+            "`plot_id` TEXT, `created_at_epoch_ms` INTEGER NOT NULL, `freshness` TEXT NOT NULL, `text` TEXT NOT NULL, " +
+            "`facts_json` TEXT NOT NULL, `sources_json` TEXT NOT NULL, `actions_json` TEXT NOT NULL, `moved_on` INTEGER NOT NULL, " +
+            "PRIMARY KEY(`id`))"
+
+    internal const val MIGRATION_17_18_SUMMARIES_SQL =
+        "CREATE TABLE IF NOT EXISTS `assistant_daily_summaries` (`language` TEXT NOT NULL, `id` TEXT NOT NULL, " +
+            "`day` TEXT NOT NULL, `created_at_epoch_ms` INTEGER NOT NULL, `text` TEXT NOT NULL, `facts_json` TEXT NOT NULL, " +
+            "`sources_json` TEXT NOT NULL, PRIMARY KEY(`language`))"
+
+    /**
+     * Inicio of the assistant (P110-P113): its answers about the whole field have no plot, and the summary of the
+     * day is kept for the morning. SQLite cannot drop a NOT NULL, so the answers move to a table rebuilt with the
+     * same columns; the answers already on the phone are kept.
+     */
+    val MIGRATION_17_18 = Migration(17, 18) { connection ->
+        connection.execSQL("ALTER TABLE `assistant_answers` RENAME TO `assistant_answers_old`")
+        connection.execSQL("DROP INDEX IF EXISTS `index_assistant_answers_plot_id`")
+        connection.execSQL(MIGRATION_17_18_ANSWERS_SQL)
+        connection.execSQL(
+            "INSERT INTO `assistant_answers` (`id`, `question_id`, `question`, `plot_id`, `created_at_epoch_ms`, " +
+                "`freshness`, `text`, `facts_json`, `sources_json`, `actions_json`, `moved_on`) " +
+                "SELECT `id`, `question_id`, `question`, `plot_id`, `created_at_epoch_ms`, `freshness`, `text`, " +
+                "`facts_json`, `sources_json`, `actions_json`, `moved_on` FROM `assistant_answers_old`",
+        )
+        connection.execSQL("DROP TABLE `assistant_answers_old`")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `index_assistant_answers_plot_id` ON `assistant_answers` (`plot_id`)")
+        connection.execSQL(MIGRATION_17_18_SUMMARIES_SQL)
+    }
+
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
         MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16,
-        MIGRATION_16_17,
+        MIGRATION_16_17, MIGRATION_17_18,
     )
 }

@@ -10,6 +10,6 @@ import javax.inject.Inject
 class LoadAssistantQuestionsUseCase @Inject constructor(
     private val repository: AssistantRepository,
 ) {
-    suspend operator fun invoke(screen: AssistantScreen, plotId: String): AppResult<List<AssistantQuestion>> =
+    suspend operator fun invoke(screen: AssistantScreen, plotId: String?): AppResult<List<AssistantQuestion>> =
         repository.questions(screen, plotId)
 }

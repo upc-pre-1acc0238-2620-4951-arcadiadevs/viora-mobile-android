@@ -12,7 +12,8 @@ data class AssistantAnswer(
     val questionId: String,
     /** The question as the producer read it; null only for answers saved before the server kept it. */
     val question: String?,
-    val plotId: String,
+    /** The plot it is about; null for an Inicio answer about the producer's whole field. */
+    val plotId: String?,
     val createdAt: Instant,
     val freshness: Freshness,
     val text: String,
