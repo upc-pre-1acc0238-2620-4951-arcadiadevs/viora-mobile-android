@@ -315,6 +315,7 @@
     <string name="sensors_type_microclima_subtitle">Microclima · aire y temperatura</string>
     <string name="sensors_type_sonda_subtitle">Suelo · %1$d cm</string>
     <string name="sensors_active_since">Activo · hace %1$s</string>
+    <string name="sensors_paused">En pausa</string>
     <string name="sensors_paused_since">En pausa desde el %1$s</string>
     <string name="sensors_paused_simple">En pausa</string>
 
@@ -1963,6 +1964,16 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="assistant_entry_plan_examples">¿Por qué %1$d %%? · ¿Y si no aclaro?</string>
     <string name="assistant_entry_plan_examples_plain">¿Por qué aclarar? · ¿Y si no aclaro?</string>
     <string name="assistant_sheet_title">¿Qué quieres saber de %1$s?</string>
+    <string name="assistant_subject_alert">esta alerta</string>
+    <string name="assistant_subject_climate">el clima de tu lote</string>
+    <string name="assistant_subject_winter_chill">tu frío invernal</string>
+    <string name="assistant_subject_sensors">tus sensores</string>
+    <string name="assistant_subject_sampling_summary">esta ronda</string>
+    <string name="assistant_subject_thinning_done">este aclareo</string>
+    <string name="assistant_subject_campaign_closed">esta campaña</string>
+    <string name="assistant_entry_alert_examples">¿Qué hago ante esta alerta?</string>
+    <string name="assistant_entry_plot_examples">¿Cómo va este lote? · ¿Qué hago hoy?</string>
+    <string name="assistant_entry_campaign_examples">¿Cómo me fue frente a la anterior? · ¿Y %1$d?</string>
     <string name="assistant_title_answer">Tu pregunta</string>
     <string name="assistant_title_recent">Tus preguntas</string>
     <string name="assistant_tab_ask">Preguntar</string>
@@ -1972,6 +1983,14 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="assistant_offline_notice">Sin conexión. Puedes ver tus respuestas recientes; para preguntar necesitas internet.</string>
     <string name="assistant_thinking_alternation">Leyendo tus campañas registradas…</string>
     <string name="assistant_thinking_plan">Leyendo tu muestreo y tu plan de aclareo…</string>
+    <string name="assistant_thinking_alert">Leyendo tu alerta y el pronóstico del lote…</string>
+    <string name="assistant_thinking_climate">Leyendo el pronóstico y tus sensores…</string>
+    <string name="assistant_thinking_winter_chill">Contando tus porciones de frío del invierno…</string>
+    <string name="assistant_thinking_plot_detail">Revisando tu lote: muestreo, plan y cosechas…</string>
+    <string name="assistant_thinking_sensors">Leyendo tus nodos y sus últimas lecturas…</string>
+    <string name="assistant_thinking_sampling_summary">Leyendo los árboles de tu muestreo…</string>
+    <string name="assistant_thinking_thinning_done">Leyendo tu aclareo y la cosecha esperada…</string>
+    <string name="assistant_thinking_campaign_closed">Leyendo tu liquidación y tus campañas anteriores…</string>
     <string name="assistant_thinking_a11y">Viora está pensando tu respuesta</string>
     <string name="assistant_age_now">Ahora</string>
     <string name="assistant_age_minutes">Hace %1$d min</string>

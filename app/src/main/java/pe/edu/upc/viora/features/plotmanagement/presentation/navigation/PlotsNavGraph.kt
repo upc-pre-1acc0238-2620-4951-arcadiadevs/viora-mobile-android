@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.core.navigation.PlotsGraph
 import pe.edu.upc.viora.core.navigation.PlotsRoute
@@ -65,12 +66,14 @@ fun NavGraphBuilder.plotsNavGraph(navController: NavController, quotaCard: @Comp
  * Lotes, and the Home tab would then bring that screen back instead of the Home.
  *
  * [onOpenSection] opens the sections of a plot that other contexts own (sensors, harvest, chill, thinning) and
- * [onExpandPlan] the plan extension; the app shell registers those screens and knows their routes.
+ * [onExpandPlan] the plan extension; the app shell registers those screens and knows their routes. It also
+ * provides the [assistantSheet] the "Pregúntale a Viora" card of the detail opens (P136).
  */
 fun NavGraphBuilder.plotScreens(
     navController: NavController,
     onOpenSection: (section: LotSection, plotId: String, plotName: String) -> Unit,
     onExpandPlan: () -> Unit,
+    assistantSheet: AssistantSheetSlot? = null,
 ) {
     composable<PlotsMapRoute> {
         PlotsMapScreen(onBack = { navController.popBackStack() })
@@ -97,6 +100,7 @@ fun NavGraphBuilder.plotScreens(
             onHarvestHistory = { plotName -> onOpenSection(LotSection.HARVEST, entry.toRoute<PlotDetailRoute>().plotId, plotName) },
             onWinterChill = { plotName -> onOpenSection(LotSection.WINTER_CHILL, entry.toRoute<PlotDetailRoute>().plotId, plotName) },
             onThinningPlan = { plotName -> onOpenSection(LotSection.THINNING, entry.toRoute<PlotDetailRoute>().plotId, plotName) },
+            assistantSheet = assistantSheet,
         )
     }
     composable<EditPlotRoute> {

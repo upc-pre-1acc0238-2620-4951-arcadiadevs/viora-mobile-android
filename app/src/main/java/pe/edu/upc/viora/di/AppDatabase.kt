@@ -76,7 +76,7 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
         FieldNoteEntity::class,
         AssistantAnswerEntity::class,
     ],
-    version = 16,
+    version = 17,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {

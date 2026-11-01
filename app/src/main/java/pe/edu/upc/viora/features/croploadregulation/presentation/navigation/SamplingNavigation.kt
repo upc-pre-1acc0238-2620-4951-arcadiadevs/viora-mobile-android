@@ -2,7 +2,11 @@ package pe.edu.upc.viora.features.croploadregulation.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -13,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.navigation.LogbookGraph
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.RegisterTreeSampleScreen
@@ -47,11 +52,13 @@ data class SamplingCompleteRoute(
 
 /**
  * Navigation graph for in-field fruit thinning sampling (P51, P52, P53, P54).
- * [plotSilhouetteSlot] allows presentation-only integration with plotmanagement visual silhouette.
+ * [plotSilhouetteSlot] allows presentation-only integration with plotmanagement visual silhouette, and
+ * [assistantSheet] is the sheet of the round entry of the summary (P142).
  */
 fun NavGraphBuilder.samplingNavGraph(
     navController: NavController,
     plotSilhouetteSlot: @Composable (plotId: String, modifier: Modifier) -> Unit,
+    assistantSheet: AssistantSheetSlot? = null,
 ) {
     navigation<SamplingGraph>(startDestination = SelectPlotSamplingRoute) {
         composable<SelectPlotSamplingRoute> {
@@ -169,6 +176,8 @@ fun NavGraphBuilder.samplingNavGraph(
                 sessionViewModel.initSession(plotId = route.plotId, plotName = route.plotName)
             }
             val sessionState = sessionViewModel.uiState.collectAsStateWithLifecycle().value
+            val offline = route.isOffline || sessionState.isOffline
+            var showAssistant by rememberSaveable { mutableStateOf(false) }
 
             SamplingCompleteScreen(
                 plotName = route.plotName,
@@ -177,7 +186,7 @@ fun NavGraphBuilder.samplingNavGraph(
                 totalShootsCount = sessionState.totalShootsCount,
                 totalFruitsCount = sessionState.totalFruitsCount,
                 meanFruitsPerShoot = sessionState.meanFruitsPerShoot,
-                isOffline = route.isOffline || sessionState.isOffline,
+                isOffline = offline,
                 isLoading = sessionState.isLoading,
                 onClose = {
                     if (!navController.popBackStack()) {
@@ -196,7 +205,12 @@ fun NavGraphBuilder.samplingNavGraph(
                         popUpTo<SamplingGraph> { inclusive = true }
                     }
                 },
+                // A round saved on the phone has not reached the server, so Viora could not read it yet
+                onAskViora = assistantSheet?.takeIf { !offline }?.let { { showAssistant = true } },
             )
+            if (showAssistant && assistantSheet != null) {
+                assistantSheet(route.plotId, route.plotName) { showAssistant = false }
+            }
         }
     }
 }

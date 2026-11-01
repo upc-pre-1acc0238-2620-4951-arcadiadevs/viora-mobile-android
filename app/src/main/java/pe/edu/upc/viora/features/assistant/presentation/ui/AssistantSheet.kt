@@ -203,7 +203,7 @@ private fun Header(state: AssistantSheetUiState, onQuestion: Boolean, now: Insta
                     Text(stringResource(R.string.assistant_title_recent), style = titleStyle, color = Neutral900, modifier = Modifier.semantics { heading() })
                 onQuestion ->
                     Text(stringResource(R.string.assistant_title_answer), style = titleStyle, color = Neutral900, modifier = Modifier.semantics { heading() })
-                else -> PlotTitle(state.plotName, titleStyle)
+                else -> SheetTitle(subject(state.screen, state.plotName), titleStyle)
             }
         }
         Spacer(Modifier.width(12.dp))
@@ -216,9 +216,12 @@ private fun Header(state: AssistantSheetUiState, onQuestion: Boolean, now: Insta
     }
 }
 
-/** "¿Qué quieres saber de *La Yarada 02*?": the plot name in italic, wherever the language puts it. */
+/**
+ * "¿Qué quieres saber de *La Yarada 02*?" or "…de *tu frío invernal*?": the subject in italic,
+ * wherever the language puts it.
+ */
 @Composable
-private fun PlotTitle(plotName: String, style: androidx.compose.ui.text.TextStyle) {
+private fun SheetTitle(subject: String, style: androidx.compose.ui.text.TextStyle) {
     val marker = "\u0001"
     val template = stringResource(R.string.assistant_sheet_title, marker)
     val before = template.substringBefore(marker)
@@ -226,13 +229,26 @@ private fun PlotTitle(plotName: String, style: androidx.compose.ui.text.TextStyl
     Text(
         text = buildAnnotatedString {
             append(before)
-            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(plotName) }
+            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(subject) }
             append(after)
         },
         style = style,
         color = Neutral900,
         modifier = Modifier.semantics { heading() },
     )
+}
+
+/** What the sheet asks about (P115, P121, P124, P131…): the plot by its name, the rest by their content. */
+@Composable
+private fun subject(screen: AssistantScreen, plotName: String): String = when (screen) {
+    AssistantScreen.ALTERNATION, AssistantScreen.PLAN, AssistantScreen.PLOT_DETAIL -> plotName
+    AssistantScreen.ALERT -> stringResource(R.string.assistant_subject_alert)
+    AssistantScreen.CLIMATE -> stringResource(R.string.assistant_subject_climate)
+    AssistantScreen.WINTER_CHILL -> stringResource(R.string.assistant_subject_winter_chill)
+    AssistantScreen.SENSORS -> stringResource(R.string.assistant_subject_sensors)
+    AssistantScreen.SAMPLING_SUMMARY -> stringResource(R.string.assistant_subject_sampling_summary)
+    AssistantScreen.THINNING_DONE -> stringResource(R.string.assistant_subject_thinning_done)
+    AssistantScreen.CAMPAIGN_CLOSED -> stringResource(R.string.assistant_subject_campaign_closed)
 }
 
 /** "● HACE 2 MIN · SE MANTIENE HASTA “OTRA PREGUNTA”" (P117) or "● RESPUESTA DEL 23 OCT" (P119). */
@@ -501,6 +517,14 @@ private fun FailedPage(reason: AskFailure, actions: AssistantSheetActions) {
 private fun thinkingCaption(screen: AssistantScreen): String = when (screen) {
     AssistantScreen.ALTERNATION -> stringResource(R.string.assistant_thinking_alternation)
     AssistantScreen.PLAN -> stringResource(R.string.assistant_thinking_plan)
+    AssistantScreen.ALERT -> stringResource(R.string.assistant_thinking_alert)
+    AssistantScreen.CLIMATE -> stringResource(R.string.assistant_thinking_climate)
+    AssistantScreen.WINTER_CHILL -> stringResource(R.string.assistant_thinking_winter_chill)
+    AssistantScreen.PLOT_DETAIL -> stringResource(R.string.assistant_thinking_plot_detail)
+    AssistantScreen.SENSORS -> stringResource(R.string.assistant_thinking_sensors)
+    AssistantScreen.SAMPLING_SUMMARY -> stringResource(R.string.assistant_thinking_sampling_summary)
+    AssistantScreen.THINNING_DONE -> stringResource(R.string.assistant_thinking_thinning_done)
+    AssistantScreen.CAMPAIGN_CLOSED -> stringResource(R.string.assistant_thinking_campaign_closed)
 }
 
 /** A slow breathing for placeholders; still when the phone has the animations off. */

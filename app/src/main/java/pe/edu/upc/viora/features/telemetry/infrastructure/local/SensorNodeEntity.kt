@@ -22,4 +22,6 @@ data class SensorNodeEntity(
     val lastTemperatureCelsius: Double?,
     @ColumnInfo(name = "last_humidity_percent")
     val lastHumidityPercent: Double?,
+    @ColumnInfo(name = "paused_at")
+    val pausedAt: String? = null,
 )

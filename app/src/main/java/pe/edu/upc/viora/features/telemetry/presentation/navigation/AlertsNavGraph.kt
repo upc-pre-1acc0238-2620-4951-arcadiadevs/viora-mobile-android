@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.features.telemetry.presentation.ui.AlertDetailScreen
 import pe.edu.upc.viora.features.telemetry.presentation.ui.AlertsCenterScreen
 
@@ -20,12 +21,13 @@ data class AlertDetailRoute(val incidentId: String)
 
 /**
  * Alerts navigation subgraph: Alerts Center and Alert Detail. [onOpenWinterChill] is "Ver mi frío" of a warm winter
- * alert (P80 of its plot).
+ * alert (P80 of its plot), and [assistantSheet] the sheet of its "Pregúntale a Viora" card (P123).
  */
 fun NavGraphBuilder.alertsNavGraph(
     navController: NavController,
     onOpenPlot: (plotId: String) -> Unit = {},
     onOpenWinterChill: (plotId: String, plotName: String) -> Unit = { _, _ -> },
+    assistantSheet: AssistantSheetSlot? = null,
 ) {
     composable<AlertsCenterRoute> {
         AlertsCenterScreen(
@@ -41,6 +43,7 @@ fun NavGraphBuilder.alertsNavGraph(
             onBack = { navController.popBackStack() },
             onOpenPlot = { plotId -> onOpenPlot(plotId) },
             onOpenWinterChill = onOpenWinterChill,
+            assistantSheet = assistantSheet,
         )
     }
 }

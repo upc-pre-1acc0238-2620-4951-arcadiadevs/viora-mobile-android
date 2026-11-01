@@ -47,6 +47,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import kotlin.math.floor
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
@@ -85,7 +86,7 @@ import pe.edu.upc.viora.features.phenology.presentation.viewmodel.WinterChillVie
 /**
  * Screen P80: "Frío invernal" (US22)
  * Dynamic winter chill tracking based on Erez model with 4 adaptive operational states.
- * Aligned 100% with Figma node 389:80486.
+ * Aligned 100% with Figma node 389:80486. The round entry under ⋮ opens the [assistantSheet] (P133).
  */
 @Composable
 fun WinterChillScreen(
@@ -96,11 +97,13 @@ fun WinterChillScreen(
     onThinning: () -> Unit = {},
     modifier: Modifier = Modifier,
     onWarmWinterAlert: (incidentId: String) -> Unit = {},
+    assistantSheet: AssistantSheetSlot? = null,
     viewModel: WinterChillViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showWhySheet by rememberSaveable { mutableStateOf(false) }
     var showMore by rememberSaveable { mutableStateOf(false) }
+    var showAssistant by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -147,9 +150,15 @@ fun WinterChillScreen(
                     // An open warm winter alert takes the card to it (T15, prototype "Frío frenado"); otherwise the climate.
                     onWarmWinterCard = { s.warmWinterAlertId?.let(onWarmWinterAlert) ?: onClimate() },
                     modifier = Modifier.weight(1f),
+                    onAskViora = assistantSheet?.let { { showAssistant = true } },
                 )
             }
         }
+    }
+
+    val content = state as? WinterChillUiState.Content
+    if (showAssistant && content != null && assistantSheet != null) {
+        assistantSheet(viewModel.plotId, content.plotName) { showAssistant = false }
     }
 
     if (showWhySheet) {
@@ -214,6 +223,7 @@ private fun ContentBody(
     onOpenWhy: () -> Unit,
     onWarmWinterCard: () -> Unit,
     modifier: Modifier = Modifier,
+    onAskViora: (() -> Unit)? = null,
 ) {
     val (lead, emphasis) = when (state.seasonState) {
         WinterSeasonState.ACCUMULATING -> Pair(
@@ -261,6 +271,7 @@ private fun ContentBody(
         EditorialHeadline(
             lead = lead,
             emphasis = emphasis,
+            onAskViora = onAskViora,
         )
 
         // Hero Section ("Frío · héroe" in slate gray 32dp)
