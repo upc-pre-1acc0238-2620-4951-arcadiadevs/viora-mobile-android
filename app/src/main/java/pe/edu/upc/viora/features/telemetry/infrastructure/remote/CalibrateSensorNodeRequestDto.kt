@@ -8,4 +8,6 @@ data class CalibrateSensorNodeRequestDto(
     val depthCm: Int,
     val calibrationMultiplier: Double = 1.0,
     val calibrationNotes: String = "",
+    /** false pauses the node and true resumes it; the backend keeps the state when it is null. */
+    val transmitting: Boolean? = null,
 )

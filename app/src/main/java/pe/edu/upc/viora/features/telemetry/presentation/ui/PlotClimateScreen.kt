@@ -59,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.Duration
 import java.util.Locale
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
@@ -119,7 +120,8 @@ private const val MAX_DAY_NIGHT_DAYS = 7
 
 /**
  * "El clima de tu lote" (Figma P90): current weather and the 7-day forecast of the plot (US19),
- * the readings of its virtual sensors and the day/night temperature of the week (US17).
+ * the readings of its virtual sensors and the day/night temperature of the week (US17). The round
+ * entry under ⋮ opens the [assistantSheet] about the selected plot (P130).
  */
 @Composable
 fun PlotClimateScreen(
@@ -130,10 +132,12 @@ fun PlotClimateScreen(
     onOpenWinterChill: (plotId: String, plotName: String) -> Unit = { _, _ -> },
     onOpenThinning: (plotId: String, plotName: String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
+    assistantSheet: AssistantSheetSlot? = null,
     viewModel: PlotClimateViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showMore by rememberSaveable { mutableStateOf(false) }
+    var showAssistant by rememberSaveable { mutableStateOf(false) }
     val content = state as? PlotClimateUiState.Content
 
     PlotClimateContent(
@@ -144,7 +148,12 @@ fun PlotClimateScreen(
         onRefresh = viewModel::refresh,
         onOpenMetric = { metric -> content?.let { onOpenMetric(it.selectedPlotId, it.plotName, metric) } },
         modifier = modifier,
+        onAskViora = assistantSheet?.let { { showAssistant = true } },
     )
+
+    if (showAssistant && content != null && assistantSheet != null) {
+        assistantSheet(content.selectedPlotId, content.plotName) { showAssistant = false }
+    }
 
     if (showMore && content != null) {
         LotSectionsSheet(
@@ -176,6 +185,7 @@ fun PlotClimateContent(
     onRefresh: () -> Unit,
     onOpenMetric: (TelemetryMetric) -> Unit,
     modifier: Modifier = Modifier,
+    onAskViora: (() -> Unit)? = null,
 ) {
     val content = state as? PlotClimateUiState.Content
     Column(
@@ -202,6 +212,8 @@ fun PlotClimateContent(
                 ClimateHeadline(
                     lead = stringResource(R.string.climate_title_lead),
                     emphasis = stringResource(R.string.climate_title_emphasis),
+                    // The sheet needs the plot: no entry while it loads or fails
+                    onAskViora = onAskViora.takeIf { content != null },
                 )
                 Spacer(Modifier.height(16.dp))
                 when (state) {

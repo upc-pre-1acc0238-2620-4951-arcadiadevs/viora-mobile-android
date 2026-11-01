@@ -19,10 +19,11 @@ fun SensorNodeDto.toEntity(): SensorNodeEntity = SensorNodeEntity(
     lastReadingAt = lastReadingAt,
     lastTemperatureCelsius = lastTemperatureCelsius,
     lastHumidityPercent = lastHumidityPercent,
+    pausedAt = pausedAt,
 )
 
 fun SensorNodeEntity.toDomainOrNull(): SensorNode? {
-    val nodeType = runCatching { SensorType.valueOf(type) }.getOrNull() ?: return null
+    val nodeType = sensorTypeOf(type) ?: return null
     val nodeStatus = runCatching { SensorStatus.valueOf(status) }.getOrNull() ?: return null
     return SensorNode(
         id = id,
@@ -34,16 +35,35 @@ fun SensorNodeEntity.toDomainOrNull(): SensorNode? {
         lastReadingAt = lastReadingAt,
         lastTemperatureCelsius = lastTemperatureCelsius,
         lastHumidityPercent = lastHumidityPercent,
+        pausedAt = pausedAt,
     )
 }
 
 fun NewSensorNode.toRequestDto(): LinkSensorNodeRequestDto = LinkSensorNodeRequestDto(
     name = name,
-    type = type.name,
+    type = type.apiName(),
     depthCm = depthCm,
 )
 
 fun SensorNode.toCalibrationRequestDto(): CalibrateSensorNodeRequestDto = CalibrateSensorNodeRequestDto(
     name = name,
     depthCm = depthCm ?: 30,
+    // "Transmitir lecturas": the server pauses or resumes the node and dates the pause
+    transmitting = status == SensorStatus.ACTIVE,
 )
+
+/**
+ * The backend names the node types in English (`MICROCLIMATE`, `SOIL_PROBE`); rows cached by older versions
+ * of the app kept the app's names, so both are read.
+ */
+private fun sensorTypeOf(raw: String): SensorType? = when (raw) {
+    "MICROCLIMATE", "MICROCLIMA" -> SensorType.MICROCLIMA
+    "SOIL_PROBE", "SONDA_SUELO" -> SensorType.SONDA_SUELO
+    else -> null
+}
+
+/** The name of the type the backend accepts when a node is linked. */
+private fun SensorType.apiName(): String = when (this) {
+    SensorType.MICROCLIMA -> "MICROCLIMATE"
+    SensorType.SONDA_SUELO -> "SOIL_PROBE"
+}

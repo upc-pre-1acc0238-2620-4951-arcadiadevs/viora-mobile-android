@@ -62,6 +62,22 @@ fun AssistantEntryButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 /**
+ * A screen title with the round entry of the assistant at its right, under the header buttons (P114,
+ * P130, P133, P139, P142, P145). Without [onAskViora] the title takes the whole width.
+ */
+@Composable
+fun TitleWithAssistantEntry(
+    onAskViora: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    title: @Composable () -> Unit,
+) {
+    Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+        Box(Modifier.weight(1f)) { title() }
+        if (onAskViora != null) AssistantEntryButton(onClick = onAskViora, modifier = Modifier.padding(start = 12.dp))
+    }
+}
+
+/**
  * The card entry of the assistant where it fits the content (Figma P120, Plan del lote): "Pregúntale
  * a Viora" with two example questions and a dark round arrow.
  */

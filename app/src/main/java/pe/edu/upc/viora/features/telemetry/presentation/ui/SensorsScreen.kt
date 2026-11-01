@@ -56,8 +56,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.time.Instant
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
@@ -84,6 +86,8 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.core.navigation.LotSectionsSheet
+import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatDayMonth
 import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.formatPercent
 import pe.edu.upc.viora.core.presentation.messageRes
@@ -108,6 +112,7 @@ fun SensorsScreen(
     onWinterChill: () -> Unit = {},
     onThinning: () -> Unit = {},
     onNodeClick: (SensorNode) -> Unit = {},
+    assistantSheet: AssistantSheetSlot? = null,
     viewModel: SensorsViewModel = hiltViewModel(),
     linkViewModel: LinkNodeViewModel = hiltViewModel(),
 ) {
@@ -117,6 +122,7 @@ fun SensorsScreen(
     val scope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
     var showMore by rememberSaveable { mutableStateOf(false) }
+    var showAssistant by rememberSaveable { mutableStateOf(false) }
 
     val plotName = when (val s = state) {
         is SensorsUiState.Content -> s.plotName
@@ -134,7 +140,13 @@ fun SensorsScreen(
         onMore = { showMore = true },
         onNodeClick = onNodeClick,
         modifier = modifier,
+        // P139: the round entry once the plot is known (with or without nodes)
+        onAskViora = assistantSheet?.takeIf { plotName.isNotBlank() }?.let { { showAssistant = true } },
     )
+
+    if (showAssistant && assistantSheet != null) {
+        assistantSheet(viewModel.plotId, plotName) { showAssistant = false }
+    }
 
     val plot = when (val s = state) {
         is SensorsUiState.Content -> s.plot
@@ -204,6 +216,7 @@ fun SensorsScreenContent(
     modifier: Modifier = Modifier,
     onMore: () -> Unit = {},
     onNodeClick: (SensorNode) -> Unit = {},
+    onAskViora: (() -> Unit)? = null,
 ) {
     val plotName = when (state) {
         is SensorsUiState.Content -> state.plotName
@@ -263,6 +276,7 @@ fun SensorsScreenContent(
             EditorialHeadline(
                 lead = stringResource(R.string.sensors_title_lead),
                 emphasis = stringResource(R.string.sensors_title_emphasis),
+                onAskViora = onAskViora,
             )
 
             Spacer(Modifier.height(16.dp))
@@ -479,7 +493,7 @@ private fun SensorCard(node: SensorNode, onClick: () -> Unit = {}, modifier: Mod
                 ) {
                     Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Harvest700))
                     Text(
-                        text = stringResource(R.string.sensors_paused_since, "el 20 oct"),
+                        text = pausedLabel(node.pausedAt),
                         style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp),
                         color = Harvest800,
                     )
@@ -796,8 +810,22 @@ private val previewNodes = listOf(
         lastReadingAt = "2026-10-20T00:00:00Z",
         lastTemperatureCelsius = null,
         lastHumidityPercent = null,
+        pausedAt = "2026-10-20T14:00:00Z",
     ),
 )
+
+/** "En pausa desde el 20 oct" with the day the producer paused it, or "En pausa" when it is unknown. */
+@Composable
+private fun pausedLabel(pausedAt: String?): String {
+    val zone = LocalAppZone.current
+    val locale = LocalConfiguration.current.locales[0]
+    val day = pausedAt?.let { runCatching { Instant.parse(it).atZone(zone).toLocalDate() }.getOrNull() }
+    return if (day == null) {
+        stringResource(R.string.sensors_paused)
+    } else {
+        stringResource(R.string.sensors_paused_since, formatDayMonth(day, locale))
+    }
+}
 
 @Preview(showBackground = true, backgroundColor = 0xFFF3F0EA, heightDp = 800)
 @Composable

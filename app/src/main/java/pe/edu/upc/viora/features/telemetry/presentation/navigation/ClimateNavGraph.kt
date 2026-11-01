@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.features.telemetry.domain.valueobject.TelemetryMetric
 import pe.edu.upc.viora.features.telemetry.presentation.ui.PlotClimateScreen
@@ -27,11 +28,13 @@ data class TelemetryDetailRoute(
 /**
  * The plot climate screens (US19 forecast, US17 sensor series). Like the other plot screens they
  * sit at the root of the navigation, outside every tab, because they are reached from the Home.
- * [onOpenSection] opens another section of the plot; the app shell knows where each one lives.
+ * [onOpenSection] opens another section of the plot; the app shell knows where each one lives, and
+ * provides the [assistantSheet] the round entry of P90 opens (P130).
  */
 fun NavGraphBuilder.climateNavGraph(
     navController: NavController,
     onOpenSection: (section: LotSection, plotId: String, plotName: String) -> Unit,
+    assistantSheet: AssistantSheetSlot? = null,
 ) {
     composable<PlotClimateRoute> {
         PlotClimateScreen(
@@ -51,6 +54,7 @@ fun NavGraphBuilder.climateNavGraph(
             onOpenThinning = { plotId, plotName ->
                 onOpenSection(LotSection.THINNING, plotId, plotName)
             },
+            assistantSheet = assistantSheet,
         )
     }
     composable<TelemetryDetailRoute> {

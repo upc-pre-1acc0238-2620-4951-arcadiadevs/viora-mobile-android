@@ -27,6 +27,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +48,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AskVioraCard
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
@@ -85,9 +90,11 @@ fun CampaignClosedScreen(
     onOpenAlternation: (plotId: String, plotName: String) -> Unit,
     onCorrect: (plotId: String, year: Int) -> Unit,
     modifier: Modifier = Modifier,
+    assistantSheet: AssistantSheetSlot? = null,
     viewModel: CampaignClosedViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var showAssistant by rememberSaveable { mutableStateOf(false) }
     CampaignClosedContent(
         state = state,
         onDone = onDone,
@@ -97,7 +104,12 @@ fun CampaignClosedScreen(
         onConflictViewReceipt = viewModel::showExistingReceipt,
         onConflictAcknowledge = { viewModel.acknowledgeConflict(onDone) },
         modifier = modifier,
+        onAskViora = assistantSheet?.let { { showAssistant = true } },
     )
+    val closed = state as? CampaignClosedUiState.Closed
+    if (showAssistant && closed != null && assistantSheet != null) {
+        assistantSheet(closed.receipt.plotId, closed.receipt.plotName) { showAssistant = false }
+    }
 }
 
 @Composable
@@ -110,6 +122,7 @@ internal fun CampaignClosedContent(
     onConflictViewReceipt: () -> Unit,
     onConflictAcknowledge: () -> Unit,
     modifier: Modifier = Modifier,
+    onAskViora: (() -> Unit)? = null,
 ) {
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerLow)) {
         when (state) {
@@ -123,6 +136,8 @@ internal fun CampaignClosedContent(
                 onOpenDossier = onOpenDossier,
                 onOpenAlternation = onOpenAlternation,
                 onCorrect = onCorrect,
+                // Only a settled campaign reached the server; one still on the phone has nothing to read
+                onAskViora = onAskViora,
             )
             is CampaignClosedUiState.Pending -> ReceiptScreen(
                 receipt = state.receipt,
@@ -156,6 +171,7 @@ private fun ReceiptScreen(
     onOpenDossier: (String, String, Int) -> Unit,
     onOpenAlternation: (String, String) -> Unit,
     onCorrect: (String, Int) -> Unit,
+    onAskViora: (() -> Unit)? = null,
 ) {
     Column(
         modifier = Modifier
@@ -208,10 +224,18 @@ private fun ReceiptScreen(
                 modifier = Modifier.weight(1f),
             )
         }
+        // P148: the card fits under the tiles, since the title leaves no room for the round entry
+        if (onAskViora != null) {
+            AskVioraCard(
+                examples = stringResource(R.string.assistant_entry_campaign_examples, receipt.campaignYear + 1),
+                onClick = onAskViora,
+                modifier = Modifier.padding(top = 12.dp),
+            )
+        }
         PrimaryPillButton(
             text = stringResource(R.string.settle_receipt_done),
             onClick = onDone,
-            modifier = Modifier.padding(top = 36.dp),
+            modifier = Modifier.padding(top = if (onAskViora != null) 16.dp else 36.dp),
             trailingIcon = R.drawable.ic_check,
         )
         Text(

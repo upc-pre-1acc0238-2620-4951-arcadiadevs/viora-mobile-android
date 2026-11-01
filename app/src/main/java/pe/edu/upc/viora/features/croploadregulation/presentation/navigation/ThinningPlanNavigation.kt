@@ -31,7 +31,8 @@ data class ThinningResultRoute(
 /**
  * P61 with its P64 sheet, P62 and P63. [onOpenSection] opens another section of the same plot from "Más opciones",
  * [onOpenLogbook] the Bitácora tab and [onOpenAlternation] the Alternancia of the plot; the composition root knows
- * where each one lives.
+ * where each one lives. [assistantSheet] is the sheet of the plan (P120) and [resultAssistantSheet] the one of the
+ * thinning just recorded (P145).
  */
 fun NavGraphBuilder.thinningPlanComposable(
     navController: NavController,
@@ -39,6 +40,7 @@ fun NavGraphBuilder.thinningPlanComposable(
     onOpenLogbook: () -> Unit,
     onOpenAlternation: (plotId: String, plotName: String) -> Unit,
     assistantSheet: AssistantSheetSlot? = null,
+    resultAssistantSheet: AssistantSheetSlot? = null,
 ) {
     composable<ThinningPlanRoute> { entry ->
         val route = entry.toRoute<ThinningPlanRoute>()
@@ -82,6 +84,7 @@ fun NavGraphBuilder.thinningPlanComposable(
             onClose = { navController.popBackStack() },
             onOpenLogbook = onOpenLogbook,
             onOpenAlternation = { plotName -> onOpenAlternation(route.plotId, plotName.ifBlank { route.plotName }) },
+            assistantSheet = resultAssistantSheet,
         )
     }
 }

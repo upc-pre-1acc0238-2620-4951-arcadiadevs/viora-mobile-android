@@ -56,8 +56,12 @@ internal fun ClimateTopBar(
 
 /** The two-line serif headline whose second line is italic ("El clima de / *tu lote.*"). */
 @Composable
-internal fun ClimateHeadline(lead: String, emphasis: String, modifier: Modifier = Modifier) =
-    EditorialHeadline(lead = lead, emphasis = emphasis, modifier = modifier)
+internal fun ClimateHeadline(
+    lead: String,
+    emphasis: String,
+    modifier: Modifier = Modifier,
+    onAskViora: (() -> Unit)? = null,
+) = EditorialHeadline(lead = lead, emphasis = emphasis, modifier = modifier, onAskViora = onAskViora)
 
 /** A pill the producer taps to pick a plot, a metric or a range. */
 @Composable

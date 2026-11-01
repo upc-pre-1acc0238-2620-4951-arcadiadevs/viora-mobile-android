@@ -47,10 +47,9 @@ class SensorRepositoryImpl @Inject constructor(
         }
         if (result is AppResult.Failure) return result
 
-        val remoteEntity = (result as AppResult.Success).value.toEntity()
-        // The calibration endpoint owns the technical fields; keep the UI transmission
-        // state locally because the API contract does not expose it in TS42.
-        val entity = remoteEntity.copy(status = node.status.name)
+        // The server applies the name, the calibration and "Transmitir lecturas", and returns the
+        // node with its status and the date of its pause
+        val entity = (result as AppResult.Success).value.toEntity()
         val updated = entity.toDomainOrNull()
             ?: return AppResult.Failure(AppError.Unknown(IllegalStateException("Server returned an unreadable node")))
         return appResultOf<Unit> { sensorNodeDao.upsertAll(listOf(entity)) }.let { stored ->

@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navDeepLink
 import pe.edu.upc.viora.BuildConfig
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.navigation.AuthRoute
 import pe.edu.upc.viora.core.navigation.HomeGraph
@@ -296,6 +297,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             onCorrect = { plotId, year ->
                 navController.navigate(SettleHarvestRoute(plotId = plotId, campaignYear = year)) { popUpTo<CampaignClosedRoute> { inclusive = true } }
             },
+            assistantSheet = assistantSheetOf(AssistantScreen.CAMPAIGN_CLOSED),
         )
         agronomicDossierComposable(navController)
         plotsNavGraph(
@@ -319,36 +321,42 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
             navController,
             onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
             onExpandPlan = { navController.navigate(PlanExtensionRoute) { launchSingleTop = true } },
+            assistantSheet = assistantSheetOf(AssistantScreen.PLOT_DETAIL),
         )
         sensorsComposable(
             navController,
             onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
+            assistantSheet = assistantSheetOf(AssistantScreen.SENSORS),
         )
         configureNodeComposable(navController)
         harvestHistoryComposable(
             navController,
             onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
-            assistantSheet = { plotId, plotName, onDismiss -> AssistantSheet(AssistantScreen.ALTERNATION, plotId, plotName, onDismiss) },
+assistantSheet = assistantSheetOf(AssistantScreen.ALTERNATION),
         )
         winterChillComposable(
             navController,
             onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
             onOpenAlert = { incidentId -> navController.navigate(AlertDetailRoute(incidentId = incidentId)) },
+            assistantSheet = assistantSheetOf(AssistantScreen.WINTER_CHILL),
         )
         climateNavGraph(
             navController,
             onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
+            assistantSheet = assistantSheetOf(AssistantScreen.CLIMATE),
         )
         alertsNavGraph(
             navController = navController,
             onOpenPlot = { plotId -> navController.navigate(PlotDetailRoute(plotId = plotId)) },
             onOpenWinterChill = { plotId, plotName -> navController.navigate(WinterChillRoute(plotId = plotId, plotName = plotName)) },
+            assistantSheet = assistantSheetOf(AssistantScreen.ALERT),
         )
         samplingNavGraph(
             navController = navController,
             plotSilhouetteSlot = { plotId, slotModifier ->
                 PlotSilhouetteById(plotId = plotId, modifier = slotModifier, showTreeGrid = true)
             },
+            assistantSheet = assistantSheetOf(AssistantScreen.SAMPLING_SUMMARY),
         )
         thinningPlanComposable(
             navController = navController,
@@ -361,7 +369,8 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 }
             },
             onOpenAlternation = { plotId, plotName -> navController.navigate(HarvestHistoryRoute(plotId = plotId, plotName = plotName)) },
-            assistantSheet = { plotId, plotName, onDismiss -> AssistantSheet(AssistantScreen.PLAN, plotId, plotName, onDismiss) },
+assistantSheet = assistantSheetOf(AssistantScreen.PLAN),
+            resultAssistantSheet = assistantSheetOf(AssistantScreen.THINNING_DONE),
         )
         navigation<PlanGraph>(startDestination = PlanRoute) {
             composable<PlanRoute> {
@@ -440,3 +449,7 @@ private fun NavHostController.payPlanAfterSignUp(hectares: Int?) {
 private fun NavHostController.redeemSavedCode(code: String) {
     navigate(RedeemCodeRoute(code = code)) { popUpTo(graph.id) { inclusive = true } }
 }
+
+/** The assistant sheet of [screen], as the slot a screen of another context opens (Figma section 23). */
+private fun assistantSheetOf(screen: AssistantScreen): AssistantSheetSlot =
+    { plotId, plotName, onDismiss -> AssistantSheet(screen, plotId, plotName, onDismiss) }

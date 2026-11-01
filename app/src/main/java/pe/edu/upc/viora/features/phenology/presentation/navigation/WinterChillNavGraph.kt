@@ -5,17 +5,22 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.features.phenology.presentation.ui.WinterChillScreen
 
 @Serializable
 data class WinterChillRoute(val plotId: String, val plotName: String = "")
 
-/** [onOpenSection] opens another section of the plot; the app shell knows where each one lives. [onOpenAlert] the warm-winter alert. */
+/**
+ * [onOpenSection] opens another section of the plot; the app shell knows where each one lives.
+ * [onOpenAlert] the warm-winter alert, and [assistantSheet] the sheet of the round entry (P133).
+ */
 fun NavGraphBuilder.winterChillComposable(
     navController: NavController,
     onOpenSection: (section: LotSection, plotId: String, plotName: String) -> Unit,
     onOpenAlert: (incidentId: String) -> Unit,
+    assistantSheet: AssistantSheetSlot? = null,
 ) {
     composable<WinterChillRoute> { entry ->
         val route = entry.toRoute<WinterChillRoute>()
@@ -34,6 +39,7 @@ fun NavGraphBuilder.winterChillComposable(
                 onOpenSection(LotSection.THINNING, route.plotId, route.plotName)
             },
             onWarmWinterAlert = onOpenAlert,
+            assistantSheet = assistantSheet,
         )
     }
 }

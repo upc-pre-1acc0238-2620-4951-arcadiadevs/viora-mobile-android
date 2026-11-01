@@ -185,4 +185,13 @@ class AppMigrationsTest {
         assertEquals(v15.keys + "assistant_answers", v16.keys)
         v15.keys.forEach { assertEquals(v15[it], v16[it]) }
     }
+
+    @Test fun `node pause migration matches the exported v17 schema and leaves every other table intact`() {
+        val v16 = createSqlByTable(16)
+        val v17 = createSqlByTable(17)
+        val column = AppMigrations.MIGRATION_16_17_SQL.substringAfter("ADD COLUMN ")
+        assertTrue(v17.getValue("sensor_nodes").contains(column))
+        assertEquals(v16.keys, v17.keys)
+        (v16.keys - "sensor_nodes").forEach { assertEquals(v16[it], v17[it]) }
+    }
 }
