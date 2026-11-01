@@ -59,6 +59,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AskVioraCard
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
@@ -102,7 +104,8 @@ private val LoweredSheetContent = 112.dp
  * A plot's detail (Figma P26): its outline on the satellite map and a sheet with its status and
  * figures. The sheet has two positions. Lowering it (dragging its grabber, tapping the grabber,
  * or double-tapping the map) leaves the map almost full screen and unlocks it so the producer can
- * explore around the plot; raising it brings back the framed outline.
+ * explore around the plot; raising it brings back the framed outline. Under "Tu lote" the card
+ * "Pregúntale a Viora" opens the [assistantSheet] (P136).
  */
 @Composable
 fun PlotDetailScreen(
@@ -114,10 +117,12 @@ fun PlotDetailScreen(
     onWinterChill: (plotName: String) -> Unit = {},
     onThinningPlan: (plotName: String) -> Unit = {},
     modifier: Modifier = Modifier,
+    assistantSheet: AssistantSheetSlot? = null,
     viewModel: PlotDetailViewModel = hiltViewModel(),
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     val archiveState = viewModel.archiveState.collectAsStateWithLifecycle().value
+    var showAssistant by rememberSaveable { mutableStateOf(false) }
     // Archived: the plot is gone from the active list, so leave its detail.
     LaunchedEffect(archiveState) { if (archiveState == ArchiveState.Done) onBack() }
     PlotDetailContent(
@@ -133,7 +138,12 @@ fun PlotDetailScreen(
         onArchive = viewModel::archive,
         onDismissArchiveFailure = viewModel::dismissArchiveFailure,
         modifier = modifier,
+        onAskViora = assistantSheet?.let { { showAssistant = true } },
     )
+    val plot = (state as? PlotDetailUiState.Content)?.plot
+    if (showAssistant && plot != null && assistantSheet != null) {
+        assistantSheet(plot.id.value, plot.name) { showAssistant = false }
+    }
 }
 
 @Composable
@@ -150,6 +160,7 @@ fun PlotDetailContent(
     archiveState: ArchiveState = ArchiveState.Idle,
     onArchive: () -> Unit = {},
     onDismissArchiveFailure: () -> Unit = {},
+    onAskViora: (() -> Unit)? = null,
 ) {
     when (state) {
         PlotDetailUiState.Loading -> VioraLoadingState(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.primary)
@@ -170,6 +181,7 @@ fun PlotDetailContent(
             onArchive = onArchive,
             onDismissArchiveFailure = onDismissArchiveFailure,
             modifier = modifier,
+            onAskViora = onAskViora,
         )
     }
 }
@@ -191,6 +203,7 @@ private fun PlotDetailBody(
     onArchive: () -> Unit,
     onDismissArchiveFailure: () -> Unit,
     modifier: Modifier = Modifier,
+    onAskViora: (() -> Unit)? = null,
 ) {
     var optionsOpen by rememberSaveable { mutableStateOf(false) }
     var confirmingArchive by rememberSaveable { mutableStateOf(false) }
@@ -229,6 +242,7 @@ private fun PlotDetailBody(
             onWinterChill = { onWinterChill(plot.name) },
             onThinningPlan = { onThinningPlan(plot.name) },
             modifier = Modifier.align(Alignment.BottomCenter),
+            onAskViora = onAskViora,
         )
         if (optionsOpen) {
             PlotOptionsSheet(
@@ -330,6 +344,7 @@ private fun DetailSheet(
     onWinterChill: () -> Unit = {},
     onThinningPlan: () -> Unit = {},
     modifier: Modifier = Modifier,
+    onAskViora: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
@@ -411,6 +426,9 @@ private fun DetailSheet(
                     background = Harvest100,
                     onClick = onThinningPlan,
                 )
+                if (onAskViora != null) {
+                    AskVioraCard(examples = stringResource(R.string.assistant_entry_plot_examples), onClick = onAskViora)
+                }
             }
         }
     }

@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +61,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AskVioraCard
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
@@ -92,10 +95,12 @@ fun AlertDetailScreen(
     onOpenPlot: (String) -> Unit,
     modifier: Modifier = Modifier,
     onOpenWinterChill: (plotId: String, plotName: String) -> Unit = { _, _ -> },
+    assistantSheet: AssistantSheetSlot? = null,
     viewModel: AlertDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showAssistant by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var showSnoozeSheet by remember { mutableStateOf(false) }
@@ -405,6 +410,18 @@ fun AlertDetailScreen(
                             )
 
                             Spacer(modifier = Modifier.height(20.dp))
+                        }
+
+                        // P123: the assistant goes under "Qué hacer"; at the top it would collide with the date
+                        if (assistantSheet != null && detail.plotId.isNotBlank()) {
+                            AskVioraCard(
+                                examples = stringResource(R.string.assistant_entry_alert_examples),
+                                onClick = { showAssistant = true },
+                            )
+                            Spacer(modifier = Modifier.height(20.dp))
+                            if (showAssistant) {
+                                assistantSheet(detail.plotId, detail.plotName) { showAssistant = false }
+                            }
                         }
 
                         val traceabilityNote = detail.dataSource?.takeIf { it.isNotBlank() }

@@ -58,6 +58,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.EditorialHeadline
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
@@ -108,6 +109,7 @@ fun SensorsScreen(
     onWinterChill: () -> Unit = {},
     onThinning: () -> Unit = {},
     onNodeClick: (SensorNode) -> Unit = {},
+    assistantSheet: AssistantSheetSlot? = null,
     viewModel: SensorsViewModel = hiltViewModel(),
     linkViewModel: LinkNodeViewModel = hiltViewModel(),
 ) {
@@ -117,6 +119,7 @@ fun SensorsScreen(
     val scope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
     var showMore by rememberSaveable { mutableStateOf(false) }
+    var showAssistant by rememberSaveable { mutableStateOf(false) }
 
     val plotName = when (val s = state) {
         is SensorsUiState.Content -> s.plotName
@@ -134,7 +137,13 @@ fun SensorsScreen(
         onMore = { showMore = true },
         onNodeClick = onNodeClick,
         modifier = modifier,
+        // P139: the round entry once the plot is known (with or without nodes)
+        onAskViora = assistantSheet?.takeIf { plotName.isNotBlank() }?.let { { showAssistant = true } },
     )
+
+    if (showAssistant && assistantSheet != null) {
+        assistantSheet(viewModel.plotId, plotName) { showAssistant = false }
+    }
 
     val plot = when (val s = state) {
         is SensorsUiState.Content -> s.plot
@@ -204,6 +213,7 @@ fun SensorsScreenContent(
     modifier: Modifier = Modifier,
     onMore: () -> Unit = {},
     onNodeClick: (SensorNode) -> Unit = {},
+    onAskViora: (() -> Unit)? = null,
 ) {
     val plotName = when (state) {
         is SensorsUiState.Content -> state.plotName
@@ -263,6 +273,7 @@ fun SensorsScreenContent(
             EditorialHeadline(
                 lead = stringResource(R.string.sensors_title_lead),
                 emphasis = stringResource(R.string.sensors_title_emphasis),
+                onAskViora = onAskViora,
             )
 
             Spacer(Modifier.height(16.dp))

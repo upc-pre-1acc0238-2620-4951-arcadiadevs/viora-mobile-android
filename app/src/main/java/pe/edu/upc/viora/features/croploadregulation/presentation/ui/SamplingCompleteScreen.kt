@@ -41,6 +41,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.TitleWithAssistantEntry
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -63,7 +64,8 @@ private val ScreenPadding = 24.dp
 /**
  * P54 · Resumen Estadístico de Ronda Completa.
  * Displays 4 summary cards: evaluated trees, mean fruits per shoot, shoots count, and fruits count,
- * along with plot plan CTA and Return to Bitácora link.
+ * along with plot plan CTA and Return to Bitácora link. With [onAskViora] the round entry of the
+ * assistant sits at the right of the title (P142).
  */
 @Composable
 fun SamplingCompleteScreen(
@@ -79,6 +81,7 @@ fun SamplingCompleteScreen(
     onViewPlotPlan: () -> Unit,
     onBackToLogbook: () -> Unit,
     modifier: Modifier = Modifier,
+    onAskViora: (() -> Unit)? = null,
 ) {
     if (isLoading) {
         Box(
@@ -213,30 +216,34 @@ fun SamplingCompleteScreen(
 
             Spacer(Modifier.height(28.dp))
 
-            // Headline: "Ronda *completa.*" vs "Ronda *guardada.*"
-            Text(
-                text = stringResource(R.string.sampling_complete_headline_lead),
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontSize = 48.sp,
-                    lineHeight = 50.sp,
-                    letterSpacing = (-1.2).sp,
-                ),
-                color = Neutral900,
-            )
-            Text(
-                text = if (isOffline) {
-                    stringResource(R.string.sampling_saved_offline_headline_emphasis)
-                } else {
-                    stringResource(R.string.sampling_complete_headline_emphasis)
-                },
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontSize = 48.sp,
-                    lineHeight = 50.sp,
-                    fontStyle = FontStyle.Italic,
-                    letterSpacing = (-1.2).sp,
-                ),
-                color = Neutral900,
-            )
+            // Headline: "Ronda *completa.*" vs "Ronda *guardada.*", with the round entry of P142 at its right
+            TitleWithAssistantEntry(onAskViora = onAskViora) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.sampling_complete_headline_lead),
+                        style = MaterialTheme.typography.displayMedium.copy(
+                            fontSize = 48.sp,
+                            lineHeight = 50.sp,
+                            letterSpacing = (-1.2).sp,
+                        ),
+                        color = Neutral900,
+                    )
+                    Text(
+                        text = if (isOffline) {
+                            stringResource(R.string.sampling_saved_offline_headline_emphasis)
+                        } else {
+                            stringResource(R.string.sampling_complete_headline_emphasis)
+                        },
+                        style = MaterialTheme.typography.displayMedium.copy(
+                            fontSize = 48.sp,
+                            lineHeight = 50.sp,
+                            fontStyle = FontStyle.Italic,
+                            letterSpacing = (-1.2).sp,
+                        ),
+                        color = Neutral900,
+                    )
+                }
+            }
 
             Spacer(Modifier.height(16.dp))
 

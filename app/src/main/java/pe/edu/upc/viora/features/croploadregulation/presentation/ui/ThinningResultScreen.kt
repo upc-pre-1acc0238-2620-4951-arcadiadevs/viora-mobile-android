@@ -52,8 +52,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.TitleWithAssistantEntry
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
@@ -90,7 +92,8 @@ import pe.edu.upc.viora.core.presentation.labelRes
 
 /**
  * P63 · Aclareo registrado (US27/US28): the caliber expected at harvest in one of its four Figma variants, the load
- * the thinning left, the campaign yield and the way to the next campaign (Alternancia).
+ * the thinning left, the campaign yield and the way to the next campaign (Alternancia). The round entry at the right
+ * of the title opens the [assistantSheet] (P145).
  */
 @Composable
 fun ThinningResultScreen(
@@ -98,10 +101,12 @@ fun ThinningResultScreen(
     onOpenLogbook: () -> Unit,
     onOpenAlternation: (plotName: String) -> Unit,
     modifier: Modifier = Modifier,
+    assistantSheet: AssistantSheetSlot? = null,
     viewModel: ThinningResultViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showHowItWorks by rememberSaveable { mutableStateOf(false) }
+    var showAssistant by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier.fillMaxSize().background(Neutral100)) {
         when (val s = state) {
@@ -128,11 +133,15 @@ fun ThinningResultScreen(
                 onOpenLogbook = onOpenLogbook,
                 onOpenAlternation = { onOpenAlternation(s.plotName) },
                 onHowItWorks = { showHowItWorks = true },
+                onAskViora = assistantSheet?.let { { showAssistant = true } },
             )
         }
     }
 
     val content = state as? ThinningResultUiState.Content
+    if (showAssistant && content != null && assistantSheet != null) {
+        assistantSheet(viewModel.plotId, content.plotName) { showAssistant = false }
+    }
     if (showHowItWorks && content != null) {
         CaliberInfoSheet(
             active = content.caliberCard,
@@ -151,6 +160,7 @@ private fun ResultBody(
     onOpenLogbook: () -> Unit,
     onOpenAlternation: () -> Unit,
     onHowItWorks: () -> Unit,
+    onAskViora: (() -> Unit)? = null,
 ) {
     val variety = state.variety?.let { stringResource(it.labelRes()) } ?: stringResource(R.string.thinning_this_variety)
     val execution = state.execution
@@ -168,9 +178,11 @@ private fun ResultBody(
             SavedInLogbookChip(Modifier.padding(top = 8.dp))
         }
         val headline = newsreader(48.sp, 50.sp).copy(letterSpacing = (-1.2).sp)
-        Column(Modifier.padding(top = 24.dp)) {
-            Text(stringResource(R.string.thinning_result_headline_lead), style = headline, color = Neutral900)
-            Text(stringResource(R.string.thinning_result_headline_emphasis), style = headline.copy(fontStyle = FontStyle.Italic), color = Neutral900)
+        TitleWithAssistantEntry(onAskViora = onAskViora, modifier = Modifier.padding(top = 24.dp)) {
+            Column {
+                Text(stringResource(R.string.thinning_result_headline_lead), style = headline, color = Neutral900)
+                Text(stringResource(R.string.thinning_result_headline_emphasis), style = headline.copy(fontStyle = FontStyle.Italic), color = Neutral900)
+            }
         }
         VioraVoice(
             text = stringResource(

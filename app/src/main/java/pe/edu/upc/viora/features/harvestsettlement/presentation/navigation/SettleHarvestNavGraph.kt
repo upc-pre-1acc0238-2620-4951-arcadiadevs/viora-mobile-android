@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.AgronomicDossierScreen
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.CampaignClosedScreen
 import pe.edu.upc.viora.features.harvestsettlement.presentation.ui.SettleHarvestScreen
@@ -39,13 +40,15 @@ fun NavGraphBuilder.settleHarvestComposable(
 /**
  * Registers the P73 receipt. The host decides where its actions lead: [onDone] closes it,
  * [onOpenDossier] is "Ver expediente del lote", [onOpenAlternation] the "año más estable" tile and
- * [onCorrect] "Corregir los kilos" (back to the form, prefilled from the pending settlement).
+ * [onCorrect] "Corregir los kilos" (back to the form, prefilled from the pending settlement). [assistantSheet] is
+ * the sheet of its "Pregúntale a Viora" card (P148).
  */
 fun NavGraphBuilder.campaignClosedComposable(
     navController: NavController,
     onOpenDossier: (plotId: String, plotName: String, year: Int) -> Unit,
     onOpenAlternation: (plotId: String, plotName: String) -> Unit,
     onCorrect: (plotId: String, year: Int) -> Unit,
+    assistantSheet: AssistantSheetSlot? = null,
 ) {
     composable<CampaignClosedRoute> {
         CampaignClosedScreen(
@@ -53,6 +56,7 @@ fun NavGraphBuilder.campaignClosedComposable(
             onOpenDossier = onOpenDossier,
             onOpenAlternation = onOpenAlternation,
             onCorrect = onCorrect,
+            assistantSheet = assistantSheet,
         )
     }
 }

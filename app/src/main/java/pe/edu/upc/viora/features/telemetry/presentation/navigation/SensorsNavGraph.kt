@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
+import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.features.telemetry.presentation.ui.SensorsScreen
 
@@ -15,10 +16,14 @@ import pe.edu.upc.viora.features.telemetry.presentation.ui.SensorsScreen
 @Serializable
 data class SensorsRoute(val plotId: String, val plotName: String = "")
 
-/** [onOpenSection] opens another section of the plot; the app shell knows where each one lives. */
+/**
+ * [onOpenSection] opens another section of the plot; the app shell knows where each one lives, and
+ * provides the [assistantSheet] of the round entry (P139).
+ */
 fun NavGraphBuilder.sensorsComposable(
     navController: NavController,
     onOpenSection: (section: LotSection, plotId: String, plotName: String) -> Unit,
+    assistantSheet: AssistantSheetSlot? = null,
 ) {
     composable<SensorsRoute> { entry ->
         val route = entry.toRoute<SensorsRoute>()
@@ -31,6 +36,7 @@ fun NavGraphBuilder.sensorsComposable(
             onNodeClick = { node ->
                 navController.navigate(ConfigureNodeRoute(plotId = route.plotId, nodeId = node.id, plotName = route.plotName))
             },
+            assistantSheet = assistantSheet,
         )
     }
 }
