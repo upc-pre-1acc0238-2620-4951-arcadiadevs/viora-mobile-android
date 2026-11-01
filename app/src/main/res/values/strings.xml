@@ -308,6 +308,7 @@
     <string name="sensors_type_microclima_subtitle">Microclimate · air and temperature</string>
     <string name="sensors_type_sonda_subtitle">Soil · %1$d cm</string>
     <string name="sensors_active_since">Active · %1$s ago</string>
+    <string name="sensors_paused">Paused</string>
     <string name="sensors_paused_since">Paused since %1$s</string>
     <string name="sensors_paused_simple">Paused</string>
 

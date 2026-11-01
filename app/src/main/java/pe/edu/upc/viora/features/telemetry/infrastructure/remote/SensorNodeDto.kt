@@ -16,4 +16,6 @@ data class SensorNodeDto(
     val lastReadingAt: String? = null,
     val lastTemperatureCelsius: Double? = null,
     val lastHumidityPercent: Double? = null,
+    /** When the producer paused the node; null unless status is PAUSED (backend 0.64.0). */
+    val pausedAt: String? = null,
 )

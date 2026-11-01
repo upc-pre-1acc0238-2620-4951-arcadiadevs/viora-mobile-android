@@ -315,6 +315,7 @@
     <string name="sensors_type_microclima_subtitle">Microclima · aire y temperatura</string>
     <string name="sensors_type_sonda_subtitle">Suelo · %1$d cm</string>
     <string name="sensors_active_since">Activo · hace %1$s</string>
+    <string name="sensors_paused">En pausa</string>
     <string name="sensors_paused_since">En pausa desde el %1$s</string>
     <string name="sensors_paused_simple">En pausa</string>
 

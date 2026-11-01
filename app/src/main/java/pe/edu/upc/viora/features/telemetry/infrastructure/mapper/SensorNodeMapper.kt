@@ -19,6 +19,7 @@ fun SensorNodeDto.toEntity(): SensorNodeEntity = SensorNodeEntity(
     lastReadingAt = lastReadingAt,
     lastTemperatureCelsius = lastTemperatureCelsius,
     lastHumidityPercent = lastHumidityPercent,
+    pausedAt = pausedAt,
 )
 
 fun SensorNodeEntity.toDomainOrNull(): SensorNode? {
@@ -34,6 +35,7 @@ fun SensorNodeEntity.toDomainOrNull(): SensorNode? {
         lastReadingAt = lastReadingAt,
         lastTemperatureCelsius = lastTemperatureCelsius,
         lastHumidityPercent = lastHumidityPercent,
+        pausedAt = pausedAt,
     )
 }
 
@@ -46,6 +48,8 @@ fun NewSensorNode.toRequestDto(): LinkSensorNodeRequestDto = LinkSensorNodeReque
 fun SensorNode.toCalibrationRequestDto(): CalibrateSensorNodeRequestDto = CalibrateSensorNodeRequestDto(
     name = name,
     depthCm = depthCm ?: 30,
+    // "Transmitir lecturas": the server pauses or resumes the node and dates the pause
+    transmitting = status == SensorStatus.ACTIVE,
 )
 
 /**
