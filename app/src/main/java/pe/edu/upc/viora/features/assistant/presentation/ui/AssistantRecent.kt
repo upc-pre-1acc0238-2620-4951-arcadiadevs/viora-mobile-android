@@ -122,7 +122,9 @@ private fun RecentCard(item: RecentAnswer, today: Boolean, onClick: () -> Unit) 
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = item.plotName?.let { stringResource(R.string.assistant_recent_meta, whenText, it) } ?: whenText,
+                // An Inicio answer about the whole field names it as the "LOTE" chips do (P129)
+                text = (item.plotName ?: stringResource(R.string.assistant_whole_field).takeIf { answer.plotId == null })
+                    ?.let { stringResource(R.string.assistant_recent_meta, whenText, it) } ?: whenText,
                 style = MaterialTheme.typography.bodySmall,
                 color = Neutral600,
             )

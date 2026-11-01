@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -32,6 +33,7 @@ import pe.edu.upc.viora.features.assistant.application.usecase.MoveOnFromAnswerU
 import pe.edu.upc.viora.features.assistant.application.usecase.ObserveRecentAnswersUseCase
 import pe.edu.upc.viora.features.assistant.application.usecase.OpenAnswerUseCase
 import pe.edu.upc.viora.features.assistant.application.usecase.RefreshRecentAnswersUseCase
+import pe.edu.upc.viora.features.assistant.dailySummary
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantScreen
 import pe.edu.upc.viora.features.assistant.domain.entity.Freshness
 import pe.edu.upc.viora.features.assistant.presentation.state.AskFailure
@@ -39,6 +41,7 @@ import pe.edu.upc.viora.features.assistant.presentation.state.AskPage
 import pe.edu.upc.viora.features.assistant.presentation.state.AssistantSheetUiState
 import pe.edu.upc.viora.features.assistant.presentation.state.AssistantTab
 import pe.edu.upc.viora.features.assistant.presentation.state.Catalog
+import pe.edu.upc.viora.features.assistant.presentation.state.PlotChoice
 import pe.edu.upc.viora.features.assistant.presentation.viewmodel.AssistantSheetViewModel
 import pe.edu.upc.viora.features.assistant.question
 import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
@@ -287,5 +290,42 @@ class AssistantSheetViewModelTest {
         vm.bind(AssistantScreen.ALTERNATION, PLOT_ID, "La Yarada 02")
 
         assertTrue(vm.state.page is AskPage.Answered)
+    }
+
+    @Test
+    fun inicioOffersEachActivePlotAndTheWholeFieldAndAsksAboutTheChipPicked() = runTest {
+        plots.plots.value = listOf(plot(PLOT_ID, "La Yarada 02"), plot("p2", "Lote Norte").copy(isActive = false))
+        val vm = viewModel()
+        vm.bind(AssistantScreen.HOME, PLOT_ID, "La Yarada 02")
+
+        assertEquals(listOf(PlotChoice(PLOT_ID, "La Yarada 02"), PlotChoice(null, null)), vm.state.plots)
+        assertEquals(PLOT_ID, vm.state.selectedPlotId)
+
+        vm.selectPlot(PlotChoice(null, null))
+        vm.ask(question())
+        advanceUntilIdle()
+
+        assertNull(vm.state.selectedPlotId)
+        assertNull(repository.questionPlots.last())
+        assertNull(repository.asks.single().plotId)
+        // The chips stay while the sheet asks about another plot
+        assertEquals(2, vm.state.plots.size)
+    }
+
+    @Test
+    fun seeingTheWholeSummaryOpensOnItAndAskingAfterwardsOpensOnTheQuestions() = runTest {
+        val vm = viewModel()
+        val summary = dailySummary().asAnswer("¿Qué hago esta semana?")
+
+        vm.bind(AssistantScreen.HOME, null, "", opening = summary)
+
+        val page = vm.state.page as AskPage.Answered
+        assertEquals("summary-1", page.answer.id)
+        assertEquals("¿Qué hago esta semana?", page.question.label)
+        assertEquals(3, page.answer.facts.size)
+
+        vm.bind(AssistantScreen.HOME, null, "")
+
+        assertEquals(AskPage.Questions, vm.state.page)
     }
 }
