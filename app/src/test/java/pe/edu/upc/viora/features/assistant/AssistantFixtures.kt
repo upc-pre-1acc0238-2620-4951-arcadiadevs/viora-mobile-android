@@ -9,6 +9,7 @@ import pe.edu.upc.viora.features.assistant.domain.entity.AnswerFact
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantAnswer
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantQuestion
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantScreen
+import pe.edu.upc.viora.features.assistant.domain.entity.DailySummary
 import pe.edu.upc.viora.features.assistant.domain.entity.FactTone
 import pe.edu.upc.viora.features.assistant.domain.entity.Freshness
 import pe.edu.upc.viora.features.assistant.domain.entity.QuestionIcon
@@ -44,7 +45,7 @@ fun answer(
 )
 
 /** One ask the fake received. */
-data class AskCall(val questionId: String, val plotId: String, val key: IdempotencyKey, val forceRefresh: Boolean)
+data class AskCall(val questionId: String, val plotId: String?, val key: IdempotencyKey, val forceRefresh: Boolean)
 
 class FakeAssistantRepository : AssistantRepository {
     var questions: AppResult<List<AssistantQuestion>> = AppResult.Success(listOf(question()))
@@ -57,18 +58,21 @@ class FakeAssistantRepository : AssistantRepository {
     val movedOn = mutableListOf<String>()
     var questionCalls = 0
     var refreshCalls = 0
+    var summary: AppResult<DailySummary> = AppResult.Failure(AppError.Offline)
+    val questionPlots = mutableListOf<String?>()
 
-    override suspend fun questions(screen: AssistantScreen, plotId: String): AppResult<List<AssistantQuestion>> {
+    override suspend fun questions(screen: AssistantScreen, plotId: String?): AppResult<List<AssistantQuestion>> {
         questionCalls++
+        questionPlots += plotId
         return questions
     }
 
-    override suspend fun ask(questionId: String, plotId: String, requestKey: IdempotencyKey, forceRefresh: Boolean): AppResult<AssistantAnswer> {
+    override suspend fun ask(questionId: String, plotId: String?, requestKey: IdempotencyKey, forceRefresh: Boolean): AppResult<AssistantAnswer> {
         asks += AskCall(questionId, plotId, requestKey, forceRefresh)
         return askResult
     }
 
-    override suspend fun answerToReopen(screen: AssistantScreen, plotId: String): AppResult<AssistantAnswer?> = reopen
+    override suspend fun answerToReopen(screen: AssistantScreen, plotId: String?): AppResult<AssistantAnswer?> = reopen
 
     override suspend fun answer(answerId: String): AppResult<AssistantAnswer> = opened
 
@@ -82,4 +86,19 @@ class FakeAssistantRepository : AssistantRepository {
     override suspend fun moveOn(answerId: String) {
         movedOn += answerId
     }
+
+    override suspend fun dailySummary(): AppResult<DailySummary> = summary
 }
+
+/** The summary of the day of P111: the window, the maximum of the week and the alerts. */
+fun dailySummary(id: String = "summary-1") = DailySummary(
+    id = id,
+    createdAt = java.time.Instant.parse("2026-11-18T12:02:00Z"),
+    text = "Hoy toca aclarear La Yarada 02: te quedan 12 días de ventana.",
+    facts = listOf(
+        AnswerFact("12", "días de ventana", "hasta el 30 nov", FactTone.PRIMARY),
+        AnswerFact("34°", "máx. jueves", "pronóstico", FactTone.PRIMARY),
+        AnswerFact("2", "alertas activas", "en tus lotes", FactTone.PRIMARY),
+    ),
+    sources = listOf("Basado en tus lotes, el pronóstico de 7 días y tus alertas"),
+)

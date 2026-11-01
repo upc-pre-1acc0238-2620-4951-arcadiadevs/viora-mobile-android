@@ -26,10 +26,13 @@ import pe.edu.upc.viora.features.assistant.domain.entity.Freshness
 import pe.edu.upc.viora.features.assistant.domain.entity.QuestionIcon
 import pe.edu.upc.viora.features.assistant.infrastructure.local.AssistantAnswerDao
 import pe.edu.upc.viora.features.assistant.infrastructure.local.AssistantAnswerEntity
+import pe.edu.upc.viora.features.assistant.infrastructure.local.DailySummaryDao
+import pe.edu.upc.viora.features.assistant.infrastructure.local.DailySummaryEntity
 import pe.edu.upc.viora.features.assistant.infrastructure.remote.AnswerHistoryDto
 import pe.edu.upc.viora.features.assistant.infrastructure.remote.AskQuestionRequestDto
 import pe.edu.upc.viora.features.assistant.infrastructure.remote.AssistantAnswerDto
 import pe.edu.upc.viora.features.assistant.infrastructure.remote.AssistantService
+import pe.edu.upc.viora.features.assistant.infrastructure.remote.DailySummaryDto
 import pe.edu.upc.viora.features.assistant.infrastructure.remote.QuestionCatalogDto
 import pe.edu.upc.viora.features.assistant.infrastructure.repository.AssistantRepositoryImpl
 import retrofit2.Response
@@ -52,7 +55,7 @@ private class InMemoryAnswerDao : AssistantAnswerDao {
 
     override suspend fun findById(id: String) = rows.value[id]
 
-    override suspend fun findLatestOfScreen(plotId: String, prefix: String, sinceEpochMs: Long) = rows.value.values
+    override suspend fun findLatestOfScreen(plotId: String?, prefix: String, sinceEpochMs: Long) = rows.value.values
         .filter { it.plotId == plotId && it.questionId.startsWith(prefix) && it.createdAtEpochMs >= sinceEpochMs }
         .maxByOrNull { it.createdAtEpochMs }
 
@@ -79,22 +82,41 @@ private class InMemoryAnswerDao : AssistantAnswerDao {
     }
 }
 
+/** The summaries table in memory. */
+private class InMemorySummaryDao : DailySummaryDao {
+    val rows = mutableMapOf<String, DailySummaryEntity>()
+
+    override suspend fun find(language: String) = rows[language]
+
+    override suspend fun upsert(entity: DailySummaryEntity) {
+        rows[entity.language] = entity
+    }
+
+    override suspend fun wipeAll() = rows.clear()
+}
+
 private class FakeAssistantService : AssistantService {
     var questions: () -> Response<QuestionCatalogDto> = { Response.success(QuestionCatalogDto("ALTERNATION")) }
     var asked: () -> Response<AssistantAnswerDto> = { Response.success(dto()) }
     var latest: () -> Response<AssistantAnswerDto> = { notFound() }
     var history: () -> Response<AnswerHistoryDto> = { Response.success(AnswerHistoryDto()) }
     var single: () -> Response<AssistantAnswerDto> = { notFound() }
+    var daily: () -> Response<DailySummaryDto> = { notFound() }
     val requests = mutableListOf<AskQuestionRequestDto>()
+    val latestPlots = mutableListOf<String?>()
 
-    override suspend fun getQuestions(screen: String, plotId: String) = questions()
+    override suspend fun getQuestions(screen: String, plotId: String?) = questions()
     override suspend fun ask(request: AskQuestionRequestDto): Response<AssistantAnswerDto> {
         requests += request
         return asked()
     }
     override suspend fun getAnswers(limit: Int) = history()
-    override suspend fun getLatest(screen: String, plotId: String) = latest()
+    override suspend fun getLatest(screen: String, plotId: String?): Response<AssistantAnswerDto> {
+        latestPlots += plotId
+        return latest()
+    }
     override suspend fun getAnswer(answerId: String) = single()
+    override suspend fun getDailySummary() = daily()
 }
 
 private fun <T> notFound(): Response<T> = Response.error(
@@ -108,9 +130,10 @@ private fun dto(
     createdAt: Instant = NOW.minusSeconds(120),
     freshness: String = "UP_TO_DATE",
     facts: Int = 2,
+    plotId: String? = PLOT_ID,
 ) = WIRE.decodeFromString<AssistantAnswerDto>(
     """
-    {"answerId":"$id","questionId":"$questionId","question":"¿Por qué mi índice es 0,51?","plotId":"$PLOT_ID",
+    {"answerId":"$id","questionId":"$questionId","question":"¿Por qué mi índice es 0,51?","plotId":${plotId?.let { "\"$it\"" } ?: "null"},
      "createdAt":"$createdAt","dataVersion":"sha256:abc","freshness":"$freshness",
      "text":"Tu índice de vecería es 0,51.",
      "facts":[${(1..facts).joinToString(",") { """{"value":"$it","label":"l$it","pill":"p$it","tone":"${if (it == 1) "PRIMARY" else "HIGHLIGHT"}"}""" }}],
@@ -124,14 +147,17 @@ private fun dto(
 class AssistantRepositoryImplTest {
 
     private val dao = InMemoryAnswerDao()
+    private val summaries = InMemorySummaryDao()
     private val service = FakeAssistantService()
     private val json = Json { ignoreUnknownKeys = true }
     private val repository = AssistantRepositoryImpl(
         service = service,
         answerDao = dao,
+        summaryDao = summaries,
         apiCaller = ApiCaller(ApiErrorMapper(json), UnconfinedTestDispatcher()),
         json = json,
         clock = Clock.fixed(NOW, ZoneOffset.UTC),
+        zone = ZoneOffset.UTC,
     )
     private val key = IdempotencyKey.of(Uuid.parse("00000000-0000-4000-8000-000000000001"))
 
@@ -246,4 +272,55 @@ class AssistantRepositoryImplTest {
 
         assertEquals("Tu índice de vecería es 0,51.", (opened as AppResult.Success).value.text)
     }
+
+    @Test
+    fun anInicioQuestionAboutTheWholeFieldGoesWithoutPlotAndReopensWithoutSignal() = runTest {
+        service.asked = { Response.success(dto(questionId = "home.week_plan", plotId = null)) }
+
+        val asked = repository.ask("home.week_plan", null, key, forceRefresh = false)
+
+        assertNull(service.requests.single().plotId)
+        assertNull((asked as AppResult.Success).value.plotId)
+        service.latest = { throw IOException("no signal") }
+        val reopened = (repository.answerToReopen(AssistantScreen.HOME, null) as AppResult.Success).value
+        assertEquals("home.week_plan", reopened?.questionId)
+        assertEquals(listOf<String?>(null), service.latestPlots)
+        // The same question about one plot is another answer
+        assertNull((repository.answerToReopen(AssistantScreen.HOME, PLOT_ID) as AppResult.Success).value)
+    }
+
+    @Test
+    fun theSummaryOfTheDayIsKeptAndServedWithoutSignalOnlyWhileItIsToday() = runTest {
+        service.daily = { Response.success(summaryDto(createdAt = NOW.minusSeconds(3600))) }
+
+        val fresh = repository.dailySummary()
+
+        assertEquals(listOf("12", "34°", "2"), (fresh as AppResult.Success).value.facts.map { it.value })
+        service.daily = { throw IOException("no signal") }
+        assertEquals("summary-1", (repository.dailySummary() as AppResult.Success).value.id)
+
+        // Yesterday's summary is never shown as today's
+        summaries.rows.replaceAll { _, row -> row.copy(day = "2026-10-29") }
+        assertTrue((repository.dailySummary() as AppResult.Failure).error.let { it is AppError.Offline || it is AppError.Timeout })
+    }
+
+    @Test
+    fun aSummaryWithoutItsThreeCardsIsNotShownAndNoPlotsIsAConflict() = runTest {
+        service.daily = { Response.success(summaryDto(cards = 2)) }
+        assertTrue(repository.dailySummary() is AppResult.Failure)
+
+        service.daily = { Response.error(409, "{}".toResponseBody("application/json".toMediaType())) }
+        assertTrue((repository.dailySummary() as AppResult.Failure).error is AppError.Conflict)
+    }
 }
+
+private fun summaryDto(createdAt: Instant = NOW, cards: Int = 3) = WIRE.decodeFromString<DailySummaryDto>(
+    """
+    {"summaryId":"summary-1","questionId":"home.daily_summary","plotId":null,"createdAt":"$createdAt",
+     "dataVersion":"sha256:abc","freshness":"UP_TO_DATE","text":"Hoy toca aclarear La Yarada 02.",
+     "facts":[${listOf("12" to "días de ventana", "34°" to "máx. jueves", "2" to "alertas activas").take(cards)
+        .joinToString(",") { (v, l) -> """{"value":"$v","label":"$l","pill":"p","tone":"PRIMARY"}""" }}],
+     "sources":[{"label":"Basado en tus lotes"}],
+     "model":{"provider":"GROQ","name":"openai/gpt-oss-20b","fallback":false}}
+    """.trimIndent(),
+)

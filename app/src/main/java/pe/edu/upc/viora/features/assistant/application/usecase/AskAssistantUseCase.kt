@@ -15,7 +15,7 @@ class AskAssistantUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         questionId: String,
-        plotId: String,
+        plotId: String?,
         requestKey: IdempotencyKey,
         forceRefresh: Boolean = false,
     ): AppResult<AssistantAnswer> = repository.ask(questionId, plotId, requestKey, forceRefresh)

@@ -23,7 +23,8 @@ data class QuestionDto(
 @Serializable
 data class AskQuestionRequestDto(
     val questionId: String,
-    val plotId: String,
+    /** Null for an Inicio question about the producer's whole field. */
+    val plotId: String?,
     val clientRequestId: String,
     val forceRefresh: Boolean,
 )
@@ -34,7 +35,7 @@ data class AssistantAnswerDto(
     val answerId: String,
     val questionId: String,
     val question: String? = null,
-    val plotId: String,
+    val plotId: String? = null,
     val createdAt: String,
     val freshness: String,
     val text: String,
@@ -51,6 +52,17 @@ data class AnswerSourceDto(val label: String)
 
 @Serializable
 data class AnswerActionDto(val type: String, val label: String, val target: String)
+
+/** `GET /assistant/daily-summary` (AssistantDailySummaryResource): the answer shape with three cards. */
+@Serializable
+data class DailySummaryDto(
+    val summaryId: String,
+    val plotId: String? = null,
+    val createdAt: String,
+    val text: String,
+    val facts: List<AnswerFactDto> = emptyList(),
+    val sources: List<AnswerSourceDto> = emptyList(),
+)
 
 /** `GET /assistant/answers`. */
 @Serializable

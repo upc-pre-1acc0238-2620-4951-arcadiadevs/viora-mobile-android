@@ -194,4 +194,13 @@ class AppMigrationsTest {
         assertEquals(v16.keys, v17.keys)
         (v16.keys - "sensor_nodes").forEach { assertEquals(v16[it], v17[it]) }
     }
+
+    @Test fun `inicio migration rebuilds the answers with an optional plot and adds the daily summary as exported in v18`() {
+        val v17 = createSqlByTable(17)
+        val v18 = createSqlByTable(18)
+        assertEquals(v18.getValue("assistant_answers"), AppMigrations.MIGRATION_17_18_ANSWERS_SQL)
+        assertEquals(v18.getValue("assistant_daily_summaries"), AppMigrations.MIGRATION_17_18_SUMMARIES_SQL)
+        assertEquals(v17.keys + "assistant_daily_summaries", v18.keys)
+        (v17.keys - "assistant_answers").forEach { assertEquals(v17[it], v18[it]) }
+    }
 }

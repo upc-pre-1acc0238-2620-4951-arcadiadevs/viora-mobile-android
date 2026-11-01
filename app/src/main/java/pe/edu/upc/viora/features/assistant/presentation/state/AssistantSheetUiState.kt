@@ -21,12 +21,19 @@ enum class AssistantTab { ASK, RECENT }
 data class AssistantSheetUiState(
     val screen: AssistantScreen,
     val plotName: String,
+    /** Inicio only (P112): the plots the producer can ask about, then the whole field (null id). */
+    val plots: List<PlotChoice> = emptyList(),
+    /** The plot the questions are about; null for the producer's whole field. */
+    val selectedPlotId: String? = null,
     val tab: AssistantTab = AssistantTab.ASK,
     val offline: Boolean = false,
     val catalog: Catalog = Catalog.Loading,
     val page: AskPage = AskPage.Opening,
     val recent: List<RecentAnswer>? = null,
 )
+
+/** A chip of "LOTE" (P112): a plot by its name, or the whole field when [id] is null. */
+data class PlotChoice(val id: String?, val name: String?)
 
 /** The questions of the screen. */
 sealed interface Catalog {

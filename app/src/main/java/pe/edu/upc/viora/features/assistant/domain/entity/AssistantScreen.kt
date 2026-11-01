@@ -6,6 +6,9 @@ package pe.edu.upc.viora.features.assistant.domain.entity
  * are the `screen` values of the backend.
  */
 enum class AssistantScreen(val questionPrefix: String) {
+    /** Inicio (P110-P113, P129): one plot or, without one, the producer's whole field. */
+    HOME("home."),
+
     /** Alternation of a plot (P40, P114-P119). */
     ALTERNATION("alternation."),
 

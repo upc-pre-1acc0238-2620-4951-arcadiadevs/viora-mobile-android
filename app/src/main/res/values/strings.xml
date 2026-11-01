@@ -1913,6 +1913,12 @@ Reference price. You pay after creating your account.</string>
     <string name="assistant_entry_plan_examples">Why %1$d%%? · What if I do not thin?</string>
     <string name="assistant_entry_plan_examples_plain">Why thin? · What if I do not thin?</string>
     <string name="assistant_sheet_title">What do you want to know about %1$s?</string>
+    <string name="assistant_sheet_title_home">What do you want to know %1$s?</string>
+    <string name="assistant_subject_home">today</string>
+    <string name="assistant_thinking_home">Reading your plots, the forecast and your alerts…</string>
+    <string name="assistant_plot_label">Plot</string>
+    <string name="assistant_whole_field">My whole field</string>
+    <string name="assistant_summary_overline">Today’s summary · %1$s</string>
     <string name="assistant_subject_alert">this alert</string>
     <string name="assistant_subject_climate">your plot\'s climate</string>
     <string name="assistant_subject_winter_chill">your winter chill</string>
