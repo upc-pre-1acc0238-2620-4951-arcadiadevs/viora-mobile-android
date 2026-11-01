@@ -2012,7 +2012,7 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="assistant_age_minutes">Hace %1$d min</string>
     <string name="assistant_age_hours">Hace %1$d h</string>
     <string name="assistant_age_day">Respuesta del %1$s</string>
-    <string name="assistant_keeps_until">Se mantiene hasta “Otra pregunta”</string>
+    <string name="assistant_keeps_until">Guardada en Recientes</string>
     <string name="assistant_answer_source">Respuesta de Viora · %1$s</string>
     <string name="assistant_answer_source_plain">Respuesta de Viora</string>
     <string name="assistant_another_question">Otra pregunta</string>

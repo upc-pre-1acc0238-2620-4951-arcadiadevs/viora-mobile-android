@@ -1961,7 +1961,7 @@ Reference price. You pay after creating your account.</string>
     <string name="assistant_age_minutes">%1$d min ago</string>
     <string name="assistant_age_hours">%1$d h ago</string>
     <string name="assistant_age_day">Answer of %1$s</string>
-    <string name="assistant_keeps_until">Kept until “Another question”</string>
+    <string name="assistant_keeps_until">Saved in Recent</string>
     <string name="assistant_answer_source">Viora\'s answer · %1$s</string>
     <string name="assistant_answer_source_plain">Viora\'s answer</string>
     <string name="assistant_another_question">Another question</string>
