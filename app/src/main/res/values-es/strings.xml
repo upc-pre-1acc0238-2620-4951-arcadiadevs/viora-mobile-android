@@ -1969,7 +1969,14 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="assistant_thinking_home">Leyendo tus lotes, el pronóstico y tus alertas…</string>
     <string name="assistant_plot_label">Lote</string>
     <string name="assistant_whole_field">Todo mi campo</string>
+    <string name="assistant_summary_title">Resumen de hoy</string>
     <string name="assistant_summary_overline">Resumen de hoy · %1$s</string>
+    <string name="assistant_summary_loading">Preparando tu resumen…</string>
+    <string name="assistant_summary_missing">Tu resumen de hoy aún no está listo</string>
+    <string name="assistant_summary_show">Ver resumen</string>
+    <string name="assistant_summary_hide">Ocultar resumen</string>
+    <string name="assistant_summary_full">Ver completo</string>
+    <string name="assistant_summary_question">¿Qué hago esta semana?</string>
     <string name="notification_channel_daily_summary">Resumen del día</string>
     <string name="notification_channel_daily_summary_description">Cada mañana, lo que toca en tu campo según Viora.</string>
     <string name="notification_daily_summary_title">Tu resumen de hoy</string>
