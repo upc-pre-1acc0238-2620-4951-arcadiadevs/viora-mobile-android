@@ -265,6 +265,20 @@
     <string name="tour_next">Siguiente</string>
     <!-- Voz de Viora -->
     <string name="viora_voice_thinking">Viora está pensando</string>
+    <string-array name="viora_voice_thinking_words">
+        <item>Pensando</item>
+        <item>Leyendo tus brotes</item>
+        <item>Contando frutos</item>
+        <item>Midiendo el cuajado</item>
+        <item>Podando ideas</item>
+        <item>Aclareando dudas</item>
+        <item>Regando la respuesta</item>
+        <item>Sumando porciones de frío</item>
+        <item>Mirando el cielo</item>
+        <item>Madurando la respuesta</item>
+        <item>Cosechando datos</item>
+        <item>Afinando el calibre</item>
+    </string-array>
     <string name="tour_finish">Empezar a usar Viora</string>
     <string name="tour_welcome_title">Hola.\nTe muestro *tu Inicio*.</string>
     <plurals name="tour_welcome_body">
