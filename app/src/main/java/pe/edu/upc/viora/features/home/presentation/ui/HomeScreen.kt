@@ -216,6 +216,14 @@ fun HomeScreenContent(
                 }
                 is HomeUiState.Content -> {
                     sections()
+                    // P110: the Viora card sits under the phase card; without access the assistant is not offered
+                    if (!isAccessPaused) {
+                        widgets.assistant(
+                            state.focusedPlot?.id?.value,
+                            state.focusedPlot?.name.orEmpty(),
+                            Modifier.padding(start = ScreenPadding, end = ScreenPadding, top = 24.dp),
+                        )
+                    }
                     val subordinateModifier = if (isAccessPaused) Modifier.alpha(0.42f) else Modifier
                     Column(modifier = subordinateModifier) {
                         HomeTodayInFieldSection(

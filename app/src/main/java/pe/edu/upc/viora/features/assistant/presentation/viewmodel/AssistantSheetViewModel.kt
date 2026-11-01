@@ -28,6 +28,7 @@ import pe.edu.upc.viora.features.assistant.application.usecase.RefreshRecentAnsw
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantAnswer
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantQuestion
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantScreen
+import pe.edu.upc.viora.features.assistant.domain.entity.DailySummary
 import pe.edu.upc.viora.features.assistant.presentation.state.AskFailure
 import pe.edu.upc.viora.features.assistant.presentation.state.AskPage
 import pe.edu.upc.viora.features.assistant.presentation.state.AskedQuestion
@@ -35,6 +36,7 @@ import pe.edu.upc.viora.features.assistant.presentation.state.AssistantPresenter
 import pe.edu.upc.viora.features.assistant.presentation.state.AssistantSheetUiState
 import pe.edu.upc.viora.features.assistant.presentation.state.AssistantTab
 import pe.edu.upc.viora.features.assistant.presentation.state.Catalog
+import pe.edu.upc.viora.features.assistant.presentation.state.PlotChoice
 import pe.edu.upc.viora.features.assistant.presentation.state.RecentAnswer
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import java.time.Clock
@@ -65,7 +67,7 @@ class AssistantSheetViewModel @Inject constructor(
     /** Null until [bind] names the screen and the plot. */
     val uiState: StateFlow<AssistantSheetUiState?> = _uiState.asStateFlow()
 
-    private var plotId: String = ""
+    private var plotId: String? = null
     private var pending: PendingAsk? = null
     private var askJob: Job? = null
     private var recentJob: Job? = null
@@ -73,27 +75,60 @@ class AssistantSheetViewModel @Inject constructor(
     /** The ask in flight or that failed, kept so "Reintentar" sends the same request. */
     private data class PendingAsk(val question: AskedQuestion, val key: IdempotencyKey, val forceRefresh: Boolean)
 
-    /** Opens the sheet of [screen] about the plot; binding the same screen and plot again keeps what is on screen. */
-    fun bind(screen: AssistantScreen, plotId: String, plotName: String) {
+    /**
+     * Opens the sheet of [screen] about the plot, or about the producer's whole field when [plotId] is null
+     * (Inicio). Binding the same screen and plot again keeps what is on screen. [opening] is an answer to show
+     * at once instead of the one the screen reopens on: the summary of the day of "Ver completo" (P113).
+     */
+    fun bind(screen: AssistantScreen, plotId: String?, plotName: String, opening: AssistantAnswer? = null) {
         val current = _uiState.value
-        if (current != null && current.screen == screen && this.plotId == plotId) return
+        if (current != null && current.screen == screen && this.plotId == plotId) {
+            val showingSummary = (current.page as? AskPage.Answered)?.answer?.questionId == DailySummary.QUESTION_ID
+            when {
+                opening != null -> showAnswer(opening)
+                // "Pregúntale a Viora" after "Ver completo" opens on the questions, not on the summary (P112)
+                showingSummary -> update { it.copy(page = AskPage.Questions, tab = AssistantTab.ASK) }
+            }
+            return
+        }
         this.plotId = plotId
-        _uiState.value = AssistantSheetUiState(screen = screen, plotName = plotName, offline = !connectivity.isOnline())
+        askJob?.cancel()
+        pending = null
+        _uiState.value = AssistantSheetUiState(
+            screen = screen,
+            plotName = plotName,
+            plots = current?.plots.orEmpty(),
+            selectedPlotId = plotId,
+            offline = !connectivity.isOnline(),
+            page = if (opening != null) answeredPage(opening, Catalog.Loading) else AskPage.Opening,
+        )
         recentJob?.cancel()
-        recentJob = viewModelScope.launch { observeRecentWithPlotNames() }
+        recentJob = viewModelScope.launch { observeRecentWithPlotNames(screen) }
         viewModelScope.launch {
             val catalog = async { fetchCatalog(screen) }
-            val reopened = findAnswerToReopen(screen, plotId)
+            val reopened = if (opening == null) findAnswerToReopen(screen, plotId) else null
             val catalogResult = catalog.await()
             val answer = (reopened as? AppResult.Success)?.value
             update { state ->
                 state.copy(
                     catalog = catalogResult,
-                    page = if (answer != null) answeredPage(answer, catalogResult) else AskPage.Questions,
+                    page = when {
+                        // An opening answer is already on screen, and the producer may have moved on meanwhile
+                        state.page !is AskPage.Opening -> state.page
+                        answer != null -> answeredPage(answer, catalogResult)
+                        else -> AskPage.Questions
+                    },
                 )
             }
             if (reopened is AppResult.Failure && reopened.error.isConnectivity) markOffline()
         }
+    }
+
+    /** "LOTE" of Inicio (P112): the questions about another plot, or about the whole field with null. */
+    fun selectPlot(choice: PlotChoice) {
+        val state = _uiState.value ?: return
+        if (choice.id == plotId) return
+        bind(state.screen, choice.id, choice.name.orEmpty())
     }
 
     fun selectTab(tab: AssistantTab) {
@@ -139,6 +174,12 @@ class AssistantSheetViewModel @Inject constructor(
             val catalog = fetchCatalog(screen)
             update { it.copy(catalog = catalog) }
         }
+    }
+
+    private fun showAnswer(answer: AssistantAnswer) {
+        askJob?.cancel()
+        pending = null
+        update { it.copy(tab = AssistantTab.ASK, page = answeredPage(answer, it.catalog)) }
     }
 
     /** Reopens an answer of "Recientes" (P118) on the "Preguntar" tab, then brings its freshness. */
@@ -209,11 +250,17 @@ class AssistantSheetViewModel @Inject constructor(
         if (result is AppResult.Failure && result.error.isConnectivity) markOffline()
     }
 
-    private suspend fun observeRecentWithPlotNames() {
+    private suspend fun observeRecentWithPlotNames(screen: AssistantScreen) {
         combine(observeRecent(), observePlots()) { answers, plots ->
             val names = plots.associate { it.id.value to it.name }
-            answers.map { RecentAnswer(it, names[it.plotId]) }
-        }.collect { recent -> update { it.copy(recent = recent) } }
+            // Inicio asks about each active plot, then about the whole field (P112)
+            val choices = if (screen == AssistantScreen.HOME) {
+                plots.filter { it.isActive }.map { PlotChoice(it.id.value, it.name) } + PlotChoice(null, null)
+            } else {
+                emptyList()
+            }
+            answers.map { RecentAnswer(it, it.plotId?.let(names::get)) } to choices
+        }.collect { (recent, choices) -> update { it.copy(recent = recent, plots = choices) } }
     }
 
     private fun answeredPage(answer: AssistantAnswer, catalog: Catalog): AskPage.Answered =

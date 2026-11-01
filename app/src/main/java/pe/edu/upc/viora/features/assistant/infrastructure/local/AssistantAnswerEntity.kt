@@ -19,8 +19,9 @@ data class AssistantAnswerEntity(
     val questionId: String,
     @ColumnInfo(name = "question")
     val question: String?,
+    /** Null for an Inicio answer about the producer's whole field. */
     @ColumnInfo(name = "plot_id")
-    val plotId: String,
+    val plotId: String?,
     @ColumnInfo(name = "created_at_epoch_ms")
     val createdAtEpochMs: Long,
     @ColumnInfo(name = "freshness")

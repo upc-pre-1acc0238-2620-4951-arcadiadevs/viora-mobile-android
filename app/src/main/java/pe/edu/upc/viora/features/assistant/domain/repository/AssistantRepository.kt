@@ -6,6 +6,7 @@ import pe.edu.upc.viora.core.domain.IdempotencyKey
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantAnswer
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantQuestion
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantScreen
+import pe.edu.upc.viora.features.assistant.domain.entity.DailySummary
 
 /**
  * The questions and answers of the assistant. Asking needs the server; the answers it gives are
@@ -15,20 +16,20 @@ import pe.edu.upc.viora.features.assistant.domain.entity.AssistantScreen
 interface AssistantRepository {
 
     /** The questions of a screen for a plot, in display order. */
-    suspend fun questions(screen: AssistantScreen, plotId: String): AppResult<List<AssistantQuestion>>
+    suspend fun questions(screen: AssistantScreen, plotId: String?): AppResult<List<AssistantQuestion>>
 
     /**
      * Asks a question. The same [requestKey] always gets the same answer, so a retry after a lost
      * response never writes a second one; [forceRefresh] ignores an answer saved for the same data.
      */
-    suspend fun ask(questionId: String, plotId: String, requestKey: IdempotencyKey, forceRefresh: Boolean): AppResult<AssistantAnswer>
+    suspend fun ask(questionId: String, plotId: String?, requestKey: IdempotencyKey, forceRefresh: Boolean): AppResult<AssistantAnswer>
 
     /**
      * The answer a screen reopens on: the last one given on it about the plot, unless the producer
      * already moved on with "Otra pregunta". Null when there is none to reopen. Without signal it
      * comes from the phone.
      */
-    suspend fun answerToReopen(screen: AssistantScreen, plotId: String): AppResult<AssistantAnswer?>
+    suspend fun answerToReopen(screen: AssistantScreen, plotId: String?): AppResult<AssistantAnswer?>
 
     /** One answer of the history, with its freshness from the server when there is signal. */
     suspend fun answer(answerId: String): AppResult<AssistantAnswer>
@@ -41,4 +42,10 @@ interface AssistantRepository {
 
     /** "Otra pregunta": the screen stops reopening on this answer; it stays in the history. */
     suspend fun moveOn(answerId: String)
+
+    /**
+     * The summary of the day of the producer's whole field (Inicio, P110-P113), written by the server at
+     * 06:30 Lima. Without signal it is the one kept on the phone, while it is still from today.
+     */
+    suspend fun dailySummary(): AppResult<DailySummary>
 }

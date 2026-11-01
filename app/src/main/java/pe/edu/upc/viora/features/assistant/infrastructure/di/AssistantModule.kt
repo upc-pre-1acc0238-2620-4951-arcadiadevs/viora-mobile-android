@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import pe.edu.upc.viora.di.AppDatabase
 import pe.edu.upc.viora.features.assistant.infrastructure.local.AssistantAnswerDao
+import pe.edu.upc.viora.features.assistant.infrastructure.local.DailySummaryDao
 import pe.edu.upc.viora.features.assistant.infrastructure.remote.AssistantService
 import retrofit2.Retrofit
 import javax.inject.Singleton
@@ -20,4 +21,7 @@ object AssistantModule {
 
     @Provides
     fun provideAssistantAnswerDao(database: AppDatabase): AssistantAnswerDao = database.assistantAnswerDao()
+
+    @Provides
+    fun provideDailySummaryDao(database: AppDatabase): DailySummaryDao = database.dailySummaryDao()
 }

@@ -5,8 +5,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 
 /**
- * The Home cards that other contexts draw with their own data: weather and soil moisture (telemetry) and
- * "Tu alternancia" (phenology). The shell fills them when it registers the Home, so the Home never imports another
+ * The Home cards that other contexts draw with their own data: weather and soil moisture (telemetry),
+ * "Tu alternancia" (phenology) and the Viora card with the summary of the day (assistant, P110). The shell fills them when it registers the Home, so the Home never imports another
  * context's screens; each card draws nothing while its context has nothing to show.
  */
 @Immutable
@@ -20,4 +20,6 @@ class HomeWidgets(
         onOpen: () -> Unit,
         modifier: Modifier,
     ) -> Unit = { _, _, _, _, _ -> },
+    /** [plotId] is the plot Inicio is focused on, which the questions of the sheet start on (P112). */
+    val assistant: @Composable (plotId: String?, plotName: String, modifier: Modifier) -> Unit = { _, _, _ -> },
 )

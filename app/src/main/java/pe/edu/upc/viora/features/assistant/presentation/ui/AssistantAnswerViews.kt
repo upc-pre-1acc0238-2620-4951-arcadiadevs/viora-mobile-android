@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +40,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -73,6 +73,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral200
 import pe.edu.upc.viora.core.designsystem.theme.Neutral300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
+import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
@@ -183,7 +184,12 @@ internal fun AnswerBody(answer: AssistantAnswer, modifier: Modifier = Modifier) 
         Box(Modifier.graphicsLayer { alpha = dim }) {
             VioraVoice(state = VioraVoiceState.Ready(answer.text, fromAssistant = true), utteranceId = answer.id)
         }
-        BentoRow(answer = answer, modifier = Modifier.graphicsLayer { alpha = dim })
+        if (answer.facts.size == SUMMARY_CARDS) {
+            // The summary of the day (P113) has three tiles of the same height, as in Inicio
+            SummaryTiles(facts = answer.facts, modifier = Modifier.graphicsLayer { alpha = dim })
+        } else {
+            BentoRow(answer = answer, modifier = Modifier.graphicsLayer { alpha = dim })
+        }
         SourceLine(answer.sources.firstOrNull())
     }
 }
@@ -267,6 +273,53 @@ private fun BentoCard(fact: AnswerFact, modifier: Modifier = Modifier) {
         )
     }
 }
+
+/** The summary of the day has its three cards: the thinning window, the maximum of the week and the alerts. */
+internal const val SUMMARY_CARDS = 3
+
+/**
+ * The three tiles of the summary of the day (P111, P113): the same height, pale yellow, pale terracotta and
+ * sand, the figure in serif and what it is under it. The pill of an answer card has no room here.
+ */
+@Composable
+internal fun SummaryTiles(facts: List<AnswerFact>, modifier: Modifier = Modifier) {
+    val backgrounds = listOf(Harvest100, Terracotta100, Neutral100)
+    Row(
+        modifier = modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        facts.take(SUMMARY_CARDS).forEachIndexed { index, fact ->
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .heightIn(min = SummaryTileHeight)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(backgrounds[index])
+                    .padding(start = 14.dp, end = 10.dp, top = 14.dp, bottom = 14.dp)
+                    .semantics(mergeDescendants = true) {},
+            ) {
+                Text(
+                    text = fact.value,
+                    style = newsreader(36.sp, 40.sp).copy(letterSpacing = (-0.6).sp),
+                    color = Neutral900,
+                    maxLines = 1,
+                    autoSize = TextAutoSize.StepBased(minFontSize = 20.sp, maxFontSize = 36.sp),
+                )
+                Spacer(Modifier.weight(1f).heightIn(min = 10.dp))
+                Text(
+                    text = fact.label,
+                    style = robotoMedium(12.sp, 16.sp),
+                    color = Neutral700,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
+private val SummaryTileHeight = 112.dp
 
 /** "● Respuesta de Viora · basado en tus 4 campañas registradas". */
 @Composable

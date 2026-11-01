@@ -35,6 +35,7 @@ import pe.edu.upc.viora.core.navigation.SplashRoute
 import pe.edu.upc.viora.core.navigation.WelcomeRoute
 import pe.edu.upc.viora.features.assistant.domain.entity.AssistantScreen
 import pe.edu.upc.viora.features.assistant.presentation.ui.AssistantSheet
+import pe.edu.upc.viora.features.assistant.presentation.ui.HomeAssistantCard
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRoundRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
@@ -201,6 +202,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                         alternation = { plotId, plotName, areaHectares, onOpen, modifier ->
                             PlotAlternationCard(plotId, plotName, areaHectares, onOpen, modifier)
                         },
+                        assistant = { plotId, plotName, modifier -> HomeAssistantCard(plotId, plotName, modifier) },
                     ),
                     sections = {
                         SubscriptionHomeContent(

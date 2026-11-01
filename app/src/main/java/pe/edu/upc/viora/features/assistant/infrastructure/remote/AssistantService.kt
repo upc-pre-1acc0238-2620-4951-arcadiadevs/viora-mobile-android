@@ -17,7 +17,7 @@ interface AssistantService {
     @GET("assistant/questions")
     suspend fun getQuestions(
         @Query("screen") screen: String,
-        @Query("plotId") plotId: String,
+        @Query("plotId") plotId: String?,
     ): Response<QuestionCatalogDto>
 
     /** 409 the question has no data; 429 too many new answers, with Retry-After. */
@@ -32,8 +32,15 @@ interface AssistantService {
     @GET("assistant/answers/latest")
     suspend fun getLatest(
         @Query("screen") screen: String,
-        @Query("plotId") plotId: String,
+        @Query("plotId") plotId: String?,
     ): Response<AssistantAnswerDto>
+
+    /**
+     * The summary of the day of the producer's whole field (no plotId). Serving a stored one spends no answer;
+     * 409 without active plots, 429 when a new one would pass the limit.
+     */
+    @GET("assistant/daily-summary")
+    suspend fun getDailySummary(): Response<DailySummaryDto>
 
     /** 404 when it expired or is not the producer's. */
     @GET("assistant/answers/{answerId}")
