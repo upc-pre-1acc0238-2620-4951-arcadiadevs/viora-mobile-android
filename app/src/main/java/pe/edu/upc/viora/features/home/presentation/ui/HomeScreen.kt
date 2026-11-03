@@ -51,7 +51,6 @@ import pe.edu.upc.viora.features.home.presentation.state.HomeUiState
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
 import pe.edu.upc.viora.features.home.presentation.tour.LocalHomeTourTargets
 import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
-import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeGreetingViewModel
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeViewModel
 import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 import pe.edu.upc.viora.core.domain.GeoPoint
@@ -71,22 +70,21 @@ fun HomeScreen(
     onOpenPlots: () -> Unit,
     onOpenAlerts: () -> Unit,
     onOpenAlternation: (plotId: PlotId, plotName: String) -> Unit,
+    displayName: String?,
+    onOpenAccount: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenSoilMoisture: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
-    onOpenAccount: () -> Unit = {},
     isAccessPaused: Boolean = false,
     phase: HomePhase? = null,
     viewModel: HomeViewModel = hiltViewModel(),
-    greetingViewModel: HomeGreetingViewModel = hiltViewModel(),
     widgets: HomeWidgets = HomeWidgets(),
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
-    val fullName = greetingViewModel.fullName.collectAsStateWithLifecycle().value
     HomeScreenContent(
         state = state,
-        displayName = fullName,
+        displayName = displayName,
         onRefresh = viewModel::refresh,
         onRegisterPlot = onRegisterPlot,
         onOpenPlot = onOpenPlot,
@@ -146,10 +144,10 @@ fun HomeScreenContent(
         modifier = modifier.fillMaxSize(),
     ) {
         Column(
-                // Outside the scroll, so what scrolls up never runs under the status bar.
-                .statusBarsPadding()
             modifier = Modifier
                 .fillMaxSize()
+                // Outside the scroll, so what scrolls up never runs under the status bar.
+                .statusBarsPadding()
                 .verticalScroll(scrollState)
                 .padding(
                     top = 12.dp,
@@ -190,8 +188,8 @@ fun HomeScreenContent(
                     modifier = Modifier.padding(top = 12.dp),
                     focusedName = (state as? HomeUiState.Content)?.focusedPlot?.name,
                     onChangeFocus = { pickingFocus = true },
-                )
                     onOpenPlots = onOpenPlots,
+                )
                 if (state.isOffline) HomeOfflineNotice(modifier = Modifier.padding(top = 16.dp))
                 // In Figma P10, without active access or without plots the week strip is omitted.
                 if (!hasNoPlots && !isAccessPaused) {

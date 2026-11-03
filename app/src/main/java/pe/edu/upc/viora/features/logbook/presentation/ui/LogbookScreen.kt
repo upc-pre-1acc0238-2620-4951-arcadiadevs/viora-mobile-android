@@ -86,6 +86,8 @@ private val ScreenPadding = 24.dp
  */
 @Composable
 fun LogbookScreen(
+    displayName: String?,
+    onOpenAccount: () -> Unit,
     onOpenSettlement: (plotId: String, year: Int) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LogbookViewModel = hiltViewModel(),
@@ -96,6 +98,8 @@ fun LogbookScreen(
     val hasActiveAlerts = viewModel.hasActiveAlerts.collectAsStateWithLifecycle().value
     LogbookContent(
         state = state,
+        displayName = displayName,
+        onOpenAccount = onOpenAccount,
         onSelectFilter = viewModel::selectFilter,
         onRefresh = viewModel::refresh,
         onOpenSettlement = onOpenSettlement,
@@ -110,6 +114,8 @@ fun LogbookScreen(
 @Composable
 fun LogbookContent(
     state: LogbookUiState,
+    displayName: String?,
+    onOpenAccount: () -> Unit,
     onSelectFilter: (LogbookFilter) -> Unit,
     onRefresh: () -> Unit,
     onOpenSettlement: (plotId: String, year: Int) -> Unit,
@@ -141,7 +147,9 @@ fun LogbookContent(
                 date = today,
                 isOffline = content?.offline == true,
                 lastRefresh = content?.lastPlotRefresh,
+                displayName = displayName,
                 onOpenAlerts = onOpenAlerts,
+                onOpenAccount = onOpenAccount,
                 hasUnreadAlerts = hasActiveAlerts,
                 modifier = Modifier.padding(horizontal = ScreenPadding),
             )
@@ -560,6 +568,8 @@ private val previewEntries = listOf(
 private fun LogbookPreview() {
     VioraTheme {
         LogbookContent(
+            displayName = "Teodoro Mamani",
+            onOpenAccount = {},
             state = LogbookUiState.Content(
                 filter = LogbookFilter.ALL,
                 groups = listOf(LogbookGroup(LogbookPeriod.THIS_WEEK, previewEntries)),

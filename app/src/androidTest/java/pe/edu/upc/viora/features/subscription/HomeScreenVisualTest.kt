@@ -55,6 +55,7 @@ class HomeScreenVisualTest {
                             displayName = "Teodoro",
                             hasUnreadAlerts = true,
                             onOpenAlerts = {},
+                            onOpenAccount = {},
                             modifier = Modifier.padding(horizontal = 24.dp),
                         )
                         Spacer(Modifier.height(28.dp))
@@ -106,6 +107,7 @@ class HomeScreenVisualTest {
                         displayName = "Teodoro",
                         hasUnreadAlerts = true,
                         onOpenAlerts = {},
+                        onOpenAccount = {},
                         modifier = Modifier.padding(horizontal = 24.dp),
                     )
                     Spacer(Modifier.height(28.dp))

@@ -92,6 +92,8 @@ fun CampaignPlanScreen(
     onOpenPlan: (plotId: String, plotName: String, campaignYear: Int) -> Unit,
     onOpenAlerts: () -> Unit,
     onRegisterPlot: () -> Unit,
+    displayName: String?,
+    onOpenAccount: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CampaignPlanViewModel = hiltViewModel(),
 ) {
@@ -110,7 +112,9 @@ fun CampaignPlanScreen(
             date = state.today,
             isOffline = state.isOffline,
             lastRefresh = state.lastRefresh,
+            displayName = displayName,
             onOpenAlerts = onOpenAlerts,
+            onOpenAccount = onOpenAccount,
             hasUnreadAlerts = state.hasUnreadAlerts,
         )
         Headline(state, onSelectCampaign = viewModel::selectCampaign, modifier = Modifier.padding(top = 28.dp))

@@ -78,6 +78,7 @@ import pe.edu.upc.viora.features.profiles.presentation.navigation.profilesNavGra
 import pe.edu.upc.viora.features.subscription.presentation.navigation.CooperativeCodeGraph
 import pe.edu.upc.viora.features.subscription.presentation.navigation.ExtensionCodeRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.MyPlanRoute
+import pe.edu.upc.viora.features.profiles.presentation.viewmodel.ProducerNameViewModel
 import pe.edu.upc.viora.features.subscription.presentation.navigation.PlanExtensionRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.ProducerPlanRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.RedeemCodeRoute
@@ -175,6 +176,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                     isAccessPaused = isAccessPaused,
                     phase = phase.headlinePhase,
                     onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
+                    displayName = producerName(),
                     onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
                     onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id.value, plotName = name)) },
                     onOpenPlots = {
@@ -387,12 +389,16 @@ assistantSheet = assistantSheetOf(AssistantScreen.PLAN),
                 )
             }
         }
+                    displayName = producerName(),
+                    onOpenAccount = { navController.navigate(AccountRoute) },
         navigation<LogbookGraph>(startDestination = LogbookRoute) {
             composable<LogbookRoute> {
                 LogbookScreen(
                     onOpenSettlement = { plotId, year -> navController.openCampaignReceipt(plotId, year, popForm = false) },
                     onOpenAlerts = { navController.navigate(AlertsCenterRoute()) },
                     onContinueSampling = { plotId, plotName ->
+                    displayName = producerName(),
+                    onOpenAccount = { navController.navigate(AccountRoute) },
                         navController.navigate(
                             SamplingRoundRoute(
                                 plotId = plotId,
@@ -435,6 +441,13 @@ private fun debugStartDestination(): Any? = when (BuildConfig.DEBUG_START_SCREEN
     "cooperative-code" -> CooperativeCodeGraph
     "account" -> AccountRoute
     "edit-profile" -> EditProfileRoute
+/** The name in the header of Inicio, Plan and Bitácora; null until the profile is on the phone. */
+@Composable
+private fun producerName(): String? {
+    val viewModel: ProducerNameViewModel = hiltViewModel()
+    return viewModel.fullName.collectAsStateWithLifecycle().value
+}
+
     else -> null
 }
 
