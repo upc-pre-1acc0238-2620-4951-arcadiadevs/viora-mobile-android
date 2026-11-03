@@ -1,6 +1,7 @@
 package pe.edu.upc.viora.features.home.presentation.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.DayOfWeek
@@ -30,26 +32,30 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 /**
  * The current week, Monday to Sunday (Figma "Semana"): today in yellow, past days dimmed.
  * The terracotta dot under a day that has a task is not drawn yet: the plan of the season
- * (US27) will say which days have one.
+ * (US27) will say which days have one. A day opens the climate of the plot in focus ([onOpenDay], Figma P90).
  */
 @Composable
-fun HomeWeekStrip(today: LocalDate, modifier: Modifier = Modifier) {
+fun HomeWeekStrip(today: LocalDate, modifier: Modifier = Modifier, onOpenDay: (() -> Unit)? = null) {
     val monday = today.with(DayOfWeek.MONDAY)
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         repeat(7) { offset ->
             val day = monday.plusDays(offset.toLong())
-            WeekDay(day = day, isToday = day == today, isPast = day.isBefore(today))
+            WeekDay(day = day, isToday = day == today, isPast = day.isBefore(today), onClick = onOpenDay)
         }
     }
 }
 
 @Composable
-private fun WeekDay(day: LocalDate, isToday: Boolean, isPast: Boolean) {
+private fun WeekDay(day: LocalDate, isToday: Boolean, isPast: Boolean, onClick: (() -> Unit)?) {
     val locale = LocalConfiguration.current.locales[0]
     val label = day.dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
         .trimEnd('.')
         .replaceFirstChar { it.titlecase(locale) }
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(
+        modifier = if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
         Text(
             text = label,
             style = if (isToday) MaterialTheme.typography.labelMedium else MaterialTheme.typography.bodySmall,

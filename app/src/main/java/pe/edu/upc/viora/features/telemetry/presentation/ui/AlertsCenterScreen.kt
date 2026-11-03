@@ -70,6 +70,7 @@ import pe.edu.upc.viora.core.presentation.LocalAppZone
 fun AlertsCenterScreen(
     onBack: () -> Unit,
     onOpenDetail: (String) -> Unit,
+    onOpenPreferences: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AlertsViewModel = hiltViewModel(),
 ) {
@@ -139,6 +140,7 @@ fun AlertsCenterScreen(
                     latestTriggeredAt = null,
                     onBack = onBack,
                     onOpenDetail = onOpenDetail,
+                    onOpenPreferences = onOpenPreferences,
                     onFilterSelected = { viewModel.setFilter(it) },
                 )
             }
@@ -154,6 +156,7 @@ fun AlertsCenterScreen(
                     latestTriggeredAt = state.latestTriggeredAt,
                     onBack = onBack,
                     onOpenDetail = onOpenDetail,
+                    onOpenPreferences = onOpenPreferences,
                     onFilterSelected = { viewModel.setFilter(it) },
                     plotFilter = if (state.canFilterByPlot) {
                         PlotFilterButtonState(isActive = state.selectedPlotId != null, onClick = { showPlotFilter = true })
@@ -185,6 +188,7 @@ private fun AlertsCenterContent(
     latestTriggeredAt: String? = null,
     onBack: () -> Unit,
     onOpenDetail: (String) -> Unit,
+    onOpenPreferences: () -> Unit,
     onFilterSelected: (AlertsFilter) -> Unit,
     modifier: Modifier = Modifier,
     plotFilter: PlotFilterButtonState? = null,
@@ -241,7 +245,7 @@ private fun AlertsCenterContent(
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(Neutral0)
-                    .clickable { /* Preferences */ },
+                    .clickable(role = Role.Button, onClick = onOpenPreferences),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(

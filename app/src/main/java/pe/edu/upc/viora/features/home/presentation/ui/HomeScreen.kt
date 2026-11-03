@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -50,7 +51,6 @@ import pe.edu.upc.viora.features.home.presentation.state.HomeUiState
 import pe.edu.upc.viora.features.home.presentation.tour.HomeTourTarget
 import pe.edu.upc.viora.features.home.presentation.tour.LocalHomeTourTargets
 import pe.edu.upc.viora.features.home.presentation.tour.homeTourTarget
-import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeGreetingViewModel
 import pe.edu.upc.viora.features.home.presentation.viewmodel.HomeViewModel
 import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 import pe.edu.upc.viora.core.domain.GeoPoint
@@ -70,22 +70,21 @@ fun HomeScreen(
     onOpenPlots: () -> Unit,
     onOpenAlerts: () -> Unit,
     onOpenAlternation: (plotId: PlotId, plotName: String) -> Unit,
+    displayName: String?,
+    onOpenAccount: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenWeatherForecast: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
     onOpenSoilMoisture: (plotId: PlotId, plotName: String) -> Unit = { _, _ -> },
-    onOpenAccount: () -> Unit = {},
     isAccessPaused: Boolean = false,
     phase: HomePhase? = null,
     viewModel: HomeViewModel = hiltViewModel(),
-    greetingViewModel: HomeGreetingViewModel = hiltViewModel(),
     widgets: HomeWidgets = HomeWidgets(),
     sections: @Composable ColumnScope.() -> Unit = {},
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
-    val fullName = greetingViewModel.fullName.collectAsStateWithLifecycle().value
     HomeScreenContent(
         state = state,
-        displayName = fullName,
+        displayName = displayName,
         onRefresh = viewModel::refresh,
         onRegisterPlot = onRegisterPlot,
         onOpenPlot = onOpenPlot,
@@ -147,9 +146,11 @@ fun HomeScreenContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                // Outside the scroll, so what scrolls up never runs under the status bar.
+                .statusBarsPadding()
                 .verticalScroll(scrollState)
                 .padding(
-                    top = systemBars.calculateTopPadding() + 12.dp,
+                    top = 12.dp,
                     bottom = VioraTabBarDefaults.ContentBottomPadding + systemBars.calculateBottomPadding(),
                 ),
         ) {
@@ -187,10 +188,18 @@ fun HomeScreenContent(
                     modifier = Modifier.padding(top = 12.dp),
                     focusedName = (state as? HomeUiState.Content)?.focusedPlot?.name,
                     onChangeFocus = { pickingFocus = true },
+                    onOpenPlots = onOpenPlots,
                 )
                 if (state.isOffline) HomeOfflineNotice(modifier = Modifier.padding(top = 16.dp))
                 // In Figma P10, without active access or without plots the week strip is omitted.
-                if (!hasNoPlots && !isAccessPaused) HomeWeekStrip(today = today, modifier = Modifier.padding(top = 22.dp))
+                if (!hasNoPlots && !isAccessPaused) {
+                    val focused = (state as? HomeUiState.Content)?.focusedPlot
+                    HomeWeekStrip(
+                        today = today,
+                        modifier = Modifier.padding(top = 22.dp),
+                        onOpenDay = focused?.let { plot -> { onOpenWeatherForecast(plot.id, plot.name) } },
+                    )
+                }
             }
             if (pickingFocus && state is HomeUiState.Content) {
                 FocusPicker(state = state, onSelect = onFocusPlot, onDismiss = { pickingFocus = false })

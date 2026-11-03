@@ -1,4 +1,4 @@
-package pe.edu.upc.viora.features.home.presentation.viewmodel
+package pe.edu.upc.viora.features.profiles.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,9 +12,9 @@ import kotlinx.coroutines.launch
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveProfileUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.RefreshProfileUseCase
 
-/** The producer's name for the Home header ("Hola, Teodoro", avatar "TM"); null until the profile is on the phone. */
+/** The producer's name for the header of Inicio, Plan and Bitácora ("Hola, Teodoro", avatar "TM"); null until the profile is on the phone. */
 @HiltViewModel
-class HomeGreetingViewModel @Inject constructor(
+class ProducerNameViewModel @Inject constructor(
     observeProfile: ObserveProfileUseCase,
     refreshProfile: RefreshProfileUseCase,
 ) : ViewModel() {

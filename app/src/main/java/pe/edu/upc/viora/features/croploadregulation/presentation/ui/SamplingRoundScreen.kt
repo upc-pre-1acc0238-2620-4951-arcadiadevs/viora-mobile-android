@@ -44,6 +44,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.navigation.LotSection
+import pe.edu.upc.viora.core.navigation.LotSectionsSheet
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
@@ -79,8 +81,23 @@ fun SamplingRoundScreen(
     onAddTree: (nextIdentifier: String, nextIndex: Int) -> Unit,
     onFinishSampling: () -> Unit,
     onContinueLater: () -> Unit,
+    onOpenSection: (LotSection) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var showMore by rememberSaveable { mutableStateOf(false) }
+    if (showMore) {
+        // The trees of the round stay saved on the phone, so going to another section loses nothing.
+        LotSectionsSheet(
+            plotName = state.plotName,
+            summary = stringResource(R.string.sampling_round_subtitle, state.campaignYear),
+            current = null,
+            onSelect = { section ->
+                showMore = false
+                onOpenSection(section)
+            },
+            onDismiss = { showMore = false },
+        )
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -130,7 +147,7 @@ fun SamplingRoundScreen(
                 }
 
                 IconButton(
-                    onClick = { /* More options */ },
+                    onClick = { showMore = true },
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
@@ -735,6 +752,7 @@ private fun SamplingRoundScreenPreview_Normal() {
             onAddTree = { _, _ -> },
             onFinishSampling = {},
             onContinueLater = {},
+            onOpenSection = {},
         )
     }
 }
@@ -762,6 +780,7 @@ private fun SamplingRoundScreenPreview_Offline() {
             onAddTree = { _, _ -> },
             onFinishSampling = {},
             onContinueLater = {},
+            onOpenSection = {},
         )
     }
 }
@@ -792,6 +811,7 @@ private fun SamplingRoundScreenPreview_RecoveredConnection() {
             onAddTree = { _, _ -> },
             onFinishSampling = {},
             onContinueLater = {},
+            onOpenSection = {},
         )
     }
 }
@@ -814,6 +834,7 @@ private fun SamplingRoundScreenPreview_Empty() {
             onAddTree = { _, _ -> },
             onFinishSampling = {},
             onContinueLater = {},
+            onOpenSection = {},
         )
     }
 }

@@ -273,6 +273,8 @@ class LogbookViewModel @Inject constructor(
                     settledAt = it.occurredAt,
                     type = LogbookRowType.SAMPLING,
                     evaluatedTreesCount = it.evaluatedTreesCount,
+                    totalShootsCount = it.totalShootsCount,
+                    totalFruitsCount = it.totalFruitsCount,
                     meanFruitsPerShoot = it.meanFruitsPerShoot,
                 )
             }
@@ -287,6 +289,7 @@ class LogbookViewModel @Inject constructor(
                     campaignYear = it.campaignYear,
                     settledAt = it.occurredAt,
                     type = LogbookRowType.THINNING,
+                    prescriptionId = it.prescriptionId,
                     removalPercentage = it.removalPercentage,
                     timeliness = it.timeliness?.name,
                 )

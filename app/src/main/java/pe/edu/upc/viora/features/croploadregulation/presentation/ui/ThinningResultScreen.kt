@@ -98,6 +98,7 @@ import pe.edu.upc.viora.core.presentation.labelRes
 @Composable
 fun ThinningResultScreen(
     onClose: () -> Unit,
+    onBackToPlan: () -> Unit,
     onOpenLogbook: () -> Unit,
     onOpenAlternation: (plotName: String) -> Unit,
     modifier: Modifier = Modifier,
@@ -130,6 +131,7 @@ fun ThinningResultScreen(
             is ThinningResultUiState.Content -> ResultBody(
                 state = s,
                 onClose = onClose,
+                onBackToPlan = onBackToPlan,
                 onOpenLogbook = onOpenLogbook,
                 onOpenAlternation = { onOpenAlternation(s.plotName) },
                 onHowItWorks = { showHowItWorks = true },
@@ -157,6 +159,7 @@ fun ThinningResultScreen(
 private fun ResultBody(
     state: ThinningResultUiState.Content,
     onClose: () -> Unit,
+    onBackToPlan: () -> Unit,
     onOpenLogbook: () -> Unit,
     onOpenAlternation: () -> Unit,
     onHowItWorks: () -> Unit,
@@ -211,7 +214,7 @@ private fun ResultBody(
         }
         PrimaryPillButton(
             text = stringResource(R.string.thinning_result_back_to_plan),
-            onClick = onClose,
+            onClick = onBackToPlan,
             modifier = Modifier.padding(top = 36.dp),
             trailingIcon = R.drawable.ic_arrow_forward,
         )
