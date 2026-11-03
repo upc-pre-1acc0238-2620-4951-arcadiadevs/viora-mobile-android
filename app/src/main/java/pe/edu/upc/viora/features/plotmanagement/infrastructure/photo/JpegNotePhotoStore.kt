@@ -15,7 +15,9 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import pe.edu.upc.viora.core.di.IoDispatcher
+import pe.edu.upc.viora.features.plotmanagement.domain.service.DOWNLOADED_NOTE_PHOTOS_DIR
 import pe.edu.upc.viora.features.plotmanagement.domain.service.NotePhotoStore
+import pe.edu.upc.viora.features.plotmanagement.domain.service.downloadedNotePhotoName
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.repository.FieldNoteRepositoryImpl
 
 /**
@@ -57,6 +59,20 @@ class JpegNotePhotoStore @Inject constructor(
     override suspend fun discard(path: String) {
         withContext(ioDispatcher) { File(path).delete() }
     }
+
+    override suspend fun downloaded(noteId: String): String? = withContext(ioDispatcher) {
+        downloadedFile(noteId).takeIf { it.exists() }?.absolutePath
+    }
+
+    override suspend fun keepDownloaded(noteId: String, bytes: ByteArray): String = withContext(ioDispatcher) {
+        val file = downloadedFile(noteId)
+        file.parentFile?.mkdirs()
+        file.writeBytes(bytes)
+        file.absolutePath
+    }
+
+    private fun downloadedFile(noteId: String) =
+        File(File(context.cacheDir, DOWNLOADED_NOTE_PHOTOS_DIR), downloadedNotePhotoName(noteId))
 
     private fun scaleAndRotate(bitmap: Bitmap, rotation: Float): Bitmap {
         val longer = maxOf(bitmap.width, bitmap.height)

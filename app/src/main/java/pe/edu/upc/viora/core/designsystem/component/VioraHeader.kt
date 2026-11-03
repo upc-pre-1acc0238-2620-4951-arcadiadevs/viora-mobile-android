@@ -40,18 +40,19 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 /**
  * Greeting row of the Home and the other top-level screens: avatar, "Hola, name" with the date and sync state, and the alerts
  * bell. [displayName] is the full name (initials of two names, greeting with the first); null until the profile exists (then the greeting has no name and the
- * avatar shows the Viora isotype). [hasUnreadAlerts] draws the red dot on the bell.
+ * avatar shows the Viora isotype). It and [onOpenAccount] have no default on purpose: a screen that forgot them showed "Hola" and a dead avatar in production.
+ * [hasUnreadAlerts] draws the red dot on the bell.
  */
 @Composable
 fun VioraGreetingHeader(
     date: LocalDate,
     isOffline: Boolean,
     lastRefresh: Instant?,
+    displayName: String?,
     onOpenAlerts: () -> Unit,
+    onOpenAccount: () -> Unit,
     modifier: Modifier = Modifier,
-    displayName: String? = null,
     hasUnreadAlerts: Boolean = false,
-    onOpenAccount: () -> Unit = {},
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),

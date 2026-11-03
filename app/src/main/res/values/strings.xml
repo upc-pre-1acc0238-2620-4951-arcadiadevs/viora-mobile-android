@@ -1628,6 +1628,14 @@ Reference price. You pay after creating your account.</string>
     <string name="note_save">Save note</string>
     <string name="note_saved_toast">Note saved in your Logbook</string>
     <string name="logbook_note_title">%1$s note</string>
+    <string name="note_detail_title">%1$s\nnote</string>
+    <string name="note_detail_synced">Synced</string>
+    <string name="note_detail_on_phone">On the phone</string>
+    <string name="note_detail_failed">Could not be saved</string>
+    <string name="note_detail_failed_body">It is still on your phone, but it was not saved to your account.</string>
+    <string name="note_detail_photo_description">Photo of the note</string>
+    <string name="note_detail_photo_offline">You will see the photo once you have signal</string>
+    <string name="note_detail_photo_retry">Tap to try again</string>
     <string name="logbook_note_details">%1$s · %2$s</string>
     <string name="logbook_note_pending">On the phone · it will be sent when there is signal</string>
     <string name="logbook_note_failed">The server did not accept this note</string>

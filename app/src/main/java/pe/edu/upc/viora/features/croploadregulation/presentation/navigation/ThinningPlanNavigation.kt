@@ -19,13 +19,17 @@ data class ThinningPlanRoute(val plotId: String, val plotName: String = "", val 
 @Serializable
 data class RegisterThinningRoute(val plotId: String, val plotName: String = "", val campaignYear: Int = 0)
 
-/** P63 · Aclareo registrado. [prescriptionId] lets it download the thinning again when it is not cached. */
+/**
+ * P63 · Aclareo registrado. [prescriptionId] lets it download the thinning again when it is not cached.
+ * [openedFromLogbook]: there is no plan behind it to go back to, so "Volver al plan" opens the plan of the plot.
+ */
 @Serializable
 data class ThinningResultRoute(
     val plotId: String,
     val prescriptionId: String,
     val plotName: String = "",
     val campaignYear: Int = 0,
+    val openedFromLogbook: Boolean = false,
 )
 
 /**
@@ -82,6 +86,15 @@ fun NavGraphBuilder.thinningPlanComposable(
         val route = entry.toRoute<ThinningResultRoute>()
         ThinningResultScreen(
             onClose = { navController.popBackStack() },
+            onBackToPlan = {
+                if (route.openedFromLogbook) {
+                    navController.navigate(
+                        ThinningPlanRoute(plotId = route.plotId, plotName = route.plotName, campaignYear = route.campaignYear),
+                    ) { popUpTo<ThinningResultRoute> { inclusive = true } }
+                } else {
+                    navController.popBackStack()
+                }
+            },
             onOpenLogbook = onOpenLogbook,
             onOpenAlternation = { plotName -> onOpenAlternation(route.plotId, plotName.ifBlank { route.plotName }) },
             assistantSheet = resultAssistantSheet,

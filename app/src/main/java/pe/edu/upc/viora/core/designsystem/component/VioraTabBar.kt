@@ -50,12 +50,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.lerp as lerpColor
 import kotlin.math.abs
 import pe.edu.upc.viora.R
-import pe.edu.upc.viora.core.designsystem.theme.Green100
+import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
-import pe.edu.upc.viora.core.designsystem.theme.Harvest700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral50
@@ -473,14 +472,14 @@ private val OptionSubtitleStyle = TextStyle(
     lineHeight = 16.sp,
 )
 
-/** Icon colours of the four record options, straight from the Figma menu. */
+/** Icon colours of the four kinds of record: the "+" menu and the Bitácora rows read them here, so they cannot drift apart. */
 object VioraTabBarActionColors {
-    val SamplingBackground = Harvest100
-    val SamplingTint = Harvest700
+    val SamplingBackground = Green200
+    val SamplingTint = Green800
     val ThinningBackground = Terracotta100
     val ThinningTint = Terracotta600
-    val HarvestBackground = Green100
-    val HarvestTint = Green800
+    val HarvestBackground = Harvest100
+    val HarvestTint = Green900
     val NoteBackground = Neutral100
     val NoteTint = Neutral700
 }

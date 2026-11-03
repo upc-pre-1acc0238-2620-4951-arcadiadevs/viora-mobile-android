@@ -16,8 +16,10 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
+import java.time.Instant
 import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
+import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.core.navigation.LogbookGraph
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.RegisterTreeSampleScreen
@@ -51,12 +53,29 @@ data class SamplingCompleteRoute(
 )
 
 /**
+ * P54 reopened from the Bitácora: a round already closed, drawn from the numbers of its record. It lives outside
+ * [SamplingGraph], so it never touches a round in progress.
+ */
+@Serializable
+data class SamplingRecordRoute(
+    val plotId: String,
+    val plotName: String,
+    val campaignYear: Int,
+    val evaluatedTreesCount: Int,
+    val totalShootsCount: Int,
+    val totalFruitsCount: Int,
+    val meanFruitsPerShoot: Double,
+    val occurredAtMillis: Long,
+)
+
+/**
  * Navigation graph for in-field fruit thinning sampling (P51, P52, P53, P54).
  * [plotSilhouetteSlot] allows presentation-only integration with plotmanagement visual silhouette, and
  * [assistantSheet] is the sheet of the round entry of the summary (P142).
  */
 fun NavGraphBuilder.samplingNavGraph(
     navController: NavController,
+    onOpenSection: (section: LotSection, plotId: String, plotName: String) -> Unit,
     plotSilhouetteSlot: @Composable (plotId: String, modifier: Modifier) -> Unit,
     assistantSheet: AssistantSheetSlot? = null,
 ) {
@@ -142,6 +161,7 @@ fun NavGraphBuilder.samplingNavGraph(
                         launchSingleTop = true
                     }
                 },
+                onOpenSection = { section -> onOpenSection(section, route.plotId, route.plotName) },
             )
         }
 
@@ -212,5 +232,24 @@ fun NavGraphBuilder.samplingNavGraph(
                 assistantSheet(route.plotId, route.plotName) { showAssistant = false }
             }
         }
+    }
+    composable<SamplingRecordRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<SamplingRecordRoute>()
+        SamplingCompleteScreen(
+            plotName = route.plotName,
+            summary = null,
+            evaluatedTreesCount = route.evaluatedTreesCount,
+            totalShootsCount = route.totalShootsCount,
+            totalFruitsCount = route.totalFruitsCount,
+            meanFruitsPerShoot = route.meanFruitsPerShoot,
+            syncedOn = Instant.ofEpochMilli(route.occurredAtMillis),
+            onClose = { navController.popBackStack() },
+            onViewPlotPlan = {
+                navController.navigate(
+                    ThinningPlanRoute(plotId = route.plotId, plotName = route.plotName, campaignYear = route.campaignYear),
+                ) { popUpTo<SamplingRecordRoute> { inclusive = true } }
+            },
+            onBackToLogbook = { navController.popBackStack() },
+        )
     }
 }

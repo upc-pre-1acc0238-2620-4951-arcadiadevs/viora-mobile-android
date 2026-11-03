@@ -25,6 +25,7 @@ import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteType
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewFieldNote
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.FieldNoteRepository
 import pe.edu.upc.viora.features.plotmanagement.domain.service.FieldNoteSyncScheduler
+import pe.edu.upc.viora.features.plotmanagement.domain.service.NotePhotoStore
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.FieldNoteDao
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.FieldNoteEntity
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.FieldNoteDto
@@ -42,6 +43,7 @@ class FieldNoteRepositoryImpl @Inject constructor(
     private val dao: FieldNoteDao,
     private val apiCaller: ApiCaller,
     private val scheduler: FieldNoteSyncScheduler,
+    private val photoStore: NotePhotoStore,
     private val clock: Clock,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : FieldNoteRepository {
@@ -76,6 +78,26 @@ class FieldNoteRepositoryImpl @Inject constructor(
             }
         }
         return failure ?: AppResult.Success(Unit)
+    }
+
+    override suspend fun photoPath(plotId: String, noteId: String): AppResult<String> = try {
+        val kept = photoStore.downloaded(noteId)
+        if (kept != null) {
+            AppResult.Success(kept)
+        } else {
+            when (val result = apiCaller.call { service.getPhoto(plotId, noteId) }) {
+                is AppResult.Failure -> result
+                is AppResult.Success -> {
+                    val bytes = withContext(ioDispatcher) { result.value.use { it.bytes() } }
+                    AppResult.Success(photoStore.keepDownloaded(noteId, bytes))
+                }
+            }
+        }
+    } catch (cancellation: CancellationException) {
+        throw cancellation
+    } catch (failure: Exception) {
+        // A photo that cannot be read or kept is not a reason to lose the note: the sheet offers to try again.
+        AppResult.Failure(AppError.Unknown(failure))
     }
 
     override suspend fun syncPending(): FieldNoteSyncResult {
@@ -166,6 +188,7 @@ class FieldNoteRepositoryImpl @Inject constructor(
             createdAt = Instant.ofEpochMilli(createdAt),
             hasPhoto = hasPhoto,
             syncState = FieldNoteSyncState.valueOf(syncState),
+            localPhotoPath = photoPath,
         )
     }.getOrNull()
 

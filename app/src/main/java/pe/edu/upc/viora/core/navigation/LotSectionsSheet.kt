@@ -56,7 +56,7 @@ enum class LotSection(
 
 /**
  * "More options" of a plot (Figma "Capa · Más opciones"): the plot's name and summary over a card
- * with its sections. The section the producer is already in ([current]) is left out. A section
+ * with its sections. The section the producer is already in ([current], null outside them) is left out. A section
  * that is not in [available] is listed greyed out as "coming soon" instead of a dead row.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +64,7 @@ enum class LotSection(
 fun LotSectionsSheet(
     plotName: String,
     summary: String,
-    current: LotSection,
+    current: LotSection?,
     onSelect: (LotSection) -> Unit,
     onDismiss: () -> Unit,
     available: Set<LotSection> = LotSection.BUILT,

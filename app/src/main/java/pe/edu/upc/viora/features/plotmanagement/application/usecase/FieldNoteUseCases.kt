@@ -28,6 +28,11 @@ class WriteFieldNoteUseCase @Inject constructor(private val repository: FieldNot
     }
 }
 
+/** The photo of a note already on the server (P79), as a path on the phone. */
+class GetFieldNotePhotoUseCase @Inject constructor(private val repository: FieldNoteRepository) {
+    suspend operator fun invoke(plotId: String, noteId: String): AppResult<String> = repository.photoPath(plotId, noteId)
+}
+
 /** Brings the notes of the given plots up to date with the server. */
 class RefreshFieldNotesUseCase @Inject constructor(private val repository: FieldNoteRepository) {
     suspend operator fun invoke(plotIds: List<String>): AppResult<Unit> = repository.refresh(plotIds)
