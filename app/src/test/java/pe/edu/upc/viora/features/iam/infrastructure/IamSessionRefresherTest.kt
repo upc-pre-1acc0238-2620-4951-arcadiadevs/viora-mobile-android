@@ -127,6 +127,34 @@ class IamSessionRefresherTest {
     }
 
     @Test
+    fun `a 401 on the refresh also ends the session`() {
+        saveSession(expiresInMillis = 0)
+        server.enqueue(MockResponse().setResponseCode(401))
+
+        assertNull(refresher.freshAccessToken())
+        assertNull(runBlocking { store.session() })
+    }
+
+    private fun assertRefreshAnswerKeepsTheSession(code: Int) {
+        saveSession(expiresInMillis = 0)
+        server.enqueue(MockResponse().setResponseCode(code))
+
+        assertEquals("old-access", refresher.freshAccessToken())
+        assertEquals("old-refresh", runBlocking { store.session() }!!.refreshToken)
+    }
+
+    @Test
+    fun `a 400 on the refresh keeps the session because it may not come from the server`() =
+        assertRefreshAnswerKeepsTheSession(400)
+
+    @Test
+    fun `a 404 on the refresh keeps the session because it may not come from the server`() =
+        assertRefreshAnswerKeepsTheSession(404)
+
+    @Test
+    fun `a 500 on the refresh keeps the session`() = assertRefreshAnswerKeepsTheSession(500)
+
+    @Test
     fun `offline keeps the current token and the session`() {
         saveSession(expiresInMillis = 0)
         server.shutdown()

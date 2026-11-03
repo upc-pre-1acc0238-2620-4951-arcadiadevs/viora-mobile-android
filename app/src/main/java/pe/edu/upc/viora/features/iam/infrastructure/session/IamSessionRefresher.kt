@@ -68,7 +68,9 @@ class IamSessionRefresher @Inject constructor(
 
     private companion object {
         const val RENEW_BEFORE_MILLIS = 60_000L
-        val REJECTED_CODES = setOf(400, 401, 403, 404)
+
+        /** Only the server's own refusal ends a session: a 400 or 404 may come from a proxy or a deploy in between. */
+        val REJECTED_CODES = setOf(401, 403)
     }
 }
 
