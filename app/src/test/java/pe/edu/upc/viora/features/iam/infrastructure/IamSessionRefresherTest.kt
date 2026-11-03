@@ -36,7 +36,12 @@ class IamSessionRefresherTest {
 
     private val server = MockWebServer()
     private val now = Instant.parse("2026-10-21T15:00:00Z")
-    private val clock = Clock.fixed(now, ZoneOffset.UTC)
+    private val clock = object : Clock() {
+        var current: Instant = now
+        override fun instant(): Instant = current
+        override fun getZone(): ZoneOffset = ZoneOffset.UTC
+        override fun withZone(zone: java.time.ZoneId): Clock = this
+    }
     private val events = SessionEvents()
     private lateinit var store: SessionStore
     private lateinit var refresher: IamSessionRefresher
@@ -127,6 +132,34 @@ class IamSessionRefresherTest {
     }
 
     @Test
+    fun `a 401 on the refresh also ends the session`() {
+        saveSession(expiresInMillis = 0)
+        server.enqueue(MockResponse().setResponseCode(401))
+
+        assertNull(refresher.freshAccessToken())
+        assertNull(runBlocking { store.session() })
+    }
+
+    private fun assertRefreshAnswerKeepsTheSession(code: Int) {
+        saveSession(expiresInMillis = 0)
+        server.enqueue(MockResponse().setResponseCode(code))
+
+        assertEquals("old-access", refresher.freshAccessToken())
+        assertEquals("old-refresh", runBlocking { store.session() }!!.refreshToken)
+    }
+
+    @Test
+    fun `a 400 on the refresh keeps the session because it may not come from the server`() =
+        assertRefreshAnswerKeepsTheSession(400)
+
+    @Test
+    fun `a 404 on the refresh keeps the session because it may not come from the server`() =
+        assertRefreshAnswerKeepsTheSession(404)
+
+    @Test
+    fun `a 500 on the refresh keeps the session`() = assertRefreshAnswerKeepsTheSession(500)
+
+    @Test
     fun `offline keeps the current token and the session`() {
         saveSession(expiresInMillis = 0)
         server.shutdown()
@@ -142,6 +175,38 @@ class IamSessionRefresherTest {
 
         assertEquals("old-access", refresher.freshAccessToken())
         assertEquals("old-refresh", runBlocking { store.session() }!!.refreshToken)
+    }
+
+    @Test
+    fun `after a passing failure the queued requests do not send the token again until the pause ends`() {
+        saveSession(expiresInMillis = 0)
+        server.enqueue(MockResponse().setResponseCode(500))
+
+        assertEquals("old-access", refresher.freshAccessToken())
+        assertEquals("old-access", refresher.freshAccessToken())
+        assertEquals("old-access", refresher.freshAccessToken(rejected = "old-access"))
+        clock.current = now.plusMillis(14_999)
+        assertEquals("old-access", refresher.freshAccessToken())
+        assertEquals(1, server.requestCount)
+
+        clock.current = now.plusMillis(15_000)
+        enqueueRenewed()
+
+        assertEquals("new-access", refresher.freshAccessToken())
+        assertEquals(2, server.requestCount)
+    }
+
+    @Test
+    fun `a refusal once the pause ends still closes the session`() {
+        saveSession(expiresInMillis = 0)
+        server.enqueue(MockResponse().setResponseCode(500))
+        refresher.freshAccessToken()
+
+        clock.current = now.plusMillis(15_000)
+        server.enqueue(MockResponse().setResponseCode(403))
+
+        assertNull(refresher.freshAccessToken())
+        assertNull(runBlocking { store.session() })
     }
 
     /** N threads ask at the same moment; the answer is slow so they all queue behind the first renewal. */
