@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -128,9 +129,11 @@ fun LogbookContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                // Outside the scroll, so what scrolls up never runs under the status bar.
+                .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(
-                    top = systemBars.calculateTopPadding() + 12.dp,
+                    top = 12.dp,
                     bottom = VioraTabBarDefaults.ContentBottomPadding + systemBars.calculateBottomPadding(),
                 ),
         ) {

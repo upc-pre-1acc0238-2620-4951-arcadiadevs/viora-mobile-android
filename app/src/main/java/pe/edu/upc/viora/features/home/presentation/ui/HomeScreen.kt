@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -145,11 +146,13 @@ fun HomeScreenContent(
         modifier = modifier.fillMaxSize(),
     ) {
         Column(
+                // Outside the scroll, so what scrolls up never runs under the status bar.
+                .statusBarsPadding()
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(
-                    top = systemBars.calculateTopPadding() + 12.dp,
+                    top = 12.dp,
                     bottom = VioraTabBarDefaults.ContentBottomPadding + systemBars.calculateBottomPadding(),
                 ),
         ) {

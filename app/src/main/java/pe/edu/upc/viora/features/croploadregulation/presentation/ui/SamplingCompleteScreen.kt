@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -99,8 +98,6 @@ fun SamplingCompleteScreen(
         return
     }
 
-    val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-
     val treesCount = summary?.evaluatedTreesCount ?: evaluatedTreesCount
     val mean = summary?.meanFruitsPerShoot ?: meanFruitsPerShoot
     val fruitsCount = summary?.sampledFruitSetCount ?: totalFruitsCount
@@ -120,13 +117,15 @@ fun SamplingCompleteScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(
-                    top = topInset + 8.dp,
+                    top = 8.dp,
                     bottom = 140.dp,
                     start = ScreenPadding,
                     end = ScreenPadding,
                 ),
         ) {
             // Top Bar: Close Button + Sync/Offline Badge
+                // Outside the scroll, so what scrolls up never runs under the status bar.
+                .statusBarsPadding()
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
