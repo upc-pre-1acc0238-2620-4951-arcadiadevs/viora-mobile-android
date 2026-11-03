@@ -39,7 +39,9 @@ import pe.edu.upc.viora.features.assistant.presentation.ui.HomeAssistantCard
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRoundRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningPlanRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.samplingNavGraph
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.SamplingRecordRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.thinningPlanComposable
+import pe.edu.upc.viora.features.croploadregulation.presentation.navigation.ThinningResultRoute
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.CampaignPlanScreen
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.AgronomicDossierRoute
 import pe.edu.upc.viora.features.harvestsettlement.presentation.navigation.CampaignClosedRoute
@@ -71,14 +73,15 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDeta
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotScreens
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNavGraph
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.FieldNoteDetailSheet
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
 import pe.edu.upc.viora.features.profiles.presentation.navigation.AccountRoute
 import pe.edu.upc.viora.features.profiles.presentation.navigation.EditProfileRoute
 import pe.edu.upc.viora.features.profiles.presentation.navigation.profilesNavGraph
+import pe.edu.upc.viora.features.profiles.presentation.viewmodel.ProducerNameViewModel
 import pe.edu.upc.viora.features.subscription.presentation.navigation.CooperativeCodeGraph
 import pe.edu.upc.viora.features.subscription.presentation.navigation.ExtensionCodeRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.MyPlanRoute
-import pe.edu.upc.viora.features.profiles.presentation.viewmodel.ProducerNameViewModel
 import pe.edu.upc.viora.features.subscription.presentation.navigation.PlanExtensionRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.ProducerPlanRoute
 import pe.edu.upc.viora.features.subscription.presentation.navigation.RedeemCodeRoute
@@ -173,10 +176,10 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 val phaseViewModel: HomePhaseViewModel = hiltViewModel()
                 val phase by phaseViewModel.uiState.collectAsStateWithLifecycle()
                 HomeScreen(
+                    displayName = producerName(),
                     isAccessPaused = isAccessPaused,
                     phase = phase.headlinePhase,
                     onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
-                    displayName = producerName(),
                     onOpenPlot = { id -> navController.navigate(PlotDetailRoute(plotId = id.value)) },
                     onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id.value, plotName = name)) },
                     onOpenPlots = {
@@ -351,19 +354,19 @@ assistantSheet = assistantSheetOf(AssistantScreen.ALTERNATION),
         )
         alertsNavGraph(
             navController = navController,
+            onOpenPreferences = { navController.navigate(AccountRoute) },
             onOpenPlot = { plotId -> navController.navigate(PlotDetailRoute(plotId = plotId)) },
             onOpenWinterChill = { plotId, plotName -> navController.navigate(WinterChillRoute(plotId = plotId, plotName = plotName)) },
             assistantSheet = assistantSheetOf(AssistantScreen.ALERT),
         )
         samplingNavGraph(
-            onOpenPreferences = { navController.navigate(AccountRoute) },
             navController = navController,
+            onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
             plotSilhouetteSlot = { plotId, slotModifier ->
                 PlotSilhouetteById(plotId = plotId, modifier = slotModifier, showTreeGrid = true)
             },
             assistantSheet = assistantSheetOf(AssistantScreen.SAMPLING_SUMMARY),
         )
-            onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
         thinningPlanComposable(
             navController = navController,
             onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
@@ -386,19 +389,45 @@ assistantSheet = assistantSheetOf(AssistantScreen.PLAN),
                     },
                     onOpenAlerts = { navController.navigate(AlertsCenterRoute()) },
                     onRegisterPlot = { navController.navigate(RegisterPlotRoute) },
+                    displayName = producerName(),
+                    onOpenAccount = { navController.navigate(AccountRoute) },
                 )
             }
         }
-                    displayName = producerName(),
-                    onOpenAccount = { navController.navigate(AccountRoute) },
         navigation<LogbookGraph>(startDestination = LogbookRoute) {
             composable<LogbookRoute> {
                 LogbookScreen(
-                    onOpenSettlement = { plotId, year -> navController.openCampaignReceipt(plotId, year, popForm = false) },
-                    onOpenAlerts = { navController.navigate(AlertsCenterRoute()) },
-                    onContinueSampling = { plotId, plotName ->
                     displayName = producerName(),
                     onOpenAccount = { navController.navigate(AccountRoute) },
+                    onOpenSettlement = { plotId, year -> navController.openCampaignReceipt(plotId, year, popForm = false) },
+                    onOpenSampling = { entry ->
+                        navController.navigate(
+                            SamplingRecordRoute(
+                                plotId = entry.plotId,
+                                plotName = entry.plotName.orEmpty(),
+                                campaignYear = entry.campaignYear,
+                                evaluatedTreesCount = entry.evaluatedTreesCount ?: 0,
+                                totalShootsCount = entry.totalShootsCount ?: 0,
+                                totalFruitsCount = entry.totalFruitsCount ?: 0,
+                                meanFruitsPerShoot = entry.meanFruitsPerShoot ?: 0.0,
+                                occurredAtMillis = entry.settledAt.toEpochMilli(),
+                            ),
+                        )
+                    },
+                    onOpenThinning = { entry ->
+                        navController.navigate(
+                            ThinningResultRoute(
+                                plotId = entry.plotId,
+                                prescriptionId = entry.prescriptionId.orEmpty(),
+                                plotName = entry.plotName.orEmpty(),
+                                campaignYear = entry.campaignYear,
+                                openedFromLogbook = true,
+                            ),
+                        )
+                    },
+                    noteDetailSheet = { noteId, onDismiss -> FieldNoteDetailSheet(noteId = noteId, onDismiss = onDismiss) },
+                    onOpenAlerts = { navController.navigate(AlertsCenterRoute()) },
+                    onContinueSampling = { plotId, plotName ->
                         navController.navigate(
                             SamplingRoundRoute(
                                 plotId = plotId,
@@ -410,6 +439,13 @@ assistantSheet = assistantSheetOf(AssistantScreen.PLAN),
             }
         }
     }
+}
+
+/** The name in the header of Inicio, Plan and Bitácora; null until the profile is on the phone. */
+@Composable
+private fun producerName(): String? {
+    val viewModel: ProducerNameViewModel = hiltViewModel()
+    return viewModel.fullName.collectAsStateWithLifecycle().value
 }
 
 /** Opens another section of a plot from its "Más opciones" sheet. */
@@ -441,13 +477,6 @@ private fun debugStartDestination(): Any? = when (BuildConfig.DEBUG_START_SCREEN
     "cooperative-code" -> CooperativeCodeGraph
     "account" -> AccountRoute
     "edit-profile" -> EditProfileRoute
-/** The name in the header of Inicio, Plan and Bitácora; null until the profile is on the phone. */
-@Composable
-private fun producerName(): String? {
-    val viewModel: ProducerNameViewModel = hiltViewModel()
-    return viewModel.fullName.collectAsStateWithLifecycle().value
-}
-
     else -> null
 }
 

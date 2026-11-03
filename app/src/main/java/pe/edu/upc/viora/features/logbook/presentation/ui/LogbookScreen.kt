@@ -27,6 +27,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,8 +49,8 @@ import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraEmptyState
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraSectionHeader
+import pe.edu.upc.viora.core.designsystem.component.VioraTabBarActionColors
 import pe.edu.upc.viora.core.designsystem.component.VioraTabBarDefaults
-import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
@@ -57,7 +61,6 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
-import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.core.domain.AppError
@@ -82,13 +85,17 @@ private val ScreenPadding = 24.dp
 
 /**
  * Logbook / "Bitácora" (Figma P50): greeting, headline, filters, active in-progress sampling
- * and settled campaigns, field samplings and thinnings grouped by period. A settled row opens its P73 receipt.
+ * and settled campaigns, field samplings, thinnings and notes grouped by period. Every row opens what it records:
+ * the P73 receipt, the round summary (P54), the thinning (P63) and the note ([noteDetailSheet], P79).
  */
 @Composable
 fun LogbookScreen(
     displayName: String?,
     onOpenAccount: () -> Unit,
     onOpenSettlement: (plotId: String, year: Int) -> Unit,
+    onOpenSampling: (SettledHarvestEntry) -> Unit,
+    onOpenThinning: (SettledHarvestEntry) -> Unit,
+    noteDetailSheet: @Composable (noteId: String, onDismiss: () -> Unit) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LogbookViewModel = hiltViewModel(),
     onContinueSampling: (plotId: String, plotName: String) -> Unit = { _, _ -> },
@@ -96,18 +103,27 @@ fun LogbookScreen(
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
     val hasActiveAlerts = viewModel.hasActiveAlerts.collectAsStateWithLifecycle().value
+    var openNoteId by rememberSaveable { mutableStateOf<String?>(null) }
     LogbookContent(
         state = state,
         displayName = displayName,
         onOpenAccount = onOpenAccount,
         onSelectFilter = viewModel::selectFilter,
         onRefresh = viewModel::refresh,
-        onOpenSettlement = onOpenSettlement,
+        onOpenEntry = { entry ->
+            when (entry.type) {
+                LogbookRowType.HARVEST -> onOpenSettlement(entry.plotId, entry.campaignYear)
+                LogbookRowType.SAMPLING -> onOpenSampling(entry)
+                LogbookRowType.THINNING -> onOpenThinning(entry)
+                LogbookRowType.NOTE -> openNoteId = entry.id
+            }
+        },
         onContinueSampling = onContinueSampling,
         onOpenAlerts = onOpenAlerts,
         hasActiveAlerts = hasActiveAlerts,
         modifier = modifier,
     )
+    openNoteId?.let { noteId -> noteDetailSheet(noteId) { openNoteId = null } }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,7 +134,7 @@ fun LogbookContent(
     onOpenAccount: () -> Unit,
     onSelectFilter: (LogbookFilter) -> Unit,
     onRefresh: () -> Unit,
-    onOpenSettlement: (plotId: String, year: Int) -> Unit,
+    onOpenEntry: (SettledHarvestEntry) -> Unit,
     modifier: Modifier = Modifier,
     today: LocalDate = LocalDate.now(),
     onContinueSampling: (plotId: String, plotName: String) -> Unit = { _, _ -> },
@@ -221,7 +237,7 @@ fun LogbookContent(
                 if (content.isEmpty) {
                     EmptyState(content.filter)
                 } else {
-                    content.groups.forEach { Group(it, onOpenSettlement) }
+                    content.groups.forEach { Group(it, onOpenEntry) }
                 }
             }
         }
@@ -291,22 +307,20 @@ private fun EmptyState(filter: LogbookFilter) {
 }
 
 @Composable
-private fun Group(group: LogbookGroup, onOpenSettlement: (plotId: String, year: Int) -> Unit) {
+private fun Group(group: LogbookGroup, onOpenEntry: (SettledHarvestEntry) -> Unit) {
     Column(modifier = Modifier.padding(top = 32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         VioraSectionHeader(
             title = stringResource(group.period.titleRes()),
             modifier = Modifier.padding(horizontal = ScreenPadding),
         )
         group.entries.forEach { entry ->
+            val onClick = { onOpenEntry(entry) }
+            val rowModifier = Modifier.padding(horizontal = ScreenPadding)
             when (entry.type) {
-                LogbookRowType.HARVEST -> SettledHarvestRow(
-                    entry = entry,
-                    onClick = { onOpenSettlement(entry.plotId, entry.campaignYear) },
-                    modifier = Modifier.padding(horizontal = ScreenPadding),
-                )
-                LogbookRowType.SAMPLING -> SamplingEventRow(entry, modifier = Modifier.padding(horizontal = ScreenPadding))
-                LogbookRowType.THINNING -> ThinningEventRow(entry, modifier = Modifier.padding(horizontal = ScreenPadding))
-                LogbookRowType.NOTE -> NoteRow(entry, modifier = Modifier.padding(horizontal = ScreenPadding))
+                LogbookRowType.HARVEST -> SettledHarvestRow(entry, onClick, rowModifier)
+                LogbookRowType.SAMPLING -> SamplingEventRow(entry, onClick, rowModifier)
+                LogbookRowType.THINNING -> ThinningEventRow(entry, onClick, rowModifier)
+                LogbookRowType.NOTE -> NoteRow(entry, onClick, rowModifier)
             }
         }
     }
@@ -333,13 +347,13 @@ private fun SettledHarvestRow(entry: SettledHarvestEntry, onClick: () -> Unit, m
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.size(48.dp).clip(CircleShape).background(Harvest100),
+            modifier = Modifier.size(48.dp).clip(CircleShape).background(VioraTabBarActionColors.HarvestBackground),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_inventory),
                 contentDescription = null,
-                tint = Harvest800,
+                tint = VioraTabBarActionColors.HarvestTint,
                 modifier = Modifier.size(24.dp),
             )
         }
@@ -370,7 +384,7 @@ private fun SettledHarvestRow(entry: SettledHarvestEntry, onClick: () -> Unit, m
 
 /** "Muestreo completado" row: icon, title, "plot · trees · fruits/shoot", check. */
 @Composable
-private fun SamplingEventRow(entry: SettledHarvestEntry, modifier: Modifier = Modifier) {
+private fun SamplingEventRow(entry: SettledHarvestEntry, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val plot = entry.plotName ?: stringResource(R.string.logbook_unknown_plot)
     val trees = entry.evaluatedTreesCount ?: 0
     val mean = formatDecimal(entry.meanFruitsPerShoot ?: 0.0, 2)
@@ -381,18 +395,19 @@ private fun SamplingEventRow(entry: SettledHarvestEntry, modifier: Modifier = Mo
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
             .background(Neutral0)
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(start = 10.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.size(48.dp).clip(CircleShape).background(Green200),
+            modifier = Modifier.size(48.dp).clip(CircleShape).background(VioraTabBarActionColors.SamplingBackground),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_nutrition),
                 contentDescription = null,
-                tint = Green900,
+                tint = VioraTabBarActionColors.SamplingTint,
                 modifier = Modifier.size(24.dp),
             )
         }
@@ -423,7 +438,7 @@ private fun SamplingEventRow(entry: SettledHarvestEntry, modifier: Modifier = Mo
 
 /** "Raleo registrado" row: icon, title, "plot · removal% · timeliness", check. */
 @Composable
-private fun ThinningEventRow(entry: SettledHarvestEntry, modifier: Modifier = Modifier) {
+private fun ThinningEventRow(entry: SettledHarvestEntry, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val plot = entry.plotName ?: stringResource(R.string.logbook_unknown_plot)
     val percent = formatWhole(entry.removalPercentage ?: 0.0)
     // The backend sends OPTIMAL or LATE; the producer reads words, never the code.
@@ -439,18 +454,19 @@ private fun ThinningEventRow(entry: SettledHarvestEntry, modifier: Modifier = Mo
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
             .background(Neutral0)
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(start = 10.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.size(48.dp).clip(CircleShape).background(Terracotta100),
+            modifier = Modifier.size(48.dp).clip(CircleShape).background(VioraTabBarActionColors.ThinningBackground),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_content_cut),
                 contentDescription = null,
-                tint = Terracotta600,
+                tint = VioraTabBarActionColors.ThinningTint,
                 modifier = Modifier.size(24.dp),
             )
         }
@@ -484,7 +500,7 @@ private fun ThinningEventRow(entry: SettledHarvestEntry, modifier: Modifier = Mo
  * a cloud while it waits on the phone, or a warning when the server refused it.
  */
 @Composable
-private fun NoteRow(entry: SettledHarvestEntry, modifier: Modifier = Modifier) {
+private fun NoteRow(entry: SettledHarvestEntry, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val plot = entry.plotName ?: stringResource(R.string.logbook_unknown_plot)
     val type = entry.noteType ?: FieldNoteType.OTHER
     val title = stringResource(R.string.logbook_note_title, stringResource(type.titleRes()))
@@ -497,18 +513,19 @@ private fun NoteRow(entry: SettledHarvestEntry, modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
             .background(Neutral0)
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(start = 10.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.size(48.dp).clip(CircleShape).background(Neutral100),
+            modifier = Modifier.size(48.dp).clip(CircleShape).background(VioraTabBarActionColors.NoteBackground),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_edit_note),
                 contentDescription = null,
-                tint = Neutral900,
+                tint = VioraTabBarActionColors.NoteTint,
                 modifier = Modifier.size(24.dp),
             )
         }
@@ -579,7 +596,7 @@ private fun LogbookPreview() {
             ),
             onSelectFilter = {},
             onRefresh = {},
-            onOpenSettlement = { _, _ -> },
+            onOpenEntry = {},
             today = LocalDate.of(2026, 11, 18),
         )
     }

@@ -30,12 +30,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.Instant
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -54,7 +56,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
+import pe.edu.upc.viora.core.presentation.LocalAppZone
 import pe.edu.upc.viora.core.presentation.formatDecimal
+import pe.edu.upc.viora.core.presentation.formatMediumDate
 import pe.edu.upc.viora.features.croploadregulation.domain.entity.SamplingSummary
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.component.SamplingSegmentedBar
 
@@ -64,7 +68,8 @@ private val ScreenPadding = 24.dp
  * P54 · Resumen Estadístico de Ronda Completa.
  * Displays 4 summary cards: evaluated trees, mean fruits per shoot, shoots count, and fruits count,
  * along with plot plan CTA and Return to Bitácora link. With [onAskViora] the round entry of the
- * assistant sits at the right of the title (P142).
+ * assistant sits at the right of the title (P142). [syncedOn] is the day of a round reopened from the Bitácora; null
+ * for the round just finished, whose chip shows the time.
  */
 @Composable
 fun SamplingCompleteScreen(
@@ -81,6 +86,7 @@ fun SamplingCompleteScreen(
     onBackToLogbook: () -> Unit,
     modifier: Modifier = Modifier,
     onAskViora: (() -> Unit)? = null,
+    syncedOn: Instant? = null,
 ) {
     if (isLoading) {
         Box(
@@ -105,7 +111,10 @@ fun SamplingCompleteScreen(
 
     val formattedMean = formatDecimal(mean, 2)
     // "9:42 a. m." in the app's language, as the sync chips of the design.
-    val syncTimeStr = LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+    val zone = LocalAppZone.current
+    val locale = LocalConfiguration.current.locales[0]
+    val syncTimeStr = syncedOn?.let { formatMediumDate(it, zone, locale) }
+        ?: LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
 
     Box(
         modifier = modifier
@@ -115,6 +124,8 @@ fun SamplingCompleteScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                // Outside the scroll, so what scrolls up never runs under the status bar.
+                .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(
                     top = 8.dp,
@@ -124,8 +135,6 @@ fun SamplingCompleteScreen(
                 ),
         ) {
             // Top Bar: Close Button + Sync/Offline Badge
-                // Outside the scroll, so what scrolls up never runs under the status bar.
-                .statusBarsPadding()
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
