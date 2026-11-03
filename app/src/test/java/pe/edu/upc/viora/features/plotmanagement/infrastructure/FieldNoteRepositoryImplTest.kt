@@ -19,6 +19,7 @@ import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.SocketPolicy
+import okio.Buffer
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -26,6 +27,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.network.ApiCaller
 import pe.edu.upc.viora.core.network.ApiErrorMapper
@@ -34,6 +36,7 @@ import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteSyncState
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.FieldNoteType
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewFieldNote
 import pe.edu.upc.viora.features.plotmanagement.domain.service.FieldNoteSyncScheduler
+import pe.edu.upc.viora.features.plotmanagement.domain.service.NotePhotoStore
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.FieldNoteDao
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.local.FieldNoteEntity
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.remote.FieldNoteService
@@ -58,11 +61,24 @@ private class NotesDaoFake : FieldNoteDao {
     override suspend fun upsertAll(entities: List<FieldNoteEntity>) = entities.forEach { upsert(it) }
 }
 
+private class PhotoStoreFake : NotePhotoStore {
+    val kept = mutableMapOf<String, ByteArray>()
+
+    override suspend fun keep(uri: String): String? = null
+    override suspend fun discard(path: String) = Unit
+    override suspend fun downloaded(noteId: String): String? = "cache/$noteId.jpg".takeIf { noteId in kept }
+    override suspend fun keepDownloaded(noteId: String, bytes: ByteArray): String {
+        kept[noteId] = bytes
+        return "cache/$noteId.jpg"
+    }
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class FieldNoteRepositoryImplTest {
     private val server = MockWebServer()
     private val dao = NotesDaoFake()
     private var scheduled = 0
+    private val photos = PhotoStoreFake()
     private val json = Json { ignoreUnknownKeys = true }
     private val now = Instant.parse("2026-11-18T15:00:00Z")
     private val today = LocalDate.of(2026, 11, 18)
@@ -93,6 +109,7 @@ class FieldNoteRepositoryImplTest {
                     scheduled++
                 }
             },
+            photoStore = photos,
             clock = Clock.fixed(now, ZoneOffset.UTC),
             ioDispatcher = dispatcher,
         )
@@ -164,5 +181,41 @@ class FieldNoteRepositoryImplTest {
         assertEquals(setOf(waiting.id, "server-1"), dao.rows.value.keys)
         assertEquals("SYNCED", dao.rows.value.getValue("server-1").syncState)
         assertEquals(2, repo.observeNotes().first().size)
+    }
+
+    @Test fun `a photo on the server is downloaded once and then read from the phone`() = runTest {
+        val repo = repository()
+        server.enqueue(MockResponse().setBody(Buffer().write(byteArrayOf(1, 2, 3))).setHeader("Content-Type", "image/jpeg"))
+
+        val first = repo.photoPath("plot-1", "note-1")
+        val second = repo.photoPath("plot-1", "note-1")
+
+        assertEquals("cache/note-1.jpg", (first as AppResult.Success).value)
+        assertEquals("cache/note-1.jpg", (second as AppResult.Success).value)
+        assertEquals(1, server.requestCount)
+        assertEquals("/api/v1/plots/plot-1/field-notes/note-1/photo", server.takeRequest().path)
+        assertEquals(listOf<Byte>(1, 2, 3), photos.kept.getValue("note-1").toList())
+    }
+
+    @Test fun `a photo the server does not have answers not found and keeps nothing`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(404))
+
+        val result = repository().photoPath("plot-1", "note-1")
+
+        assertTrue((result as AppResult.Failure).error is AppError.NotFound)
+        assertTrue(photos.kept.isEmpty())
+    }
+
+    @Test fun `without signal the photo fails instead of crashing the sheet`() = runTest {
+        server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START))
+
+        assertTrue(repository().photoPath("plot-1", "note-1") is AppResult.Failure)
+    }
+
+    @Test fun `a note waiting on the phone exposes the copy of its photo`() = runTest {
+        val repo = repository()
+        val note = (repo.write(NewFieldNote("plot-1", FieldNoteType.OTHER, "Con foto.", today, "files/a.jpg")) as AppResult.Success).value
+
+        assertEquals("files/a.jpg", note.localPhotoPath)
     }
 }

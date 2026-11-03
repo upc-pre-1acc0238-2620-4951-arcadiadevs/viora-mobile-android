@@ -11,8 +11,8 @@ enum class FieldNoteSyncState { PENDING, SYNCED, FAILED }
 
 /**
  * A note the producer wrote in the logbook about one plot (P75). It is saved on the phone first and
- * sent when there is signal; [hasPhoto] is true when a photo was attached (still on the phone while
- * [syncState] is [FieldNoteSyncState.PENDING]).
+ * sent when there is signal; [hasPhoto] is true when a photo was attached. [localPhotoPath] is its
+ * copy on the phone, which only exists until the photo is uploaded.
  */
 data class FieldNote(
     val id: String,
@@ -23,6 +23,7 @@ data class FieldNote(
     val createdAt: Instant,
     val hasPhoto: Boolean,
     val syncState: FieldNoteSyncState,
+    val localPhotoPath: String? = null,
 ) {
     companion object {
         /** The server keeps up to 500 characters. */

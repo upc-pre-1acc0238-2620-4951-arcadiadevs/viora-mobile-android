@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.plotmanagement.infrastructure.remote
 
 import kotlinx.serialization.Serializable
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -49,4 +50,8 @@ interface FieldNoteService {
         @Path("noteId") noteId: String,
         @Body photo: RequestBody,
     ): Response<FieldNoteDto>
+
+    /** The bytes of the photo; 404 when the note has none. */
+    @GET("plots/{plotId}/field-notes/{noteId}/photo")
+    suspend fun getPhoto(@Path("plotId") plotId: String, @Path("noteId") noteId: String): Response<ResponseBody>
 }

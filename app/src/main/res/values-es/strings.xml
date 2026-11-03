@@ -1663,6 +1663,14 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="note_save">Guardar nota</string>
     <string name="note_saved_toast">Nota guardada en tu Bitácora</string>
     <string name="logbook_note_title">Nota de %1$s</string>
+    <string name="note_detail_title">Nota de\n%1$s</string>
+    <string name="note_detail_synced">Sincronizado</string>
+    <string name="note_detail_on_phone">En el teléfono</string>
+    <string name="note_detail_failed">No se pudo guardar</string>
+    <string name="note_detail_failed_body">Sigue en tu teléfono, pero no se guardó en tu cuenta.</string>
+    <string name="note_detail_photo_description">Foto de la nota</string>
+    <string name="note_detail_photo_offline">La foto se verá cuando tengas señal</string>
+    <string name="note_detail_photo_retry">Toca para intentarlo de nuevo</string>
     <string name="logbook_note_details">%1$s · %2$s</string>
     <string name="logbook_note_pending">En el teléfono · se enviará cuando haya señal</string>
     <string name="logbook_note_failed">El servidor no aceptó esta nota</string>

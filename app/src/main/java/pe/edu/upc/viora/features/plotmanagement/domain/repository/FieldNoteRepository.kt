@@ -18,6 +18,9 @@ interface FieldNoteRepository {
     /** Downloads the notes of the given plots, keeping the ones not sent yet. */
     suspend fun refresh(plotIds: List<String>): AppResult<Unit>
 
+    /** The path on the phone of a photo already on the server, downloading it the first time. */
+    suspend fun photoPath(plotId: String, noteId: String): AppResult<String>
+
     /** Sends the notes not sent yet (and their photos). Called by the background worker. */
     suspend fun syncPending(): FieldNoteSyncResult
 }
