@@ -19,6 +19,7 @@ import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.navigation.LogbookGraph
+import pe.edu.upc.viora.core.navigation.LotSection
 import pe.edu.upc.viora.core.navigation.PlanGraph
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.RegisterTreeSampleScreen
 import pe.edu.upc.viora.features.croploadregulation.presentation.ui.SamplingCompleteScreen
@@ -74,6 +75,7 @@ fun NavGraphBuilder.samplingNavGraph(
                             ),
                         )
                     } else {
+    onOpenSection: (section: LotSection, plotId: String, plotName: String) -> Unit,
                         navController.navigate(
                             SamplingRoundRoute(
                                 plotId = plotId,
@@ -159,6 +161,7 @@ fun NavGraphBuilder.samplingNavGraph(
                 defaultIdentifier = route.defaultIdentifier,
                 isOffline = sessionState.isOffline,
                 onClose = { navController.popBackStack() },
+                onOpenSection = { section -> onOpenSection(section, route.plotId, route.plotName) },
                 onSaveTree = { id, shoots, fruits, circumference ->
                     sessionViewModel.addSample(id, shoots, fruits, circumference)
                     navController.popBackStack()

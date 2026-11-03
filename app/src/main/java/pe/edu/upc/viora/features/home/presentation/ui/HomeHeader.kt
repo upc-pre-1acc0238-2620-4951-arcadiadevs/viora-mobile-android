@@ -37,7 +37,8 @@ import pe.edu.upc.viora.core.presentation.formatHectares
 /**
  * Campaign chip (dark) plus, when there are plots, the plots-and-hectares chip (Figma "Contexto").
  * With several plots and an [onChangeFocus] the second chip names the plot in focus ([focusedName])
- * and opens the picker, so the producer sees which plot the cards of the Home talk about.
+ * and opens the picker, so the producer sees which plot the cards of the Home talk about; otherwise it
+ * opens the plots ([onOpenPlots], Figma P20).
  */
 @Composable
 fun HomeContextChips(
@@ -47,6 +48,7 @@ fun HomeContextChips(
     modifier: Modifier = Modifier,
     focusedName: String? = null,
     onChangeFocus: (() -> Unit)? = null,
+    onOpenPlots: (() -> Unit)? = null,
 ) {
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         ContextChip(
@@ -71,6 +73,7 @@ fun HomeContextChips(
                 background = Neutral0,
                 textColor = Neutral900,
                 dot = Green800,
+                onClick = onOpenPlots,
             )
         }
     }

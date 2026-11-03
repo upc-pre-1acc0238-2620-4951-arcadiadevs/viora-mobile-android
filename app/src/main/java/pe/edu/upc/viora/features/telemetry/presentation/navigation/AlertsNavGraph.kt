@@ -25,6 +25,7 @@ data class AlertDetailRoute(val incidentId: String)
  */
 fun NavGraphBuilder.alertsNavGraph(
     navController: NavController,
+    onOpenPreferences: () -> Unit,
     onOpenPlot: (plotId: String) -> Unit = {},
     onOpenWinterChill: (plotId: String, plotName: String) -> Unit = { _, _ -> },
     assistantSheet: AssistantSheetSlot? = null,
@@ -35,6 +36,7 @@ fun NavGraphBuilder.alertsNavGraph(
             onOpenDetail = { incidentId ->
                 navController.navigate(AlertDetailRoute(incidentId = incidentId))
             },
+            onOpenPreferences = onOpenPreferences,
         )
     }
 

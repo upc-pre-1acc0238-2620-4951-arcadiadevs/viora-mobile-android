@@ -188,9 +188,17 @@ fun HomeScreenContent(
                     focusedName = (state as? HomeUiState.Content)?.focusedPlot?.name,
                     onChangeFocus = { pickingFocus = true },
                 )
+                    onOpenPlots = onOpenPlots,
                 if (state.isOffline) HomeOfflineNotice(modifier = Modifier.padding(top = 16.dp))
                 // In Figma P10, without active access or without plots the week strip is omitted.
-                if (!hasNoPlots && !isAccessPaused) HomeWeekStrip(today = today, modifier = Modifier.padding(top = 22.dp))
+                if (!hasNoPlots && !isAccessPaused) {
+                    val focused = (state as? HomeUiState.Content)?.focusedPlot
+                    HomeWeekStrip(
+                        today = today,
+                        modifier = Modifier.padding(top = 22.dp),
+                        onOpenDay = focused?.let { plot -> { onOpenWeatherForecast(plot.id, plot.name) } },
+                    )
+                }
             }
             if (pickingFocus && state is HomeUiState.Content) {
                 FocusPicker(state = state, onSelect = onFocusPlot, onDismiss = { pickingFocus = false })

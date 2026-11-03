@@ -132,6 +132,7 @@ fun HarvestHistoryScreen(
         onAddCampaign = { editor.openAdd() },
         onAddYear = { editor.openAdd(it) },
         onEditCampaign = editor::openCorrect,
+        onOpenNextCampaign = onThinning,
         onAskViora = assistantSheet?.let { { showAssistant = true } },
         modifier = modifier,
     )
@@ -214,6 +215,7 @@ fun HarvestHistoryContent(
     onAddCampaign: () -> Unit = {},
     onAddYear: (Int) -> Unit = {},
     onEditCampaign: (HarvestRecord) -> Unit = {},
+    onOpenNextCampaign: () -> Unit = {},
     onAskViora: (() -> Unit)? = null,
 ) {
     Column(
@@ -234,6 +236,7 @@ fun HarvestHistoryContent(
                 onAddCampaign = onAddCampaign,
                 onAddYear = onAddYear,
                 onEditCampaign = onEditCampaign,
+                onOpenNextCampaign = onOpenNextCampaign,
                 onAskViora = onAskViora,
                 modifier = Modifier.weight(1f),
             )
@@ -317,6 +320,7 @@ private fun ContentBody(
     onAddCampaign: () -> Unit,
     onAddYear: (Int) -> Unit,
     onEditCampaign: (HarvestRecord) -> Unit,
+    onOpenNextCampaign: () -> Unit,
     onAskViora: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -337,7 +341,7 @@ private fun ContentBody(
             ProgressCard(count = state.records.size)
         }
         VioraVoice(text = voiceText(summary.voice))
-        if (index != null && bbiClass != null) InsightCards(state)
+        if (index != null && bbiClass != null) InsightCards(state, onOpenNextCampaign)
 
         VioraSectionHeader(
             title = stringResource(if (state.areaHectares != null) R.string.harvest_chart_title_ha else R.string.harvest_chart_title),
@@ -490,14 +494,14 @@ private fun ProgressCard(count: Int) {
 }
 
 @Composable
-private fun InsightCards(state: HarvestHistoryUiState.Content) {
+private fun InsightCards(state: HarvestHistoryUiState.Content, onOpenNextCampaign: () -> Unit) {
     val summary = state.summary
     val drop = summary.dropAfterOn
     val ordered = state.records.sortedBy { it.campaignYear }
     val countCard: @Composable (Modifier) -> Unit = { m ->
         CampaignsCard(ordered, m)
     }
-    val nextCard: @Composable (Modifier) -> Unit = { m -> NextCampaignCard(summary.nextYear, summary.outlook, m) }
+    val nextCard: @Composable (Modifier) -> Unit = { m -> NextCampaignCard(summary.nextYear, summary.outlook, onOpenNextCampaign, m) }
     if (drop != null) {
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
@@ -579,10 +583,14 @@ private fun CampaignsCard(ordered: List<HarvestRecord>, modifier: Modifier = Mod
 }
 
 @Composable
-private fun NextCampaignCard(year: Int?, outlook: Outlook?, modifier: Modifier = Modifier) {
+private fun NextCampaignCard(year: Int?, outlook: Outlook?, onClick: () -> Unit, modifier: Modifier = Modifier) {
     if (year == null || outlook == null) return
     Column(
-        modifier = modifier.clip(RoundedCornerShape(28.dp)).background(Harvest100).padding(18.dp),
+        modifier = modifier
+            .clip(RoundedCornerShape(28.dp))
+            .background(Harvest100)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(year.toString(), style = MaterialTheme.typography.displayMedium.copy(fontSize = 40.sp, lineHeight = 44.sp), color = Neutral900)

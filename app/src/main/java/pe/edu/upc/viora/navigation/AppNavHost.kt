@@ -354,12 +354,14 @@ assistantSheet = assistantSheetOf(AssistantScreen.ALTERNATION),
             assistantSheet = assistantSheetOf(AssistantScreen.ALERT),
         )
         samplingNavGraph(
+            onOpenPreferences = { navController.navigate(AccountRoute) },
             navController = navController,
             plotSilhouetteSlot = { plotId, slotModifier ->
                 PlotSilhouetteById(plotId = plotId, modifier = slotModifier, showTreeGrid = true)
             },
             assistantSheet = assistantSheetOf(AssistantScreen.SAMPLING_SUMMARY),
         )
+            onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
         thinningPlanComposable(
             navController = navController,
             onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
