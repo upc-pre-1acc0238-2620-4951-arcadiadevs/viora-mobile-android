@@ -7,6 +7,8 @@ import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.core.presentation.daysUntil
 import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
+import pe.edu.upc.viora.features.subscription.domain.entity.DataSharingConsent
+import pe.edu.upc.viora.features.subscription.domain.entity.DataSharingStatus
 import pe.edu.upc.viora.features.subscription.domain.entity.ProducerSubscription
 import pe.edu.upc.viora.features.subscription.domain.valueobject.SubscriptionMode
 
@@ -44,7 +46,22 @@ data class MyPlanUiState(
     val endsOn: LocalDate? = null,
     /** Days of plan left; 0 when there is no plan. */
     val daysLeft: Int = 0,
+    /** The newest consent to share data with the cooperative; null when there is none or it could not be read. */
+    val sharing: DataSharingConsent? = null,
+    /** "Dejar de compartir" is with the server. */
+    val isWithdrawing: Boolean = false,
+    /** Why stopping to share failed; the section says it under its button. */
+    val withdrawError: AppError? = null,
 ) {
+    /**
+     * P99 · Activado con código shows "Compartes datos" while the sponsored plan is in force: who reads the data and
+     * the button to stop, or since when it is no longer shared. A consent that ended with an older plan is not shown.
+     */
+    val showsSharing: Boolean
+        get() = activatedWithCode && standing != PlanStanding.NONE && sharing != null && sharing.status != DataSharingStatus.ENDED
+
+    val isSharing: Boolean get() = sharing?.status == DataSharingStatus.ACTIVE
+
     val usedHectares: Double get() = plots.sumOf { it.hectares }
 
     val freeHectares: Double get() = (quotaHectares - usedHectares).coerceAtLeast(0.0)

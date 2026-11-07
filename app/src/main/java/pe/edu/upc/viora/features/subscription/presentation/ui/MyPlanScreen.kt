@@ -34,7 +34,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -67,6 +70,7 @@ import pe.edu.upc.viora.core.designsystem.component.OutlinedPillButton
 import pe.edu.upc.viora.core.designsystem.component.PhaseCardArtwork
 import pe.edu.upc.viora.core.designsystem.component.PhaseIllustration
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraConfirmDialog
 import pe.edu.upc.viora.core.designsystem.component.VioraLoadingState
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
@@ -82,6 +86,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.NewsreaderFamily
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta600
+import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatDayMonthYear
 import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.presentation.messageRes
 import pe.edu.upc.viora.core.presentation.vioraNumberFormat
@@ -137,13 +144,24 @@ fun MyPlanScreen(actions: MyPlanActions, modifier: Modifier = Modifier, viewMode
                 Spacer(Modifier.height(16.dp))
                 PrimaryPillButton(text = stringResource(R.string.common_retry), onClick = viewModel::refresh)
             }
-            else -> MyPlanContent(state, actions)
+            else -> MyPlanContent(state, actions, onStopSharing = viewModel::stopSharing)
         }
     }
 }
 
 @Composable
-private fun MyPlanContent(state: MyPlanUiState, actions: MyPlanActions) {
+private fun MyPlanContent(state: MyPlanUiState, actions: MyPlanActions, onStopSharing: () -> Unit) {
+    var confirmingStop by rememberSaveable { mutableStateOf(false) }
+    if (confirmingStop) {
+        StopSharingDialog(
+            state = state,
+            onConfirm = {
+                confirmingStop = false
+                onStopSharing()
+            },
+            onDismiss = { confirmingStop = false },
+        )
+    }
     val context = LocalContext.current
     val animationsOff = remember(context) {
         Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
@@ -179,6 +197,19 @@ private fun MyPlanContent(state: MyPlanUiState, actions: MyPlanActions) {
             PlanSection(stringResource(R.string.my_plan_section_plots), rise(1)) { PlotsCard(state, t) }
         }
         VioraVoice(text = voiceLine(state), modifier = rise(2))
+        if (state.showsSharing) {
+            Column(rise(3), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                PlanSection(stringResource(R.string.my_plan_section_sharing)) { SharingCard(state) }
+                if (state.isSharing) {
+                    OutlinedPillButton(stringResource(R.string.my_plan_stop_sharing), onClick = {
+                        if (!state.isWithdrawing) confirmingStop = true
+                    })
+                }
+                state.withdrawError?.let {
+                    Text(stringResource(it.messageRes()), style = MaterialTheme.typography.bodySmall, color = Terracotta600)
+                }
+            }
+        }
         if (state.standing != PlanStanding.NONE) {
             PlanSection(stringResource(R.string.my_plan_section_details), rise(3)) { DetailsCard(state) }
         }
@@ -473,6 +504,60 @@ private fun DetailsCard(state: MyPlanUiState) {
             divider = false,
         )
     }
+}
+
+/**
+ * P99 · Compartes datos: with whom and what, while the data is shared (P99 · Activado con código); after the
+ * producer stopped, only since when (P99 · Ya no compartes).
+ */
+@Composable
+private fun SharingCard(state: MyPlanUiState) {
+    val consent = state.sharing ?: return
+    val zone = LocalAppZone.current
+    val locale = LocalConfiguration.current.locales[0]
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(Neutral0).padding(horizontal = 20.dp, vertical = 4.dp)) {
+        if (state.isSharing) {
+            DetailRow(
+                stringResource(R.string.my_plan_sharing_with),
+                consent.managerName?.let { stringResource(R.string.my_plan_sharing_manager, it) }
+                    ?: stringResource(R.string.my_plan_sharing_no_manager, consent.organizationName),
+                divider = true,
+            )
+            DetailRow(stringResource(R.string.my_plan_sharing_sees), stringResource(R.string.my_plan_sharing_sees_value), divider = true)
+            DetailRow(stringResource(R.string.my_plan_sharing_never_sees), stringResource(R.string.my_plan_sharing_never_sees_value), divider = false)
+        } else {
+            DetailRow(stringResource(R.string.my_plan_sharing_status), stringResource(R.string.my_plan_sharing_stopped), divider = consent.withdrawnAt != null)
+            consent.withdrawnAt?.let {
+                DetailRow(
+                    stringResource(R.string.my_plan_sharing_since),
+                    formatDayMonthYear(it.atZone(zone).toLocalDate(), locale),
+                    divider = false,
+                )
+            }
+        }
+    }
+}
+
+/** P99 · Dejar de compartir (diálogo): the manager stops reading at once, the plan stays until its end. */
+@Composable
+private fun StopSharingDialog(state: MyPlanUiState, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    val manager = state.sharing?.managerName ?: stringResource(R.string.my_plan_stop_sharing_someone)
+    val body = state.endsOn?.let {
+        stringResource(R.string.my_plan_stop_sharing_body, manager, formatDayMonthYear(it, LocalConfiguration.current.locales[0]))
+    } ?: stringResource(R.string.my_plan_stop_sharing_body_no_end, manager)
+    VioraConfirmDialog(
+        icon = R.drawable.ic_warning,
+        iconBackground = Terracotta100,
+        iconTint = Terracotta600,
+        title = stringResource(R.string.my_plan_stop_sharing_title),
+        body = body,
+        primaryLabel = stringResource(R.string.my_plan_stop_sharing),
+        onPrimary = onConfirm,
+        secondaryLabel = stringResource(R.string.my_plan_stop_sharing_cancel),
+        onSecondary = onDismiss,
+        onDismiss = onDismiss,
+        primaryColor = Terracotta500,
+    )
 }
 
 @Composable
