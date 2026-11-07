@@ -1289,7 +1289,7 @@
     <string name="redeem_code_label">Cooperative code</string>
     <string name="redeem_code_hint">It\'s in your cooperative\'s message. E.g.: COOP-7K2Q</string>
     <string name="redeem_code_error_not_redeemable">Expired or already redeemed code. Ask your cooperative for a new one.</string>
-    <string name="redeem_code_error_already_subscribed">You already have an active plan.</string>
+    <string name="redeem_code_error_already_subscribed">Your current plan is still in force.</string>
     <string name="redeem_code_error_too_many_attempts">Too many codes tried. Wait a few minutes and try again.</string>
     <string name="redeem_code_action_redeem">Redeem code</string>
     <string name="redeem_code_action_try_another">Try another code</string>
@@ -1305,6 +1305,27 @@
     <string name="membership_validity_value">Per your agreement</string>
     <string name="membership_action_register_plot">Register my first plot</string>
     <string name="membership_action_home">Go to home</string>
+    <string name="membership_body_sharing">You share your plots with %1$s, its manager. Let\'s start by registering your first plot.</string>
+    <string name="membership_validity_until">Until %1$s</string>
+    <string name="consent_title_lead">Before activating</string>
+    <string name="consent_title_emphasis">your plan.</string>
+    <string name="consent_voice">%1$s will cover %2$s ha until %3$s. You don\'t pay.</string>
+    <string name="consent_voice_no_end">%1$s will cover %2$s ha. You don\'t pay.</string>
+    <string name="consent_will_see">%1$s, its technical manager, will see:</string>
+    <string name="consent_will_see_no_manager">The organization\'s technical manager will see:</string>
+    <string name="consent_sees_contact">Your name, phone and email</string>
+    <string name="consent_sees_plots">All your plots, new ones too</string>
+    <string name="consent_sees_records">Samplings, thinning, alerts, BBI and harvests</string>
+    <string name="consent_wont_see">Will not see:</string>
+    <string name="consent_never_sees">Your logbook, the assistant or your payments</string>
+    <string name="consent_note">You can stop sharing whenever you want from My plan.</string>
+    <string name="consent_quota_below">You have %1$s ha registered and this code covers %2$s. You keep your plots, but you can\'t add more without expanding.</string>
+    <string name="consent_action_accept">Accept and activate</string>
+    <string name="consent_action_not_now">Not now</string>
+    <string name="redeem_code_has_plan_title_lead">You already have</string>
+    <string name="redeem_code_has_plan_title_emphasis">an active plan.</string>
+    <string name="redeem_code_has_plan_voice">Plans don\'t combine: you can use this code when yours ends.</string>
+    <string name="redeem_code_action_my_plan">Back to My plan</string>
 
     <!-- Welcome (T01 splash and T02 welcome plates) -->
     <string name="welcome_intro_eyebrow">WELCOME TO VIORA</string>

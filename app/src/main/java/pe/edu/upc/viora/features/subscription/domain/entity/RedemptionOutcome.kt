@@ -13,6 +13,9 @@ sealed interface RedemptionOutcome {
     /** The producer already has an active subscription. */
     data object AlreadySubscribed : RedemptionOutcome
 
+    /** The consent text changed since the preview: it must be shown and accepted again. */
+    data object ConsentOutdated : RedemptionOutcome
+
     /** Too many codes were tried; the backend refuses more for a while. */
     data object TooManyAttempts : RedemptionOutcome
 

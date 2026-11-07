@@ -1322,7 +1322,7 @@
     <string name="redeem_code_label">Código de cooperativa</string>
     <string name="redeem_code_hint">Está en el mensaje de tu cooperativa. Ej.: COOP-7K2Q</string>
     <string name="redeem_code_error_not_redeemable">Código vencido o ya canjeado. Pide uno nuevo a tu cooperativa.</string>
-    <string name="redeem_code_error_already_subscribed">Ya tienes un plan activo.</string>
+    <string name="redeem_code_error_already_subscribed">Tu plan actual sigue vigente.</string>
     <string name="redeem_code_error_too_many_attempts">Probaste demasiados códigos. Espera unos minutos e inténtalo de nuevo.</string>
     <string name="redeem_code_action_redeem">Canjear código</string>
     <string name="redeem_code_action_try_another">Probar otro código</string>
@@ -1338,6 +1338,27 @@
     <string name="membership_validity_value">Según tu convenio</string>
     <string name="membership_action_register_plot">Registrar mi primer lote</string>
     <string name="membership_action_home">Ir al inicio</string>
+    <string name="membership_body_sharing">Compartes tus lotes con %1$s, su gestor. Empecemos por registrar tu primer lote.</string>
+    <string name="membership_validity_until">Hasta el %1$s</string>
+    <string name="consent_title_lead">Antes de activar</string>
+    <string name="consent_title_emphasis">tu plan.</string>
+    <string name="consent_voice">%1$s cubrirá %2$s ha hasta el %3$s. Tú no pagas.</string>
+    <string name="consent_voice_no_end">%1$s cubrirá %2$s ha. Tú no pagas.</string>
+    <string name="consent_will_see">%1$s, su gestor técnico, podrá ver:</string>
+    <string name="consent_will_see_no_manager">El gestor técnico de la organización podrá ver:</string>
+    <string name="consent_sees_contact">Tu nombre, teléfono y correo</string>
+    <string name="consent_sees_plots">Todos tus lotes, también los nuevos</string>
+    <string name="consent_sees_records">Muestreos, aclareo, alertas, BBI y cosechas</string>
+    <string name="consent_wont_see">No verá:</string>
+    <string name="consent_never_sees">Tu bitácora, el asistente ni tus pagos</string>
+    <string name="consent_note">Puedes dejar de compartir cuando quieras desde Mi plan.</string>
+    <string name="consent_quota_below">Tienes %1$s ha registradas y este código cubre %2$s. Conservas tus lotes, pero no podrás añadir más sin ampliar.</string>
+    <string name="consent_action_accept">Aceptar y activar</string>
+    <string name="consent_action_not_now">Ahora no</string>
+    <string name="redeem_code_has_plan_title_lead">Ya tienes</string>
+    <string name="redeem_code_has_plan_title_emphasis">un plan activo.</string>
+    <string name="redeem_code_has_plan_voice">Los planes no se combinan: podrás usar este código cuando termine el tuyo.</string>
+    <string name="redeem_code_action_my_plan">Volver a Mi plan</string>
 
     <!-- Welcome (T01 splash and T02 welcome plates) -->
     <string name="welcome_intro_eyebrow">BIENVENIDO A VIORA</string>
