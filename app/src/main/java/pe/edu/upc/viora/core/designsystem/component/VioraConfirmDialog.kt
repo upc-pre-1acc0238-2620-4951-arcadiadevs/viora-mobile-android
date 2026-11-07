@@ -51,6 +51,7 @@ fun VioraConfirmDialog(
     onSecondary: () -> Unit,
     onDismiss: () -> Unit,
     secondaryColor: Color = Neutral900,
+    primaryColor: Color = Green900,
     note: String? = null,
 ) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -80,7 +81,7 @@ fun VioraConfirmDialog(
                     .fillMaxWidth()
                     .height(52.dp)
                     .clip(CircleShape)
-                    .background(Green900)
+                    .background(primaryColor)
                     .clickable(role = Role.Button, onClick = onPrimary),
                 contentAlignment = Alignment.Center,
             ) {

@@ -319,6 +319,13 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 navController.openHome()
                 navController.navigate(RegisterPlotRoute)
             },
+            // P05 · Ya tienes un plan: back to the P99 below when the code was tried from there.
+            onOpenMyPlan = {
+                navController.navigate(MyPlanRoute) {
+                    popUpTo<CooperativeCodeGraph> { inclusive = true }
+                    launchSingleTop = true
+                }
+            },
         )
         producerPlanComposable(navController, onLeave = { navController.openHome() }, onRegisterPlot = {
             navController.openHome()

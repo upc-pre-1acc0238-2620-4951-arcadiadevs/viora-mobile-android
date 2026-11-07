@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.Instant
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.theme.Green200
@@ -43,17 +45,29 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.presentation.formatDecimal
+import pe.edu.upc.viora.core.presentation.LocalAppZone
+import pe.edu.upc.viora.core.presentation.formatDayMonthYear
 import pe.edu.upc.viora.core.presentation.formatWhole
 
-/** P06 · Membresía activa: what the redeemed code gives the producer, then on to the first plot. */
+/**
+ * P06 · Membresía activa: what the redeemed code gives the producer and who now sees their plots, then on to the
+ * first plot. Without the manager or the end date (an older backend) it keeps the generic lines.
+ */
 @Composable
 fun CooperativeMembershipScreen(
     cooperativeName: String,
     quotaHectares: Double,
+    endsAt: Instant?,
+    managerName: String?,
     onRegisterPlot: () -> Unit,
     onGoHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val zone = LocalAppZone.current
+    val locale = LocalConfiguration.current.locales[0]
+    val validity = endsAt?.let {
+        stringResource(R.string.membership_validity_until, formatDayMonthYear(it.atZone(zone).toLocalDate(), locale))
+    } ?: stringResource(R.string.membership_validity_value)
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -82,13 +96,14 @@ fun CooperativeMembershipScreen(
                 eyebrow = stringResource(R.string.membership_badge),
                 lead = stringResource(R.string.membership_title_lead),
                 emphasis = stringResource(R.string.membership_title_emphasis),
-                body = stringResource(R.string.membership_body),
+                body = managerName?.let { stringResource(R.string.membership_body_sharing, it) }
+                    ?: stringResource(R.string.membership_body),
             )
             Spacer(Modifier.height(28.dp))
             HorizontalDivider(color = Neutral200)
             MembershipRow(stringResource(R.string.membership_row_cooperative), cooperativeName)
             MembershipRow(stringResource(R.string.membership_row_quota), stringResource(R.string.membership_quota_value, quotaHectares.asHectares()))
-            MembershipRow(stringResource(R.string.membership_row_validity), stringResource(R.string.membership_validity_value))
+            MembershipRow(stringResource(R.string.membership_row_validity), validity)
         }
         Column(
             modifier = Modifier.padding(top = 16.dp, bottom = 12.dp),
@@ -125,7 +140,7 @@ internal fun MembershipRow(label: String, value: String) {
 }
 
 /** 12.0 is shown as "12" and 12.5 as "12,5" (or "12.5"), as the design writes the quota. */
-private fun Double.asHectares(): String = if (this % 1.0 == 0.0) formatWhole(this.toLong()) else formatDecimal(this, 1)
+internal fun Double.asHectares(): String = if (this % 1.0 == 0.0) formatWhole(this.toLong()) else formatDecimal(this, 1)
 
 /**
  * The centered head of P06 and of P05 · Validando: the eyebrow with its dot, the two-line editorial

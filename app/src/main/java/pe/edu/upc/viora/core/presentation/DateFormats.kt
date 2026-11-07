@@ -18,6 +18,10 @@ import java.util.Locale
 fun formatDayMonth(date: LocalDate, locale: Locale = Locale.getDefault()): String =
     DateTimeFormatter.ofPattern("d MMM", locale).format(date).withoutDots()
 
+/** "31 dic 2027" in Spanish, "31 Dec 2027" in English: a day with its year, as the plan's end is written. */
+fun formatDayMonthYear(date: LocalDate, locale: Locale = Locale.getDefault()): String =
+    DateTimeFormatter.ofPattern("d MMM yyyy", locale).format(date).withoutDots()
+
 /** "nov": the short month alone, for chart axes. */
 fun formatMonthShort(date: LocalDate, locale: Locale = Locale.getDefault()): String =
     DateTimeFormatter.ofPattern("MMM", locale).format(date).withoutDots()
