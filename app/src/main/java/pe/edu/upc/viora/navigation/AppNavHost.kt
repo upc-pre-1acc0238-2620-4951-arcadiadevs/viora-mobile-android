@@ -70,11 +70,13 @@ import pe.edu.upc.viora.features.phenology.presentation.navigation.harvestHistor
 import pe.edu.upc.viora.features.phenology.presentation.navigation.winterChillComposable
 import pe.edu.upc.viora.features.phenology.presentation.ui.PlotAlternationCard
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotDetailRoute
+import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.PlotSectorsRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.RegisterPlotRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotScreens
 import pe.edu.upc.viora.features.plotmanagement.presentation.navigation.plotsNavGraph
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.FieldNoteDetailSheet
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSilhouetteById
+import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.SectorPromptViewModel
 import pe.edu.upc.viora.features.profiles.presentation.navigation.AccountRoute
 import pe.edu.upc.viora.features.profiles.presentation.navigation.EditProfileRoute
 import pe.edu.upc.viora.features.profiles.presentation.navigation.profilesNavGraph
@@ -175,6 +177,15 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                 val isAccessPaused = (subState as? AppResult.Success)?.let { it.value?.entitlementActive != true } ?: false
                 val phaseViewModel: HomePhaseViewModel = hiltViewModel()
                 val phase by phaseViewModel.uiState.collectAsStateWithLifecycle()
+                // P06b: a member whose plots have no sector is asked once where they are.
+                val sectorPrompt: SectorPromptViewModel = hiltViewModel()
+                val askSectors by sectorPrompt.ask.collectAsStateWithLifecycle()
+                LaunchedEffect(askSectors) {
+                    if (askSectors) {
+                        sectorPrompt.opened()
+                        navController.navigate(PlotSectorsRoute) { launchSingleTop = true }
+                    }
+                }
                 HomeScreen(
                     displayName = producerName(),
                     isAccessPaused = isAccessPaused,
