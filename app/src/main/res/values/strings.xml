@@ -2048,4 +2048,33 @@ Reference price. You pay after creating your account.</string>
     <string name="assistant_recent_empty_action">Ask a question</string>
     <string name="assistant_question_fallback">Your question to Viora</string>
     <string name="assistant_question_disabled_a11y">%1$s. Not available: %2$s</string>
+
+    <!-- Member plot sector: P24 sector field and sheets, P06b -->
+    <string name="details_sector_label">Sector</string>
+    <string name="details_sector_placeholder">Choose your sector</string>
+    <string name="details_sector_choose">choose the sector</string>
+    <string name="sector_choose_title_lead">Choose your</string>
+    <string name="sector_choose_title_emphasis">sector</string>
+    <string name="sector_not_listed">My sector is not listed</string>
+    <string name="sector_not_listed_hint">Write it and your manager will review it</string>
+    <string name="sector_choose_footer">The list belongs to your organization. It is a detail of your plot: it draws no boundary.</string>
+    <string name="sector_write_title_lead">Write your</string>
+    <string name="sector_write_title_emphasis">sector</string>
+    <string name="sector_write_subtitle">Your manager will review it</string>
+    <string name="sector_write_close">Close</string>
+    <string name="sector_write_label">Your sector</string>
+    <string name="sector_write_placeholder">Cerro Blanco</string>
+    <string name="sector_write_note">Your plot stays «To confirm» until %1$s reviews it. It is saved anyway.</string>
+    <string name="sector_write_note_no_manager">Your plot stays «To confirm» until your manager reviews it. It is saved anyway.</string>
+    <string name="sector_write_save">Save</string>
+    <string name="sector_pending_value">%1$s · To confirm</string>
+    <string name="plot_sectors_title_lead">Where are</string>
+    <string name="plot_sectors_title_emphasis">your plots?</string>
+    <string name="plot_sectors_voice">Your manager will see them grouped by sector.</string>
+    <string name="plot_sectors_empty">Your plots already have a sector.</string>
+    <string name="plot_sectors_save_failed">Some sectors could not be saved. Check your connection and try again.</string>
+    <string name="plot_sectors_save">Save</string>
+    <string name="plot_sectors_later">Later</string>
+    <string name="plot_sectors_row_subtitle">%1$s · %2$s ha</string>
+    <string name="plot_sectors_choose">Choose sector</string>
 </resources>

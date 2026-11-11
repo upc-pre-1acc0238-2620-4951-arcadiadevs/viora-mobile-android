@@ -94,6 +94,7 @@ fun RegisterPlotScreen(
             onVarietySelected = viewModel::setVariety,
             onRowSpacingChange = viewModel::changeRowSpacing,
             onTreeSpacingChange = viewModel::changeTreeSpacing,
+            onSectorChosen = viewModel::chooseSector,
             onContinue = viewModel::continueToReview,
             onBack = ::back,
             onClose = ::leave,
