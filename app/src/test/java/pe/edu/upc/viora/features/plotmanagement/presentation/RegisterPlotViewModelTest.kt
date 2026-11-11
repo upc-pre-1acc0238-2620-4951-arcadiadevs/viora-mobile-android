@@ -21,11 +21,18 @@ import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.AssignPlotSectorUseCase
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.GetLicenseSectorsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RegisterPlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotChanges
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotSector
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.PlotSectorStatus
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.SectorChoice
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.SectorZone
+import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotSectorRepository
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.PlotRepository
 import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
@@ -35,6 +42,10 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotS
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.RegisterPlotViewModel
 import pe.edu.upc.viora.features.subscription.application.usecase.GetCurrentSubscriptionUseCase
+import pe.edu.upc.viora.features.subscription.application.usecase.GetLatestDataSharingConsentUseCase
+import pe.edu.upc.viora.features.subscription.domain.entity.DataSharingConsent
+import pe.edu.upc.viora.features.subscription.domain.entity.DataSharingStatus
+import pe.edu.upc.viora.features.subscription.domain.repository.DataSharingConsentRepository
 import pe.edu.upc.viora.features.subscription.domain.entity.ProducerSubscription
 import pe.edu.upc.viora.features.subscription.domain.repository.ProducerSubscriptionRepository
 import pe.edu.upc.viora.features.subscription.domain.valueobject.PlanCapacity
@@ -62,10 +73,35 @@ private class RegistrationRepository : PlotRepository {
     override suspend fun restore(id: PlotId): AppResult<Plot> = AppResult.Failure(AppError.Offline)
 }
 
+/** The license's sectors: a member gets the list, an individual producer is refused (403). */
+private class SectorRepository : PlotSectorRepository {
+    var list: AppResult<List<SectorZone>> = AppResult.Failure(AppError.Forbidden("territory.producer.not_sponsored"))
+    val assigned = mutableListOf<Pair<String, SectorChoice>>()
+
+    override suspend fun sectors(): AppResult<List<SectorZone>> = list
+    override suspend fun plotSectors(): AppResult<List<PlotSector>> = AppResult.Success(emptyList())
+    override suspend fun assign(plotId: String, choice: SectorChoice): AppResult<PlotSector> {
+        assigned += plotId to choice
+        return AppResult.Success(PlotSector(plotId, PlotSectorStatus.ASSIGNED, "Los Palos", null))
+    }
+}
+
+private class ConsentRepository : DataSharingConsentRepository {
+    override suspend fun latest(): AppResult<DataSharingConsent?> = AppResult.Success(
+        DataSharingConsent(
+            id = "c1", organizationName = "Olivar del Sur", managerName = "Rubén Ticona", status = DataSharingStatus.ACTIVE,
+            acceptedAt = null, withdrawnAt = null, planEndsAt = null,
+        ),
+    )
+
+    override suspend fun withdraw(consentId: String): AppResult<DataSharingConsent> = AppResult.Failure(AppError.Offline)
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class RegisterPlotViewModelTest {
 
     private val repository = RegistrationRepository()
+    private val sectors = SectorRepository()
 
     private val a = GeoPoint(latitude = -18.050, longitude = -70.250)
     private val b = GeoPoint(latitude = -18.050, longitude = -70.249)
@@ -87,6 +123,9 @@ class RegisterPlotViewModelTest {
         observePlots = ObservePlotsUseCase(repository),
         registerPlot = RegisterPlotUseCase(repository),
         currentSubscription = GetCurrentSubscriptionUseCase(subscriptions),
+        licenseSectors = GetLicenseSectorsUseCase(sectors),
+        latestConsent = GetLatestDataSharingConsentUseCase(ConsentRepository()),
+        assignSector = AssignPlotSectorUseCase(sectors),
     )
 
     /** What GET subscriptions answers; null is the 204 of a producer without a plan. */
@@ -477,5 +516,45 @@ class RegisterPlotViewModelTest {
         val vm = readyToSave()
         assertNull(vm.uiState.value.planQuotaHectares)
         assertFalse(vm.uiState.value.exceedsPlan)
+    }
+
+    // ---- sector (members only)
+
+    @Test
+    fun `an individual producer is not asked for a sector`() {
+        val vm = readyToSave()
+        repository.registerResult = AppResult.Success(existingPlot())
+
+        assertFalse(vm.uiState.value.asksSector)
+        vm.save()
+        assertTrue(sectors.assigned.isEmpty())
+    }
+
+    @Test
+    fun `a member chooses a sector that is sent once the plot is saved`() {
+        val palos = SectorZone("s1", "Los Palos")
+        sectors.list = AppResult.Success(listOf(palos))
+        val vm = readyToSave()
+        repository.registerResult = AppResult.Success(existingPlot())
+
+        assertTrue(vm.uiState.value.asksSector)
+        assertEquals("Rubén Ticona", vm.uiState.value.managerName)
+        vm.chooseSector(SectorChoice.Listed(palos))
+        vm.save()
+
+        assertEquals(listOf("p" to SectorChoice.Listed(palos)), sectors.assigned)
+        assertEquals(PlotId("p"), vm.uiState.value.savedPlotId)
+    }
+
+    @Test
+    fun `a member may leave the sector out`() {
+        sectors.list = AppResult.Success(listOf(SectorZone("s1", "Los Palos")))
+        val vm = readyToSave()
+        repository.registerResult = AppResult.Success(existingPlot())
+
+        vm.save()
+
+        assertTrue(sectors.assigned.isEmpty())
+        assertEquals(PlotId("p"), vm.uiState.value.savedPlotId)
     }
 }

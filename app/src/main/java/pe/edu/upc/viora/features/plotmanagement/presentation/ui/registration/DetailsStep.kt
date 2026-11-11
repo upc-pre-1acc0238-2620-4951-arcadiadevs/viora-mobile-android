@@ -31,6 +31,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.theme.Green200
+import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Green900
 import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
@@ -59,16 +64,22 @@ import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.core.presentation.formatHectares
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.SectorChoice
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotUiState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.SectorPicker
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.label
 import pe.edu.upc.viora.core.presentation.formatCount
 import pe.edu.upc.viora.core.presentation.formatMeters
 import pe.edu.upc.viora.core.presentation.labelRes
 
-/** Step 2: name, variety and planting frame. Density and net area update as the frame changes. */
+/**
+ * Step 3: name, variety and planting frame. Density and net area update as the frame changes. A member also says
+ * where the plot is (P24 · Socio con sector).
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DetailsStep(
@@ -77,11 +88,26 @@ fun DetailsStep(
     onVarietySelected: (OliveVariety) -> Unit,
     onRowSpacingChange: (Int) -> Unit,
     onTreeSpacingChange: (Int) -> Unit,
+    onSectorChosen: (SectorChoice) -> Unit,
     onContinue: () -> Unit,
     onBack: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var choosingSector by rememberSaveable { mutableStateOf(false) }
+    val sectors = state.sectors
+    if (choosingSector && sectors != null) {
+        SectorPicker(
+            sectors = sectors,
+            chosen = state.sector,
+            managerName = state.managerName,
+            onChosen = {
+                onSectorChosen(it)
+                choosingSector = false
+            },
+            onDismiss = { choosingSector = false },
+        )
+    }
     Column(modifier = modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
         StepHeader(step = RegisterPlotStep.DETAILS.number, onBack = onBack, onClose = onClose, modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp))
         Column(
@@ -112,6 +138,9 @@ fun DetailsStep(
             VarietyChips(selected = state.variety, onSelected = onVarietySelected)
             if (state.showDetailErrors && state.variety == null) {
                 FieldError(stringResource(R.string.details_variety_error))
+            }
+            if (state.asksSector) {
+                SectorField(value = state.sector?.label(), onClick = { choosingSector = true })
             }
 
             SectionLabel(stringResource(R.string.details_frame))
@@ -164,6 +193,30 @@ fun DetailsStep(
             onClick = onContinue,
             trailingIcon = R.drawable.ic_arrow_forward,
             modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp),
+        )
+    }
+}
+
+/** «Sector»: looks like the name field, and opens the sector sheets instead of a keyboard. */
+@Composable
+private fun SectorField(value: String?, onClick: () -> Unit) {
+    val label = stringResource(R.string.details_sector_label)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(Neutral0)
+            .border(if (value == null) 1.dp else 2.dp, if (value == null) Neutral300 else Green900, RoundedCornerShape(24.dp))
+            .clickable(role = Role.Button, onClickLabel = stringResource(R.string.details_sector_choose), onClick = onClick)
+            .semantics(mergeDescendants = true) {}
+            .padding(horizontal = 20.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Text(text = label, style = MaterialTheme.typography.labelMedium, color = Green800)
+        Text(
+            text = value ?: stringResource(R.string.details_sector_placeholder),
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (value == null) Neutral600 else Neutral900,
         )
     }
 }
