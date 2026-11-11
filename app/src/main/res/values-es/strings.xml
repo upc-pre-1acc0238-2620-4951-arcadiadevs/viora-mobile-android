@@ -2099,4 +2099,33 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="assistant_recent_empty_action">Hacer una pregunta</string>
     <string name="assistant_question_fallback">Tu pregunta a Viora</string>
     <string name="assistant_question_disabled_a11y">%1$s. No disponible: %2$s</string>
+
+    <!-- Member plot sector: P24 sector field and sheets, P06b -->
+    <string name="details_sector_label">Sector</string>
+    <string name="details_sector_placeholder">Elige tu sector</string>
+    <string name="details_sector_choose">elegir el sector</string>
+    <string name="sector_choose_title_lead">Elige tu</string>
+    <string name="sector_choose_title_emphasis">sector</string>
+    <string name="sector_not_listed">Mi sector no está</string>
+    <string name="sector_not_listed_hint">Escríbelo y tu gestor lo revisará</string>
+    <string name="sector_choose_footer">La lista es de tu organización. Es un dato de tu lote: no dibuja ninguna frontera.</string>
+    <string name="sector_write_title_lead">Escribe tu</string>
+    <string name="sector_write_title_emphasis">sector</string>
+    <string name="sector_write_subtitle">Tu gestor lo revisará</string>
+    <string name="sector_write_close">Cerrar</string>
+    <string name="sector_write_label">Tu sector</string>
+    <string name="sector_write_placeholder">Cerro Blanco</string>
+    <string name="sector_write_note">Tu lote queda «Por confirmar» hasta que %1$s lo revise. Se guarda igual.</string>
+    <string name="sector_write_note_no_manager">Tu lote queda «Por confirmar» hasta que tu gestor lo revise. Se guarda igual.</string>
+    <string name="sector_write_save">Guardar</string>
+    <string name="sector_pending_value">%1$s · Por confirmar</string>
+    <string name="plot_sectors_title_lead">¿Dónde están</string>
+    <string name="plot_sectors_title_emphasis">tus lotes?</string>
+    <string name="plot_sectors_voice">Tu gestor los verá agrupados por sector.</string>
+    <string name="plot_sectors_empty">Tus lotes ya tienen sector.</string>
+    <string name="plot_sectors_save_failed">No se pudieron guardar algunos sectores. Revisa tu conexión y vuelve a intentarlo.</string>
+    <string name="plot_sectors_save">Guardar</string>
+    <string name="plot_sectors_later">Más tarde</string>
+    <string name="plot_sectors_row_subtitle">%1$s · %2$s ha</string>
+    <string name="plot_sectors_choose">Elegir sector</string>
 </resources>

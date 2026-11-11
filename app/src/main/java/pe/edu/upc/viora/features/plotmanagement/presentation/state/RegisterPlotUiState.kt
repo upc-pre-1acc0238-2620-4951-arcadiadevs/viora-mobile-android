@@ -4,6 +4,8 @@ import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.core.domain.GeoPoint
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.SectorChoice
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.SectorZone
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
@@ -60,7 +62,19 @@ data class RegisterPlotUiState(
     val planQuotaHectares: Double? = null,
     /** Hectares the producer's active plots already use. */
     val usedHectares: Double = 0.0,
+    /**
+     * The sectors of the license that sponsors the member (P24 · Socio con sector). Null for a producer without a
+     * sponsored plan, or while unknown: the Sector field is then not shown, as for every individual producer.
+     */
+    val sectors: List<SectorZone>? = null,
+    /** Where the member says the plot is; optional, it is sent once the plot is saved. */
+    val sector: SectorChoice? = null,
+    /** The member's manager, who reviews a written sector («hasta que Rubén lo revise»). */
+    val managerName: String? = null,
 ) {
+    /** The Sector field of P24 is only for members. */
+    val asksSector: Boolean get() = sectors != null
+
     /** Hectares of the plan still free before this plot. */
     val freeHectares: Double? get() = planQuotaHectares?.let { (it - usedHectares).coerceAtLeast(0.0) }
 

@@ -13,9 +13,12 @@ import kotlinx.coroutines.launch
 import pe.edu.upc.viora.core.domain.AppError
 import pe.edu.upc.viora.core.domain.AppResult
 import pe.edu.upc.viora.core.domain.OliveVariety
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.AssignPlotSectorUseCase
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.GetLicenseSectorsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.RegisterPlotUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.NewPlot
+import pe.edu.upc.viora.features.plotmanagement.domain.entity.SectorChoice
 import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlantationFrame
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotName
@@ -27,6 +30,7 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.state.SaveFailure
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.TracedCorner
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.planLimitDetail
 import pe.edu.upc.viora.features.subscription.application.usecase.GetCurrentSubscriptionUseCase
+import pe.edu.upc.viora.features.subscription.application.usecase.GetLatestDataSharingConsentUseCase
 
 /** Drives the wizard: choose how to mark the outline, mark it, describe the plot, review and save. */
 @HiltViewModel
@@ -34,6 +38,9 @@ class RegisterPlotViewModel @Inject constructor(
     observePlots: ObservePlotsUseCase,
     private val registerPlot: RegisterPlotUseCase,
     currentSubscription: GetCurrentSubscriptionUseCase,
+    licenseSectors: GetLicenseSectorsUseCase,
+    latestConsent: GetLatestDataSharingConsentUseCase,
+    private val assignSector: AssignPlotSectorUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterPlotUiState())
@@ -54,6 +61,14 @@ class RegisterPlotViewModel @Inject constructor(
         }
         viewModelScope.launch {
             observePlots().collect { plots -> _uiState.update { it.copy(usedHectares = plots.sumOf { plot -> plot.areaHectares }) } }
+        }
+        // Only a member gets the license's sectors (an individual producer is refused), so the answer itself says
+        // whether to ask for one. Without it the plot is registered as always.
+        viewModelScope.launch {
+            val sectors = (licenseSectors() as? AppResult.Success)?.value ?: return@launch
+            _uiState.update { it.copy(sectors = sectors) }
+            val manager = (latestConsent() as? AppResult.Success)?.value?.managerName
+            _uiState.update { it.copy(managerName = manager) }
         }
     }
 
@@ -145,6 +160,11 @@ class RegisterPlotViewModel @Inject constructor(
         _uiState.update { it.copy(rowSpacingMeters = it.rowSpacingMeters.stepped(steps)) }
     }
 
+    /** P24 · Elegir sector or «Mi sector no está». */
+    fun chooseSector(choice: SectorChoice) {
+        _uiState.update { it.copy(sector = choice) }
+    }
+
     fun changeTreeSpacing(steps: Int) {
         _uiState.update { it.copy(treeSpacingMeters = it.treeSpacingMeters.stepped(steps)) }
     }
@@ -165,7 +185,12 @@ class RegisterPlotViewModel @Inject constructor(
         _uiState.update { it.copy(isSaving = true, saveFailure = null) }
         viewModelScope.launch {
             when (val result = registerPlot(newPlot)) {
-                is AppResult.Success -> _uiState.update { it.copy(isSaving = false, savedPlotId = result.value.id) }
+                is AppResult.Success -> {
+                    // The sector lives in the license, not in the plot, so it goes once the plot exists. If it does
+                    // not get through, the plot is kept anyway and simply has no sector yet.
+                    current.sector?.let { assignSector(result.value.id.value, it) }
+                    _uiState.update { it.copy(isSaving = false, savedPlotId = result.value.id) }
+                }
                 is AppResult.Failure -> _uiState.update { it.afterSaveFailure(result.error) }
             }
         }

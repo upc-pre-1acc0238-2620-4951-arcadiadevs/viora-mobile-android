@@ -13,6 +13,7 @@ import pe.edu.upc.viora.core.navigation.PlotsGraph
 import pe.edu.upc.viora.core.navigation.PlotsRoute
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotDetailScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotsMapScreen
+import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotSectorsScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.PlotsScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.AdjustOutlineScreen
 import pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration.EditPlotScreen
@@ -40,6 +41,10 @@ data class EditPlotRoute(val plotId: String)
 /** Moves the corners of a registered plot's outline on the map. It hides the tab bar. */
 @Serializable
 data class AdjustOutlineRoute(val plotId: String)
+
+/** P06b · Sector de tus lotes: the Home opens it once for a member whose plots have no sector. It hides the tab bar. */
+@Serializable
+data object PlotSectorsRoute
 
 /** The "Lotes" tab: just the list. The screens it opens are [plotScreens], outside any tab. */
 /**
@@ -108,5 +113,8 @@ fun NavGraphBuilder.plotScreens(
     }
     composable<AdjustOutlineRoute> {
         AdjustOutlineScreen(onBack = { navController.popBackStack() })
+    }
+    composable<PlotSectorsRoute> {
+        PlotSectorsScreen(onBack = { navController.popBackStack() }, onDone = { navController.popBackStack() })
     }
 }
