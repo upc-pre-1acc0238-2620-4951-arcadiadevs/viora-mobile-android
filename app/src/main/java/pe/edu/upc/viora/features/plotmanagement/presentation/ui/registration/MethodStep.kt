@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -42,6 +43,8 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.R
@@ -136,6 +139,7 @@ fun MethodStep(
                 onValueChange = onDeclaredAreaChange,
                 placeholder = stringResource(R.string.declared_area_placeholder),
                 enabled = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
             )
             if (!declaredAreaIsValid) {
                 Text(stringResource(R.string.declared_area_invalid), style = MaterialTheme.typography.bodySmall, color = Terracotta700)
