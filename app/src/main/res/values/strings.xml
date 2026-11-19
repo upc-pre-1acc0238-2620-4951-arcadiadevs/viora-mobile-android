@@ -2077,4 +2077,19 @@ Reference price. You pay after creating your account.</string>
     <string name="plot_sectors_later">Later</string>
     <string name="plot_sectors_row_subtitle">%1$s · %2$s ha</string>
     <string name="plot_sectors_choose">Choose sector</string>
+    <string name="term_help_eyebrow">WHAT DOES IT MEAN?</string>
+    <string name="term_help_description">What does %1$s mean?</string>
+    <string name="term_alternation_title">Alternation index</string>
+    <string name="term_thinning_definition">It means removing some small olives by hand when the tree has set more fruit than it can fill. It is not pruning: no branches are cut.</string>
+    <string name="term_thinning_example">If your olive trees are heavily loaded this year, thinning now gives larger olives and helps prevent next year’s harvest from falling.</string>
+    <string name="term_alternation_definition">It measures how much your harvest rises and falls from one year to the next. Many olive trees produce heavily one campaign and lightly the next.</string>
+    <string name="term_alternation_example">If you harvested 8 t/ha one year and 3 t/ha the next, your alternation is high. The more even your harvests, the lower the index.</string>
+    <string name="term_dormancy_definition">During dormancy, the olive tree slows down; watch the chill it accumulates for the next bloom.</string>
+    <string name="term_dormancy_example">This winter, check the chill hours in your plot before the coming campaign’s bloom.</string>
+    <string name="term_bloom_definition">During bloom, the olive tree opens its flowers; watch for when most of them are open.</string>
+    <string name="term_bloom_example">Record the full bloom date this campaign to help plan thinning.</string>
+    <string name="term_fruit_set_definition">During fruit set, some flowers become small olives; watch how much fruit remains on the branches.</string>
+    <string name="term_fruit_set_example">After this campaign’s bloom, check the shoots to estimate the olive load.</string>
+    <string name="term_harvest_definition">At harvest, ripe olives are picked; check their condition and record what you collect.</string>
+    <string name="term_harvest_example">When this campaign’s harvest ends, record the kilograms collected from your plot.</string>
 </resources>
