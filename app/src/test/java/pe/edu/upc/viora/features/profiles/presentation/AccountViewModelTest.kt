@@ -30,10 +30,10 @@ import pe.edu.upc.viora.features.home.application.usecase.RestartHomeTourUseCase
 import pe.edu.upc.viora.features.home.domain.repository.HomeTourRepository
 import pe.edu.upc.viora.features.iam.application.usecase.SignOutUseCase
 import pe.edu.upc.viora.features.iam.domain.repository.AuthRepository
-import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveFieldNotesUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.published.FieldNote
 import pe.edu.upc.viora.features.plotmanagement.application.published.FieldNoteSyncState
 import pe.edu.upc.viora.features.plotmanagement.application.published.FieldNoteType
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveFieldNotesUseCase
 import pe.edu.upc.viora.features.plotmanagement.domain.repository.FieldNoteRepository
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveAnimatedVoiceUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveProfileUseCase
@@ -50,7 +50,11 @@ import pe.edu.upc.viora.features.subscription.domain.repository.ProducerSubscrip
 import pe.edu.upc.viora.features.subscription.domain.valueobject.PlanCapacity
 import pe.edu.upc.viora.features.subscription.domain.valueobject.SubscriptionMode
 import pe.edu.upc.viora.features.subscription.domain.valueobject.SubscriptionStatus
+import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveCriticalAlertsUseCase
+import pe.edu.upc.viora.features.telemetry.application.usecase.SetCriticalAlertsUseCase
+import pe.edu.upc.viora.features.telemetry.domain.notification.CriticalAlertSettings
 import pe.edu.upc.viora.testing.unused
+
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AccountViewModelTest {
@@ -118,6 +122,15 @@ class AccountViewModelTest {
         createdAt = Instant.parse("2026-10-01T12:00:00Z"), hasPhoto = false, syncState = state,
     )
 
+    private val criticalAlerts = object : CriticalAlertSettings {
+        override val enabled = flowOf(true)
+        override suspend fun setEnabled(enabled: Boolean) {}
+        override suspend fun notifiedIds() = emptySet<String>()
+        override suspend fun markNotified(id: String) {}
+        override suspend fun retainNotified(ids: Set<String>) {}
+        override suspend fun clearNotified() {}
+    }
+
     private fun viewModel() = AccountViewModel(
         observeProfile = ObserveProfileUseCase(profiles),
         refreshProfile = RefreshProfileUseCase(profiles),
@@ -129,6 +142,8 @@ class AccountViewModelTest {
         observePendingSamples = ObservePendingDraftSamplesCountUseCase(thinning),
         observePendingSettlements = ObservePendingSettlementsUseCase(settlements),
         observeFieldNotes = ObserveFieldNotesUseCase(fieldNotes),
+        observeCriticalAlerts = ObserveCriticalAlertsUseCase(criticalAlerts),
+        setCriticalAlerts = SetCriticalAlertsUseCase(criticalAlerts),
     )
 
     @Test

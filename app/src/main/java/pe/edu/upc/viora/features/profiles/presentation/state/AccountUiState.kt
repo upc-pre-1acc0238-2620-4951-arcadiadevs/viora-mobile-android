@@ -13,6 +13,7 @@ data class AccountUiState(
     val languageNotice: AppLanguage? = null,
     /** Voz de Viora animada (Preferencias), kept on the phone; on by default. */
     val animatedVoice: Boolean = true,
+    val criticalAlerts: Boolean = true,
     val isSigningOut: Boolean = false,
     val isSignedOut: Boolean = false,
     /** Samples, settlements and notes still on the phone only: signing out would lose them. */

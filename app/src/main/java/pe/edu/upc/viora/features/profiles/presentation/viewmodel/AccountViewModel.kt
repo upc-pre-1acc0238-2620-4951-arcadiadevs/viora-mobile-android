@@ -16,14 +16,16 @@ import pe.edu.upc.viora.features.croploadregulation.application.usecase.ObserveP
 import pe.edu.upc.viora.features.harvestsettlement.application.usecase.ObservePendingSettlementsUseCase
 import pe.edu.upc.viora.features.home.application.usecase.RestartHomeTourUseCase
 import pe.edu.upc.viora.features.iam.application.usecase.SignOutUseCase
-import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveFieldNotesUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.published.FieldNoteSyncState
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveFieldNotesUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveAnimatedVoiceUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.ObserveProfileUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.RefreshProfileUseCase
 import pe.edu.upc.viora.features.profiles.application.usecase.SetAnimatedVoiceUseCase
 import pe.edu.upc.viora.features.profiles.presentation.state.AccountUiState
 import pe.edu.upc.viora.features.subscription.application.usecase.GetCurrentSubscriptionUseCase
+import pe.edu.upc.viora.features.telemetry.application.usecase.ObserveCriticalAlertsUseCase
+import pe.edu.upc.viora.features.telemetry.application.usecase.SetCriticalAlertsUseCase
 
 /**
  * P95 · Mi cuenta. The language itself is switched by the screen (it needs the activity); this
@@ -41,12 +43,17 @@ class AccountViewModel @Inject constructor(
     observePendingSamples: ObservePendingDraftSamplesCountUseCase,
     observePendingSettlements: ObservePendingSettlementsUseCase,
     observeFieldNotes: ObserveFieldNotesUseCase,
+    observeCriticalAlerts: ObserveCriticalAlertsUseCase,
+    private val setCriticalAlerts: SetCriticalAlertsUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AccountUiState())
     val uiState: StateFlow<AccountUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            observeCriticalAlerts().collect { enabled -> _uiState.update { it.copy(criticalAlerts = enabled) } }
+        }
         viewModelScope.launch {
             observeProfile().collect { profile -> _uiState.update { it.copy(profile = profile) } }
         }
@@ -63,6 +70,10 @@ class AccountViewModel @Inject constructor(
             val subscription = getCurrentSubscription()
             if (subscription is AppResult.Success) _uiState.update { it.copy(isMember = subscription.value?.entitlementActive == true) }
         }
+    }
+
+    fun onCriticalAlertsChange(enabled: Boolean) {
+        viewModelScope.launch { setCriticalAlerts(enabled) }
     }
 
     fun openLanguageSheet() = _uiState.update { it.copy(showLanguageSheet = true) }
