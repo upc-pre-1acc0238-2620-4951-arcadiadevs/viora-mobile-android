@@ -46,8 +46,19 @@ data class CurrentPhase(
     val chill: ChillTracker?,
     /** True once the plot's own full bloom is recorded: until then its thinning window is the usual one. */
     val bloomRecorded: Boolean,
+    /** Where the start date of each phase comes from; a phase missing from it is [PhaseDateSource.USUAL]. */
+    val startSources: Map<OlivePhase, PhaseDateSource> = emptyMap(),
+    val profile: PhaseProfile = PhaseProfiles.USUAL,
 ) {
     fun window(phase: OlivePhase): PhaseWindow = windows[phase.ordinal]
+
+    fun sourceOf(phase: OlivePhase): PhaseDateSource = startSources[phase] ?: PhaseDateSource.USUAL
+
+    /** The producer can correct a start date unless the plot's own records fix it. */
+    fun canAdjustStart(phase: OlivePhase): Boolean = sourceOf(phase) != PhaseDateSource.RECORDED
+
+    /** The days the start of [phase] can be moved to, so that the phases keep their order. */
+    fun startBounds(phase: OlivePhase): DateBounds = OliveCalendar.startBounds(today.year, phase, calendar, profile)
 
     /** A maximum that puts the bloom at risk: the producer is asked to water early. */
     fun isBloomHeat(maxCelsius: Double): Boolean = maxCelsius >= calendar.bloomHeatCelsius
@@ -56,8 +67,16 @@ data class CurrentPhase(
 /** Which phase of the olive year a plot is in, from its calendar (see [OliveCalendar]) and its own data. */
 object OlivePhases {
 
-    fun of(today: LocalDate, dates: PlotPhaseDates, chill: ChillTracker?): CurrentPhase {
-        val calendar = OliveCalendar.calendarFor(today.year, dates.fullBloomOn, dates.thinningOpensOn, dates.thinningClosesOn)
+    fun of(
+        today: LocalDate,
+        dates: PlotPhaseDates,
+        chill: ChillTracker?,
+        adjustments: PhaseAdjustments = PhaseAdjustments.NONE,
+        profile: PhaseProfile = PhaseProfiles.USUAL,
+    ): CurrentPhase {
+        val calendar = OliveCalendar.calendarFor(
+            today.year, dates.fullBloomOn, dates.thinningOpensOn, dates.thinningClosesOn, adjustments, profile,
+        )
         val windows = listOf(
             dormancy(today, calendar, chill),
             window(OlivePhase.BLOOM, today, calendar.budbreak, calendar.fullBloom),
@@ -73,7 +92,17 @@ object OlivePhases {
             current = current(windows, dates.harvestPending),
             chill = chill,
             bloomRecorded = dates.fullBloomOn != null,
+            startSources = OlivePhase.entries.associateWith { sourceOf(it, dates, adjustments) },
+            profile = profile,
         )
+    }
+
+    /** The plot's records fix the start of the fruit set (its full bloom) and of the thinning (its plan's window). */
+    private fun sourceOf(phase: OlivePhase, dates: PlotPhaseDates, adjustments: PhaseAdjustments): PhaseDateSource = when {
+        phase == OlivePhase.FRUIT_SET && dates.fullBloomOn != null -> PhaseDateSource.RECORDED
+        phase == OlivePhase.THINNING && dates.thinningOpensOn != null -> PhaseDateSource.RECORDED
+        adjustments[phase] != null -> PhaseDateSource.ADJUSTED
+        else -> PhaseDateSource.USUAL
     }
 
     /**

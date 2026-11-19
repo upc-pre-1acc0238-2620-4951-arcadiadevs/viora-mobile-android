@@ -3,6 +3,7 @@ package pe.edu.upc.viora.features.phenology.domain
 import java.time.LocalDate
 import java.time.MonthDay
 import pe.edu.upc.viora.core.domain.OliveVariety
+import kotlin.collections.get
 
 /**
  * Where the start date of a phase comes from, so the producer can tell an estimate from a date that is theirs:
