@@ -38,6 +38,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import pe.edu.upc.viora.R
@@ -68,6 +69,8 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotU
 fun GpsStep(
     state: RegisterPlotUiState,
     reading: GpsReading,
+    serviceEnabled: Boolean,
+    onOpenLocationSettings: () -> Unit,
     onMarkCorner: (GeoPoint) -> Unit,
     onUndo: () -> Unit,
     onCloseOutline: () -> Unit,
@@ -98,12 +101,18 @@ fun GpsStep(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             StepHeader(step = RegisterPlotStep.TRACE.number, onBack = onBack, onClose = onClose)
-            GpsStatusPill(reading)
+            GpsStatusPill(reading, serviceEnabled)
         }
         val sheetModifier = Modifier
             .align(Alignment.BottomCenter)
             .onSizeChanged { sheetHeightPx = it.height }
-        if (reading is GpsReading.Lost && !waiting) {
+        if (!serviceEnabled) {
+            LostSignalSheet(
+                cornerCount = state.corners.size, expanded = sheetExpanded,
+                onExpandedChange = { sheetExpanded = it }, onUseMap = onUseMap,
+                onWait = onOpenLocationSettings, serviceOff = true, modifier = sheetModifier,
+            )
+        } else if (reading is GpsReading.Lost && !waiting) {
             LostSignalSheet(
                 cornerCount = state.corners.size,
                 expanded = sheetExpanded,
@@ -129,8 +138,10 @@ fun GpsStep(
 
 /** The chip under the header that says how good the GPS is right now. */
 @Composable
-private fun GpsStatusPill(reading: GpsReading) {
-    val style = when (reading) {
+private fun GpsStatusPill(reading: GpsReading, serviceEnabled: Boolean) {
+    val style = if (!serviceEnabled) {
+        PillStyle(stringResource(R.string.location_service_off_title), Terracotta500, Terracotta100, Terracotta700)
+    } else when (reading) {
         GpsReading.Searching -> PillStyle(stringResource(R.string.gps_status_searching), Neutral600, Neutral0, Neutral900)
         is GpsReading.Located -> {
             val meters = reading.fix.accuracyMeters.roundToInt().toString()
@@ -286,16 +297,25 @@ private fun LostSignalSheet(
     onExpandedChange: (Boolean) -> Unit,
     onUseMap: () -> Unit,
     onWait: () -> Unit,
+    serviceOff: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     SheetFrame(modifier = modifier) {
         SheetHandle(expanded = expanded, onExpandedChange = onExpandedChange)
         if (expanded) {
             val titleStyle = MaterialTheme.typography.headlineMedium
-            Text(text = stringResource(R.string.gps_lost_title_lead), style = titleStyle)
-            Text(text = stringResource(R.string.gps_lost_title_emphasis), style = titleStyle, fontStyle = FontStyle.Italic)
+            if (serviceOff) {
+                Text(text = stringResource(R.string.location_service_off_title), style = titleStyle)
+            } else {
+                Text(text = stringResource(R.string.gps_lost_title_lead), style = titleStyle)
+                Text(text = stringResource(R.string.gps_lost_title_emphasis), style = titleStyle, fontStyle = FontStyle.Italic)
+            }
             Text(
-                text = if (cornerCount == 0) {
+                text = if (serviceOff && cornerCount == 0) {
+                    stringResource(R.string.location_service_walk_body_empty)
+                } else if (serviceOff) {
+                    pluralStringResource(R.plurals.location_service_walk_body_kept, cornerCount, cornerCount)
+                } else if (cornerCount == 0) {
                     stringResource(R.string.gps_lost_body_empty)
                 } else {
                     pluralStringResource(R.plurals.gps_lost_body_kept, cornerCount, cornerCount)
@@ -327,7 +347,7 @@ private fun LostSignalSheet(
                 .clickable(role = Role.Button, onClick = onWait),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = stringResource(R.string.gps_wait_signal), style = MaterialTheme.typography.titleMedium, color = Neutral900)
+            Text(text = stringResource(if (serviceOff) R.string.location_service_open else R.string.gps_wait_signal), style = MaterialTheme.typography.titleMedium, color = Neutral900)
         }
     }
 }
@@ -344,4 +364,12 @@ private fun SheetFrame(modifier: Modifier = Modifier, content: @Composable () ->
             .animateContentSize()
             .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
     ) { content() }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LocationOffSheetPreview() {
+    LostSignalSheet(
+        cornerCount = 3, expanded = true, onExpandedChange = {}, onUseMap = {}, onWait = {}, serviceOff = true,
+    )
 }

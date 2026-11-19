@@ -2128,4 +2128,15 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="plot_sectors_later">Más tarde</string>
     <string name="plot_sectors_row_subtitle">%1$s · %2$s ha</string>
     <string name="plot_sectors_choose">Elegir sector</string>
+    <string name="location_service_off_title">La ubicación está desactivada</string>
+    <string name="location_service_off_body">Activa la ubicación para recorrer el lote con GPS o traza el contorno en el mapa.</string>
+    <string name="location_service_off_hint">Toca para activar la ubicación</string>
+    <string name="location_service_open">Abrir ajustes de ubicación</string>
+    <string name="location_service_use_map">Seguir en el mapa</string>
+    <string name="location_service_walk_body_empty">Activa la ubicación para seguir recorriendo o continúa en el mapa.</string>
+    <plurals name="location_service_walk_body_kept">
+        <item quantity="one">Se conserva %1$d esquina. Activa la ubicación para seguir recorriendo o continúa en el mapa.</item>
+        <item quantity="many">Se conservan %1$d esquinas. Activa la ubicación para seguir recorriendo o continúa en el mapa.</item>
+        <item quantity="other">Se conservan %1$d esquinas. Activa la ubicación para seguir recorriendo o continúa en el mapa.</item>
+    </plurals>
 </resources>

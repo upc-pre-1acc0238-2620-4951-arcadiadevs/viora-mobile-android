@@ -42,9 +42,11 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
+import pe.edu.upc.viora.core.designsystem.component.VioraConfirmDialog
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -56,9 +58,11 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral50
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
+import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.MarkingMethod
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
+import pe.edu.upc.viora.features.plotmanagement.presentation.state.availableMethod
 
 /**
  * Step 1: how will the corners be marked, walking with the GPS or tracing on the map. The GPS is
@@ -69,15 +73,18 @@ import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotS
 @Composable
 fun MethodStep(
     permission: LocationPermission,
+    serviceEnabled: Boolean,
+    onOpenLocationSettings: () -> Unit,
     onStart: (MarkingMethod) -> Unit,
     onBack: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val recommended = if (permission.isGranted) MarkingMethod.GPS_WALK else MarkingMethod.MAP_TRACE
+    val recommended = availableMethod(null, permission.isGranted, serviceEnabled)
     var chosen by rememberSaveable { mutableStateOf<MarkingMethod?>(null) }
     // A GPS choice is void once the permission is gone (e.g. revoked in the settings meanwhile).
-    val selected = chosen?.takeIf { it != MarkingMethod.GPS_WALK || permission.isGranted } ?: recommended
+    val selected = availableMethod(chosen, permission.isGranted, serviceEnabled)
+    var offerLocationSettings by rememberSaveable { mutableStateOf(false) }
 
     // The settings are offered right after a request that Android answered with "never ask again".
     var requested by rememberSaveable { mutableStateOf(false) }
@@ -91,6 +98,7 @@ fun MethodStep(
 
     fun onGpsCardClick() {
         when {
+            !serviceEnabled -> offerLocationSettings = true
             permission.isGranted -> chosen = MarkingMethod.GPS_WALK
             permission.isBlocked -> permission.openSettings()
             else -> {
@@ -118,13 +126,14 @@ fun MethodStep(
             }
             VioraVoice(text = stringResource(R.string.method_voice))
             Spacer(Modifier.size(2.dp))
-            val locked = !permission.isGranted
+            val locked = !permission.isGranted || !serviceEnabled
             MethodCard(
                 icon = if (locked) R.drawable.ic_lock else R.drawable.ic_location_on,
                 title = stringResource(R.string.method_gps_title),
-                body = stringResource(if (locked) R.string.method_gps_locked_body else R.string.method_gps_body),
+                body = stringResource(if (!serviceEnabled) R.string.location_service_off_body else if (locked) R.string.method_gps_locked_body else R.string.method_gps_body),
                 hint = stringResource(
                     when {
+                        !serviceEnabled -> R.string.location_service_off_hint
                         !locked -> R.string.method_gps_hint
                         permission.isBlocked -> R.string.method_gps_blocked_hint
                         else -> R.string.method_gps_locked_hint
@@ -153,6 +162,19 @@ fun MethodStep(
             onClick = { onStart(selected) },
             trailingIcon = R.drawable.ic_arrow_forward,
             modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp),
+        )
+    }
+
+    if (offerLocationSettings) {
+        VioraConfirmDialog(
+            icon = R.drawable.ic_location_on, iconBackground = Terracotta100, iconTint = Terracotta700,
+            title = stringResource(R.string.location_service_off_title),
+            body = stringResource(R.string.location_service_off_body),
+            primaryLabel = stringResource(R.string.location_service_open),
+            onPrimary = { offerLocationSettings = false; onOpenLocationSettings() },
+            secondaryLabel = stringResource(R.string.location_service_use_map),
+            onSecondary = { offerLocationSettings = false; chosen = MarkingMethod.MAP_TRACE },
+            onDismiss = { offerLocationSettings = false },
         )
     }
 
@@ -244,4 +266,13 @@ private fun SelectionMark(selected: Boolean) {
     } else {
         Box(modifier = Modifier.size(28.dp).border(1.5.dp, Neutral600.copy(alpha = 0.5f), CircleShape))
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MethodServiceOffPreview() {
+    MethodStep(
+        permission = LocationPermission(true, false, {}, {}),
+        serviceEnabled = false, onOpenLocationSettings = {}, onStart = {}, onBack = {}, onClose = {},
+    )
 }

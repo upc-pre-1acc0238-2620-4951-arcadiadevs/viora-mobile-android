@@ -2077,4 +2077,14 @@ Reference price. You pay after creating your account.</string>
     <string name="plot_sectors_later">Later</string>
     <string name="plot_sectors_row_subtitle">%1$s · %2$s ha</string>
     <string name="plot_sectors_choose">Choose sector</string>
+    <string name="location_service_off_title">Location is off</string>
+    <string name="location_service_off_body">Turn on location to walk the plot with GPS, or trace it on the map.</string>
+    <string name="location_service_off_hint">Tap to turn on location</string>
+    <string name="location_service_open">Open location settings</string>
+    <string name="location_service_use_map">Continue on the map</string>
+    <string name="location_service_walk_body_empty">Turn on location to keep walking, or continue on the map.</string>
+    <plurals name="location_service_walk_body_kept">
+        <item quantity="one">Your %1$d corner is kept. Turn on location to keep walking, or continue on the map.</item>
+        <item quantity="other">Your %1$d corners are kept. Turn on location to keep walking, or continue on the map.</item>
+    </plurals>
 </resources>
