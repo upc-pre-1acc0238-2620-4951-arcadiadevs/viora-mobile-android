@@ -1,5 +1,8 @@
 package pe.edu.upc.viora.features.telemetry.application
 
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -46,7 +49,7 @@ class CheckCriticalAlertsUseCaseTest {
         override suspend fun completeMitigationStep(incidentId: String, stepId: String) = AppResult.Failure(AppError.Offline)
         override suspend fun getSummary() = AppResult.Failure(AppError.Offline)
     }
-    private val check = CheckCriticalAlertsUseCase(repository, settings, notifier)
+    private val check = CheckCriticalAlertsUseCase(repository, settings, notifier, Clock.fixed(Instant.parse("2026-11-19T12:00:00Z"), ZoneOffset.UTC))
 
     @Test fun preferenceOffDoesNotRefreshOrNotify() = runTest {
         settings.setEnabled(false)

@@ -2083,6 +2083,5 @@ Reference price. You pay after creating your account.</string>
     <string name="notification_critical_body">Open the alert to review what to do.</string>
     <string name="account_critical_alerts_label">Critical alert notifications</string>
     <string name="notification_channel_critical_alerts_description">Urgent agroclimatic alerts for your plots.</string>
-    <string name="account_critical_alerts_permission_hint">Turn on Viora notifications in your phone settings.</string>
-    <string name="account_critical_alerts_settings">Open settings</string>
+    <string name="account_critical_alerts_permission_hint">Turn on Notifications above to receive them.</string>
 </resources>

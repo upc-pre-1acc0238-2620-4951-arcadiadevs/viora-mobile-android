@@ -1,5 +1,6 @@
 package pe.edu.upc.viora.features.telemetry.application.usecase
 
+import java.time.Clock
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import pe.edu.upc.viora.core.domain.AppResult
@@ -11,6 +12,7 @@ class CheckCriticalAlertsUseCase @Inject constructor(
     private val repository: IncidentRepository,
     private val settings: CriticalAlertSettings,
     private val notifier: CriticalAlertNotifier,
+    private val clock: Clock,
 ) {
     suspend operator fun invoke(): AppResult<Unit> {
         if (!settings.enabled.first() || !notifier.canNotify()) return AppResult.Success(Unit)
@@ -18,7 +20,7 @@ class CheckCriticalAlertsUseCase @Inject constructor(
         if (result is AppResult.Failure) return result
         val incidents = repository.observeIncidents().first()
         settings.retainNotified(incidents.map { it.id }.toSet())
-        val alerts = selectCriticalAlerts(incidents, settings.notifiedIds())
+        val alerts = selectCriticalAlerts(incidents, settings.notifiedIds(), clock.instant())
         for (alert in alerts) {
             if (!settings.enabled.first() || !notifier.canNotify()) break
             // Persist before posting: a process crash can miss an alert, but cannot post it twice.
