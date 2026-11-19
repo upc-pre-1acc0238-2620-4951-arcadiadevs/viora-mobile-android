@@ -1025,7 +1025,6 @@
         <item quantity="many">Quedan %d días</item>
         <item quantity="other">Quedan %d días</item>
     </plurals>
-    <string name="thinning_last_day">Hoy es el último día</string>
     <plurals name="thinning_opens_in">
         <item quantity="one">La ventana abre en %d día</item>
         <item quantity="many">La ventana abre en %d días</item>
@@ -1077,7 +1076,6 @@
         <item quantity="many">quedan %1$d días antes del carozo</item>
         <item quantity="other">quedan %1$d días antes del carozo</item>
     </plurals>
-    <string name="plan_week_last_day">hoy es el último día antes del carozo</string>
     <string name="plan_week_one">%1$s · %2$s</string>
     <string name="plan_week_first">Empieza por %1$s · %2$s</string>
     <string name="plan_week_next_opening">La ventana de %1$s abre el %2$s</string>

@@ -1006,7 +1006,6 @@
         <item quantity="one">%d day left</item>
         <item quantity="other">%d days left</item>
     </plurals>
-    <string name="thinning_last_day">Today is the last day</string>
     <plurals name="thinning_opens_in">
         <item quantity="one">The window opens in %d day</item>
         <item quantity="other">The window opens in %d days</item>
@@ -1053,7 +1052,6 @@
         <item quantity="one">%1$d day left before pit hardening</item>
         <item quantity="other">%1$d days left before pit hardening</item>
     </plurals>
-    <string name="plan_week_last_day">today is the last day before pit hardening</string>
     <string name="plan_week_one">%1$s · %2$s</string>
     <string name="plan_week_first">Start with %1$s · %2$s</string>
     <string name="plan_week_next_opening">The window of %1$s opens on %2$s</string>
@@ -1723,7 +1721,7 @@ Reference price. You pay after creating your account.</string>
     <string name="phase_msg_bloom_mild">is the week\'s high. The bloom of %1$s will not suffer heat.</string>
     <string name="phase_msg_bloom_until_fruit_set">until the fruit set of %1$s.</string>
     <string name="phase_msg_trees_missing">left in %1$s to estimate your load. Works without signal.</string>
-    <string name="phase_msg_bloom_missing">until the usual window. Record the full bloom to fix your own.</string>
+    <string name="phase_msg_bloom_missing">for the usual window. Record the full bloom to fix your own.</string>
     <string name="phase_msg_sampling_done">until the thinning of %1$s opens. Sampling done.</string>
     <string name="phase_msg_thin_percentage">to thin %1$d %% of the fruit in %2$s.</string>
     <string name="phase_msg_thin_without_plan">to thin %1$s. Finish the sampling to know how much.</string>

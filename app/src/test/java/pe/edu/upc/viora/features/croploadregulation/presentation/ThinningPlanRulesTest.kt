@@ -73,9 +73,10 @@ class ThinningPlanRulesTest {
         val plan = issuedPlan()
         assertEquals(WindowPhase.NotOpenYet(2), plan.windowPhase(LocalDate.of(2026, 11, 1)))
         val open = plan.windowPhase(LocalDate.of(2026, 11, 18)) as WindowPhase.Open
-        assertEquals(12, open.daysLeft)
+        assertEquals(13, open.daysLeft)
         assertEquals(15f / 27f, open.progress, 0.001f)
-        assertEquals(WindowPhase.Open(0, 1f), plan.windowPhase(LocalDate.of(2026, 11, 30)))
+        assertEquals(WindowPhase.Open(1, 1f), plan.windowPhase(LocalDate.of(2026, 11, 30)))
+        assertEquals(WindowPhase.Closed(1), plan.windowPhase(LocalDate.of(2026, 12, 1)))
         assertEquals(WindowPhase.Closed(9), plan.windowPhase(LocalDate.of(2026, 12, 9)))
         assertNull(blockedPlan(PrescriptionBlocker.FULL_BLOOM_MISSING).windowPhase(LocalDate.of(2026, 11, 18)))
     }
