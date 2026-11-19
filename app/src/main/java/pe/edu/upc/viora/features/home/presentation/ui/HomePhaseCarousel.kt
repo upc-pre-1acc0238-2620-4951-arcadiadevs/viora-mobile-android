@@ -165,8 +165,9 @@ private fun PhaseCardView(card: PhaseCard, onAction: () -> Unit, modifier: Modif
                     stringResource(R.string.phase_eyebrow, stringResource(card.timing.label), stringResource(card.phase.label)).uppercase(),
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.54.sp),
                     color = onDark,
-                    modifier = Modifier.weight(1f).padding(end = 30.dp),
                 )
+                // Inline with the phase name it explains, clear of the artwork in the top-right corner.
+                AgronomicTermHelp(card.phase.helpTerm(), tint = Neutral50)
             }
             Figure(card.figure, Modifier.padding(top = 2.dp))
             Text(
@@ -180,11 +181,6 @@ private fun PhaseCardView(card: PhaseCard, onAction: () -> Unit, modifier: Modif
             Capsule(card, Modifier.padding(top = 10.dp))
             ActionPill(stringResource(card.actionLabel()), onAction, Modifier.padding(top = 12.dp))
         }
-        AgronomicTermHelp(
-            card.phase.helpTerm(),
-            modifier = Modifier.align(Alignment.TopEnd).padding(top = 17.dp, end = 18.dp),
-            tint = Neutral50,
-        )
     }
 }
 
