@@ -76,6 +76,10 @@ fun ReviewStep(
             OutlinePreview(
                 corners = state.corners,
                 caption = stringResource(R.string.trace_area_value, formatHectares(state.areaHectares)),
+                secondaryCaption = state.comparisonDeclaredAreaHectares?.let {
+                    stringResource(R.string.area_declared_comparison, formatHectares(it))
+                },
+                secondaryCaptionColor = if (state.hasConsiderableAreaDifference) Terracotta700 else Neutral600,
                 captionAlignment = Alignment.TopStart,
                 height = 200.dp,
             )

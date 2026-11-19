@@ -11,7 +11,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -23,8 +27,10 @@ import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.extension.compose.style.MapStyle
+import com.mapbox.maps.plugin.DistanceUnits
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
+import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.TracedCorner
 
@@ -43,7 +49,7 @@ private const val CENTERED_ZOOM = 16.0
  * map centre (and the Mapbox logo) stay in the part of the map that is actually visible.
  * With [moving] the map is locked and the corners ([outline]) become draggable handles (see
  * [CornerHandles]); taps do not add corners then.
- * The compass and scale bar are left out: they sat under the header buttons and the sheet.
+ * The scale bar sits just above the sheet; the compass is omitted.
  */
 @OptIn(MapboxExperimental::class)
 @Composable
@@ -83,6 +89,7 @@ fun PlotTraceMap(
         }
     }
     val bottomInset = with(LocalDensity.current) { bottomInsetPx.toDp() }
+    val scaleDescription = stringResource(R.string.map_scale_description)
 
     Box(modifier = modifier) {
         MapboxMap(
@@ -91,7 +98,13 @@ fun PlotTraceMap(
             onMapClickListener = tapListener,
             style = { MapStyle(style = Style.SATELLITE_STREETS) },
             compass = {},
-            scaleBar = {},
+            scaleBar = { ScaleBar(
+                modifier = Modifier.semantics { contentDescription = scaleDescription },
+                alignment = Alignment.BottomEnd,
+                contentPadding = PaddingValues(end = 16.dp, bottom = bottomInset + 48.dp),
+                distanceUnits = DistanceUnits.METRIC,
+                ratio = 0.35f,
+            ) },
             logo = { Logo(contentPadding = PaddingValues(start = 4.dp, top = 4.dp, end = 4.dp, bottom = bottomInset + 4.dp)) },
             attribution = { Attribution(contentPadding = PaddingValues(start = 92.dp, top = 4.dp, end = 4.dp, bottom = bottomInset + 4.dp)) },
         ) {

@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.PrimaryPillButton
 import pe.edu.upc.viora.core.designsystem.component.VioraConfirmDialog
+import pe.edu.upc.viora.core.designsystem.component.VioraTextFieldCard
 import pe.edu.upc.viora.core.designsystem.component.VioraVoice
 import pe.edu.upc.viora.core.designsystem.theme.Green200
 import pe.edu.upc.viora.core.designsystem.theme.Green800
@@ -60,6 +61,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.MarkingMethod
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.availableMethod
@@ -79,6 +81,9 @@ fun MethodStep(
     onBack: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    declaredArea: String = "",
+    declaredAreaIsValid: Boolean = true,
+    onDeclaredAreaChange: (String) -> Unit = {},
 ) {
     val recommended = availableMethod(null, permission.isGranted, serviceEnabled)
     var chosen by rememberSaveable { mutableStateOf<MarkingMethod?>(null) }
@@ -125,6 +130,16 @@ fun MethodStep(
                 Text(text = stringResource(R.string.method_title_emphasis), style = titleStyle, fontStyle = FontStyle.Italic)
             }
             VioraVoice(text = stringResource(R.string.method_voice))
+            VioraTextFieldCard(
+                label = stringResource(R.string.declared_area_label),
+                value = declaredArea,
+                onValueChange = onDeclaredAreaChange,
+                placeholder = stringResource(R.string.declared_area_placeholder),
+                enabled = true,
+            )
+            if (!declaredAreaIsValid) {
+                Text(stringResource(R.string.declared_area_invalid), style = MaterialTheme.typography.bodySmall, color = Terracotta700)
+            }
             Spacer(Modifier.size(2.dp))
             val locked = !permission.isGranted || !serviceEnabled
             MethodCard(
@@ -160,6 +175,7 @@ fun MethodStep(
                 if (selected == MarkingMethod.GPS_WALK) R.string.method_start_walk else R.string.method_start_trace,
             ),
             onClick = { onStart(selected) },
+            enabled = declaredAreaIsValid,
             trailingIcon = R.drawable.ic_arrow_forward,
             modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp),
         )
@@ -275,4 +291,20 @@ private fun MethodServiceOffPreview() {
         permission = LocationPermission(true, false, {}, {}),
         serviceEnabled = false, onOpenLocationSettings = {}, onStart = {}, onBack = {}, onClose = {},
     )
+}
+
+@Preview(showBackground = true, heightDp = 800)
+@Composable
+private fun MethodStepWithDeclaredAreaPreview() {
+    VioraTheme {
+        MethodStep(
+            permission = LocationPermission(true, false, {}, {}),
+            serviceEnabled = true,
+            onOpenLocationSettings = {},
+            declaredArea = "3.5",
+            onStart = {},
+            onBack = {},
+            onClose = {},
+        )
+    }
 }

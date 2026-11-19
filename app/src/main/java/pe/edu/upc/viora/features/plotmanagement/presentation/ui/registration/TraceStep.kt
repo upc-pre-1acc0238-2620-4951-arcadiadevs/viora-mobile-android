@@ -44,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import pe.edu.upc.viora.R
@@ -57,6 +58,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
+import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
 import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.PlotOutline
@@ -248,6 +250,8 @@ private fun TraceSheet(
             CornerStatTiles(
                 cornerCount = cornerCount,
                 areaHectares = state.areaHectares,
+                declaredAreaHectares = state.comparisonDeclaredAreaHectares,
+                considerableDifference = state.hasConsiderableAreaDifference,
                 modifier = Modifier.padding(top = 12.dp),
             )
         }
@@ -307,7 +311,13 @@ private fun TraceSheet(
 
 /** The two figures of the outline sheets: how many corners there are and the provisional area. */
 @Composable
-internal fun CornerStatTiles(cornerCount: Int, areaHectares: Double, modifier: Modifier = Modifier) {
+internal fun CornerStatTiles(
+    cornerCount: Int,
+    areaHectares: Double,
+    modifier: Modifier = Modifier,
+    declaredAreaHectares: Double? = null,
+    considerableDifference: Boolean = false,
+) {
     Row(
         modifier = modifier.height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -321,6 +331,10 @@ internal fun CornerStatTiles(cornerCount: Int, areaHectares: Double, modifier: M
         StatTile(
             value = if (cornerCount >= PlotOutline.MIN_CORNERS) stringResource(R.string.trace_area_value, formatHectares(areaHectares)) else "—",
             caption = stringResource(R.string.trace_area_label),
+            secondary = declaredAreaHectares?.takeIf { cornerCount >= PlotOutline.MIN_CORNERS }?.let {
+                stringResource(R.string.area_declared_comparison, formatHectares(it))
+            },
+            secondaryColor = if (considerableDifference) Terracotta700 else Neutral600,
             background = Harvest100,
             modifier = Modifier.weight(1f).fillMaxHeight(),
         )
@@ -403,5 +417,13 @@ private fun TraceMessage(
                 color = Neutral600,
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CornerStatTilesMismatchPreview() {
+    VioraTheme {
+        CornerStatTiles(cornerCount = 4, areaHectares = 0.3, declaredAreaHectares = 3.0, considerableDifference = true)
     }
 }
