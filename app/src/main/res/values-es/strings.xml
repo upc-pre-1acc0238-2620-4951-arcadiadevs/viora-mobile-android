@@ -2169,6 +2169,5 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="notification_critical_body">Abre la alerta para revisar qué hacer.</string>
     <string name="account_critical_alerts_label">Notificaciones de alertas críticas</string>
     <string name="notification_channel_critical_alerts_description">Alertas agroclimáticas urgentes para tus lotes.</string>
-    <string name="account_critical_alerts_permission_hint">Activa las notificaciones de Viora en los ajustes del teléfono.</string>
-    <string name="account_critical_alerts_settings">Abrir ajustes</string>
+    <string name="account_critical_alerts_permission_hint">Activa «Notificaciones» aquí arriba para recibirlas.</string>
 </resources>

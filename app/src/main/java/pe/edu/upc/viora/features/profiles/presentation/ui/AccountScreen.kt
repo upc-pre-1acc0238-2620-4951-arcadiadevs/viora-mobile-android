@@ -23,7 +23,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,7 +34,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
@@ -167,18 +165,6 @@ fun AccountScreen(
                     showDivider = true,
                     onClick = { context.openNotificationSettings() },
                 )
-                AccountRow(
-                    label = stringResource(R.string.account_home_tour_label),
-                    value = stringResource(R.string.account_home_tour_replay),
-                    showDivider = true,
-                    onClick = { viewModel.replayHomeTour(onReplayHomeTour) },
-                )
-                AccountSwitchRow(
-                    label = stringResource(R.string.account_animated_voice_label),
-                    checked = state.animatedVoice,
-                    onCheckedChange = viewModel::onAnimatedVoiceChange,
-                    showDivider = true,
-                )
                 AccountSwitchRow(
                     label = stringResource(R.string.account_critical_alerts_label),
                     checked = state.criticalAlerts,
@@ -191,10 +177,24 @@ fun AccountScreen(
                             notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
                         }
                     },
+                    showDivider = true,
+                    supporting = if (state.criticalAlerts && !criticalNotificationsAvailable) {
+                        stringResource(R.string.account_critical_alerts_permission_hint)
+                    } else {
+                        null
+                    },
                 )
-                if (state.criticalAlerts && !criticalNotificationsAvailable) {
-                    CriticalNotificationsHint(onOpenSettings = { context.openNotificationSettings() })
-                }
+                AccountRow(
+                    label = stringResource(R.string.account_home_tour_label),
+                    value = stringResource(R.string.account_home_tour_replay),
+                    showDivider = true,
+                    onClick = { viewModel.replayHomeTour(onReplayHomeTour) },
+                )
+                AccountSwitchRow(
+                    label = stringResource(R.string.account_animated_voice_label),
+                    checked = state.animatedVoice,
+                    onCheckedChange = viewModel::onAnimatedVoiceChange,
+                )
             }
 
             AccountSection(title = stringResource(R.string.account_section_session)) {
@@ -264,20 +264,4 @@ private fun Context.openNotificationSettings() {
 
 private fun Context.canPostCriticalAlerts(): Boolean = VioraNotificationChannels.canPostCriticalAlerts(this)
 
-@Composable
-private fun CriticalNotificationsHint(onOpenSettings: () -> Unit) {
-    Text(
-        text = stringResource(R.string.account_critical_alerts_permission_hint),
-        style = MaterialTheme.typography.bodySmall,
-        color = Neutral500,
-    )
-    TextButton(onClick = onOpenSettings) {
-        Text(stringResource(R.string.account_critical_alerts_settings))
-    }
-}
 
-@Preview(showBackground = true)
-@Composable
-private fun CriticalNotificationsHintPreview() {
-    Column { CriticalNotificationsHint(onOpenSettings = {}) }
-}

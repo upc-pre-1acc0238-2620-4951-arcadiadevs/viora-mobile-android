@@ -282,6 +282,7 @@ internal fun AccountSwitchRow(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     showDivider: Boolean = false,
+    supporting: String? = null,
 ) {
     Row(
         modifier = modifier
@@ -292,12 +293,16 @@ internal fun AccountSwitchRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp, lineHeight = 20.sp),
-            color = Neutral900,
-            modifier = Modifier.weight(1f),
-        )
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp, lineHeight = 20.sp),
+                color = Neutral900,
+            )
+            if (supporting != null) {
+                Text(text = supporting, style = MaterialTheme.typography.bodySmall, color = Terracotta700)
+            }
+        }
         VioraSwitch(checked = checked)
     }
 }
@@ -497,6 +502,17 @@ internal object DigitGroupsTransformation : VisualTransformation {
 
 /** Horizontal margin of the account screens, as in Figma. */
 internal val AccountGutter: Dp = 24.dp
+
+@Preview(showBackground = true)
+@Composable
+private fun CriticalAlertsSwitchBlockedPreview() {
+    AccountSwitchRow(
+        label = stringResource(R.string.account_critical_alerts_label),
+        checked = true,
+        onCheckedChange = {},
+        supporting = stringResource(R.string.account_critical_alerts_permission_hint),
+    )
+}
 
 @Preview(showBackground = true)
 @Composable
