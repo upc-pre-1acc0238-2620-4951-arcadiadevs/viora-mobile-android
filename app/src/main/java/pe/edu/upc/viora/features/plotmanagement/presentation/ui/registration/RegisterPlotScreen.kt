@@ -19,6 +19,7 @@ import pe.edu.upc.viora.core.designsystem.component.VioraConfirmDialog
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.domain.PlotId
+import pe.edu.upc.viora.core.presentation.formatHectares
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.MarkingMethod
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.GpsTrackingViewModel
@@ -58,6 +59,9 @@ fun RegisterPlotScreen(
     when (state.step) {
         RegisterPlotStep.METHOD -> MethodStep(
             permission = locationPermission,
+            declaredArea = state.declaredArea,
+            declaredAreaIsValid = state.declaredAreaIsValid,
+            onDeclaredAreaChange = viewModel::setDeclaredArea,
             onStart = viewModel::startMarking,
             onBack = ::back,
             onClose = ::leave,
@@ -108,6 +112,25 @@ fun RegisterPlotScreen(
             modifier = modifier,
             onAdjustOutline = viewModel::adjustOutline,
             onExpandPlan = onExpandPlan,
+        )
+    }
+
+    if (state.showAreaConfirmation) {
+        VioraConfirmDialog(
+            icon = R.drawable.ic_warning,
+            iconBackground = Terracotta100,
+            iconTint = Terracotta700,
+            title = stringResource(R.string.area_difference_title),
+            body = stringResource(
+                R.string.area_difference_body,
+                formatHectares(state.declaredAreaHectares ?: 0.0),
+                formatHectares(state.areaHectares),
+            ),
+            primaryLabel = stringResource(R.string.area_difference_adjust),
+            onPrimary = viewModel::adjustOutline,
+            secondaryLabel = stringResource(R.string.area_difference_confirm),
+            onSecondary = viewModel::confirmAreaAndSave,
+            onDismiss = viewModel::dismissAreaConfirmation,
         )
     }
 

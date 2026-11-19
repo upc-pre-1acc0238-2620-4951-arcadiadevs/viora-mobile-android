@@ -195,7 +195,13 @@ private fun MarkingSheet(
                 style = titleStyle,
                 fontStyle = FontStyle.Italic,
             )
-            CornerStatTiles(cornerCount = cornerCount, areaHectares = state.areaHectares, modifier = Modifier.padding(top = 12.dp))
+            CornerStatTiles(
+                cornerCount = cornerCount,
+                areaHectares = state.areaHectares,
+                declaredAreaHectares = state.comparisonDeclaredAreaHectares,
+                considerableDifference = state.hasConsiderableAreaDifference,
+                modifier = Modifier.padding(top = 12.dp),
+            )
         }
         Row(
             modifier = Modifier.padding(top = 12.dp),

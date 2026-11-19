@@ -2077,4 +2077,13 @@ Reference price. You pay after creating your account.</string>
     <string name="plot_sectors_later">Later</string>
     <string name="plot_sectors_row_subtitle">%1$s · %2$s ha</string>
     <string name="plot_sectors_choose">Choose sector</string>
+    <string name="declared_area_label">Approximate area (optional)</string>
+    <string name="declared_area_placeholder">Hectares, e.g. 3.5</string>
+    <string name="declared_area_invalid">Enter a number greater than zero.</string>
+    <string name="area_difference_title">The area does not match</string>
+    <string name="area_difference_body">You stated that the plot has about %1$s ha, but the outline you marked measures %2$s ha. Check the outline or save it as it is if it looks right.</string>
+    <string name="area_difference_adjust">Correct outline</string>
+    <string name="area_difference_confirm">Continue and save</string>
+    <string name="map_scale_description">Map scale in metric units</string>
+    <string name="area_declared_comparison">of ~%1$s ha stated</string>
 </resources>
