@@ -1,9 +1,14 @@
 package pe.edu.upc.viora.features.profiles.presentation.ui
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,9 +35,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,6 +53,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.locale.AppLanguage
+import pe.edu.upc.viora.core.notification.VioraNotificationChannels
 import pe.edu.upc.viora.features.profiles.presentation.viewmodel.AccountViewModel
 
 private const val LANGUAGE_NOTICE_MILLIS = 2_500L
@@ -73,8 +82,13 @@ fun AccountScreen(
 
     // Notifications can be switched off in the phone's settings; read them again on every return.
     var notificationsOn by remember { mutableStateOf(true) }
+    var criticalNotificationsAvailable by remember { mutableStateOf(context.canPostCriticalAlerts()) }
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        criticalNotificationsAvailable = context.canPostCriticalAlerts()
+    }
     LifecycleResumeEffect(Unit) {
         notificationsOn = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        criticalNotificationsAvailable = context.canPostCriticalAlerts()
         onPauseOrDispose { }
     }
 
@@ -163,7 +177,24 @@ fun AccountScreen(
                     label = stringResource(R.string.account_animated_voice_label),
                     checked = state.animatedVoice,
                     onCheckedChange = viewModel::onAnimatedVoiceChange,
+                    showDivider = true,
                 )
+                AccountSwitchRow(
+                    label = stringResource(R.string.account_critical_alerts_label),
+                    checked = state.criticalAlerts,
+                    onCheckedChange = { enabled ->
+                        viewModel.onCriticalAlertsChange(enabled)
+                        criticalNotificationsAvailable = context.canPostCriticalAlerts()
+                        if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    },
+                )
+                if (state.criticalAlerts && !criticalNotificationsAvailable) {
+                    CriticalNotificationsHint(onOpenSettings = { context.openNotificationSettings() })
+                }
             }
 
             AccountSection(title = stringResource(R.string.account_section_session)) {
@@ -229,4 +260,24 @@ private fun Context.openNotificationSettings() {
         .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     startActivity(intent)
+}
+
+private fun Context.canPostCriticalAlerts(): Boolean = VioraNotificationChannels.canPostCriticalAlerts(this)
+
+@Composable
+private fun CriticalNotificationsHint(onOpenSettings: () -> Unit) {
+    Text(
+        text = stringResource(R.string.account_critical_alerts_permission_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = Neutral500,
+    )
+    TextButton(onClick = onOpenSettings) {
+        Text(stringResource(R.string.account_critical_alerts_settings))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CriticalNotificationsHintPreview() {
+    Column { CriticalNotificationsHint(onOpenSettings = {}) }
 }

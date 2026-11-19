@@ -2163,4 +2163,12 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="term_fruit_set_example">Después de la floración de esta campaña, revisa los brotes para estimar la carga de aceitunas.</string>
     <string name="term_harvest_definition">En la cosecha se recogen las aceitunas maduras; observa su estado y registra lo recogido.</string>
     <string name="term_harvest_example">Al terminar la cosecha de esta campaña, anota los kilos recogidos en tu lote.</string>
+    <string name="notification_channel_critical_alerts">Alertas críticas</string>
+    <string name="notification_frost_title">Riesgo de helada en %1$s</string>
+    <string name="notification_critical_title">Alerta crítica en %1$s</string>
+    <string name="notification_critical_body">Abre la alerta para revisar qué hacer.</string>
+    <string name="account_critical_alerts_label">Notificaciones de alertas críticas</string>
+    <string name="notification_channel_critical_alerts_description">Alertas agroclimáticas urgentes para tus lotes.</string>
+    <string name="account_critical_alerts_permission_hint">Activa las notificaciones de Viora en los ajustes del teléfono.</string>
+    <string name="account_critical_alerts_settings">Abrir ajustes</string>
 </resources>

@@ -3,6 +3,7 @@ package pe.edu.upc.viora.features.telemetry.presentation.navigation
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import kotlinx.serialization.Serializable
 import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.features.telemetry.presentation.ui.AlertDetailScreen
@@ -18,6 +19,8 @@ data class AlertsCenterRoute(val plotId: String? = null)
  */
 @Serializable
 data class AlertDetailRoute(val incidentId: String)
+
+const val ALERT_DETAIL_LINK = "viora://critical-alert"
 
 /**
  * Alerts navigation subgraph: Alerts Center and Alert Detail. [onOpenWinterChill] is "Ver mi frío" of a warm winter
@@ -40,7 +43,7 @@ fun NavGraphBuilder.alertsNavGraph(
         )
     }
 
-    composable<AlertDetailRoute> {
+    composable<AlertDetailRoute>(deepLinks = listOf(navDeepLink<AlertDetailRoute>(basePath = ALERT_DETAIL_LINK))) {
         AlertDetailScreen(
             onBack = { navController.popBackStack() },
             onOpenPlot = { plotId -> onOpenPlot(plotId) },
