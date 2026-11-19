@@ -59,6 +59,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AgronomicTerm
+import pe.edu.upc.viora.core.designsystem.component.AgronomicTermHelp
 import pe.edu.upc.viora.core.designsystem.component.AskVioraCard
 import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
@@ -79,6 +81,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.designsystem.theme.VioraTheme
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.core.presentation.formatCount
@@ -88,7 +91,6 @@ import pe.edu.upc.viora.core.presentation.formatMeters
 import pe.edu.upc.viora.core.presentation.labelRes
 import pe.edu.upc.viora.features.phenology.application.published.BbiClass
 import pe.edu.upc.viora.features.plotmanagement.domain.entity.Plot
-import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.ArchiveState
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.LotHarvest
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.PlotDetailUiState
@@ -411,6 +413,7 @@ private fun DetailSheet(
                     subtitle = harvestSubtitle(harvest),
                     background = Harvest100,
                     onClick = onHarvestHistory,
+                    helpTerm = AgronomicTerm.ALTERNATION,
                 )
                 LotSectionCard(
                     icon = R.drawable.ic_ac_unit,
@@ -425,6 +428,7 @@ private fun DetailSheet(
                     subtitle = stringResource(R.string.lot_section_thinning_hint),
                     background = Harvest100,
                     onClick = onThinningPlan,
+                    helpTerm = AgronomicTerm.THINNING,
                 )
                 if (onAskViora != null) {
                     AskVioraCard(examples = stringResource(R.string.assistant_entry_plot_examples), onClick = onAskViora)
@@ -463,6 +467,7 @@ private fun LotSectionCard(
     background: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    helpTerm: AgronomicTerm? = null,
 ) {
     Row(
         modifier = modifier
@@ -481,6 +486,7 @@ private fun LotSectionCard(
             Text(title, style = MaterialTheme.typography.titleSmall, color = Neutral900)
             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Neutral700)
         }
+        if (helpTerm != null) AgronomicTermHelp(helpTerm)
         Box(Modifier.size(40.dp).clip(CircleShape).background(Green800), contentAlignment = Alignment.Center) {
             Icon(painterResource(R.drawable.ic_arrow_forward), contentDescription = null, tint = Neutral0, modifier = Modifier.size(20.dp))
         }

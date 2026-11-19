@@ -41,6 +41,7 @@ fun OptionRow(
     onClick: () -> Unit,
     isDestructive: Boolean = false,
     enabled: Boolean = true,
+    trailing: (@Composable () -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier
@@ -70,6 +71,7 @@ fun OptionRow(
             )
             Text(text = hint, style = MaterialTheme.typography.bodySmall, color = Neutral600)
         }
+        trailing?.invoke()
         if (!isDestructive && enabled) {
             Icon(
                 painter = painterResource(R.drawable.ic_chevron_right),

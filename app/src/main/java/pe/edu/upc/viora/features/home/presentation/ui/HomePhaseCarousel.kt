@@ -51,6 +51,8 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AgronomicTerm
+import pe.edu.upc.viora.core.designsystem.component.AgronomicTermHelp
 import pe.edu.upc.viora.core.designsystem.component.PhaseCardArtwork
 import pe.edu.upc.viora.core.designsystem.component.PhaseIllustration
 import pe.edu.upc.viora.core.designsystem.theme.Green200
@@ -163,6 +165,7 @@ private fun PhaseCardView(card: PhaseCard, onAction: () -> Unit, modifier: Modif
                     stringResource(R.string.phase_eyebrow, stringResource(card.timing.label), stringResource(card.phase.label)).uppercase(),
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.54.sp),
                     color = onDark,
+                    modifier = Modifier.weight(1f).padding(end = 30.dp),
                 )
             }
             Figure(card.figure, Modifier.padding(top = 2.dp))
@@ -177,6 +180,11 @@ private fun PhaseCardView(card: PhaseCard, onAction: () -> Unit, modifier: Modif
             Capsule(card, Modifier.padding(top = 10.dp))
             ActionPill(stringResource(card.actionLabel()), onAction, Modifier.padding(top = 12.dp))
         }
+        AgronomicTermHelp(
+            card.phase.helpTerm(),
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 17.dp, end = 18.dp),
+            tint = Neutral50,
+        )
     }
 }
 
@@ -415,4 +423,12 @@ private fun messageText(message: PhaseMessage): String = when (message) {
             HomePhase.HARVEST -> R.string.phase_msg_ended_harvest
         },
     )
+}
+
+internal fun HomePhase.helpTerm(): AgronomicTerm = when (this) {
+    HomePhase.DORMANCY -> AgronomicTerm.DORMANCY
+    HomePhase.BLOOM -> AgronomicTerm.BLOOM
+    HomePhase.FRUIT_SET -> AgronomicTerm.FRUIT_SET
+    HomePhase.THINNING -> AgronomicTerm.THINNING
+    HomePhase.HARVEST -> AgronomicTerm.HARVEST
 }

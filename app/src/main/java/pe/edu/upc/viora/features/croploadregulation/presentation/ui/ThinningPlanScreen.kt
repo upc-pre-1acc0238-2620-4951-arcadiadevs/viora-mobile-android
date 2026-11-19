@@ -60,6 +60,8 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AgronomicTerm
+import pe.edu.upc.viora.core.designsystem.component.AgronomicTermHelp
 import pe.edu.upc.viora.core.designsystem.component.AskVioraCard
 import pe.edu.upc.viora.core.designsystem.component.AssistantSheetSlot
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
@@ -538,7 +540,7 @@ private fun PrescriptionCard(
             closed -> stringResource(R.string.thinning_closed_eyebrow, plan.windowClosesOn?.short().orEmpty().uppercase(locale))
             else -> stringResource(R.string.thinning_prescription_eyebrow)
         }
-        Eyebrow(eyebrow)
+        ThinningEyebrow(eyebrow)
         Figure(
             value = stringResource(R.string.thinning_percent, formatWhole(if (noThinning) 0 else percentage.roundToInt())),
             caption = stringResource(if (noThinning) R.string.thinning_no_thinning else R.string.thinning_of_fruits),
@@ -605,7 +607,7 @@ private val WINDOW_BLOCK_HEIGHT = 71.dp
 private fun GhostPrescriptionCard() {
     val dash = stringResource(R.string.thinning_no_value)
     PrescriptionShell(Modifier.alpha(0.35f)) {
-        Eyebrow(stringResource(R.string.thinning_prescription_eyebrow))
+        ThinningEyebrow(stringResource(R.string.thinning_prescription_eyebrow))
         Figure(value = stringResource(R.string.thinning_percent, dash), caption = stringResource(R.string.thinning_of_fruits), dimmed = false)
         Text(
             stringResource(R.string.thinning_instruction_light),
@@ -633,6 +635,14 @@ private fun PrescriptionShell(modifier: Modifier = Modifier, content: @Composabl
             modifier = Modifier.align(Alignment.TopEnd).offset(x = 76.dp, y = (-90).dp).requiredSize(240.dp, 210.dp),
         )
         Column(Modifier.fillMaxWidth().padding(start = 22.dp, end = 22.dp, top = 22.dp, bottom = 22.dp)) { content() }
+    }
+}
+
+@Composable
+private fun ThinningEyebrow(text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Eyebrow(text)
+        AgronomicTermHelp(AgronomicTerm.THINNING, tint = Neutral50)
     }
 }
 

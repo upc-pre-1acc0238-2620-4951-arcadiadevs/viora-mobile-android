@@ -26,6 +26,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AgronomicTerm
+import pe.edu.upc.viora.core.designsystem.component.AgronomicTermHelp
 import pe.edu.upc.viora.core.designsystem.component.CircleIconButton
 import pe.edu.upc.viora.core.designsystem.component.OptionDivider
 import pe.edu.upc.viora.core.designsystem.component.OptionRow
@@ -95,6 +97,9 @@ fun LotSectionsSheet(
                         hint = stringResource(if (enabled) section.hint else R.string.lot_section_soon),
                         onClick = { onSelect(section) },
                         enabled = enabled,
+                        trailing = if (section == LotSection.THINNING) {
+                            { AgronomicTermHelp(AgronomicTerm.THINNING) }
+                        } else null,
                     )
                     if (position < sections.lastIndex) OptionDivider()
                 }
