@@ -10,7 +10,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import pe.edu.upc.viora.features.plotmanagement.domain.service.LocationService
 import pe.edu.upc.viora.features.plotmanagement.domain.service.LocationTracker
+import pe.edu.upc.viora.features.plotmanagement.infrastructure.location.AndroidLocationService
 import pe.edu.upc.viora.features.plotmanagement.infrastructure.location.FusedLocationTracker
 
 @Module
@@ -19,6 +21,9 @@ abstract class PlotLocationModule {
 
     @Binds
     abstract fun bindLocationTracker(impl: FusedLocationTracker): LocationTracker
+
+    @Binds
+    abstract fun bindLocationService(impl: AndroidLocationService): LocationService
 
     companion object {
         @Provides

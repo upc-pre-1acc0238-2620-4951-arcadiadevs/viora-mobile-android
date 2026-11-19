@@ -1,5 +1,7 @@
 package pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -10,9 +12,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
 import pe.edu.upc.viora.core.designsystem.component.VioraConfirmDialog
@@ -22,6 +26,7 @@ import pe.edu.upc.viora.core.domain.PlotId
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.MarkingMethod
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.RegisterPlotStep
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.GpsTrackingViewModel
+import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.LocationServiceViewModel
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.RegisterPlotViewModel
 
 /**
@@ -54,10 +59,20 @@ fun RegisterPlotScreen(
     }
 
     val locationPermission = rememberLocationPermission()
+    val locationService: LocationServiceViewModel = hiltViewModel()
+    val serviceEnabled = locationService.enabled.collectAsStateWithLifecycle().value
+    val context = LocalContext.current
+    LifecycleResumeEffect(Unit) {
+        locationService.refresh()
+        onPauseOrDispose { }
+    }
+    val openLocationSettings = { context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) }
 
     when (state.step) {
         RegisterPlotStep.METHOD -> MethodStep(
             permission = locationPermission,
+            serviceEnabled = serviceEnabled,
+            onOpenLocationSettings = openLocationSettings,
             onStart = viewModel::startMarking,
             onBack = ::back,
             onClose = ::leave,
@@ -68,6 +83,8 @@ fun RegisterPlotScreen(
             GpsStep(
                 state = state,
                 reading = gps.reading.collectAsStateWithLifecycle().value,
+                serviceEnabled = serviceEnabled,
+                onOpenLocationSettings = openLocationSettings,
                 onMarkCorner = viewModel::addCorner,
                 onUndo = viewModel::undoCorner,
                 onCloseOutline = viewModel::closeOutline,

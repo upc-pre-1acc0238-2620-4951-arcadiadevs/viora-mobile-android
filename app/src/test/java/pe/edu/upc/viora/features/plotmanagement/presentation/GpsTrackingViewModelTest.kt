@@ -6,6 +6,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -17,9 +18,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveGpsFixesUseCase
-import pe.edu.upc.viora.features.plotmanagement.domain.service.LocationTracker
 import pe.edu.upc.viora.core.domain.GeoPoint
+import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObserveGpsFixesUseCase
+import pe.edu.upc.viora.features.plotmanagement.domain.service.LocationService
+import pe.edu.upc.viora.features.plotmanagement.domain.service.LocationTracker
 import pe.edu.upc.viora.features.plotmanagement.domain.valueobject.GpsFix
 import pe.edu.upc.viora.features.plotmanagement.presentation.state.GpsReading
 import pe.edu.upc.viora.features.plotmanagement.presentation.viewmodel.GpsTrackingViewModel
@@ -43,7 +45,10 @@ class GpsTrackingViewModelTest {
 
     private fun fix(accuracy: Double) = GpsFix(GeoPoint(-18.0958, -70.3167), accuracy)
 
-    private fun viewModel(fixes: Flow<GpsFix>) = GpsTrackingViewModel(ObserveGpsFixesUseCase(ScriptedTracker(fixes)))
+    private fun viewModel(fixes: Flow<GpsFix>) = GpsTrackingViewModel(ObserveGpsFixesUseCase(ScriptedTracker(fixes)), object : LocationService {
+        override fun isEnabled() = true
+        override fun observeEnabled() = flowOf(true)
+    })
 
     @Test
     fun `it searches until the first fix arrives`() = runTest {
