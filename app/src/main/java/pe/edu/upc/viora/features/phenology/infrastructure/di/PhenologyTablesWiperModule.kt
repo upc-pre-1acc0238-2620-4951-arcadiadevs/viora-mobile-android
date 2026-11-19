@@ -6,9 +6,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import pe.edu.upc.viora.core.database.AccountDataWiper
+import pe.edu.upc.viora.features.phenology.infrastructure.local.PhaseAdjustmentsWiper
 import pe.edu.upc.viora.features.phenology.infrastructure.local.PhenologyTablesWiper
 
-/** Signing out (or another account signing in) empties the tables of this context. */
+/** Signing out (or another account signing in) empties the tables and the preferences of this context. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class PhenologyTablesWiperModule {
@@ -16,4 +17,8 @@ abstract class PhenologyTablesWiperModule {
     @Binds
     @IntoSet
     abstract fun bindPhenologyTablesWiper(wiper: PhenologyTablesWiper): AccountDataWiper
+
+    @Binds
+    @IntoSet
+    abstract fun bindPhaseAdjustmentsWiper(wiper: PhaseAdjustmentsWiper): AccountDataWiper
 }
