@@ -55,6 +55,7 @@ import pe.edu.upc.viora.features.assistant.domain.entity.AssistantScreen
 import pe.edu.upc.viora.features.assistant.domain.entity.DailySummary
 import pe.edu.upc.viora.features.assistant.domain.entity.FactTone
 import pe.edu.upc.viora.features.assistant.presentation.state.DailySummaryCardUiState
+import pe.edu.upc.viora.features.assistant.presentation.state.summaryLine
 import pe.edu.upc.viora.features.assistant.presentation.viewmodel.DailySummaryViewModel
 
 /** What the card has open on top of Inicio. */
@@ -162,7 +163,7 @@ private fun CollapsedLine(state: DailySummaryCardUiState, onShow: () -> Unit) {
             Text(stringResource(R.string.assistant_summary_title), style = MaterialTheme.typography.titleSmall, color = Neutral900)
             Text(
                 text = when {
-                    summary != null -> summaryLine(summary)
+                    summary != null -> summaryLine(summary.facts)
                     state == DailySummaryCardUiState.Loading -> stringResource(R.string.assistant_summary_loading)
                     else -> stringResource(R.string.assistant_summary_missing)
                 },
@@ -209,10 +210,6 @@ private fun CalendarBadge() {
         Icon(painterResource(R.drawable.ic_calendar_month), contentDescription = null, tint = Green800, modifier = Modifier.size(20.dp))
     }
 }
-
-/** "12 días de ventana · 34° máx. jueves · 2 alertas activas": the three figures with what each one is. */
-private fun summaryLine(summary: DailySummary): String =
-    summary.facts.joinToString(" · ") { "${it.value} ${it.label}" }
 
 private val previewSummary = DailySummary(
     id = "preview",
