@@ -171,6 +171,111 @@ class RegisterPlotViewModelTest {
         return vm
     }
 
+    @Test
+    fun `comparison reference appears only with a valid declaration and three corners`() {
+        val vm = viewModel()
+        vm.setDeclaredArea("3")
+        assertNull(vm.uiState.value.comparisonDeclaredAreaHectares)
+        vm.addCorner(a)
+        vm.addCorner(b)
+        assertNull(vm.uiState.value.comparisonDeclaredAreaHectares)
+        vm.addCorner(c)
+        assertEquals(3.0, vm.uiState.value.comparisonDeclaredAreaHectares!!, 0.0)
+        vm.setDeclaredArea("")
+        assertNull(vm.uiState.value.comparisonDeclaredAreaHectares)
+        vm.setDeclaredArea("invalid")
+        assertNull(vm.uiState.value.comparisonDeclaredAreaHectares)
+    }
+
+    @Test
+    fun `declared area compares at the thirty percent boundary`() {
+        assertFalse(pe.edu.upc.viora.features.plotmanagement.presentation.state.areaDiffersConsiderably(1.3, 1.0))
+        assertTrue(pe.edu.upc.viora.features.plotmanagement.presentation.state.areaDiffersConsiderably(1.301, 1.0))
+        assertFalse(pe.edu.upc.viora.features.plotmanagement.presentation.state.areaDiffersConsiderably(0.7, 1.0))
+        assertTrue(pe.edu.upc.viora.features.plotmanagement.presentation.state.areaDiffersConsiderably(0.699, 1.0))
+    }
+
+    @Test
+    fun `different declared area asks before saving and confirmation survives retry but not outline changes`() {
+        val vm = readyToSave()
+        vm.setDeclaredArea("100")
+        vm.save()
+        assertTrue(vm.uiState.value.showAreaConfirmation)
+        assertTrue(repository.registered.isEmpty())
+        vm.confirmAreaAndSave()
+        assertFalse(vm.uiState.value.showAreaConfirmation)
+        assertEquals(1, repository.registered.size)
+        vm.save()
+        assertEquals(2, repository.registered.size)
+        vm.adjustOutline()
+        val original = vm.uiState.value.corners
+        assertEquals(listOf(a, b, c, d).toSet(), original.toSet())
+        vm.undoCorner()
+        vm.addCorner(d)
+        vm.closeOutline()
+        vm.continueToReview()
+        vm.save()
+        assertTrue(vm.uiState.value.showAreaConfirmation)
+        assertEquals(2, repository.registered.size)
+    }
+
+    @Test
+    fun `declared area accepts decimal comma and rejects invalid values`() {
+        val vm = freshViewModel()
+        vm.setDeclaredArea("1,5")
+        assertEquals(1.5, vm.uiState.value.declaredAreaHectares!!, 0.0)
+        vm.setDeclaredArea("0")
+        assertFalse(vm.uiState.value.declaredAreaIsValid)
+        vm.startMarking(MarkingMethod.MAP_TRACE)
+        assertEquals(RegisterPlotStep.METHOD, vm.uiState.value.step)
+        vm.setDeclaredArea("")
+        assertTrue(vm.uiState.value.declaredAreaIsValid)
+        vm.startMarking(MarkingMethod.MAP_TRACE)
+        assertEquals(RegisterPlotStep.TRACE, vm.uiState.value.step)
+    }
+
+    @Test
+    fun `optional empty declared area saves without comparison`() {
+        val vm = readyToSave()
+        vm.save()
+        assertFalse(vm.uiState.value.showAreaConfirmation)
+        assertEquals(1, repository.registered.size)
+    }
+
+    @Test
+    fun `matching declared area saves without confirmation`() {
+        val vm = readyToSave()
+        vm.setDeclaredArea(vm.uiState.value.areaHectares.toString())
+        vm.save()
+        assertFalse(vm.uiState.value.showAreaConfirmation)
+        assertEquals(1, repository.registered.size)
+    }
+
+    @Test
+    fun `dismissing warning does not save and asks again`() {
+        val vm = readyToSave()
+        vm.setDeclaredArea("100")
+        vm.save()
+        vm.dismissAreaConfirmation()
+        assertFalse(vm.uiState.value.showAreaConfirmation)
+        assertTrue(repository.registered.isEmpty())
+        vm.save()
+        assertTrue(vm.uiState.value.showAreaConfirmation)
+    }
+
+    @Test
+    fun `correcting outline dismisses warning and keeps corners`() {
+        val vm = readyToSave()
+        vm.setDeclaredArea("100")
+        vm.save()
+        val corners = vm.uiState.value.corners
+        vm.adjustOutline()
+        assertFalse(vm.uiState.value.showAreaConfirmation)
+        assertEquals(RegisterPlotStep.TRACE, vm.uiState.value.step)
+        assertEquals(corners, vm.uiState.value.corners)
+        assertTrue(repository.registered.isEmpty())
+    }
+
     // ---- start
 
     @Test

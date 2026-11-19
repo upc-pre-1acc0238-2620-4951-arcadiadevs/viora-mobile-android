@@ -2,6 +2,7 @@ package pe.edu.upc.viora.features.plotmanagement.presentation.ui.registration
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mapbox.geojson.Point
@@ -28,6 +30,7 @@ import com.mapbox.maps.extension.compose.style.MapStyle
 import com.mapbox.maps.plugin.gestures.gestures
 import pe.edu.upc.viora.core.designsystem.theme.Green100
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
+import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.domain.GeoPoint
 
@@ -46,6 +49,8 @@ fun OutlinePreview(
     captionAlignment: Alignment,
     height: Dp,
     modifier: Modifier = Modifier,
+    secondaryCaption: String? = null,
+    secondaryCaptionColor: Color = Neutral600,
 ) {
     BoxWithConstraints(
         modifier = modifier
@@ -88,16 +93,16 @@ fun OutlinePreview(
             }
             OutlineAnnotations(corners)
         }
-        Text(
-            text = caption,
-            style = MaterialTheme.typography.labelMedium,
-            color = Neutral900,
+        Column(
             modifier = Modifier
                 .align(captionAlignment)
                 .padding(12.dp)
-                .clip(CircleShape)
+                .clip(if (secondaryCaption == null) CircleShape else RoundedCornerShape(16.dp))
                 .background(Neutral0)
                 .padding(horizontal = 12.dp, vertical = 6.dp),
-        )
+        ) {
+            Text(text = caption, style = MaterialTheme.typography.labelMedium, color = Neutral900)
+            secondaryCaption?.let { Text(text = it, style = MaterialTheme.typography.bodySmall, color = secondaryCaptionColor) }
+        }
     }
 }

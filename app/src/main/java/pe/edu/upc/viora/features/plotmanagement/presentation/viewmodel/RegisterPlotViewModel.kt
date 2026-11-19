@@ -74,9 +74,15 @@ class RegisterPlotViewModel @Inject constructor(
 
     // ---- Step 1: choose how to mark the outline
 
+    fun setDeclaredArea(value: String) {
+        _uiState.update {
+            if (it.declaredArea == value) it else it.copy(declaredArea = value, areaDifferenceConfirmed = false, showAreaConfirmation = false)
+        }
+    }
+
     /** Starts marking the outline with [method]. */
     fun startMarking(method: MarkingMethod) {
-        _uiState.update { it.copy(method = method, step = RegisterPlotStep.TRACE) }
+        _uiState.update { if (it.declaredAreaIsValid) it.copy(method = method, step = RegisterPlotStep.TRACE) else it }
     }
 
     /**
@@ -104,6 +110,7 @@ class RegisterPlotViewModel @Inject constructor(
                 val corner = TracedCorner(id = it.nextCornerId, point = point)
                 it.copy(
                     outline = it.outline.toMutableList().apply { add(index, corner) },
+                    areaDifferenceConfirmed = false,
                     nextCornerId = it.nextCornerId + 1,
                     outlineError = null,
                     refusedMove = false,
@@ -116,7 +123,7 @@ class RegisterPlotViewModel @Inject constructor(
     fun undoCorner() {
         _uiState.update {
             val last = it.outline.maxByOrNull { corner -> corner.id } ?: return@update it
-            it.copy(outline = it.outline - last, outlineError = null, refusedMove = false)
+            it.copy(outline = it.outline - last, outlineError = null, refusedMove = false, areaDifferenceConfirmed = false)
         }
     }
 
@@ -133,7 +140,7 @@ class RegisterPlotViewModel @Inject constructor(
             if (PlotOutline.check(moved.map { corner -> corner.point }) == PlotOutline.Error.SelfIntersecting) {
                 it.copy(refusedMove = true)
             } else {
-                it.copy(outline = moved, refusedMove = false, outlineError = null)
+                it.copy(outline = moved, refusedMove = false, outlineError = null, areaDifferenceConfirmed = if (moved == it.outline) it.areaDifferenceConfirmed else false)
             }
         }
     }
@@ -182,6 +189,10 @@ class RegisterPlotViewModel @Inject constructor(
         val current = _uiState.value
         if (current.isSaving || current.exceedsPlan) return
         val newPlot = current.toNewPlotOrNull() ?: return
+        if (current.hasConsiderableAreaDifference && !current.areaDifferenceConfirmed) {
+            _uiState.update { it.copy(showAreaConfirmation = true) }
+            return
+        }
         _uiState.update { it.copy(isSaving = true, saveFailure = null) }
         viewModelScope.launch {
             when (val result = registerPlot(newPlot)) {
@@ -196,9 +207,19 @@ class RegisterPlotViewModel @Inject constructor(
         }
     }
 
+    fun confirmAreaAndSave() {
+        if (!_uiState.value.showAreaConfirmation) return
+        _uiState.update { it.copy(showAreaConfirmation = false, areaDifferenceConfirmed = true) }
+        save()
+    }
+
+    fun dismissAreaConfirmation() {
+        _uiState.update { it.copy(showAreaConfirmation = false) }
+    }
+
     /** "Ajustar contorno" of P25: back to the outline, keeping the corners and the details. */
     fun adjustOutline() {
-        _uiState.update { it.copy(step = RegisterPlotStep.TRACE, saveFailure = null) }
+        _uiState.update { it.copy(step = RegisterPlotStep.TRACE, saveFailure = null, showAreaConfirmation = false) }
     }
 
     fun dismissSaveFailure() {

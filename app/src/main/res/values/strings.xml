@@ -1006,7 +1006,6 @@
         <item quantity="one">%d day left</item>
         <item quantity="other">%d days left</item>
     </plurals>
-    <string name="thinning_last_day">Today is the last day</string>
     <plurals name="thinning_opens_in">
         <item quantity="one">The window opens in %d day</item>
         <item quantity="other">The window opens in %d days</item>
@@ -1053,7 +1052,6 @@
         <item quantity="one">%1$d day left before pit hardening</item>
         <item quantity="other">%1$d days left before pit hardening</item>
     </plurals>
-    <string name="plan_week_last_day">today is the last day before pit hardening</string>
     <string name="plan_week_one">%1$s · %2$s</string>
     <string name="plan_week_first">Start with %1$s · %2$s</string>
     <string name="plan_week_next_opening">The window of %1$s opens on %2$s</string>
@@ -1723,7 +1721,7 @@ Reference price. You pay after creating your account.</string>
     <string name="phase_msg_bloom_mild">is the week\'s high. The bloom of %1$s will not suffer heat.</string>
     <string name="phase_msg_bloom_until_fruit_set">until the fruit set of %1$s.</string>
     <string name="phase_msg_trees_missing">left in %1$s to estimate your load. Works without signal.</string>
-    <string name="phase_msg_bloom_missing">until the usual window. Record the full bloom to fix your own.</string>
+    <string name="phase_msg_bloom_missing">for the usual window. Record the full bloom to fix your own.</string>
     <string name="phase_msg_sampling_done">until the thinning of %1$s opens. Sampling done.</string>
     <string name="phase_msg_thin_percentage">to thin %1$d %% of the fruit in %2$s.</string>
     <string name="phase_msg_thin_without_plan">to thin %1$s. Finish the sampling to know how much.</string>
@@ -2077,4 +2075,45 @@ Reference price. You pay after creating your account.</string>
     <string name="plot_sectors_later">Later</string>
     <string name="plot_sectors_row_subtitle">%1$s · %2$s ha</string>
     <string name="plot_sectors_choose">Choose sector</string>
+    <string name="location_service_off_title">Location is off</string>
+    <string name="location_service_off_body">Turn on location to walk the plot with GPS, or trace it on the map.</string>
+    <string name="location_service_off_hint">Tap to turn on location</string>
+    <string name="location_service_open">Open location settings</string>
+    <string name="location_service_use_map">Continue on the map</string>
+    <string name="location_service_walk_body_empty">Turn on location to keep walking, or continue on the map.</string>
+    <plurals name="location_service_walk_body_kept">
+        <item quantity="one">Your %1$d corner is kept. Turn on location to keep walking, or continue on the map.</item>
+        <item quantity="other">Your %1$d corners are kept. Turn on location to keep walking, or continue on the map.</item>
+    </plurals>
+    <string name="declared_area_label">Approximate area (optional)</string>
+    <string name="declared_area_placeholder">Hectares, e.g. 3.5</string>
+    <string name="declared_area_invalid">Enter a number greater than zero.</string>
+    <string name="area_difference_title">The area does not match</string>
+    <string name="area_difference_body">You stated that the plot has about %1$s ha, but the outline you marked measures %2$s ha. Check the outline or save it as it is if it looks right.</string>
+    <string name="area_difference_adjust">Correct outline</string>
+    <string name="area_difference_confirm">Continue and save</string>
+    <string name="map_scale_description">Map scale in metric units</string>
+    <string name="area_declared_comparison">of ~%1$s ha stated</string>
+    <string name="term_help_eyebrow">WHAT DOES IT MEAN?</string>
+    <string name="term_help_description">What does %1$s mean?</string>
+    <string name="term_alternation_title">Alternation index</string>
+    <string name="term_thinning_definition">It means removing some small olives by hand when the tree has set more fruit than it can fill. It is not pruning: no branches are cut.</string>
+    <string name="term_thinning_example">If your olive trees are heavily loaded this year, thinning now gives larger olives and helps prevent next year’s harvest from falling.</string>
+    <string name="term_alternation_definition">It measures how much your harvest rises and falls from one year to the next. Many olive trees produce heavily one campaign and lightly the next.</string>
+    <string name="term_alternation_example">If you harvested 8 t/ha one year and 3 t/ha the next, your alternation is high. The more even your harvests, the lower the index.</string>
+    <string name="term_dormancy_definition">During dormancy, the olive tree slows down; watch the chill it accumulates for the next bloom.</string>
+    <string name="term_dormancy_example">This winter, check the chill hours in your plot before the coming campaign’s bloom.</string>
+    <string name="term_bloom_definition">During bloom, the olive tree opens its flowers; watch for when most of them are open.</string>
+    <string name="term_bloom_example">Record the full bloom date this campaign to help plan thinning.</string>
+    <string name="term_fruit_set_definition">During fruit set, some flowers become small olives; watch how much fruit remains on the branches.</string>
+    <string name="term_fruit_set_example">After this campaign’s bloom, check the shoots to estimate the olive load.</string>
+    <string name="term_harvest_definition">At harvest, ripe olives are picked; check their condition and record what you collect.</string>
+    <string name="term_harvest_example">When this campaign’s harvest ends, record the kilograms collected from your plot.</string>
+    <string name="notification_channel_critical_alerts">Critical alerts</string>
+    <string name="notification_frost_title">Frost risk in %1$s</string>
+    <string name="notification_critical_title">Critical alert in %1$s</string>
+    <string name="notification_critical_body">Open the alert to review what to do.</string>
+    <string name="account_critical_alerts_label">Critical alert notifications</string>
+    <string name="notification_channel_critical_alerts_description">Urgent agroclimatic alerts for your plots.</string>
+    <string name="account_critical_alerts_permission_hint">Turn on Notifications above to receive them.</string>
 </resources>

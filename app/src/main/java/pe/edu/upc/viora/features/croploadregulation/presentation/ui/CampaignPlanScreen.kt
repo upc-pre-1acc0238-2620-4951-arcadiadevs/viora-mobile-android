@@ -202,7 +202,7 @@ private fun WeekCard(state: CampaignPlanUiState, onOpen: (PlanRow) -> Unit, modi
     val subtitle = when {
         first != null -> {
             val days = first.daysLeft ?: 0
-            val remaining = if (days == 0) stringResource(R.string.plan_week_last_day) else pluralStringResource(R.plurals.plan_week_days_left, days, days)
+            val remaining = pluralStringResource(R.plurals.plan_week_days_left, days, days)
             if (urgent.size > 1) stringResource(R.string.plan_week_first, first.plot.name, remaining) else stringResource(R.string.plan_week_one, first.plot.name, remaining)
         }
         else -> state.nextOpening?.let { next ->

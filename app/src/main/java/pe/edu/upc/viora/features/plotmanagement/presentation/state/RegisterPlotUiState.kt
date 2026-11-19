@@ -35,10 +35,21 @@ sealed interface SaveFailure {
     data class Other(val error: AppError) : SaveFailure
 }
 
+/** A difference is considerable only when it exceeds 30% of the declared area. */
+const val DECLARED_AREA_DIFFERENCE_THRESHOLD = 0.30
+
+fun areaDiffersConsiderably(calculated: Double, declared: Double): Boolean =
+    calculated < declared * (1.0 - DECLARED_AREA_DIFFERENCE_THRESHOLD) ||
+        calculated > declared * (1.0 + DECLARED_AREA_DIFFERENCE_THRESHOLD)
+
 data class RegisterPlotUiState(
     val step: RegisterPlotStep = RegisterPlotStep.METHOD,
     /** The method chosen in the first step; the outline is marked with it. */
     val method: MarkingMethod? = null,
+    /** Approximate area, used only by this wizard and never included in the request. */
+    val declaredArea: String = "",
+    val showAreaConfirmation: Boolean = false,
+    val areaDifferenceConfirmed: Boolean = false,
     /** The traced corners in drawing order (the outline never crosses itself). */
     val outline: List<TracedCorner> = emptyList(),
     /** Next id to hand out: ids grow in the order corners are added, so the highest is the last one. */
@@ -89,6 +100,15 @@ data class RegisterPlotUiState(
     val outlineCenter: GeoPoint?
         get() = if (outline.isEmpty()) null else GeoPoint(corners.map { it.latitude }.average(), corners.map { it.longitude }.average())
 
+    val declaredAreaHectares: Double?
+        get() = declaredArea.replace(',', '.').toDoubleOrNull()?.takeIf { it.isFinite() && it > 0.0 }
+    val declaredAreaIsValid: Boolean
+        get() = declaredArea.isBlank() || (declaredArea.matches(Regex("[0-9]+([.,][0-9]+)?")) && declaredAreaHectares != null)
+    val comparisonDeclaredAreaHectares: Double?
+        get() = declaredAreaHectares?.takeIf { declaredAreaIsValid && corners.size >= PlotOutline.MIN_CORNERS }
+    val hasConsiderableAreaDifference: Boolean
+        get() = declaredAreaHectares?.let { areaDiffersConsiderably(areaHectares, it) } == true
+
     val areaHectares: Double get() = PlotOutline.areaHectares(corners)
     val treesPerHectare: Int get() = PlantationFrame.density(rowSpacingMeters, treeSpacingMeters)
     val estimatedTrees: Int get() = Math.round(areaHectares * treesPerHectare).toInt()
@@ -98,7 +118,7 @@ data class RegisterPlotUiState(
     val detailsAreValid: Boolean get() = nameError == null && variety != null && frameError == null
 
     /** Leaving now would throw away something the producer did. */
-    val hasWorkInProgress: Boolean get() = corners.isNotEmpty() || name.isNotBlank()
+    val hasWorkInProgress: Boolean get() = corners.isNotEmpty() || name.isNotBlank() || declaredArea.isNotBlank()
 
     companion object {
         const val DEFAULT_SPACING_METERS = 7.0

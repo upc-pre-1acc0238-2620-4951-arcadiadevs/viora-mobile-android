@@ -49,7 +49,7 @@ data class ThinningPrescription(
             today.isBefore(opens) -> WindowPhase.NotOpenYet(ChronoUnit.DAYS.between(today, opens).toInt())
             today.isAfter(closes) -> WindowPhase.Closed(ChronoUnit.DAYS.between(closes, today).toInt())
             else -> WindowPhase.Open(
-                daysLeft = ChronoUnit.DAYS.between(today, closes).toInt(),
+                daysLeft = ChronoUnit.DAYS.between(today, closes).toInt() + 1,
                 progress = ChronoUnit.DAYS.between(opens, today).toFloat() /
                     ChronoUnit.DAYS.between(opens, closes).coerceAtLeast(1),
             )

@@ -1025,7 +1025,6 @@
         <item quantity="many">Quedan %d días</item>
         <item quantity="other">Quedan %d días</item>
     </plurals>
-    <string name="thinning_last_day">Hoy es el último día</string>
     <plurals name="thinning_opens_in">
         <item quantity="one">La ventana abre en %d día</item>
         <item quantity="many">La ventana abre en %d días</item>
@@ -1077,7 +1076,6 @@
         <item quantity="many">quedan %1$d días antes del carozo</item>
         <item quantity="other">quedan %1$d días antes del carozo</item>
     </plurals>
-    <string name="plan_week_last_day">hoy es el último día antes del carozo</string>
     <string name="plan_week_one">%1$s · %2$s</string>
     <string name="plan_week_first">Empieza por %1$s · %2$s</string>
     <string name="plan_week_next_opening">La ventana de %1$s abre el %2$s</string>
@@ -2128,4 +2126,46 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
     <string name="plot_sectors_later">Más tarde</string>
     <string name="plot_sectors_row_subtitle">%1$s · %2$s ha</string>
     <string name="plot_sectors_choose">Elegir sector</string>
+    <string name="location_service_off_title">La ubicación está desactivada</string>
+    <string name="location_service_off_body">Activa la ubicación para recorrer el lote con GPS o traza el contorno en el mapa.</string>
+    <string name="location_service_off_hint">Toca para activar la ubicación</string>
+    <string name="location_service_open">Abrir ajustes de ubicación</string>
+    <string name="location_service_use_map">Seguir en el mapa</string>
+    <string name="location_service_walk_body_empty">Activa la ubicación para seguir recorriendo o continúa en el mapa.</string>
+    <plurals name="location_service_walk_body_kept">
+        <item quantity="one">Se conserva %1$d esquina. Activa la ubicación para seguir recorriendo o continúa en el mapa.</item>
+        <item quantity="many">Se conservan %1$d esquinas. Activa la ubicación para seguir recorriendo o continúa en el mapa.</item>
+        <item quantity="other">Se conservan %1$d esquinas. Activa la ubicación para seguir recorriendo o continúa en el mapa.</item>
+    </plurals>
+    <string name="declared_area_label">Área aproximada (opcional)</string>
+    <string name="declared_area_placeholder">Hectáreas, por ejemplo 3,5</string>
+    <string name="declared_area_invalid">Escribe un número mayor que cero.</string>
+    <string name="area_difference_title">El área no coincide</string>
+    <string name="area_difference_body">Indicaste que el lote tiene unas %1$s ha, pero el contorno que marcaste mide %2$s ha. Revisa el contorno o guárdalo así si está bien.</string>
+    <string name="area_difference_adjust">Corregir contorno</string>
+    <string name="area_difference_confirm">Continuar y guardar</string>
+    <string name="map_scale_description">Escala del mapa en unidades métricas</string>
+    <string name="area_declared_comparison">de ~%1$s ha indicadas</string>
+    <string name="term_help_eyebrow">¿QUÉ SIGNIFICA?</string>
+    <string name="term_help_description">¿Qué significa %1$s?</string>
+    <string name="term_alternation_title">Índice de alternancia</string>
+    <string name="term_thinning_definition">Es sacar a mano parte de las aceitunas pequeñas cuando el árbol cuajó más fruta de la que puede llenar. No es poda: no se cortan ramas. También se le dice raleo.</string>
+    <string name="term_thinning_example">Si este año tus olivos están muy cargados, aclarar ahora da aceitunas más grandes y evita que la cosecha del próximo año caiga.</string>
+    <string name="term_alternation_definition">Mide cuánto sube y baja tu cosecha de un año a otro. Muchos olivos dan una campaña de mucha producción y la siguiente de poca.</string>
+    <string name="term_alternation_example">Si un año cosechaste 8 t/ha y el siguiente 3 t/ha, tu alternancia es alta. Mientras más parejas sean tus cosechas, más bajo es el índice.</string>
+    <string name="term_dormancy_definition">En el reposo, el olivo reduce su actividad; observa el frío que acumula para la próxima floración.</string>
+    <string name="term_dormancy_example">Este invierno revisa las horas de frío del lote antes de la floración de la campaña.</string>
+    <string name="term_bloom_definition">En la floración se abren las flores del olivo; observa cuándo la mayoría está abierta.</string>
+    <string name="term_bloom_example">En esta campaña registra la fecha de plena floración para planificar el aclareo.</string>
+    <string name="term_fruit_set_definition">En el cuajado, algunas flores forman aceitunas pequeñas; observa cuánta fruta queda en las ramas.</string>
+    <string name="term_fruit_set_example">Después de la floración de esta campaña, revisa los brotes para estimar la carga de aceitunas.</string>
+    <string name="term_harvest_definition">En la cosecha se recogen las aceitunas maduras; observa su estado y registra lo recogido.</string>
+    <string name="term_harvest_example">Al terminar la cosecha de esta campaña, anota los kilos recogidos en tu lote.</string>
+    <string name="notification_channel_critical_alerts">Alertas críticas</string>
+    <string name="notification_frost_title">Riesgo de helada en %1$s</string>
+    <string name="notification_critical_title">Alerta crítica en %1$s</string>
+    <string name="notification_critical_body">Abre la alerta para revisar qué hacer.</string>
+    <string name="account_critical_alerts_label">Notificaciones de alertas críticas</string>
+    <string name="notification_channel_critical_alerts_description">Alertas agroclimáticas urgentes para tus lotes.</string>
+    <string name="account_critical_alerts_permission_hint">Activa «Notificaciones» aquí arriba para recibirlas.</string>
 </resources>

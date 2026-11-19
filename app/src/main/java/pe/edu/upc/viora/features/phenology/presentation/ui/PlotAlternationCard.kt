@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pe.edu.upc.viora.R
+import pe.edu.upc.viora.core.designsystem.component.AgronomicTerm
+import pe.edu.upc.viora.core.designsystem.component.AgronomicTermHelp
 import pe.edu.upc.viora.core.designsystem.theme.Green800
 import pe.edu.upc.viora.core.designsystem.theme.Harvest300
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
@@ -42,9 +44,9 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
 import pe.edu.upc.viora.core.domain.tonnesPerHectare
 import pe.edu.upc.viora.core.presentation.formatTonnesPerHectare
-import pe.edu.upc.viora.features.phenology.presentation.state.PlotAlternation
 import pe.edu.upc.viora.features.phenology.domain.entity.BearingYear
 import pe.edu.upc.viora.features.phenology.domain.entity.HarvestRecord
+import pe.edu.upc.viora.features.phenology.presentation.state.PlotAlternation
 import pe.edu.upc.viora.features.phenology.presentation.viewmodel.PlotAlternationViewModel
 
 private val BarWidth = 44.dp
@@ -91,11 +93,15 @@ fun PlotAlternationCardContent(
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = stringResource(R.string.home_alternation_title),
-                style = MaterialTheme.typography.headlineSmall,
-                color = Neutral900,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(R.string.home_alternation_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Neutral900,
+                    modifier = Modifier.weight(1f),
+                )
+                AgronomicTermHelp(AgronomicTerm.ALTERNATION)
+            }
             Text(
                 text = stringResource(R.string.home_alternation_subtitle, plotName),
                 style = MaterialTheme.typography.bodySmall,

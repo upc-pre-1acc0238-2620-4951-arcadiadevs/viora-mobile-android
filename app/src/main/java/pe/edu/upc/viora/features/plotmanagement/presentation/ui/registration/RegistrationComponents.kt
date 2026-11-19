@@ -41,6 +41,8 @@ fun StatTile(
     background: Color,
     modifier: Modifier = Modifier,
     valueColor: Color = Neutral900,
+    secondary: String? = null,
+    secondaryColor: Color = Neutral600,
 ) {
     Column(
         modifier = modifier
@@ -50,6 +52,7 @@ fun StatTile(
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Text(text = value, style = MaterialTheme.typography.displaySmall, color = valueColor)
+        secondary?.let { Text(text = it, style = MaterialTheme.typography.bodySmall, color = secondaryColor) }
         Text(text = caption, style = MaterialTheme.typography.bodySmall, color = Neutral600)
     }
 }

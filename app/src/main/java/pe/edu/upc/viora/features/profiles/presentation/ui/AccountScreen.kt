@@ -1,9 +1,14 @@
 package pe.edu.upc.viora.features.profiles.presentation.ui
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,6 +51,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Neutral500
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta100
 import pe.edu.upc.viora.core.designsystem.theme.Terracotta700
 import pe.edu.upc.viora.core.locale.AppLanguage
+import pe.edu.upc.viora.core.notification.VioraNotificationChannels
 import pe.edu.upc.viora.features.profiles.presentation.viewmodel.AccountViewModel
 
 private const val LANGUAGE_NOTICE_MILLIS = 2_500L
@@ -73,8 +80,13 @@ fun AccountScreen(
 
     // Notifications can be switched off in the phone's settings; read them again on every return.
     var notificationsOn by remember { mutableStateOf(true) }
+    var criticalNotificationsAvailable by remember { mutableStateOf(context.canPostCriticalAlerts()) }
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        criticalNotificationsAvailable = context.canPostCriticalAlerts()
+    }
     LifecycleResumeEffect(Unit) {
         notificationsOn = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        criticalNotificationsAvailable = context.canPostCriticalAlerts()
         onPauseOrDispose { }
     }
 
@@ -153,6 +165,25 @@ fun AccountScreen(
                     showDivider = true,
                     onClick = { context.openNotificationSettings() },
                 )
+                AccountSwitchRow(
+                    label = stringResource(R.string.account_critical_alerts_label),
+                    checked = state.criticalAlerts,
+                    onCheckedChange = { enabled ->
+                        viewModel.onCriticalAlertsChange(enabled)
+                        criticalNotificationsAvailable = context.canPostCriticalAlerts()
+                        if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    },
+                    showDivider = true,
+                    supporting = if (state.criticalAlerts && !criticalNotificationsAvailable) {
+                        stringResource(R.string.account_critical_alerts_permission_hint)
+                    } else {
+                        null
+                    },
+                )
                 AccountRow(
                     label = stringResource(R.string.account_home_tour_label),
                     value = stringResource(R.string.account_home_tour_replay),
@@ -230,3 +261,7 @@ private fun Context.openNotificationSettings() {
         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     startActivity(intent)
 }
+
+private fun Context.canPostCriticalAlerts(): Boolean = VioraNotificationChannels.canPostCriticalAlerts(this)
+
+

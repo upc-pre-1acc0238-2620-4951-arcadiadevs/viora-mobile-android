@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,6 +44,7 @@ fun VioraTextFieldCard(
     placeholder: String,
     enabled: Boolean,
     modifier: Modifier = Modifier,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     Column(
         modifier = modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Neutral0).padding(horizontal = 18.dp, vertical = 12.dp),
@@ -54,6 +56,7 @@ fun VioraTextFieldCard(
             onValueChange = onValueChange,
             enabled = enabled,
             singleLine = true,
+            keyboardOptions = keyboardOptions,
             textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.sp, color = Neutral900),
             cursorBrush = SolidColor(Green800),
             modifier = Modifier.fillMaxWidth().semantics { contentDescription = label },
