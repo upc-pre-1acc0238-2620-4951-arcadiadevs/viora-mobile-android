@@ -240,6 +240,8 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
                                     onSample = { id, name -> navController.navigate(SamplingRoundRoute(plotId = id, plotName = name)) },
                                     onOpenThinningPlan = { id, name -> navController.navigate(ThinningPlanRoute(plotId = id, plotName = name)) },
                                     onOpenAlternation = { id, name -> navController.navigate(HarvestHistoryRoute(plotId = id, plotName = name)) },
+                                    onAdjustPhaseStart = phaseViewModel::adjustStart,
+                                    onResetPhaseStart = phaseViewModel::resetStart,
                                     harvestPicker = { harvest, onDone ->
                                         HarvestPlotPickerSheet(
                                             state = HarvestEntryUiState(harvest.campaignYear, harvest.plots, harvest.totalPlots),
@@ -357,7 +359,7 @@ fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         harvestHistoryComposable(
             navController,
             onOpenSection = { section, plotId, plotName -> navController.openLotSection(section, plotId, plotName) },
-assistantSheet = assistantSheetOf(AssistantScreen.ALTERNATION),
+            assistantSheet = assistantSheetOf(AssistantScreen.ALTERNATION),
         )
         winterChillComposable(
             navController,
@@ -396,7 +398,7 @@ assistantSheet = assistantSheetOf(AssistantScreen.ALTERNATION),
                 }
             },
             onOpenAlternation = { plotId, plotName -> navController.navigate(HarvestHistoryRoute(plotId = plotId, plotName = plotName)) },
-assistantSheet = assistantSheetOf(AssistantScreen.PLAN),
+            assistantSheet = assistantSheetOf(AssistantScreen.PLAN),
             resultAssistantSheet = assistantSheetOf(AssistantScreen.THINNING_DONE),
         )
         navigation<PlanGraph>(startDestination = PlanRoute) {

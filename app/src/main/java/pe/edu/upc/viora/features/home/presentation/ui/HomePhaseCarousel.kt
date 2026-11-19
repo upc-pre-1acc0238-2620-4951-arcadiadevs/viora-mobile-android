@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,8 +52,6 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlinx.coroutines.launch
 import pe.edu.upc.viora.R
-import pe.edu.upc.viora.core.designsystem.component.AgronomicTerm
-import pe.edu.upc.viora.core.designsystem.component.AgronomicTermHelp
 import pe.edu.upc.viora.core.designsystem.component.PhaseCardArtwork
 import pe.edu.upc.viora.core.designsystem.component.PhaseIllustration
 import pe.edu.upc.viora.core.designsystem.theme.Green200
@@ -85,6 +84,10 @@ class HomePhaseActions(
     val onSample: (plotId: String, plotName: String) -> Unit,
     val onOpenThinningPlan: (plotId: String, plotName: String) -> Unit,
     val onOpenAlternation: (plotId: String, plotName: String) -> Unit,
+    /** The producer says that a phase starts on that day in the plot in focus (see [PhaseCalendarSheet]). */
+    val onAdjustPhaseStart: (phase: HomePhase, on: LocalDate) -> Unit,
+    /** The start of a phase goes back to the usual date in the plot in focus. */
+    val onResetPhaseStart: (phase: HomePhase) -> Unit,
     val harvestPicker: @Composable (harvest: HarvestProgress, onDone: () -> Unit) -> Unit,
 )
 
@@ -103,6 +106,7 @@ fun HomePhaseCarousel(
     val pager = rememberPagerState(initialPage = state.current) { state.cards.size }
     val scope = rememberCoroutineScope()
     var picking by rememberSaveable { mutableStateOf(false) }
+    var showingCalendar by rememberSaveable { mutableStateOf(false) }
     // The current phase can move once the harvest data arrives (June: harvest or winter).
     LaunchedEffect(state.current) { pager.scrollToPage(state.current) }
 
@@ -142,6 +146,22 @@ fun HomePhaseCarousel(
             }
         }
         PageDots(count = state.cards.size, selected = pager.currentPage, modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 12.dp))
+        if (state.calendar.isNotEmpty()) {
+            TextButton(onClick = { showingCalendar = true }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Icon(painterResource(R.drawable.ic_calendar_month), contentDescription = null, modifier = Modifier.size(18.dp))
+                Text(stringResource(R.string.phase_calendar_link), modifier = Modifier.padding(start = 8.dp))
+            }
+        }
+    }
+
+    if (showingCalendar && state.calendar.isNotEmpty()) {
+        PhaseCalendarSheet(
+            plotName = state.focusedPlotName,
+            rows = state.calendar,
+            onAdjust = actions.onAdjustPhaseStart,
+            onReset = actions.onResetPhaseStart,
+            onDismiss = { showingCalendar = false },
+        )
     }
 
     val harvest = state.harvest
@@ -166,8 +186,6 @@ private fun PhaseCardView(card: PhaseCard, onAction: () -> Unit, modifier: Modif
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.54.sp),
                     color = onDark,
                 )
-                // Inline with the phase name it explains, clear of the artwork in the top-right corner.
-                AgronomicTermHelp(card.phase.helpTerm(), tint = Neutral50)
             }
             Figure(card.figure, Modifier.padding(top = 2.dp))
             Text(
@@ -353,7 +371,7 @@ private fun milestoneText(milestone: PhaseMilestone, on: LocalDate): String =
 
 /** "30 nov" / "Nov 30": the short month without the abbreviation dot some locales add. */
 @Composable
-private fun shortDate(on: LocalDate): String {
+internal fun shortDate(on: LocalDate): String {
     val locale = LocalConfiguration.current.locales[0]
     return DateTimeFormatter.ofPattern(stringResource(R.string.phase_date_pattern), locale).format(on).replace(".", "")
 }
@@ -419,12 +437,4 @@ private fun messageText(message: PhaseMessage): String = when (message) {
             HomePhase.HARVEST -> R.string.phase_msg_ended_harvest
         },
     )
-}
-
-internal fun HomePhase.helpTerm(): AgronomicTerm = when (this) {
-    HomePhase.DORMANCY -> AgronomicTerm.DORMANCY
-    HomePhase.BLOOM -> AgronomicTerm.BLOOM
-    HomePhase.FRUIT_SET -> AgronomicTerm.FRUIT_SET
-    HomePhase.THINNING -> AgronomicTerm.THINNING
-    HomePhase.HARVEST -> AgronomicTerm.HARVEST
 }
