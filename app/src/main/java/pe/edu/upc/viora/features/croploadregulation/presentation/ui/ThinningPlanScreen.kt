@@ -572,11 +572,7 @@ private fun PrescriptionCard(
                 until = stringResource(R.string.thinning_window_until, closes?.short() ?: stringResource(R.string.thinning_no_value)),
             )
             val dayLine = when (phase) {
-                is WindowPhase.Open -> if (phase.daysLeft == 0) {
-                    stringResource(R.string.thinning_last_day)
-                } else {
-                    pluralStringResource(R.plurals.thinning_days_left, phase.daysLeft, phase.daysLeft)
-                }
+                is WindowPhase.Open -> pluralStringResource(R.plurals.thinning_days_left, phase.daysLeft, phase.daysLeft)
                 is WindowPhase.NotOpenYet -> pluralStringResource(R.plurals.thinning_opens_in, phase.daysUntilOpen, phase.daysUntilOpen)
                 is WindowPhase.Closed -> pluralStringResource(
                     R.plurals.thinning_closed_since,

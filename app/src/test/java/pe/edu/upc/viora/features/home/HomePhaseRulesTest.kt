@@ -5,10 +5,11 @@ import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.core.domain.OliveVariety
 import pe.edu.upc.viora.core.domain.PlotId
-import pe.edu.upc.viora.features.croploadregulation.blockedPlan
 import pe.edu.upc.viora.features.croploadregulation.application.published.CampaignPlan
+import pe.edu.upc.viora.features.croploadregulation.blockedPlan
 import pe.edu.upc.viora.features.croploadregulation.issuedPlan
 import pe.edu.upc.viora.features.harvestsettlement.application.published.PlotToSettle
 import pe.edu.upc.viora.features.home.presentation.state.HarvestProgress
@@ -19,15 +20,14 @@ import pe.edu.upc.viora.features.home.presentation.state.PhaseAction
 import pe.edu.upc.viora.features.home.presentation.state.PhaseFigure
 import pe.edu.upc.viora.features.home.presentation.state.PhaseMessage
 import pe.edu.upc.viora.features.home.presentation.state.PhaseTiming
+import pe.edu.upc.viora.features.phenology.application.published.ChillTracker
+import pe.edu.upc.viora.features.phenology.application.published.WinterSeasonState
 import pe.edu.upc.viora.features.phenology.domain.OlivePhases
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillProjection
-import pe.edu.upc.viora.features.phenology.application.published.ChillTracker
 import pe.edu.upc.viora.features.phenology.domain.entity.ThermalAnomaly
-import pe.edu.upc.viora.features.phenology.application.published.WinterSeasonState
 import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
-import pe.edu.upc.viora.core.domain.GeoPoint
-import pe.edu.upc.viora.features.telemetry.domain.entity.ForecastDay
 import pe.edu.upc.viora.features.telemetry.application.published.WeatherForecast
+import pe.edu.upc.viora.features.telemetry.domain.entity.ForecastDay
 
 /** Figma P10 · Fase: which phase the Home opens on and what each card says, from the plot's own data. */
 class HomePhaseRulesTest {
@@ -73,20 +73,39 @@ class HomePhaseRulesTest {
         assertEquals(HomePhase.THINNING, state.currentPhase())
         assertEquals(HomePhase.THINNING, state.headlinePhase)
         val card = state.card(HomePhase.THINNING)
-        assertEquals(PhaseFigure.Days(12), card.figure)
+        assertEquals(PhaseFigure.Days(13), card.figure)
         assertEquals(PhaseMessage.ThinPercentage(30, "La Yarada 02"), card.message)
         assertEquals(LocalDate.of(2026, 11, 30), card.endsOn)
         assertEquals(PhaseAction.SEE_THINNING_PLAN, card.action)
     }
 
     @Test
-    fun `a plot without a plan uses the usual window and says the sampling decides how much`() {
+    fun `a plot without a plan identifies the usual window and asks for bloom`() {
         val today = LocalDate.of(2026, 11, 10)
         val card = state(today).card(HomePhase.THINNING)
 
         assertEquals(PhaseTiming.NOW, card.timing)
-        assertEquals(PhaseMessage.ThinWithoutPlan("La Yarada 02"), card.message)
+        assertEquals(PhaseMessage.BloomMissing, card.message)
+        assertEquals(PhaseAction.RECORD_BLOOM, card.action)
         assertEquals(LocalDate.of(2026, 11, 3), card.startsOn)
+    }
+
+    @Test
+    fun `thinning counts the closing day and closes the next day`() {
+        val plan = CampaignPlan("plot-1", issuedPlan(), null)
+        val last = state(LocalDate.of(2026, 11, 30), plan = plan).card(HomePhase.THINNING)
+        assertEquals(PhaseTiming.NOW, last.timing)
+        assertEquals(PhaseFigure.Days(1), last.figure)
+        assertEquals(PhaseTiming.DONE, state(LocalDate.of(2026, 12, 1), plan = plan).card(HomePhase.THINNING).timing)
+        assertEquals(PhaseFigure.Days(2), state(LocalDate.of(2026, 11, 1), plan = plan).card(HomePhase.THINNING).figure)
+    }
+
+    @Test
+    fun `without bloom the thinning card prioritizes the usual window over prescription messages`() {
+        val prescription = issuedPlan().copy(fullBloomOn = null)
+        val card = state(LocalDate.of(2026, 11, 18), plan = CampaignPlan("plot-1", prescription, null)).card(HomePhase.THINNING)
+        assertEquals(PhaseMessage.BloomMissing, card.message)
+        assertEquals(PhaseAction.RECORD_BLOOM, card.action)
     }
 
     @Test
