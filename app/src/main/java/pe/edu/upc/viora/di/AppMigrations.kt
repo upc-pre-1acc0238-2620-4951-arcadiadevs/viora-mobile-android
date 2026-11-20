@@ -257,9 +257,24 @@ object AppMigrations {
         connection.execSQL(MIGRATION_17_18_SUMMARIES_SQL)
     }
 
+    internal const val MIGRATION_18_19_SETTLEMENTS_SQL =
+        "ALTER TABLE `harvest_settlements` ADD COLUMN `discard_kg` REAL NOT NULL DEFAULT 0"
+
+    internal const val MIGRATION_18_19_PENDING_SQL =
+        "ALTER TABLE `pending_settlements` ADD COLUMN `discard_olives_kg` REAL NOT NULL DEFAULT 0"
+
+    /**
+     * Discarded olives of the harvest settlement (M-04). Settlements and pending settlements already on the phone keep
+     * their kilos and simply have no discard (0); no row is rebuilt.
+     */
+    val MIGRATION_18_19 = Migration(18, 19) { connection ->
+        connection.execSQL(MIGRATION_18_19_SETTLEMENTS_SQL)
+        connection.execSQL(MIGRATION_18_19_PENDING_SQL)
+    }
+
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
         MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16,
-        MIGRATION_16_17, MIGRATION_17_18,
+        MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
     )
 }
