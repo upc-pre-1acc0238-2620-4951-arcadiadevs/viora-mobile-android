@@ -11,6 +11,7 @@ data class HarvestSettlementDto(
     val campaignYear: Int,
     val greenOlivesKg: Double,
     val blackOlivesKg: Double,
+    val discardOlivesKg: Double? = null,
     val totalYieldKg: Double,
     val commercialFruitsPerKg: Double? = null,
     val notes: String? = null,
@@ -58,6 +59,7 @@ data class SettleHarvestRequestDto(
     val millTicketNumber: String? = null,
     val commercialFruitsPerKg: Double? = null,
     val notes: String? = null,
+    val discardOlivesKg: Double? = null,
 )
 
 /** The `existingSettlement` ProblemDetail property of a 409 `HARVESTSETTLEMENT_CONFLICT`. */

@@ -28,6 +28,7 @@ fun HarvestSettlementDto.toEntity(): HarvestSettlementEntity {
         campaignYear = campaignYear,
         greenKg = greenOlivesKg,
         blackKg = blackOlivesKg,
+        discardKg = discardOlivesKg ?: 0.0,
         totalYieldKg = totalYieldKg,
         commercialFruitsPerKg = commercialFruitsPerKg,
         notes = notes,
@@ -66,6 +67,7 @@ fun SettleHarvestDraft.toRequestDto(): SettleHarvestRequestDto = SettleHarvestRe
     millTicketNumber = millTicketNumber,
     commercialFruitsPerKg = commercialFruitsPerKg,
     notes = notes,
+    discardOlivesKg = discardOlivesKg.takeIf { it > 0.0 },
 )
 
 fun ExistingSettlementDto.toDomain(): SettlementSummary = SettlementSummary(
@@ -82,6 +84,7 @@ fun HarvestSettlementEntity.toDomain(): HarvestSettlement = HarvestSettlement(
     campaignYear = campaignYear,
     greenKg = greenKg,
     blackKg = blackKg,
+    discardKg = discardKg,
     totalYieldKg = totalYieldKg,
     commercialFruitsPerKg = commercialFruitsPerKg,
     notes = notes,
