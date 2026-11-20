@@ -7,7 +7,8 @@ import java.time.LocalDate
  * A campaign the producer already settled ("cosecha asentada", US29). [greenKg] and [blackKg]
  * are the split by fruit maturity; [settledAt] is when the server stored the settlement.
  * [receiptNumber], [weighedOn], [millTicketNumber] and [commercialSizeGrade] are nullable because
- * older backend versions do not send them.
+ * older backend versions do not send them. [discardKg] is the discarded fruit (M-04), 0 when none was
+ * recorded or the backend does not send it; [totalYieldKg] is the server's total for the campaign.
  */
 data class HarvestSettlement(
     val id: String,
@@ -23,6 +24,7 @@ data class HarvestSettlement(
     val weighedOn: LocalDate? = null,
     val millTicketNumber: String? = null,
     val commercialSizeGrade: String? = null,
+    val discardKg: Double = 0.0,
     val status: SettlementStatus,
     val settledAt: Instant,
     val thinningBalance: ThinningBalance,

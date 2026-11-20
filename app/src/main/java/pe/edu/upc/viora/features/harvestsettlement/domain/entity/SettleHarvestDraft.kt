@@ -5,6 +5,8 @@ import java.time.LocalDate
 /**
  * What the producer submits to settle a plot's harvest for a campaign. [weighedOn] is the
  * weighing date (never in the future); the optional fields are omitted from the request when null.
+ * [discardOlivesKg] is the optional discarded fruit ("aceituna de descarte", M-04): 0 when there was none, and it
+ * counts toward the harvest total together with the green and black kilos.
  */
 data class SettleHarvestDraft(
     val plotId: String,
@@ -15,6 +17,7 @@ data class SettleHarvestDraft(
     val millTicketNumber: String? = null,
     val commercialFruitsPerKg: Double? = null,
     val notes: String? = null,
+    val discardOlivesKg: Double = 0.0,
 )
 
 /** Summary of a settlement that already exists for the campaign (the 409 `existingSettlement`). */
