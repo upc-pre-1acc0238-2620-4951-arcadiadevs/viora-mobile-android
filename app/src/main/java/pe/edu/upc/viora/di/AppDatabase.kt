@@ -79,7 +79,7 @@ import pe.edu.upc.viora.features.telemetry.infrastructure.local.TelemetryReading
         AssistantAnswerEntity::class,
         DailySummaryEntity::class,
     ],
-    version = 18,
+    version = 19,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {

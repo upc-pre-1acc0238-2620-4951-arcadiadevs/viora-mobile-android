@@ -67,12 +67,16 @@ import pe.edu.upc.viora.features.harvestsettlement.domain.valueobject.Commercial
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestRules
 import pe.edu.upc.viora.features.harvestsettlement.presentation.state.SettleHarvestUiState
 
-/** The green and black kilos inputs and the live total with its split bar (Figma "Kilos por calidad"). */
+/**
+ * The green, black and optional discard kilos inputs and the live total with its split bar (Figma "Kilos por calidad").
+ * The discarded olives (M-04) count toward the total but not toward the green / black split.
+ */
 @Composable
 internal fun KilosByQualityCard(
     state: SettleHarvestUiState,
     onGreenChange: (String) -> Unit,
     onBlackChange: (String) -> Unit,
+    onDiscardChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -96,6 +100,15 @@ internal fun KilosByQualityCard(
             enabled = !state.isSaving,
             error = state.blackError,
             errorText = kilosErrorText(state.blackText),
+        )
+        KilosEntry(
+            label = stringResource(R.string.settle_discard_label),
+            dot = Neutral500,
+            value = state.discardText,
+            onValueChange = onDiscardChange,
+            enabled = !state.isSaving,
+            error = state.discardError,
+            errorText = kilosErrorText(state.discardText),
         )
         TotalBlock(state)
     }

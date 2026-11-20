@@ -28,8 +28,11 @@ import pe.edu.upc.viora.features.home.application.usecase.ObserveChosenPlotUseCa
 import pe.edu.upc.viora.features.home.presentation.state.HarvestProgress
 import pe.edu.upc.viora.features.home.presentation.state.HomePhaseRules
 import pe.edu.upc.viora.features.home.presentation.state.HomePhaseUiState
+import pe.edu.upc.viora.features.phenology.application.usecase.AdjustPhaseStartUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.ObserveCurrentPhaseUseCase
 import pe.edu.upc.viora.features.phenology.application.usecase.RefreshChillTrackerUseCase
+import pe.edu.upc.viora.features.phenology.application.usecase.ResetPhaseStartUseCase
+import pe.edu.upc.viora.features.phenology.application.published.OlivePhase
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.ObservePlotsUseCase
 import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
 import pe.edu.upc.viora.features.plotmanagement.application.usecase.PickFocusedPlotUseCase
@@ -55,6 +58,8 @@ class HomePhaseViewModel @Inject constructor(
     private val clock: Clock,
     pickFocusedPlot: PickFocusedPlotUseCase,
     private val observeCurrentPhase: ObserveCurrentPhaseUseCase,
+    private val adjustPhaseStart: AdjustPhaseStartUseCase,
+    private val resetPhaseStart: ResetPhaseStartUseCase,
 ) : ViewModel() {
 
     private val plots = observePlots()
@@ -84,7 +89,7 @@ class HomePhaseViewModel @Inject constructor(
 
     /** Phenology says which phase the plot is in; the cards only put it into words. */
     val uiState: StateFlow<HomePhaseUiState> = plotData.flatMapLatest { data ->
-        observeCurrentPhase(data.plot?.id?.value, HomePhaseRules.phaseDates(data.plan, data.harvest)).map { phase ->
+        observeCurrentPhase(data.plot?.id?.value, HomePhaseRules.phaseDates(data.plan, data.harvest), data.plot?.variety).map { phase ->
             HomePhaseRules.state(phase, data.plot, data.plan, data.forecast, data.harvest)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomePhaseUiState())
@@ -102,6 +107,18 @@ class HomePhaseViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /** The producer says that [phase] starts on [on] in the plot in focus, every campaign. */
+    fun adjustStart(phase: OlivePhase, on: LocalDate) {
+        val plotId = uiState.value.focusedPlotId ?: return
+        viewModelScope.launch { adjustPhaseStart(plotId, phase, on) }
+    }
+
+    /** The start of [phase] goes back to the usual date in the plot in focus. */
+    fun resetStart(phase: OlivePhase) {
+        val plotId = uiState.value.focusedPlotId ?: return
+        viewModelScope.launch { resetPhaseStart(plotId, phase) }
     }
 
     private fun today(): LocalDate = LocalDate.now(clock)

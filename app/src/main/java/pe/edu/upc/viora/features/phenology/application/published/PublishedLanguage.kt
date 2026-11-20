@@ -26,3 +26,7 @@ typealias PhaseWindow = pe.edu.upc.viora.features.phenology.domain.PhaseWindow
 typealias CurrentPhase = pe.edu.upc.viora.features.phenology.domain.CurrentPhase
 
 typealias PlotPhaseDates = pe.edu.upc.viora.features.phenology.domain.PlotPhaseDates
+
+typealias PhaseDateSource = pe.edu.upc.viora.features.phenology.domain.PhaseDateSource
+
+typealias DateBounds = pe.edu.upc.viora.features.phenology.domain.DateBounds

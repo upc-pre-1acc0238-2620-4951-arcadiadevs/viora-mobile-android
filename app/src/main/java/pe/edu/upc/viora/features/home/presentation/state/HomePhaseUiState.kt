@@ -6,7 +6,9 @@ import pe.edu.upc.viora.features.croploadregulation.application.published.Campai
 import pe.edu.upc.viora.features.croploadregulation.application.published.ThinningPrescription
 import pe.edu.upc.viora.features.harvestsettlement.application.published.PlotToSettle
 import pe.edu.upc.viora.features.phenology.application.published.CurrentPhase
+import pe.edu.upc.viora.features.phenology.application.published.DateBounds
 import pe.edu.upc.viora.features.phenology.application.published.OlivePhase
+import pe.edu.upc.viora.features.phenology.application.published.PhaseDateSource
 import pe.edu.upc.viora.features.phenology.application.published.PhaseWindow
 import pe.edu.upc.viora.features.phenology.application.published.PlotPhaseDates
 import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
@@ -74,6 +76,24 @@ data class PhaseCard(
     val hasSamplingStarted: Boolean = false,
 )
 
+/**
+ * One phase on the plot's calendar sheet: the day it starts and ends, where the start comes from and, when the
+ * producer can correct it, the days it can be moved to ([bounds] is null when the plot's own records fix it).
+ */
+data class PhaseCalendarRow(
+    val phase: HomePhase,
+    val timing: PhaseTiming,
+    val startsOn: LocalDate,
+    val endsOn: LocalDate,
+    val source: PhaseDateSource,
+    val bounds: DateBounds?,
+) {
+    val canAdjust: Boolean get() = bounds != null
+
+    /** Only a date the producer corrected can go back to the usual one. */
+    val canReset: Boolean get() = source == PhaseDateSource.ADJUSTED
+}
+
 /** The harvest card's data and its picker's (P70): the plots of [campaignYear] still to register out of [totalPlots]. */
 data class HarvestProgress(val campaignYear: Int, val plots: List<PlotToSettle>, val totalPlots: Int) {
     val pendingCount: Int get() = plots.size
@@ -86,6 +106,8 @@ data class HomePhaseUiState(
     val focusedPlotId: String? = null,
     val focusedPlotName: String = "",
     val harvest: HarvestProgress? = null,
+    /** The calendar of the plot in focus, one row per phase; empty while there is no plot. */
+    val calendar: List<PhaseCalendarRow> = emptyList(),
 ) {
     /** The phase the headline speaks about ("Hoy toca aclarar."), only while it is going on. */
     val headlinePhase: HomePhase? get() = cards.getOrNull(current)?.takeIf { it.timing == PhaseTiming.NOW }?.phase
@@ -122,7 +144,7 @@ object HomePhaseRules {
             dormancy(today, phase, plot),
             bloom(today, phase, forecast, plot),
             fruitSet(today, phase.window(HomePhase.FRUIT_SET), plan, plot),
-            thinning(today, phase.window(HomePhase.THINNING), phase.bloomRecorded, plan, plot),
+            thinning(today, phase.window(HomePhase.THINNING), plan, plot),
             harvest(today, phase.window(HomePhase.HARVEST), harvest),
         )
         return HomePhaseUiState(
@@ -131,6 +153,18 @@ object HomePhaseRules {
             focusedPlotId = focused?.id?.value,
             focusedPlotName = plot,
             harvest = harvest,
+            calendar = if (focused == null) emptyList() else calendarRows(phase),
+        )
+    }
+
+    private fun calendarRows(phase: CurrentPhase): List<PhaseCalendarRow> = phase.windows.map { window ->
+        PhaseCalendarRow(
+            phase = window.phase,
+            timing = window.timing,
+            startsOn = window.startsOn,
+            endsOn = window.endsOn,
+            source = phase.sourceOf(window.phase),
+            bounds = phase.startBounds(window.phase).takeIf { phase.canAdjustStart(window.phase) },
         )
     }
 
@@ -181,18 +215,16 @@ object HomePhaseRules {
         }
     }
 
-    private fun thinning(today: LocalDate, window: PhaseWindow, bloomRecorded: Boolean, plan: CampaignPlan?, plot: String): PhaseCard {
+    private fun thinning(today: LocalDate, window: PhaseWindow, plan: CampaignPlan?, plot: String): PhaseCard {
         val base = generic(today, window, PhaseMilestone.FRUIT_SET, PhaseMilestone.PIT_HARDENING, PhaseAction.SEE_THINNING_PLAN)
         if (window.timing != PhaseTiming.NOW) return base
-        val figure = PhaseFigure.Days(daysBetween(today, window.endsOn) + 1)
-        if (!bloomRecorded) return base.copy(figure = figure, message = PhaseMessage.BloomMissing, action = PhaseAction.RECORD_BLOOM)
         val percentage = plan?.prescription?.takeIf { it.isIssued }?.percentageToRemove
         val message = when {
             plan?.execution != null -> PhaseMessage.ThinningRecorded(plot)
             percentage != null -> PhaseMessage.ThinPercentage(kotlin.math.round(percentage).toInt(), plot)
             else -> PhaseMessage.ThinWithoutPlan(plot)
         }
-        return base.copy(figure = figure, message = message)
+        return base.copy(figure = PhaseFigure.Days(daysBetween(today, window.endsOn)), message = message)
     }
 
     private fun harvest(today: LocalDate, window: PhaseWindow, harvest: HarvestProgress?): PhaseCard {

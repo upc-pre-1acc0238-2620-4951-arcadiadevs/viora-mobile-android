@@ -17,6 +17,7 @@ sealed interface SettleDialog {
 /**
  * State of the settle form (P71) and its dialogs (P72). [totalKg], [greenShare] and
  * [tonnesPerHectare] are null while the kilos are not valid (or the plot is not cached yet).
+ * [discardText] is the optional discarded olives (M-04): [totalKg] counts it with the green and black kilos.
  * [isEditing] is true when the form corrects a settlement still pending on the phone.
  */
 data class SettleHarvestUiState(
@@ -29,6 +30,8 @@ data class SettleHarvestUiState(
     val blackText: String,
     val greenError: Boolean,
     val blackError: Boolean,
+    val discardText: String = "",
+    val discardError: Boolean = false,
     val totalKg: Double?,
     val greenShare: Double?,
     val tonnesPerHectare: Double?,

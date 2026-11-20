@@ -67,6 +67,7 @@ class SettleHarvestViewModel @Inject constructor(
         val weighedOn: LocalDate,
         val greenText: String = "",
         val blackText: String = "",
+        val discardText: String = "",
         val millTicket: String = "",
         val calibreText: String = "",
         val calibreGrade: CommercialSizeGrade? = null,
@@ -98,6 +99,9 @@ class SettleHarvestViewModel @Inject constructor(
     fun onGreenChange(text: String) = edit { it.copy(greenText = text.filter(::isKilosChar)) }
 
     fun onBlackChange(text: String) = edit { it.copy(blackText = text.filter(::isKilosChar)) }
+
+    /** Optional discarded olives (M-04); blank means none. */
+    fun onDiscardChange(text: String) = edit { it.copy(discardText = text.filter(::isKilosChar)) }
 
     fun onMillTicketChange(text: String) = edit { it.copy(millTicket = text.take(SettleHarvestRules.MILL_TICKET_MAX)) }
 
@@ -169,6 +173,7 @@ class SettleHarvestViewModel @Inject constructor(
                 weighedOn = saved.weighedOn,
                 greenText = kilosText(saved.greenOlivesKg),
                 blackText = kilosText(saved.blackOlivesKg),
+                discardText = if (saved.discardOlivesKg > 0.0) kilosText(saved.discardOlivesKg) else "",
                 millTicket = saved.millTicketNumber.orEmpty(),
                 calibreGrade = grade,
                 calibreText = if (grade == null) saved.commercialFruitsPerKg?.let(::kilosText).orEmpty() else "",
@@ -192,6 +197,7 @@ class SettleHarvestViewModel @Inject constructor(
     private fun toSettleDraft(draft: Draft): SettleHarvestDraft? {
         val green = SettleHarvestRules.kilos(draft.greenText) ?: return null
         val black = SettleHarvestRules.kilos(draft.blackText) ?: return null
+        val discard = SettleHarvestRules.kilos(draft.discardText) ?: return null
         val calibre = SettleHarvestRules.calibre(draft.calibreGrade, draft.calibreText)
         if (calibre == CalibreReading.Invalid) return null
         return SettleHarvestDraft(
@@ -199,6 +205,7 @@ class SettleHarvestViewModel @Inject constructor(
             campaignYear = campaignYear,
             greenOlivesKg = green,
             blackOlivesKg = black,
+            discardOlivesKg = discard,
             weighedOn = draft.weighedOn,
             millTicketNumber = SettleHarvestRules.millTicket(draft.millTicket),
             commercialFruitsPerKg = (calibre as? CalibreReading.Value)?.fruitsPerKg,
@@ -207,13 +214,14 @@ class SettleHarvestViewModel @Inject constructor(
 
     private fun build(draft: Draft, plot: Plot?): SettleHarvestUiState {
         val today = today()
-        val total = SettleHarvestRules.totalKilos(draft.greenText, draft.blackText)
+        val total = SettleHarvestRules.totalKilos(draft.greenText, draft.blackText, draft.discardText)
         val validTotal = SettleHarvestRules.isValidTotal(total)
         val green = SettleHarvestRules.kilos(draft.greenText)
         val black = SettleHarvestRules.kilos(draft.blackText)
         val calibreError = SettleHarvestRules.calibre(draft.calibreGrade, draft.calibreText) == CalibreReading.Invalid
         val greenError = SettleHarvestRules.kilosError(draft.greenText)
         val blackError = SettleHarvestRules.kilosError(draft.blackText)
+        val discardError = SettleHarvestRules.kilosError(draft.discardText)
         return SettleHarvestUiState(
             plotId = plotId,
             plotName = plot?.name.orEmpty(),
@@ -224,6 +232,8 @@ class SettleHarvestViewModel @Inject constructor(
             blackText = draft.blackText,
             greenError = greenError,
             blackError = blackError,
+            discardText = draft.discardText,
+            discardError = discardError,
             totalKg = total.takeIf { validTotal },
             greenShare = if (validTotal && green != null && black != null) SettleHarvestRules.greenShare(green, black) else null,
             tonnesPerHectare = if (validTotal && total != null && plot != null && plot.areaHectares > 0.0) tonnesPerHectare(total, plot.areaHectares) else null,

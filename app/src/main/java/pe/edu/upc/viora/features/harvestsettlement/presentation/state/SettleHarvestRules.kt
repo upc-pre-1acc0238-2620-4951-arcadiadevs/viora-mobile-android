@@ -28,17 +28,21 @@ object SettleHarvestRules {
     /** True when the text is not a number or is negative. */
     fun kilosError(text: String): Boolean = kilos(text).let { it == null || it < 0.0 }
 
-    /** Green plus black kilos, or null while either is invalid. */
-    fun totalKilos(greenText: String, blackText: String): Double? {
+    /**
+     * Green plus black plus discard kilos, or null while any of them is invalid. The discard is optional (M-04):
+     * a blank [discardText] counts as 0, so the total is the same as before for a harvest without discard.
+     */
+    fun totalKilos(greenText: String, blackText: String, discardText: String = ""): Double? {
         val green = kilos(greenText) ?: return null
         val black = kilos(blackText) ?: return null
-        return if (green < 0.0 || black < 0.0) null else green + black
+        val discard = kilos(discardText) ?: return null
+        return if (green < 0.0 || black < 0.0 || discard < 0.0) null else green + black + discard
     }
 
     /** The settlement needs something to settle: the total must be greater than zero. */
     fun isValidTotal(total: Double?): Boolean = total != null && total > 0.0
 
-    /** Share of green olives in 0..1, or null when there is nothing weighed. */
+    /** Share of green olives in 0..1 among the green and black kilos (the discard is not part of the split), or null when there are none. */
     fun greenShare(greenKg: Double, blackKg: Double): Double? =
         (greenKg + blackKg).takeIf { it > 0.0 }?.let { greenKg / it }
 
