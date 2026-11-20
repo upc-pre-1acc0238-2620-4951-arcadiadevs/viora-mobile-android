@@ -808,6 +808,8 @@
   <string name="settle_pattern_short">MMM d</string>
   <string name="settle_green_label">Green olives</string>
   <string name="settle_black_label">Black olives</string>
+  <string name="settle_discard_label">Discarded olives (optional)</string>
+  <string name="settle_discard_receipt_label">Discarded olives</string>
   <string name="settle_error_negative">Kilos cannot be negative.</string>
   <string name="settle_error_invalid">Type the kilos as a number.</string>
   <string name="settle_total_label">TOTAL · CALCULATED FOR YOU</string>

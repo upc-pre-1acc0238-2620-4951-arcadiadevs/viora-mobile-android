@@ -825,6 +825,8 @@
   <string name="settle_pattern_short">d MMM</string>
   <string name="settle_green_label">Aceituna verde</string>
   <string name="settle_black_label">Aceituna negra</string>
+  <string name="settle_discard_label">Aceituna de descarte (opcional)</string>
+  <string name="settle_discard_receipt_label">Aceituna de descarte</string>
   <string name="settle_error_negative">Los kilos no pueden ser negativos.</string>
   <string name="settle_error_invalid">Escribe los kilos con números.</string>
   <string name="settle_total_label">TOTAL · SE CALCULA SOLO</string>
