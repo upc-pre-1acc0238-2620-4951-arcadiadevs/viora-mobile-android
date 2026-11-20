@@ -70,4 +70,6 @@ data class HarvestSettlementEntity(
     val millTicketNumber: String? = null,
     @ColumnInfo(name = "commercial_size_grade")
     val commercialSizeGrade: String? = null,
+    @ColumnInfo(name = "discard_kg", defaultValue = "0")
+    val discardKg: Double = 0.0,
 )

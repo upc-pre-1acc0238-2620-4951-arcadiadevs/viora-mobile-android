@@ -44,4 +44,6 @@ data class PendingSettlementEntity(
     val createdAt: Long,
     @ColumnInfo(name = "updated_at")
     val updatedAt: Long,
+    @ColumnInfo(name = "discard_olives_kg", defaultValue = "0")
+    val discardOlivesKg: Double = 0.0,
 )
