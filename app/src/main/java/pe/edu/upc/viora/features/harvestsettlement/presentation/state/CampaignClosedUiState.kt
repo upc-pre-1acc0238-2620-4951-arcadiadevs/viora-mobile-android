@@ -7,7 +7,8 @@ import pe.edu.upc.viora.features.harvestsettlement.domain.entity.SettlementSumma
 /**
  * What the receipt card (P73) shows, whether the settlement is already on the server or still
  * waiting on the phone. [receiptNumber] is null until the server issues it (and with an older
- * backend); [calibre] is the sales size grade label, null when none was recorded.
+ * backend); [calibre] is the sales size grade label, null when none was recorded. [discardKg] is the discarded
+ * olives (M-04), 0 when there were none; [totalKg] already counts it.
  */
 data class SettlementReceipt(
     val plotId: String,
@@ -22,6 +23,7 @@ data class SettlementReceipt(
     val weighedOn: LocalDate,
     val receiptNumber: String?,
     val calibre: String?,
+    val discardKg: Double = 0.0,
 )
 
 /** What the P73 screen shows for a plot and campaign. */

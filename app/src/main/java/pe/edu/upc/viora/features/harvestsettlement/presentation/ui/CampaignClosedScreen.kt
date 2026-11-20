@@ -62,6 +62,7 @@ import pe.edu.upc.viora.core.designsystem.theme.Harvest100
 import pe.edu.upc.viora.core.designsystem.theme.Harvest800
 import pe.edu.upc.viora.core.designsystem.theme.Neutral0
 import pe.edu.upc.viora.core.designsystem.theme.Neutral200
+import pe.edu.upc.viora.core.designsystem.theme.Neutral500
 import pe.edu.upc.viora.core.designsystem.theme.Neutral600
 import pe.edu.upc.viora.core.designsystem.theme.Neutral700
 import pe.edu.upc.viora.core.designsystem.theme.Neutral900
@@ -268,7 +269,7 @@ private fun StatusChip(@DrawableRes icon: Int, text: String, background: Color, 
     }
 }
 
-/** The receipt: total, plot line, green / black split, a perforation and the status footer. */
+/** The receipt: total, plot line, green / black split with the discard when there is one, a perforation and the status footer. */
 @Composable
 private fun ReceiptCard(receipt: SettlementReceipt, pending: Boolean, failed: Boolean, modifier: Modifier = Modifier) {
     val notchColor = MaterialTheme.colorScheme.surfaceContainerLow
@@ -333,6 +334,10 @@ private fun ReceiptCard(receipt: SettlementReceipt, pending: Boolean, failed: Bo
         Row(Modifier.fillMaxWidth().padding(top = 10.dp)) {
             QualityKilos(R.string.settle_green_label, Green700, receipt.greenKg, receipt.greenShare, Modifier.weight(1f))
             QualityKilos(R.string.settle_black_label, Neutral900, receipt.blackKg, receipt.greenShare?.let { 1 - it }, Modifier.weight(1f))
+        }
+        // The discarded olives (M-04) only show when the producer recorded some; they have no share of the split.
+        if (receipt.discardKg > 0.0) {
+            QualityKilos(R.string.settle_discard_receipt_label, Neutral500, receipt.discardKg, null, Modifier.padding(top = 8.dp))
         }
         Spacer(Modifier.height(12.dp))
         Row(

@@ -78,6 +78,7 @@ fun SettleHarvestScreen(
         onWeighedOnChange = viewModel::onWeighedOnChange,
         onGreenChange = viewModel::onGreenChange,
         onBlackChange = viewModel::onBlackChange,
+        onDiscardChange = viewModel::onDiscardChange,
         onMillTicketChange = viewModel::onMillTicketChange,
         onCalibreTextChange = viewModel::onCalibreTextChange,
         onCalibreGradeSelect = viewModel::onCalibreGradeSelect,
@@ -97,6 +98,7 @@ internal fun SettleHarvestContent(
     onWeighedOnChange: (LocalDate) -> Unit,
     onGreenChange: (String) -> Unit,
     onBlackChange: (String) -> Unit,
+    onDiscardChange: (String) -> Unit,
     onMillTicketChange: (String) -> Unit,
     onCalibreTextChange: (String) -> Unit,
     onCalibreGradeSelect: (CommercialSizeGrade?) -> Unit,
@@ -109,7 +111,7 @@ internal fun SettleHarvestContent(
     var pickingDate by rememberSaveable { mutableStateOf(false) }
     // Back or the close button ask before throwing away kilos the producer already typed.
     var askDiscard by rememberSaveable { mutableStateOf(false) }
-    val hasTyped = listOf(state.greenText, state.blackText, state.millTicket, state.calibreText).any { it.isNotBlank() }
+    val hasTyped = listOf(state.greenText, state.blackText, state.discardText, state.millTicket, state.calibreText).any { it.isNotBlank() }
     val close = { if (hasTyped && !state.isSaving) askDiscard = true else onClose() }
     BackHandler(enabled = hasTyped && !state.isSaving) { askDiscard = true }
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerLow)) {
@@ -135,7 +137,7 @@ internal fun SettleHarvestContent(
                 enabled = !state.isSaving,
                 onClick = { pickingDate = true },
             )
-            KilosByQualityCard(state, onGreenChange, onBlackChange)
+            KilosByQualityCard(state, onGreenChange, onBlackChange, onDiscardChange)
             VioraTextFieldCard(
                 label = stringResource(R.string.settle_mill_label),
                 value = state.millTicket,
