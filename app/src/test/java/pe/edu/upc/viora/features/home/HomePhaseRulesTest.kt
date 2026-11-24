@@ -2,8 +2,12 @@ package pe.edu.upc.viora.features.home
 
 import java.time.Instant
 import java.time.LocalDate
+import java.time.MonthDay
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import pe.edu.upc.viora.core.domain.GeoPoint
 import pe.edu.upc.viora.core.domain.OliveVariety
@@ -21,8 +25,10 @@ import pe.edu.upc.viora.features.home.presentation.state.PhaseFigure
 import pe.edu.upc.viora.features.home.presentation.state.PhaseMessage
 import pe.edu.upc.viora.features.home.presentation.state.PhaseTiming
 import pe.edu.upc.viora.features.phenology.application.published.ChillTracker
+import pe.edu.upc.viora.features.phenology.application.published.PhaseDateSource
 import pe.edu.upc.viora.features.phenology.application.published.WinterSeasonState
 import pe.edu.upc.viora.features.phenology.domain.OlivePhases
+import pe.edu.upc.viora.features.phenology.domain.PhaseAdjustments
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillProjection
 import pe.edu.upc.viora.features.phenology.domain.entity.ThermalAnomaly
 import pe.edu.upc.viora.features.plotmanagement.application.published.Plot
@@ -219,5 +225,53 @@ class HomePhaseRulesTest {
         assertNull(state.headlinePhase)
         assertEquals(PhaseFigure.Days(78), state.card(HomePhase.HARVEST).figure)
         assertEquals(PhaseMessage.StartsIn(HomePhase.HARVEST), state.card(HomePhase.HARVEST).message)
+    }
+
+    @Test
+    fun `calendar rows are generated with correct sources bounds and adjustability`() {
+        val today = LocalDate.of(2026, 10, 15)
+        val adjustments = PhaseAdjustments(mapOf(HomePhase.BLOOM to MonthDay.of(7, 15)))
+        val phase = OlivePhases.of(today, HomePhaseRules.phaseDates(null, null), null, adjustments)
+
+        val state = HomePhaseRules.state(phase, plot, null, null, null)
+
+        assertEquals(5, state.calendar.size)
+        val bloomRow = state.calendar.first { it.phase == HomePhase.BLOOM }
+        assertEquals(PhaseDateSource.ADJUSTED, bloomRow.source)
+        assertTrue(bloomRow.canAdjust)
+        assertTrue(bloomRow.canReset)
+        assertNotNull(bloomRow.bounds)
+
+        val dormancyRow = state.calendar.first { it.phase == HomePhase.DORMANCY }
+        assertEquals(PhaseDateSource.USUAL, dormancyRow.source)
+        assertTrue(dormancyRow.canAdjust)
+        assertFalse(dormancyRow.canReset)
+    }
+
+    @Test
+    fun `recorded bloom locks fruit set row so it cannot be adjusted`() {
+        val today = LocalDate.of(2026, 10, 15)
+        val plan = CampaignPlan(
+            "plot-1",
+            issuedPlan().copy(
+                fullBloomOn = LocalDate.of(2026, 10, 5),
+                windowOpensOn = LocalDate.of(2026, 11, 2),
+                windowClosesOn = LocalDate.of(2026, 11, 25),
+            ),
+            null,
+        )
+        val phase = OlivePhases.of(today, HomePhaseRules.phaseDates(plan, null), null)
+
+        val state = HomePhaseRules.state(phase, plot, plan, null, null)
+
+        val fruitSetRow = state.calendar.first { it.phase == HomePhase.FRUIT_SET }
+        assertEquals(PhaseDateSource.RECORDED, fruitSetRow.source)
+        assertFalse(fruitSetRow.canAdjust)
+        assertFalse(fruitSetRow.canReset)
+        assertNull(fruitSetRow.bounds)
+
+        val thinningRow = state.calendar.first { it.phase == HomePhase.THINNING }
+        assertEquals(PhaseDateSource.RECORDED, thinningRow.source)
+        assertFalse(thinningRow.canAdjust)
     }
 }

@@ -144,7 +144,7 @@ object HomePhaseRules {
             dormancy(today, phase, plot),
             bloom(today, phase, forecast, plot),
             fruitSet(today, phase.window(HomePhase.FRUIT_SET), plan, plot),
-            thinning(today, phase.window(HomePhase.THINNING), plan, plot),
+            thinning(today, phase.window(HomePhase.THINNING), phase.bloomRecorded, plan, plot),
             harvest(today, phase.window(HomePhase.HARVEST), harvest),
         )
         return HomePhaseUiState(
@@ -215,16 +215,18 @@ object HomePhaseRules {
         }
     }
 
-    private fun thinning(today: LocalDate, window: PhaseWindow, plan: CampaignPlan?, plot: String): PhaseCard {
+    private fun thinning(today: LocalDate, window: PhaseWindow, bloomRecorded: Boolean, plan: CampaignPlan?, plot: String): PhaseCard {
         val base = generic(today, window, PhaseMilestone.FRUIT_SET, PhaseMilestone.PIT_HARDENING, PhaseAction.SEE_THINNING_PLAN)
         if (window.timing != PhaseTiming.NOW) return base
+        val figure = PhaseFigure.Days(daysBetween(today, window.endsOn) + 1)
+        if (!bloomRecorded) return base.copy(figure = figure, message = PhaseMessage.BloomMissing, action = PhaseAction.RECORD_BLOOM)
         val percentage = plan?.prescription?.takeIf { it.isIssued }?.percentageToRemove
         val message = when {
             plan?.execution != null -> PhaseMessage.ThinningRecorded(plot)
             percentage != null -> PhaseMessage.ThinPercentage(kotlin.math.round(percentage).toInt(), plot)
             else -> PhaseMessage.ThinWithoutPlan(plot)
         }
-        return base.copy(figure = PhaseFigure.Days(daysBetween(today, window.endsOn)), message = message)
+        return base.copy(figure = figure, message = message)
     }
 
     private fun harvest(today: LocalDate, window: PhaseWindow, harvest: HarvestProgress?): PhaseCard {

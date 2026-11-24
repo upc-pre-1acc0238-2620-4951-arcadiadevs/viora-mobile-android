@@ -249,4 +249,36 @@ class HarvestSettlementMapperTest {
         assertEquals(SettlementSummary(2026, 2000.5, "VR-26-0003", LocalDate.of(2026, 10, 1)), summary)
         assertNull(ExistingSettlementDto(2026, 1.0).toDomain().receiptNumber)
     }
+
+    @Test
+    fun `discard kilos map between dto, entity and domain (M-04)`() {
+        val dto = minimalDto.copy(discardOlivesKg = 350.0)
+        val entity = dto.toEntity()
+        assertEquals(350.0, entity.discardKg, 0.0)
+
+        val domain = entity.toDomain()
+        assertEquals(350.0, domain.discardKg, 0.0)
+
+        val withoutDiscard = minimalDto.copy(discardOlivesKg = null).toEntity().toDomain()
+        assertEquals(0.0, withoutDiscard.discardKg, 0.0)
+    }
+
+    @Test
+    fun `draft with positive discard kilos sends discardOlivesKg in request (M-04)`() {
+        val draftWithDiscard = SettleHarvestDraft(
+            plotId = "p-1",
+            campaignYear = 2026,
+            greenOlivesKg = 1200.5,
+            blackOlivesKg = 800.0,
+            weighedOn = LocalDate.of(2026, 10, 3),
+            discardOlivesKg = 450.0,
+        )
+
+        val body = json.encodeToString(draftWithDiscard.toRequestDto())
+        assertTrue(body.contains(""""discardOlivesKg":450.0"""))
+
+        val draftWithoutDiscard = draftWithDiscard.copy(discardOlivesKg = 0.0)
+        val bodyWithout = json.encodeToString(draftWithoutDiscard.toRequestDto())
+        assertTrue(!bodyWithout.contains("discardOlivesKg"))
+    }
 }
