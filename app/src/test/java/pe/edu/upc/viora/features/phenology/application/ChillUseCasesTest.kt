@@ -10,6 +10,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import pe.edu.upc.viora.core.domain.AppResult
+import pe.edu.upc.viora.features.phenology.FakePhaseAdjustmentsRepository
 import pe.edu.upc.viora.features.phenology.chillTracker
 import java.time.Clock
 import java.time.LocalDate
@@ -39,6 +40,7 @@ private class FakeChillRepository : ChillRepository {
 class ChillUseCasesTest {
 
     private val fakeRepo = FakeChillRepository()
+    private val fakeAdjustments = FakePhaseAdjustmentsRepository()
     private val observeUseCase = ObserveChillTrackerUseCase(fakeRepo)
     private val refreshUseCase = RefreshChillTrackerUseCase(fakeRepo)
 
@@ -61,6 +63,7 @@ class ChillUseCasesTest {
 
     private fun observePhaseOn(day: LocalDate) = ObserveCurrentPhaseUseCase(
         fakeRepo,
+        fakeAdjustments,
         Clock.fixed(day.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC),
     )
 
@@ -83,5 +86,18 @@ class ChillUseCasesTest {
 
         assertEquals(OlivePhase.FRUIT_SET, phase.current)
         assertEquals(null, phase.chill)
+    }
+
+    @Test
+    fun `producer adjustments update the current phase`() = runTest {
+        val today = LocalDate.of(2026, 8, 15)
+        fakeRepo.trackerFlow.value = chillTracker(accumulated = 20.0)
+
+        val initial = observePhaseOn(today)("plot-1").first()
+        assertEquals(OlivePhase.DORMANCY, initial.current)
+
+        fakeAdjustments.adjust("plot-1", OlivePhase.BLOOM, java.time.MonthDay.of(8, 10))
+        val updated = observePhaseOn(today)("plot-1").first()
+        assertEquals(OlivePhase.BLOOM, updated.current)
     }
 }

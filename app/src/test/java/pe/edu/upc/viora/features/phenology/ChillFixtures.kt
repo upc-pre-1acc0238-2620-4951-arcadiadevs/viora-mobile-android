@@ -2,12 +2,18 @@ package pe.edu.upc.viora.features.phenology
 
 import java.time.Instant
 import java.time.LocalDate
+import java.time.MonthDay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import pe.edu.upc.viora.features.phenology.domain.OlivePhase
+import pe.edu.upc.viora.features.phenology.domain.PhaseAdjustments
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillCurvePoint
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillProjection
 import pe.edu.upc.viora.features.phenology.domain.entity.ChillTracker
 import pe.edu.upc.viora.features.phenology.domain.entity.PreviousChillSeason
 import pe.edu.upc.viora.features.phenology.domain.entity.ThermalAnomaly
 import pe.edu.upc.viora.features.phenology.domain.entity.WinterSeasonState
+import pe.edu.upc.viora.features.phenology.domain.repository.PhaseAdjustmentsRepository
 import pe.edu.upc.viora.features.phenology.infrastructure.local.ChillTrackerEntity
 
 /**
@@ -78,3 +84,17 @@ fun chillEntity(plotId: String = "plot-1", accumulated: Double = 18.0) = ChillTr
     curvePointsJson = "[]",
     syncedAtEpochMs = 1000L,
 )
+
+class FakePhaseAdjustmentsRepository(
+    val adjustmentsFlow: MutableStateFlow<PhaseAdjustments> = MutableStateFlow(PhaseAdjustments.NONE),
+) : PhaseAdjustmentsRepository {
+    override fun observe(plotId: String): Flow<PhaseAdjustments> = adjustmentsFlow
+
+    override suspend fun adjust(plotId: String, phase: OlivePhase, on: MonthDay) {
+        adjustmentsFlow.value = adjustmentsFlow.value.adjusted(phase, on)
+    }
+
+    override suspend fun reset(plotId: String, phase: OlivePhase) {
+        adjustmentsFlow.value = adjustmentsFlow.value.reset(phase)
+    }
+}
