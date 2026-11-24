@@ -34,6 +34,11 @@ class AppMigrationsTest {
     private val v12 = createSqlByTable(12)
     private val v13 = createSqlByTable(13)
     private val v14 = createSqlByTable(14)
+    private val v15 = createSqlByTable(15)
+    private val v16 = createSqlByTable(16)
+    private val v17 = createSqlByTable(17)
+    private val v18 = createSqlByTable(18)
+    private val v19 = createSqlByTable(19)
 
     @Test
     fun `new tables are created exactly as the exported v5 schema`() {
@@ -202,5 +207,14 @@ class AppMigrationsTest {
         assertEquals(v18.getValue("assistant_daily_summaries"), AppMigrations.MIGRATION_17_18_SUMMARIES_SQL)
         assertEquals(v17.keys + "assistant_daily_summaries", v18.keys)
         (v17.keys - "assistant_answers").forEach { assertEquals(v17[it], v18[it]) }
+    }
+
+    @Test fun `settlement discard migration adds discard columns to settlements and pending settlements as exported in v19`() {
+        val columnSettlement = AppMigrations.MIGRATION_18_19_SETTLEMENTS_SQL.substringAfter("ADD COLUMN ")
+        val columnPending = AppMigrations.MIGRATION_18_19_PENDING_SQL.substringAfter("ADD COLUMN ")
+        assertTrue(v19.getValue("harvest_settlements").contains(columnSettlement))
+        assertTrue(v19.getValue("pending_settlements").contains(columnPending))
+        assertEquals(v18.keys, v19.keys)
+        (v18.keys - setOf("harvest_settlements", "pending_settlements")).forEach { assertEquals(v18[it], v19[it]) }
     }
 }

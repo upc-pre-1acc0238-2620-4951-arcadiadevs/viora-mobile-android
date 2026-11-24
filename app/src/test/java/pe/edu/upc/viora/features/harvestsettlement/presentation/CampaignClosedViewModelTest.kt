@@ -84,6 +84,34 @@ class CampaignClosedViewModelTest {
         assertEquals("101/110", receipt.calibre)
         assertEquals("La Yarada 02", receipt.plotName)
         assertEquals(OliveVariety.SEVILLANA, receipt.variety)
+        assertEquals(0.0, receipt.discardKg, 0.0)
+    }
+
+    @Test
+    fun `a settlement with discard kilos shows discard in the closed receipt (M-04)`() = runTest {
+        repository.cache.value = listOf(
+            testSettlement("p1", 2026).copy(
+                receiptNumber = "VR-26-0142",
+                weighedOn = LocalDate.of(2026, 5, 14),
+                discardKg = 1200.0,
+                totalYieldKg = 22_000.0,
+            ),
+        )
+
+        val receipt = closed(viewModel())
+
+        assertEquals(1200.0, receipt.discardKg, 0.0)
+        assertEquals(22_000.0, receipt.totalKg, 0.0)
+    }
+
+    @Test
+    fun `a pending row with discard draft shows discard in the pending receipt (M-04)`() = runTest {
+        val draft = testDraft("p1", 2026).copy(discardOlivesKg = 750.0)
+        repository.pending.value = listOf(testPending(draft, PendingStatus.PENDING))
+
+        val state = viewModel().uiState.value as CampaignClosedUiState.Pending
+
+        assertEquals(750.0, state.receipt.discardKg, 0.0)
     }
 
     @Test

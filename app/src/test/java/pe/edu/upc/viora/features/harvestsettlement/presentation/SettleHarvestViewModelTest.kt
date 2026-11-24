@@ -413,4 +413,56 @@ class SettleHarvestViewModelTest {
         assertNull(vm.uiState.value.dialog)
         assertTrue(settledCalls.isEmpty() && queuedCalls.isEmpty())
     }
+
+    @Test
+    fun `discard kilos are included in total kilos and tonnes per hectare (M-04)`() = runTest {
+        val vm = viewModel()
+
+        vm.fill(green = "12500", black = "8300")
+        vm.onDiscardChange("1200")
+
+        val state = vm.uiState.value
+        assertEquals("1200", state.discardText)
+        assertFalse(state.discardError)
+        assertEquals(22_000.0, state.totalKg!!, 0.0)
+        assertEquals(8.8, state.tonnesPerHectare!!, 1e-9)
+        assertTrue(state.canSave)
+    }
+
+    @Test
+    fun `negative discard flags the field and blocks saving (M-04)`() = runTest {
+        val vm = viewModel()
+
+        vm.fill(green = "12500", black = "8300")
+        vm.onDiscardChange("-50")
+
+        val state = vm.uiState.value
+        assertTrue(state.discardError)
+        assertNull(state.totalKg)
+        assertFalse(state.canSave)
+    }
+
+    @Test
+    fun `saving settlement passes discard kilos to the draft (M-04)`() = runTest {
+        val vm = viewModel()
+        vm.fill(green = "12500", black = "8300")
+        vm.onDiscardChange("1500")
+        vm.requestConfirm()
+
+        vm.confirm()
+
+        val draft = repository.settled.single().first
+        assertEquals(1_500.0, draft.discardOlivesKg, 0.0)
+    }
+
+    @Test
+    fun `editing pending settlement loads discard olives kilos (M-04)`() = runTest {
+        val draft = testDraft("p1", 2026).copy(discardOlivesKg = 850.0)
+        repository.pending.value = listOf(testPending(draft, PendingStatus.PENDING))
+
+        val state = viewModel().uiState.value
+        assertTrue(state.isEditing)
+        assertEquals("850", state.discardText)
+        assertEquals(21_650.0, state.totalKg!!, 0.0)
+    }
 }

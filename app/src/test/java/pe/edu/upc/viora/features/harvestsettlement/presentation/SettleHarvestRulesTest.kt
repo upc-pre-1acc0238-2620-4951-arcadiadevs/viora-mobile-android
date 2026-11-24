@@ -40,6 +40,31 @@ class SettleHarvestRulesTest {
     }
 
     @Test
+    fun `the discard field is optional and adds to the harvest total (M-04)`() {
+        // Blank or zero discard adds 0 to total
+        assertEquals(20_800.0, SettleHarvestRules.totalKilos("12 500", "8 300", "")!!, 0.0)
+        assertEquals(20_800.0, SettleHarvestRules.totalKilos("12 500", "8 300", "0")!!, 0.0)
+
+        // Valid discard adds to total
+        assertEquals(22_000.0, SettleHarvestRules.totalKilos("12 500", "8 300", "1 200")!!, 0.0)
+        assertEquals(22_000.5, SettleHarvestRules.totalKilos("12 500", "8 300", "1 200,5")!!, 0.0)
+
+        // Negative or unreadable discard invalidates the total
+        assertNull(SettleHarvestRules.totalKilos("12 500", "8 300", "-100"))
+        assertNull(SettleHarvestRules.totalKilos("12 500", "8 300", "descarte"))
+
+        // Discard alone can form a valid total
+        assertEquals(450.0, SettleHarvestRules.totalKilos("", "", "450")!!, 0.0)
+    }
+
+    @Test
+    fun `green share is calculated only between green and black ignoring discard (M-04)`() {
+        // Discard is not part of the commercial split
+        val shareWithoutDiscard = SettleHarvestRules.greenShare(12_480.0, 8_320.0)
+        assertEquals(0.6, shareWithoutDiscard!!, 1e-9)
+    }
+
+    @Test
     fun `a zero total cannot be settled`() {
         assertFalse(SettleHarvestRules.isValidTotal(0.0))
         assertFalse(SettleHarvestRules.isValidTotal(null))
