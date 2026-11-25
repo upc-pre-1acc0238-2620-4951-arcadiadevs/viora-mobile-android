@@ -2186,7 +2186,7 @@ Precio referencial. Pagas después de crear tu cuenta.</string>
   <string name="account_critical_alerts_permission_hint">Las notificaciones están apagadas en tu teléfono, así que las alertas no te llegarán. Actívalas en los ajustes del teléfono.</string>
   <string name="notification_channel_critical_alerts">Alertas críticas</string>
   <string name="notification_channel_critical_alerts_description">Heladas y otros avisos urgentes de tus lotes.</string>
-  <string name="notification_critical_title">Alerta crítica en tu campo</string>
-  <string name="notification_frost_title">Aviso de helada</string>
+  <string name="notification_critical_title">Alerta crítica en %1$s</string>
+  <string name="notification_frost_title">Riesgo de helada en %1$s</string>
   <string name="notification_critical_body">Abre Viora para ver qué hacer.</string>
 </resources>
